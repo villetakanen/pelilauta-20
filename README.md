@@ -54,7 +54,10 @@ This keeps each directory self-contained for LLM context while avoiding monorepo
 - **Validation**: [Zod](https://zod.dev/) schemas
 - **Language**: TypeScript throughout
 - **Monorepo**: pnpm + Vite aliases (no workspace linking)
+- **Unit Testing**: [Vitest](https://vitest.dev/) (colocated `*.test.ts` files)
+- **E2E Testing**: [Playwright](https://playwright.dev/) (per-app `e2e/` directories)
 - **Linting**: [Biome](https://biomejs.dev/)
+- **Git Hooks**: [Lefthook](https://github.com/evilmartians/lefthook) + [commitlint](https://commitlint.js.org/) (Conventional Commits)
 
 ## Development
 
@@ -72,9 +75,11 @@ pnpm install
 ### Key Commands
 
 ```bash
-pnpm dev          # Start development (all apps)
-pnpm build        # Build for production
-pnpm test         # Run tests
+pnpm dev          # Start pelilauta app (dev mode)
+pnpm dev:ds       # Start cyan-ds app (dev mode)
+pnpm build        # Build both apps for production
+pnpm test         # Run unit tests (Vitest, all packages + apps)
+pnpm test:e2e     # Run e2e tests (Playwright, both apps)
 pnpm check        # Lint and format (Biome)
 ```
 
