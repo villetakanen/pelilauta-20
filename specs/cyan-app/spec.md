@@ -28,6 +28,7 @@ The cyan-ds app (`app/cyan-ds/`) is the living documentation and demo site for t
 - [Book Layout](book-layout/spec.md) — MDX page layout
 - [Units & Grid](units-and-grid/spec.md) — units token documentation page
 - [Chroma](chroma/spec.md) — chroma color token documentation page
+- [Semantic Colors](semantic-colors/spec.md) — semantic color mapping documentation page
 
 ## Contract
 

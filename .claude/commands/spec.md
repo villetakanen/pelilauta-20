@@ -88,7 +88,13 @@ Specs support hierarchical nesting. A parent spec covers the domain; child specs
 - A parent spec should list its children in the Architecture section
 - Create directories as needed
 
-### 6. After writing
+### 6. DS ↔ Docs page co-spec rule
+
+When a spec under `specs/cyan-ds/` is created or updated, check if a corresponding docs page spec exists under `specs/cyan-app/`. If it does, update it to reflect any changes (new tokens, renamed sections, removed items). If it doesn't and the DS spec is consumer-facing (tokens, components), create a skeleton docs page spec.
+
+The reverse also applies: when a `specs/cyan-app/` docs page spec changes, verify the underlying `specs/cyan-ds/` spec is consistent.
+
+### 7. After writing
 
 - Show the user the spec for review
 - If this accompanies a code change, remind them of the Same-Commit Rule
