@@ -48,6 +48,18 @@ Absolute `rem`-based values (not grid-derived). Scale is non-linear:
 | `--cn-icon-size-large` | 72px |
 | `--cn-icon-size-xlarge` | 128px |
 
+#### Button Sizing
+
+Touch-accessible button dimensions:
+
+| Token | Value | Role |
+|---|---|---|
+| `--cn-button-physical-size` | 56px | Minimum touch target (accessibility) |
+| `--cn-button-size` | 38px | Standard visual button size |
+| `--cn-navigation-button-size` | 56px | Navigation button visual size |
+
+All buttons must have a 56px minimum touch area even if visually smaller.
+
 #### Navigation / Layout
 
 | Token | Derivation | Computed |
@@ -57,10 +69,20 @@ Absolute `rem`-based values (not grid-derived). Scale is non-linear:
 | `--cn-height-rail` | `grid × 9` | 72px |
 | `--cn-width-tray` | `grid × 42` | 336px |
 
+#### Responsive Sizing
+
+v20 uses **container queries** instead of global media-query breakpoints. Components respond to their container's inline size, not the viewport.
+
+- No `--cn-breakpoint-*` tokens — the upstream tokens (`620px`, `960px`, `1365px`) are retired
+- Layout containers declare `container-type: inline-size` and optionally `container-name`
+- Components use `@container` rules to adapt at locally meaningful thresholds
+- Threshold values are component decisions, not global constants
+
 ### Anti-Patterns
 
 - **Don't use magic pixel values** — always reference or derive from `--cn-grid` for spatial tokens. Icon sizes are the exception (they follow their own scale).
 - **Don't duplicate the grid constant** — if the grid base changes, all derived tokens must follow automatically via `calc()`.
+- **Don't use `@media` for component-level responsiveness** — use `@container` queries. `@media` is acceptable only for top-level app shell concerns (e.g. print styles).
 
 ## Contract
 
