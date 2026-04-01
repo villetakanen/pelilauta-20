@@ -1,0 +1,7 @@
+:root {
+  --cyan-radius-sm: 0.25rem;
+  --cyan-radius-md: 0.5rem;
+  --cyan-radius-lg: 0.75rem;
+  --cyan-radius-xl: 1rem;
+  --cyan-radius-full: 9999px;
+}

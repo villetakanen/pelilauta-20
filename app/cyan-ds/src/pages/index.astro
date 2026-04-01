@@ -1,0 +1,22 @@
+---
+import { Button } from "@cyan/index";
+import Base from "@shell/layouts/Base.astro";
+import TopNav from "@shell/nav/TopNav.svelte";
+---
+
+<Base title="Cyan Design System">
+  <TopNav slot="nav" appName="Cyan DS" client:load />
+
+  <h1>Cyan Design System</h1>
+  <p>Component library for Pelilauta 20.</p>
+
+  <section>
+    <h2>Button</h2>
+    <div style="display: flex; gap: var(--cyan-space-md); align-items: center; margin-top: var(--cyan-space-md);">
+      <Button label="Primary" client:load />
+      <Button label="Outline" variant="outline" client:load />
+      <Button label="Ghost" variant="ghost" client:load />
+      <Button label="Disabled" disabled client:load />
+    </div>
+  </section>
+</Base>

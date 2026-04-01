@@ -1,0 +1,30 @@
+:root {
+  /* Primary */
+  --cyan-primary: #00bcd4;
+  --cyan-primary-light: #62efff;
+  --cyan-primary-dark: #008ba3;
+  --cyan-on-primary: #ffffff;
+
+  /* Surface */
+  --cyan-surface: #ffffff;
+  --cyan-surface-dim: #f5f5f5;
+  --cyan-surface-bright: #fafafa;
+  --cyan-on-surface: #1a1a1a;
+  --cyan-on-surface-muted: #666666;
+
+  /* Background */
+  --cyan-background: #fafafa;
+  --cyan-on-background: #1a1a1a;
+
+  /* Outline */
+  --cyan-outline: #cccccc;
+  --cyan-outline-variant: #e0e0e0;
+
+  /* Error */
+  --cyan-error: #d32f2f;
+  --cyan-on-error: #ffffff;
+
+  /* Success */
+  --cyan-success: #388e3c;
+  --cyan-on-success: #ffffff;
+}
