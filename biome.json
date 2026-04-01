@@ -15,5 +15,22 @@
   },
   "files": {
     "includes": ["**", "!**/node_modules", "!**/dist", "!**/.astro", "!**/playwright-report"]
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["**/*.astro"],
+      "linter": {
+        "rules": {
+          "style": {
+            "useConst": "off",
+            "useImportType": "off"
+          },
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    }
+  ]
 }
