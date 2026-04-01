@@ -48,4 +48,28 @@
   --chroma-surface-95: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 5%);
   --chroma-surface-99: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 1%);
   --chroma-surface-100: hsl(204deg, 78%, 97%);
+
+  /* Error accent — magenta (partial steps) */
+  --chroma-error-20: hsl(318deg, 83%, 20%);
+  --chroma-error-40: hsl(318deg, 83%, 40%);
+  --chroma-error-60: hsl(318deg, 83%, 60%);
+  --chroma-error-90: hsl(318deg, 83%, 90%);
+
+  /* Warning accent — yellow (partial steps) */
+  --chroma-warning-20: hsl(65deg, 100%, 20%);
+  --chroma-warning-40: hsl(65deg, 100%, 40%);
+  --chroma-warning-60: hsl(65deg, 100%, 63%);
+  --chroma-warning-90: hsl(65deg, 100%, 90%);
+
+  /* Info accent — teal (partial steps) */
+  --chroma-info-20: hsl(170deg, 100%, 20%);
+  --chroma-info-40: hsl(170deg, 100%, 40%);
+  --chroma-info-60: hsl(170deg, 100%, 60%);
+  --chroma-info-90: hsl(170deg, 100%, 90%);
+
+  /* Love accent — red (partial steps) */
+  --chroma-love-20: hsl(3deg, 74%, 20%);
+  --chroma-love-40: hsl(3deg, 74%, 40%);
+  --chroma-love-60: hsl(3deg, 74%, 54%);
+  --chroma-love-90: hsl(3deg, 74%, 90%);
 }

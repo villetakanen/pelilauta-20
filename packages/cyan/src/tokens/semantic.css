@@ -1,0 +1,169 @@
+:root {
+  color-scheme: light dark;
+
+  /* Surfaces */
+  --color-surface: light-dark(
+    var(--chroma-surface-100),
+    var(--chroma-surface-10)
+  );
+  --color-surface-1: light-dark(
+    var(--chroma-surface-100),
+    color-mix(in hsl, var(--chroma-surface-10), var(--chroma-surface-20) 50%)
+  );
+  --color-surface-2: light-dark(
+    var(--chroma-surface-100),
+    var(--chroma-surface-20)
+  );
+  --color-surface-3: light-dark(
+    var(--chroma-surface-100),
+    color-mix(in hsl, var(--chroma-surface-20), var(--chroma-surface-30) 50%)
+  );
+  --color-surface-4: light-dark(
+    var(--chroma-surface-50),
+    var(--chroma-surface-30)
+  );
+  --color-on-surface: light-dark(
+    var(--chroma-surface-10),
+    var(--chroma-surface-90)
+  );
+  --color-on-surface-secondary: light-dark(
+    var(--chroma-surface-40),
+    var(--chroma-surface-60)
+  );
+
+  /* Background */
+  --color-background: light-dark(
+    color-mix(in hsl, var(--chroma-surface-100), var(--chroma-surface-80) 22%),
+    var(--chroma-surface-0)
+  );
+  --color-on-background: light-dark(
+    var(--chroma-surface-10),
+    var(--chroma-surface-70)
+  );
+
+  /* Text */
+  --color-text: light-dark(
+    var(--chroma-surface-10),
+    var(--chroma-surface-80)
+  );
+  --color-text-high: light-dark(black, white);
+  --color-text-low: light-dark(
+    var(--chroma-surface-20),
+    var(--chroma-surface-60)
+  );
+  --color-heading-1: light-dark(
+    var(--chroma-surface-30),
+    var(--chroma-surface-70)
+  );
+  --color-heading-2: light-dark(
+    var(--chroma-surface-20),
+    var(--chroma-surface-80)
+  );
+
+  /* Links */
+  --color-link: light-dark(
+    var(--chroma-surface-40),
+    var(--chroma-surface-60)
+  );
+  --color-link-hover: light-dark(
+    var(--chroma-surface-50),
+    var(--chroma-surface-80)
+  );
+  --color-link-active: light-dark(
+    var(--chroma-surface-60),
+    var(--chroma-surface-30)
+  );
+
+  /* Buttons & Interactive */
+  --color-button: light-dark(
+    var(--chroma-surface-50),
+    var(--chroma-surface-20)
+  );
+  --color-button-light: light-dark(
+    var(--chroma-primary-60),
+    var(--chroma-primary-95)
+  );
+  --color-button-accent: light-dark(
+    var(--chroma-primary-20),
+    var(--chroma-primary-70)
+  );
+  --color-button-cta: light-dark(
+    var(--chroma-error-40),
+    var(--chroma-error-40)
+  );
+  --color-hover: light-dark(
+    color-mix(in hsl, var(--chroma-surface-50), transparent 90%),
+    color-mix(in hsl, var(--chroma-surface-50), transparent 80%)
+  );
+
+  /* Borders */
+  --color-border: light-dark(
+    var(--chroma-surface-60),
+    var(--chroma-surface-30)
+  );
+  --color-border-hover: light-dark(
+    var(--chroma-surface-50),
+    var(--chroma-surface-40)
+  );
+  --color-border-focus: light-dark(
+    var(--chroma-primary-70),
+    var(--chroma-primary-40)
+  );
+
+  /* Functional / Status */
+  --color-success: light-dark(
+    var(--chroma-primary-60),
+    var(--chroma-primary-60)
+  );
+  --color-warning: light-dark(
+    var(--chroma-warning-40),
+    var(--chroma-warning-60)
+  );
+  --color-error: light-dark(
+    var(--chroma-error-40),
+    var(--chroma-error-60)
+  );
+  --color-info: light-dark(
+    var(--chroma-info-20),
+    var(--chroma-info-60)
+  );
+  --color-love: light-dark(
+    var(--chroma-love-40),
+    var(--chroma-love-60)
+  );
+
+  /* Inputs / Forms */
+  --color-input: light-dark(
+    var(--chroma-surface-80),
+    var(--chroma-surface-5, var(--chroma-surface-0))
+  );
+  --color-on-input: var(--color-on-surface);
+  --color-input-hover: light-dark(
+    var(--chroma-surface-70),
+    var(--chroma-surface-0)
+  );
+  --color-input-focus: light-dark(
+    var(--chroma-surface-70),
+    var(--chroma-surface-0)
+  );
+  --color-input-disabled: light-dark(
+    var(--chroma-surface-80),
+    var(--chroma-surface-20)
+  );
+
+  /* Elevation / Shadow */
+  --color-shadow: light-dark(
+    var(--chroma-surface-30),
+    var(--chroma-surface-0)
+  );
+  --color-elevation-1: var(--color-surface-1);
+  --color-elevation-2: var(--color-surface-2);
+  --color-elevation-3: var(--color-surface-3);
+
+  /* Selection */
+  --color-selection: light-dark(
+    color-mix(in hsl, var(--chroma-primary-60), transparent 70%),
+    color-mix(in hsl, var(--chroma-primary-40), transparent 70%)
+  );
+  --color-on-selection: var(--color-on-surface);
+}
