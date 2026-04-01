@@ -80,9 +80,11 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 | Token | Light | Dark | Role |
 |---|---|---|---|
 | `--color-success` | primary-60 | primary-60 | Success state |
-| `--color-warning` | chroma-warning | chroma-warning | Warning state |
-| `--color-error` | chroma-error | chroma-error | Error/destructive state |
-| `--color-info` | chroma-info | chroma-info | Informational accent |
+| `--color-warning` | chroma-warning-{step} | chroma-warning-{step} | Warning state |
+| `--color-error` | chroma-error-{step} | chroma-error-{step} | Error/destructive state |
+| `--color-info` | chroma-info-{step} | chroma-info-{step} | Informational accent |
+
+Exact steps TBD during implementation — the semantic layer picks the steps that give appropriate contrast for each theme.
 
 #### Inputs / Forms
 
@@ -104,18 +106,18 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 ### Migration Notes
 
 - **Drop the `--cn-color-*` legacy aliases** — upstream has a parallel set (`--cn-color-primary`, `--cn-color-surface`, etc.) that are backward-compat shims mapping to the same `--color-*` values. v20 should only ship the `--color-*` namespace.
-- **Drop `--chroma-info/warning/error` from chroma.css** — already done in v20 chroma. The three accent hues (`info: hsl(170, 100%, 20%)`, `warning: hsl(65, 100%, 63%)`, `error: hsl(318, 83%, 40%)`) and their tints move here as functional tokens.
+- **Accent colors are now stepped palettes in chroma** — `--chroma-error-{step}`, `--chroma-warning-{step}`, `--chroma-info-{step}`, `--chroma-love-{step}`. The semantic layer maps specific steps to functional roles via `light-dark()`.
 - **`light-dark()` requires `color-scheme`** — the `<html>` or `:root` must declare `color-scheme: light dark` for `light-dark()` to work. Base.astro should set this.
 - **Upstream uses `white` as a literal** — surface levels 1–3 use `white` in light mode instead of `--chroma-surface-100`. Use `--chroma-surface-100` so the entire system derives from the same palette.
-- **Component-specific tokens should move out** — `--color-bubble`, `--color-reply-bubble`, `--cn-color-avatar-*` are component-specific. They should live in their component's CSS, not in the semantic layer.
-- **`--color-reaction-red`** is a hardcoded hex (`#e03c31`) — the only non-derived color. Needs a decision: keep as-is, or derive from error palette.
+- **Component-specific tokens should move out** — `--color-bubble`, `--color-reply-bubble`, `--cn-color-avatar-*` are DS component tokens (bubble, avatar). In v20, they belong in each component's own CSS with their own `light-dark()` derivations, not in the shared semantic layer.
+- **`--color-reaction-red` is replaced by `--chroma-love-{step}`** — the hardcoded hex moves to chroma as a proper tonal scale. The semantic layer references the appropriate step.
 
 ### Anti-Patterns
 
 - **Don't reference `--chroma-*` tokens directly in components** — always go through semantic tokens so theme switching works
 - **Don't add component-specific color tokens here** — this file is the shared semantic layer. Component colors belong in component CSS.
 - **Don't use hardcoded colors** — derive everything from chroma via `light-dark()` and `color-mix()`
-- **Don't duplicate the chroma accent hues** — info/warning/error are defined once in this file; chroma should not also define them
+- **Don't duplicate chroma steps** — reference `--chroma-{accent}-{step}` tokens, don't redefine the hue values in the semantic layer
 
 ## Contract
 

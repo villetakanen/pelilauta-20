@@ -44,11 +44,25 @@ Tonal range blending between two inline anchor values:
 
 All intermediate steps derive from `color-mix()` between these two endpoints. No `black` mixing. The upstream K-S/S-K tokens are dropped in v20 — they were semantic roles disguised as palette primitives. The numbered steps (`--chroma-surface-0` through `--chroma-surface-100`) are the only public API.
 
+#### Accent Palettes (partial step coverage)
+
+Accent palettes define single-hue tonal scales for functional UI states. Unlike primary/secondary/surface, accents don't need all 13 steps — only the steps actually used. The step number indicates brightness on the MD3 tonal scale (0 = darkest, 100 = lightest).
+
+| Palette | Base hue | Upstream source |
+|---|---|---|
+| `--chroma-error-{step}` | Magenta `hsl(318, 83%, 40%)` | `--chroma-error` |
+| `--chroma-warning-{step}` | Yellow `hsl(65, 100%, 63%)` | `--chroma-warning` |
+| `--chroma-info-{step}` | Teal `hsl(170, 100%, 20%)` | `--chroma-info` |
+| `--chroma-love-{step}` | Red `#e03c31` | `--color-reaction-red` |
+
+Steps are added as needed by the semantic layer and components. For example, if `--color-error` needs a step-40 and a tint at step-90, chroma provides `--chroma-error-40` and `--chroma-error-90`.
+
 ### Migration Notes
 
 - **Namespace:** `--chroma-*` not `--cn-*` — decide whether to unify under `cn-` for v20 or keep chroma as a distinct namespace
 - **Drop `-hsl` companion tokens:** The upstream primary palette ships raw HSL companions (`--chroma-primary-XX-hsl`) for every step. These were a pre-`color-mix()` workaround for alpha transparency (e.g. `rgba(var(--h), var(--s), var(--l), 0.1)`). No longer needed — `color-mix(in hsl, color, transparent N%)` replaces them
-- **Remove semantic colors from chroma:** The upstream file includes `--chroma-info`, `--chroma-warning`, `--chroma-error` and their tint variants. These are not part of chroma's responsibility — they belong in the [semantic color token file](../semantic/spec.md)
+- **Accent palettes replace flat semantic colors:** Upstream `--chroma-info`, `--chroma-warning`, `--chroma-error` were single tokens. v20 replaces them with stepped palettes (`--chroma-error-40`, `--chroma-love-40`, etc.) so tints and variants derive from the same hue at different brightness levels. The [semantic layer](../semantic/spec.md) maps these to functional roles.
+- **`--color-reaction-red` becomes `--chroma-love-*`:** The upstream hardcoded hex moves into chroma as a proper tonal scale.
 - **Drop K-S / S-K anchor tokens:** The upstream `--chroma-K-S` and `--chroma-S-K` were semantic roles disguised as palette primitives. In v20, the HSL values are inlined directly in the surface palette derivation. The numbered steps (`--chroma-surface-0` through `--chroma-surface-100`) are the only public API.
 - **Align to MD3 13-step scale:** Upstream has 11 steps (10–99). Add steps 0 and 100
 - **Fix secondary palette spacing:** Replace drifted mix percentages with an even progression
@@ -59,7 +73,7 @@ All intermediate steps derive from `color-mix()` between these two endpoints. No
 
 - **Don't hardcode hex/hsl values** — always reference chroma tokens or derive via `color-mix()`
 - **Don't create palette steps outside the MD3 tonal scale** — use 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100
-- **Don't put semantic colors in chroma** — chroma is tonal palettes only
+- **Don't add single-value semantic tokens to chroma** — chroma provides tonal steps; the semantic layer assigns roles
 - **Don't mix the primary hue gradient assumption into component code** — the hue shift is a palette design decision, not a component concern
 
 ## Contract
@@ -68,9 +82,10 @@ All intermediate steps derive from `color-mix()` between these two endpoints. No
 
 - [ ] Primary palette covers all 13 MD3 tonal steps with perceptual hue curve from teal to yellow
 - [ ] Secondary palette derives from two anchors via `color-mix()` with even spacing
-- [ ] Surface palette derives entirely from K-S and S-K via `color-mix()` (no `black` mixing)
+- [ ] Surface palette derives entirely from endpoint values via `color-mix()` (no `black` mixing)
+- [ ] Accent palettes (error, warning, info, love) use step numbering for brightness
 - [ ] No `-hsl` companion tokens
-- [ ] No semantic color tokens (info/warning/error) in chroma
+- [ ] No flat single-value semantic tokens — all colors are stepped
 
 ### Regression Guardrails
 
