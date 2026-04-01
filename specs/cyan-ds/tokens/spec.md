@@ -27,4 +27,4 @@ Design tokens are the single source of truth for visual constants in the Cyan de
 
 - [ ] All tokens are `cn-`-prefixed
 - [ ] All tokens are defined on `:root`
-- [ ] Tokens use `rem` or `calc()` from `rem` values for accessibility scaling
+- [ ] Tokens use `rem` or `calc()` from `rem` values for accessibility scaling (exception: z-index tokens are unitless integers and exempt from this requirement)

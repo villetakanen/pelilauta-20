@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(gh api:*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(gh repo:*)",
+      "Bash(git push:*)",
+      "Bash(pnpm:*)",
+      "WebFetch(domain:pnpm.io)",
+      "Bash(python3 -c \" import json, sys pkg = json.load\\(sys.stdin\\) pkg['pnpm'] = {'onlyBuiltDependencies': ['@biomejs/biome', 'lefthook']} json.dump\\(pkg, sys.stdout, indent=2\\) \")",
+      "Bash(curl -s http://localhost:4321)",
+      "Read(//Users/ville.takanen/dev/pelilauta-20/app/cyan-ds/**)",
+      "Bash(wait)",
+      "Bash(git restore:*)",
+      "Bash(git commit:*)",
+      "Bash(gh pr:*)",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "mcp__asdlc__search_knowledge_base",
+      "mcp__asdlc__list_articles",
+      "mcp__asdlc__get_article",
+      "Bash(rm /Users/ville.takanen/dev/pelilauta-20/.claude/skills/spec.md /Users/ville.takanen/dev/pelilauta-20/.claude/skills/reverse-spec.md)",
+      "Bash(rmdir /Users/ville.takanen/dev/pelilauta-20/.claude/skills)",
+      "WebFetch(domain:cyan-4.netlify.app)",
+      "Bash(python3 -c \"import json,sys; vs=json.load\\(sys.stdin\\); print\\('\\\\n'.join\\(vs[-10:]\\)\\)\")",
+      "Read(//tmp/**)",
+      "Bash(curl:*)",
+      "Bash(kill %1)",
+      "Bash(ls /Users/ville.takanen/dev/pelilauta-20/pnpm-workspace.*)",
+      "Bash(npx @biomejs/biome migrate)",
+      "WebFetch(domain:docs.astro.build)",
+      "WebFetch(domain:biomejs.dev)",
+      "Bash(npx:*)",
+      "Bash(gh search:*)"
+    ]
+  }
+}

@@ -1,0 +1,62 @@
+---
+layout: ../../layouts/Book.astro
+title: 'Z-Index'
+description: 'Stacking hierarchy tokens for layered Cyan DS components.'
+---
+
+Every component that floats above the page — trays, modals, toasts — needs a z-index. Without shared tokens, components compete with magic numbers. The `--cn-z-*` tokens define a single, explicit stacking order for the whole system.
+
+## Hierarchy
+
+Six layers, ordered back-to-front:
+
+| Token | Value | Component |
+|---|---|---|
+| `--cn-z-tray` | 20000 | Side navigation tray |
+| `--cn-z-rail` | 30000 | Bottom navigation rail |
+| `--cn-z-tray-button` | 40000 | Tray toggle button |
+| `--cn-z-reply-dialog` | 41000 | Docked reply dialog |
+| `--cn-z-modal` | 50000 | Modal dialogs and overlays |
+| `--cn-z-snackbar` | 60000 | Toast notifications |
+
+Values are intentionally high (20 000–60 000) to avoid collisions with third-party styles, and spaced in increments of 10 000 to leave room between layers.
+
+## Visual Stack
+
+Each panel below uses `position: relative` and a `z-index` from a `--cn-z-*` token. Higher layers are offset to show depth — in a real UI they would overlap completely.
+
+<div style="position: relative; height: 14rem; margin-block: var(--cn-gap);">
+  <div style="position: absolute; top: 0; left: 0; width: 14rem; padding: var(--cn-gap); background: var(--color-elevation-1); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-tray); font-size: 0.75rem; color: var(--color-text-low);">
+    <code>--cn-z-tray</code><br/>20 000
+  </div>
+  <div style="position: absolute; top: 1.5rem; left: 1.5rem; width: 14rem; padding: var(--cn-gap); background: var(--color-elevation-2); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-rail); font-size: 0.75rem; color: var(--color-text-low);">
+    <code>--cn-z-rail</code><br/>30 000
+  </div>
+  <div style="position: absolute; top: 3rem; left: 3rem; width: 14rem; padding: var(--cn-gap); background: var(--color-elevation-3); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-tray-button); font-size: 0.75rem; color: var(--color-text-low);">
+    <code>--cn-z-tray-button</code><br/>40 000
+  </div>
+  <div style="position: absolute; top: 4.5rem; left: 4.5rem; width: 14rem; padding: var(--cn-gap); background: var(--color-elevation-3); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-reply-dialog); font-size: 0.75rem; color: var(--color-text-low);">
+    <code>--cn-z-reply-dialog</code><br/>41 000
+  </div>
+  <div style="position: absolute; top: 6rem; left: 6rem; width: 14rem; padding: var(--cn-gap); background: var(--color-elevation-3); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-modal); font-size: 0.75rem; color: var(--color-text);">
+    <code>--cn-z-modal</code><br/>50 000
+  </div>
+  <div style="position: absolute; top: 7.5rem; left: 7.5rem; width: 14rem; padding: var(--cn-gap); background: var(--color-button); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-snackbar); font-size: 0.75rem; color: var(--color-text-high);">
+    <code>--cn-z-snackbar</code><br/>60 000
+  </div>
+</div>
+
+## Usage
+
+Reference the token closest to your component's role:
+
+```css
+.my-overlay {
+  position: fixed;
+  z-index: var(--cn-z-modal);
+}
+```
+
+Z-index only takes effect on **positioned elements** (`position` must be `relative`, `absolute`, `fixed`, or `sticky`).
+
+To add a new layer, insert it between existing tokens by choosing a value in the gap. Update this page and the token file together.
