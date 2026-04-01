@@ -29,6 +29,8 @@ The cyan-ds app (`app/cyan-ds/`) is the living documentation and demo site for t
 - [Units & Grid](units-and-grid/spec.md) — units token documentation page
 - [Chroma](chroma/spec.md) — chroma color token documentation page
 - [Semantic Colors](semantic-colors/spec.md) — semantic color mapping documentation page
+- [Z-Index](z-index/spec.md) — z-index token hierarchy documentation page
+- [Tray](tray/spec.md) — tray and tray button component documentation page
 
 ## Contract
 

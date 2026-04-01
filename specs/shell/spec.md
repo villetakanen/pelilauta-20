@@ -50,6 +50,17 @@ Top navigation bar with app branding.
 |---|---|---|---|
 | `appName` | `string` | yes | App name displayed in the brand link |
 
+#### Tray Orchestration
+
+The shell's `Base.astro` (or a dedicated layout) embeds the DS `<Tray>` component and wires it to the app's preferences store:
+
+- Reads `trayExpanded` from the preferences store
+- Passes it as the `expanded` prop to `<Tray>`
+- Listens for toggle clicks and updates the store
+- Applies viewport-aware logic (collapse on narrow, restore on wide)
+
+See: [Pelilauta Preferences](../pelilauta/preferences/spec.md) for the store contract, [Tray](../cyan-ds/components/tray/spec.md) for the DS component contract.
+
 ### Anti-Patterns
 
 - **Don't put app-specific layout logic in shell** — shell is shared infrastructure; app-specific layouts (e.g. Book.astro) live in the consuming app

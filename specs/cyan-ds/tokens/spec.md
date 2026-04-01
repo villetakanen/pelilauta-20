@@ -19,6 +19,7 @@ Design tokens are the single source of truth for visual constants in the Cyan de
 - [Units](units/spec.md) — spatial primitives, grid system, sizing
 - [Chroma](chroma/spec.md) — color system, tonal palettes
 - [Semantic](semantic/spec.md) — functional UI color mappings (surfaces, text, buttons, status)
+- [Z-Index](z-index/spec.md) — stacking hierarchy for layered components
 
 ## Contract
 
