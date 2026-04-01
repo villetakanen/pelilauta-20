@@ -1,0 +1,31 @@
+{
+  "name": "pelilauta-20",
+  "version": "20.0.0-alpha.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter ./app/pelilauta dev",
+    "dev:ds": "pnpm --filter ./app/cyan-ds dev",
+    "build": "pnpm --filter './app/*' build",
+    "test": "pnpm --filter '*' test",
+    "test:e2e": "pnpm --filter './app/*' test:e2e",
+    "check": "biome check --write ."
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.0",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "lefthook": "^1.10.0",
+    "typescript": "^5.7.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@biomejs/biome",
+      "@firebase/util",
+      "esbuild",
+      "lefthook",
+      "protobufjs",
+      "sharp"
+    ]
+  }
+}

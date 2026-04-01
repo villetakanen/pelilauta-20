@@ -1,0 +1,12 @@
+---
+import { Button } from "@cyan/index";
+import Base from "@shell/layouts/Base.astro";
+import TopNav from "@shell/nav/TopNav.svelte";
+---
+
+<Base title="Pelilauta">
+  <TopNav slot="nav" appName="Pelilauta" client:load />
+  <h1>Pelilauta 20</h1>
+  <p>RPG community platform.</p>
+  <Button label="Get started" client:load />
+</Base>
