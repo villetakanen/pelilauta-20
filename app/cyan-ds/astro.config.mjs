@@ -1,9 +1,10 @@
 import path from "node:path";
+import mdx from "@astrojs/mdx";
 import svelte from "@astrojs/svelte";
 import { defineConfig } from "astro/config";
 
 export default defineConfig({
-  integrations: [svelte()],
+  integrations: [svelte(), mdx()],
   vite: {
     resolve: {
       alias: {
