@@ -7,3 +7,4 @@ dist
 playwright-report
 test-results
 *.tsbuildinfo
+app/*/pnpm-lock.yaml
