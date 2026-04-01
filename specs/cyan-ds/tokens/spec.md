@@ -17,7 +17,8 @@ Design tokens are the single source of truth for visual constants in the Cyan de
 ### Sub-Specs
 
 - [Units](units/spec.md) — spatial primitives, grid system, sizing
-- [Chroma](chroma/spec.md) — color system, tonal palettes, semantic accents
+- [Chroma](chroma/spec.md) — color system, tonal palettes
+- [Semantic](semantic/spec.md) — functional UI color mappings (surfaces, text, buttons, status)
 
 ## Contract
 

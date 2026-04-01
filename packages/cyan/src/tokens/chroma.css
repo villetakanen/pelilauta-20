@@ -1,8 +1,4 @@
 :root {
-  /* Key / Surface anchors */
-  --chroma-K-S: hsl(204deg, 78%, 97%);
-  --chroma-S-K: hsl(204deg, 100%, 11%);
-
   /* Primary palette — 13 MD3 tonal steps
    * Hue rotates from teal (185°) to yellow (65°) across a perceptual curve.
    * Values are hand-tuned per-step HSL from upstream cyan-design-system-4. */
@@ -37,18 +33,19 @@
   --chroma-secondary-100: #d0f0c0;
 
   /* Surface palette — 13 MD3 tonal steps
-   * Derived entirely from K-S and S-K via color-mix(). No black mixing. */
-  --chroma-surface-0: var(--chroma-S-K);
-  --chroma-surface-10: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 90%);
-  --chroma-surface-20: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 80%);
-  --chroma-surface-30: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 70%);
-  --chroma-surface-40: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 60%);
-  --chroma-surface-50: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 50%);
-  --chroma-surface-60: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 40%);
-  --chroma-surface-70: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 30%);
-  --chroma-surface-80: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 20%);
-  --chroma-surface-90: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 10%);
-  --chroma-surface-95: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 5%);
-  --chroma-surface-99: color-mix(in hsl, var(--chroma-K-S), var(--chroma-S-K) 1%);
-  --chroma-surface-100: var(--chroma-K-S);
+   * Endpoints are the light/dark surface anchors (upstream K-S / S-K).
+   * All intermediate steps derive via color-mix(). No black mixing. */
+  --chroma-surface-0: hsl(204deg, 100%, 11%);
+  --chroma-surface-10: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 90%);
+  --chroma-surface-20: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 80%);
+  --chroma-surface-30: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 70%);
+  --chroma-surface-40: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 60%);
+  --chroma-surface-50: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 50%);
+  --chroma-surface-60: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 40%);
+  --chroma-surface-70: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 30%);
+  --chroma-surface-80: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 20%);
+  --chroma-surface-90: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 10%);
+  --chroma-surface-95: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 5%);
+  --chroma-surface-99: color-mix(in hsl, hsl(204deg, 78%, 97%), hsl(204deg, 100%, 11%) 1%);
+  --chroma-surface-100: hsl(204deg, 78%, 97%);
 }

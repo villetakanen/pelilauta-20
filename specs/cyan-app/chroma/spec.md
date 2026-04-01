@@ -19,7 +19,7 @@ A living documentation and demo page that showcases the Cyan chroma (color) toke
 
 The page documents the three palettes with tables and inline swatch demos:
 
-1. **Key/Surface Anchors** — `--chroma-K-S` and `--chroma-S-K`, two swatches showing the light/dark reference points
+1. **Surface Anchors** — `--chroma-surface-0` and `--chroma-surface-100`, two swatches showing the dark/light endpoints
 2. **Primary Palette** — all 13 MD3 tonal steps (0–100), swatch strip showing the teal→yellow hue rotation, table with token name and step
 3. **Secondary Palette** — all 13 MD3 tonal steps, swatch strip, table with token name and step
 4. **Surface Palette** — all 13 MD3 tonal steps, swatch strip showing K-S to S-K range, table with token name and step
@@ -48,7 +48,7 @@ Each palette section renders a horizontal swatch strip of `<div>` elements style
 - [ ] Page exists at `app/cyan-ds/src/pages/principles/chroma.mdx`
 - [ ] Page uses Book layout via frontmatter
 - [ ] All three palettes (primary, secondary, surface) shown with swatch demos and token tables
-- [ ] Key/Surface anchors displayed as a pair of contrasting swatches
+- [ ] Surface endpoints displayed as a pair of contrasting swatches (surface-0, surface-100)
 - [ ] Swatch demos reference tokens via `var()`, never hardcoded values
 - [ ] Primary palette demo visually demonstrates the teal→yellow hue progression
 - [ ] Page renders correctly at `pnpm dev` (once chroma tokens are implemented)

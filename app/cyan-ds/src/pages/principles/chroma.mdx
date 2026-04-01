@@ -4,18 +4,13 @@ title: 'Chroma'
 description: 'Tonal color palettes for the Cyan Design System.'
 ---
 
-## Key / Surface Anchors
+## Surface Anchors
 
-Two reference colors anchor the entire light/dark range. All surface palette steps derive from these via `color-mix()`.
-
-| Token | Role |
-|-------|------|
-| `--chroma-K-S` | Light surface (near-white, cool blue tint) |
-| `--chroma-S-K` | Dark surface (near-black, deep blue) |
+The surface palette spans from a near-black deep blue (`--chroma-surface-0`) to a near-white cool blue tint (`--chroma-surface-100`). All intermediate steps derive via `color-mix()`.
 
 <div style="display: flex; gap: var(--cn-gap); padding: var(--cn-gap);">
-  <div style="flex: 1; height: 4rem; background: var(--chroma-K-S); border: 1px solid var(--cn-outline, #ccc); border-radius: var(--cn-border-radius-small); display: flex; align-items: center; justify-content: center; color: var(--chroma-S-K); font-size: 0.875rem;">K-S</div>
-  <div style="flex: 1; height: 4rem; background: var(--chroma-S-K); border-radius: var(--cn-border-radius-small); display: flex; align-items: center; justify-content: center; color: var(--chroma-K-S); font-size: 0.875rem;">S-K</div>
+  <div style="flex: 1; height: 4rem; background: var(--chroma-surface-0); border-radius: var(--cn-border-radius-small); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.875rem;">surface-0</div>
+  <div style="flex: 1; height: 4rem; background: var(--chroma-surface-100); border: 1px solid #ccc; border-radius: var(--cn-border-radius-small); display: flex; align-items: center; justify-content: center; color: #000; font-size: 0.875rem;">surface-100</div>
 </div>
 
 ## Primary Palette
@@ -92,7 +87,7 @@ The secondary palette blends between two anchors via `color-mix()` with evenly-s
 
 ## Surface Palette
 
-The surface palette blends entirely between `--chroma-K-S` (light) and `--chroma-S-K` (dark) via `color-mix()`. No step uses an independent color or mixes with black.
+The surface palette blends entirely between `--chroma-surface-100` (light) and `--chroma-surface-0` (dark) via `color-mix()`. No step uses an independent color or mixes with black.
 
 | Token | Step |
 |-------|------|
