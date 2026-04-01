@@ -1,0 +1,30 @@
+:root {
+  /* Base Grid */
+  --cn-grid: 0.5rem;
+  --cn-gap: calc(var(--cn-grid) * 2);
+  --cn-line: calc(var(--cn-grid) * 3);
+
+  /* Border Radius */
+  --cn-border-radius-small: calc(var(--cn-grid) * 0.5);
+  --cn-border-radius-medium: var(--cn-grid);
+  --cn-border-radius-large: calc(var(--cn-grid) * 2);
+  --cn-border-radius-xl: calc(var(--cn-grid) * 4);
+
+  /* Icon Sizes (absolute, not grid-derived) */
+  --cn-icon-size-xsmall: 1rem;
+  --cn-icon-size-small: 1.5rem;
+  --cn-icon-size: 2.25rem;
+  --cn-icon-size-large: 4.5rem;
+  --cn-icon-size-xlarge: 8rem;
+
+  /* Button Sizing */
+  --cn-button-physical-size: calc(var(--cn-grid) * 7);
+  --cn-button-size: calc(var(--cn-grid) * 4.75);
+  --cn-navigation-button-size: calc(var(--cn-grid) * 7);
+
+  /* Navigation / Layout */
+  --cn-navigation-icon-label-height: calc(var(--cn-grid) * 2);
+  --cn-width-rail: calc(var(--cn-grid) * 10);
+  --cn-height-rail: calc(var(--cn-grid) * 9);
+  --cn-width-tray: calc(var(--cn-grid) * 42);
+}

@@ -1,0 +1,31 @@
+---
+import Base from "@shell/layouts/Base.astro";
+import TopNav from "@shell/nav/TopNav.svelte";
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+const { title, description } = frontmatter;
+---
+
+<Base title={title}>
+  <TopNav slot="nav" appName="Cyan DS" client:load />
+
+  <article>
+    <h1>{title}</h1>
+    {description && <p class="description">{description}</p>}
+    <slot />
+  </article>
+</Base>
+
+<style>
+  .description {
+    color: var(--cyan-on-surface-variant);
+    margin-block-end: var(--cn-gap);
+  }
+</style>
