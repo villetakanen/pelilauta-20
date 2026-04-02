@@ -1,4 +1,6 @@
 ---
+import Icon from "./Icon.astro";
+
 interface Props {
   noun?: string;
   title: string;
@@ -14,11 +16,11 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
   <div class="container">
     {mode === 'modal' ? (
       <a href={backHref} class="back-button" aria-label="Back">
-        <cn-icon noun="arrow-left" />
+        <Icon noun="arrow-left" size="small" />
       </a>
     ) : noun ? (
       <div class="noun-icon">
-        <cn-icon noun={noun} />
+        <Icon noun={noun} size="small" />
       </div>
     ) : null}
     
@@ -170,7 +172,7 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
     background: var(--color-hover);
   }
 
-  .back-button cn-icon {
+  .back-button :global(.cn-icon) {
     z-index: 120;
     position: relative;
   }

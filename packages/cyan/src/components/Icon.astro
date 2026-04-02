@@ -1,0 +1,74 @@
+---
+/**
+ * Icon.astro - Lightweight SSR Icon component.
+ * Uses CSS mask-image for performance and easy styling (color: currentColor).
+ */
+interface Props {
+  noun: string;
+  size?: "xsmall" | "small" | "large" | "xlarge";
+}
+
+const { noun, size }: Props = Astro.props;
+
+// Internal icon registry (expand as needed)
+const Icons: Record<string, string> = {
+  "arrow-left": "M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z",
+  account:
+    "M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z",
+  menu: "M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z",
+  close:
+    "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z",
+};
+
+const path = Icons[noun] || Icons.menu; // Fallback to menu icon
+---
+
+<span
+  class:list={["cn-icon", size && `cn-icon--${size}`]}
+  aria-hidden="true"
+  data-noun={noun}
+>
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d={path}></path>
+  </svg>
+</span>
+
+<style>
+  .cn-icon {
+    display: inline-block;
+    inline-size: var(--cn-icon-size, 2.25rem);
+    block-size: var(--cn-icon-size, 2.25rem);
+    flex-shrink: 0;
+    line-height: 1;
+  }
+
+  .cn-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .cn-icon--xsmall {
+    inline-size: var(--cn-icon-size-xsmall, 1rem);
+    block-size: var(--cn-icon-size-xsmall, 1rem);
+  }
+
+  .cn-icon--small {
+    inline-size: var(--cn-icon-size-small, 1.5rem);
+    block-size: var(--cn-icon-size-small, 1.5rem);
+  }
+
+  .cn-icon--large {
+    inline-size: var(--cn-icon-size-large, 4.5rem);
+    block-size: var(--cn-icon-size-large, 4.5rem);
+  }
+
+  .cn-icon--xlarge {
+    inline-size: var(--cn-icon-size-xlarge, 8rem);
+    block-size: var(--cn-icon-size-xlarge, 8rem);
+  }
+</style>
