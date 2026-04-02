@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 test.describe("AppBar", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the DS page where AppBar is demoed
-    await page.goto("/");
+    await page.goto("/components/app-bar");
   });
 
   test("Renders responsive titles correctly", async ({ page }) => {
