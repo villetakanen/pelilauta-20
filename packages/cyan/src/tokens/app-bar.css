@@ -1,0 +1,15 @@
+:root {
+  /* App Bar Heights & Grid */
+  --cn-app-bar-height: calc(var(--cn-grid) * 8);
+  --cn-app-bar-gap: var(--cn-gap);
+  --cn-app-bar-padding-horizontal: var(--cn-gap);
+
+  /* Colors */
+  --cn-app-bar-background: var(--color-surface);
+  --cn-app-bar-background-sticky: var(--color-surface-1);
+  --cn-app-bar-color: var(--color-on-surface);
+  --cn-app-bar-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+
+  /* Border radius (for specific layout variants if needed) */
+  --cn-app-bar-border-radius: 0;
+}

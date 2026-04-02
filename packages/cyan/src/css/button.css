@@ -12,7 +12,9 @@
   cursor: pointer;
   background-color: var(--cyan-surface-dim);
   color: var(--cyan-on-surface);
-  transition: background-color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
 }
 
 .button:disabled {

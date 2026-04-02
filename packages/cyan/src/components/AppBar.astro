@@ -1,0 +1,177 @@
+---
+interface Props {
+  noun?: string;
+  title: string;
+  shortTitle?: string;
+  mode?: "sticky" | "modal" | "";
+  backHref?: string;
+}
+
+const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.props;
+---
+
+<header class:list={['cn-app-bar', mode]} data-mode={mode}>
+  <div class="container">
+    {mode === 'modal' ? (
+      <a href={backHref} class="back-button" aria-label="Back">
+        <cn-icon noun="arrow-left" />
+      </a>
+    ) : noun ? (
+      <div class="noun-icon">
+        <cn-icon noun={noun} />
+      </div>
+    ) : null}
+    
+    <h3 class="title">
+      <span class="full-title">{title}</span>
+      {shortTitle && <span class="short-title">{shortTitle}</span>}
+    </h3>
+
+    {mode !== 'modal' && (
+      <div class="actions">
+        <slot />
+      </div>
+    )}
+  </div>
+</header>
+
+<style>
+  .cn-app-bar {
+    display: block;
+    position: relative;
+    height: var(--cn-app-bar-height);
+    background-color: var(--cn-app-bar-background);
+    color: var(--cn-app-bar-color);
+    z-index: var(--cn-z-app-bar, 100);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    border-radius: var(--cn-app-bar-border-radius, 0);
+  }
+
+  .container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    padding: 0 var(--cn-app-bar-padding-horizontal);
+    gap: var(--cn-app-bar-gap);
+  }
+
+  /* Responsive Title Display */
+  @media (max-width: 620px) {
+    .full-title {
+      display: none;
+    }
+  }
+
+  @media (min-width: 621px) {
+    .short-title {
+      display: none;
+    }
+  }
+
+  /* Mode: Sticky */
+  .cn-app-bar.sticky {
+    position: sticky;
+    top: 0;
+    animation: elevated both linear;
+    animation-timeline: scroll();
+    animation-range: 0px 50px;
+  }
+
+  @keyframes elevated {
+    from {
+      background-color: var(--cn-app-bar-background);
+      box-shadow: none;
+    }
+    to {
+      background-color: var(--cn-app-bar-background-sticky);
+      box-shadow: var(--cn-app-bar-shadow);
+    }
+  }
+
+  /* Mode: Modal */
+  .cn-app-bar.modal {
+    position: sticky;
+    top: 0;
+    background-color: var(--cn-app-bar-background-sticky);
+    box-shadow: var(--cn-app-bar-shadow);
+  }
+
+  .cn-app-bar.modal .container {
+    padding-left: var(--cn-grid);
+  }
+
+  .noun-icon {
+    display: flex;
+    align-items: center;
+    z-index: 120;
+  }
+
+  .title {
+    color: inherit;
+    flex-grow: 1;
+    font-family: var(--cn-font-family);
+    font-size: var(--cn-font-size-h3);
+    font-weight: var(--cn-font-weight-h3);
+    letter-spacing: var(--cn-letter-spacing-h3, 0);
+    line-height: var(--cn-app-bar-height);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin: 0;
+  }
+
+  @media (max-width: 620px) {
+    .title {
+      font-size: var(--cn-font-size-h5);
+      line-height: var(--cn-line-height-h5);
+      letter-spacing: var(--cn-letter-spacing-h5, 0);
+      max-height: calc(var(--cn-app-bar-height) - var(--cn-grid));
+      white-space: normal;
+    }
+    .noun-icon {
+      display: none;
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--cn-app-bar-gap);
+  }
+
+  .back-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: inherit;
+    background: none;
+    border: none;
+    position: relative;
+    padding: 0;
+    margin: 0;
+    border-radius: 50%;
+    width: var(--cn-navigation-icon-size, 2.25rem);
+    height: var(--cn-navigation-icon-size, 2.25rem);
+    text-decoration: none;
+  }
+
+  .back-button::before {
+    content: '';
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    border-radius: 50%;
+    background: var(--color-surface-variant, transparent);
+    transition: background-color 0.2s ease;
+  }
+
+  .back-button:hover::before {
+    background: var(--color-hover);
+  }
+
+  .back-button cn-icon {
+    z-index: 120;
+    position: relative;
+  }
+</style>

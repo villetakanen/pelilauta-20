@@ -2,6 +2,7 @@
 
 > **Project:** Pelilauta 20 monorepo for RPG community platform and Cyan design system.
 > **Core constraints:** spec-anchored delivery, deterministic checks over inference, smallest safe change.
+> **Browser Support:** Targeted at modern (evergreen) browsers only. No legacy fallbacks required for experimental CSS features (e.g. scroll-driven animations).
 
 ## Toolchain
 

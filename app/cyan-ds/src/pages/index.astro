@@ -1,5 +1,5 @@
 ---
-import { Tray } from "@cyan/index";
+import { AppBar, Tray } from "@cyan/index";
 import Base from "@shell/layouts/Base.astro";
 import TopNav from "@shell/nav/TopNav.svelte";
 import "@cyan/css/button.css";
@@ -29,69 +29,67 @@ import "@cyan/css/button.css";
   </section>
 
   <section style="margin-top: var(--cyan-space-2xl);">
-    <h2>Tray</h2>
+    <h2>App Bar</h2>
     <p style="margin-top: var(--cyan-space-sm); max-width: 42rem;">
-      Fixed left navigation tray with a floating toggle button. This demo shows
-      both controlled states from Astro props.
+      Sticky and modal top navigation bars with responsive titles and CSS-driven elevation.
     </p>
 
-    <div class="tray-demo">
-      <div class="tray-demo__card">
-        <h3>Collapsed</h3>
-        <div class="tray-demo__viewport">
-          <Tray label="Open collapsed tray">
-            <h4>Main menu</h4>
-            <nav>
-              <a href="#">Home</a>
-              <a href="#">Projects</a>
-              <a href="#">Settings</a>
-            </nav>
-          </Tray>
-          <div class="tray-demo__content">Content area</div>
+    <div class="app-bar-demos">
+      <div class="demo-card">
+        <h3>Standard App Bar</h3>
+        <div class="viewport">
+          <AppBar title="Community Portal" noun="compass">
+            <button class="button primary">Join</button>
+          </AppBar>
+          <div class="content">Content area</div>
         </div>
       </div>
 
-      <div class="tray-demo__card">
-        <h3>Expanded</h3>
-        <div class="tray-demo__viewport">
-          <Tray  label="Close expanded tray">
-            <h4>Main menu</h4>
-            <nav>
-              <a href="#">Home</a>
-              <a href="#">Projects</a>
-              <a href="#">Settings</a>
-            </nav>
-          </Tray>
-          <div class="tray-demo__content">Content area</div>
+      <div class="demo-card">
+        <h3>Modal Mode (with Short Title)</h3>
+        <div class="viewport">
+          <AppBar title="Edit Character Profile" shortTitle="Edit Profile" mode="modal" backHref="#" />
+          <div class="content">Content area</div>
+        </div>
+      </div>
+
+      <div class="demo-card">
+        <h3>Sticky Mode (Scroll to see elevation)</h3>
+        <div class="viewport scrollable">
+          <AppBar title="Thread: Recent RPG News" mode="sticky" noun="translate">
+              <button class="button ghost">Share</button>
+          </AppBar>
+          <div class="content">
+            <p>Scroll down inside this box to see the App Bar elevate.</p>
+            <div style="height: 40rem; background: linear-gradient(to bottom, var(--color-background), var(--color-surface-4));"></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
+
+  <section style="margin-top: var(--cyan-space-2xl);">
 </Base>
 
 <style>
-  .tray-demo {
+  .app-bar-demos {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    grid-template-columns: 1fr;
     gap: var(--cyan-space-lg);
     margin-top: var(--cyan-space-md);
   }
 
-  .tray-demo__card {
+  .demo-card {
     padding: var(--cyan-space-md);
     background: var(--color-elevation-1);
     border: 1px solid var(--color-border);
     border-radius: var(--cn-border-radius-medium);
   }
 
-  .tray-demo__card h3 {
-    font-size: var(--cyan-font-size-md);
-  }
-
-  .tray-demo__viewport {
+  .viewport {
     position: relative;
     isolation: isolate;
-    min-height: 20rem;
+    min-height: 12rem;
     margin-top: var(--cyan-space-md);
     overflow: clip;
     border-radius: var(--cn-border-radius-medium);
@@ -99,20 +97,21 @@ import "@cyan/css/button.css";
     background: var(--color-background);
   }
 
-  .tray-demo__viewport :global(.cn-tray) {
-    position: absolute;
-    inline-size: 95%;
-    block-size: 100%;
+  .viewport.scrollable {
+    overflow-y: auto;
+    height: 15rem;
+    min-height: unset;
   }
 
-  .tray-demo__viewport :global(.cn-tray-button) {
-    position: absolute;
+  .viewport :global(.cn-app-bar) {
+    position: sticky;
+    top: 0;
   }
 
-  .tray-demo__content {
+  .content {
     display: grid;
     place-items: center;
-    block-size: 100%;
+    padding: var(--cn-gap);
     color: var(--color-text-low);
     font-size: var(--cyan-font-size-sm);
   }
