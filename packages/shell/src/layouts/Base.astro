@@ -1,9 +1,14 @@
 ---
+import { Tray } from "@cyan/index";
+
 interface Props {
   title: string;
+  trayExpanded?: boolean;
+  trayLabel?: string;
 }
 
-const { title } = Astro.props;
+const { title, trayExpanded = false, trayLabel = "Menu" } = Astro.props;
+const hasTray = Astro.slots.has("tray");
 ---
 
 <!doctype html>
@@ -14,6 +19,11 @@ const { title } = Astro.props;
     <title>{title}</title>
   </head>
   <body>
+    {hasTray && (
+      <Tray expanded={trayExpanded} label={trayLabel}>
+        <slot name="tray" />
+      </Tray>
+    )}
     <slot name="nav" />
     <main>
       <slot />

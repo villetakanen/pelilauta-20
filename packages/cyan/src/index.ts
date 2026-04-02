@@ -1,1 +1,2 @@
-export { default as Button } from "./components/Button.svelte";
+export { default as Tray } from "./components/Tray.astro";
+export { default as TrayButton } from "./components/TrayButton.astro";

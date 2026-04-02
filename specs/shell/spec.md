@@ -28,6 +28,7 @@ The root HTML document layout. All app pages ultimately render inside this.
 
 | Slot | Purpose |
 |---|---|
+| `tray` (named) | Tray navigation content rendered inside DS `<Tray>` |
 | `nav` (named) | Navigation component (e.g. TopNav) |
 | default | Page content inside `<main>` |
 
@@ -36,6 +37,8 @@ The root HTML document layout. All app pages ultimately render inside this.
 | Prop | Type | Required | Description |
 |---|---|---|---|
 | `title` | `string` | yes | Document `<title>` |
+| `trayExpanded` | `boolean` | no (default `false`) | Passed to DS `<Tray expanded>` |
+| `trayLabel` | `string` | no (default `"Menu"`) | Accessible label for tray toggle button |
 
 #### `nav/TopNav.svelte`
 
@@ -50,16 +53,16 @@ Top navigation bar with app branding.
 |---|---|---|---|
 | `appName` | `string` | yes | App name displayed in the brand link |
 
-#### Tray Orchestration
+#### Tray Orchestration [DEFERRED - NOT YET IMPLEMENTED]
 
-The shell's `Base.astro` (or a dedicated layout) embeds the DS `<Tray>` component and wires it to the app's preferences store:
+The shell's `Base.astro` (or a dedicated layout) will eventually embed the DS `<Tray>` component and wire it to the app's preferences store:
 
-- Reads `trayExpanded` from the preferences store
-- Passes it as the `expanded` prop to `<Tray>`
-- Listens for toggle clicks and updates the store
-- Applies viewport-aware logic (collapse on narrow, restore on wide)
+- Will read `trayExpanded` from the preferences store
+- Will pass it as the `expanded` prop to `<Tray>`
+- Will listen for toggle clicks and updates the store
+- Will apply viewport-aware logic (collapse on narrow, restore on wide)
 
-See: [Pelilauta Preferences](../pelilauta/preferences/spec.md) for the store contract, [Tray](../cyan-ds/components/tray/spec.md) for the DS component contract.
+See: [Pelilauta Preferences](../pelilauta/preferences/spec.md) for the future store contract, [Tray](../cyan-ds/components/tray/spec.md) for the DS component contract.
 
 ### Anti-Patterns
 

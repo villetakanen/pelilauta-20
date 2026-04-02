@@ -1,3 +1,7 @@
+---
+description: Create or update a living spec for a feature domain.
+---
+
 # Spec Command
 
 Create or update a **living spec** for a feature domain. Specs are the permanent source of truth for a feature — they define how the system works (Blueprint) and how we know it works (Contract).
@@ -28,41 +32,7 @@ Before writing, understand the feature using **locally available information onl
 
 ### 3. Write the spec file
 
-Write the spec to `/specs/$ARGUMENTS/spec.md`. Use this template structure. Omit sections that don't apply — keep it minimal and high-signal.
-
-````markdown
-# Feature: [Feature Name]
-
-## Blueprint
-
-### Context
-[Why does this feature exist? What problem does it solve? 1-3 sentences.]
-
-### Architecture
-- **Components:** [Key files/modules with paths]
-- **Data Models:** [Schemas, types — reference file paths, don't duplicate code]
-- **API Contracts:** [Endpoints, events, public interfaces]
-- **Dependencies:** [What this depends on / what depends on this]
-
-### Anti-Patterns
-- [What agents must avoid when working on this feature, with rationale]
-
-## Contract
-
-### Definition of Done
-- [ ] [Observable success criterion]
-
-### Regression Guardrails
-- [Critical invariant that must never break]
-
-### Scenarios
-```gherkin
-Scenario: [Name]
-  Given [Precondition]
-  When [Action]
-  Then [Expected outcome]
-```
-````
+Write the spec to `/specs/$ARGUMENTS/spec.md`. DO NOT invent a template structure. You MUST read `specs/TEMPLATE.md` in the repository root and output the spec using exactly that structure, ensuring test mapping lines are filled out properly. Omit sections that don't apply — keep it minimal and high-signal.
 
 ### 4. Spec principles
 
@@ -72,6 +42,9 @@ Scenario: [Name]
 - **One spec per independently evolvable feature** — don't create monolithic specs
 - **Gherkin scenarios are optional** — only add them when the feature has meaningful behavioral contracts
 - **Keep it maintainable** — a spec that's too detailed becomes a burden and goes stale
+- **UI Architecture Boundaries:**
+  - Astro (`.astro`): CSS-only components, structural layouts, server-side data fetching.
+  - Svelte 5 (`.svelte`): Complex, client-side reactive state only (progressive enhancement).
 
 ### 5. File placement
 
@@ -88,11 +61,19 @@ Specs support hierarchical nesting. A parent spec covers the domain; child specs
 - A parent spec should list its children in the Architecture section
 - Create directories as needed
 
-### 6. DS ↔ Docs page co-spec rule
+### 6. Cyan DS Spec & Docs Rule
 
-When a spec under `specs/cyan-ds/` is created or updated, check if a corresponding docs page spec exists under `specs/cyan-app/`. If it does, update it to reflect any changes (new tokens, renamed sections, removed items). If it doesn't and the DS spec is consumer-facing (tokens, components), create a skeleton docs page spec.
+For Cyan work, specs and docs pages are maintained compactly. The `.mdx` doc pages act as the interactive representation of the Design System Specs.
 
-The reverse also applies: when a `specs/cyan-app/` docs page spec changes, verify the underlying `specs/cyan-ds/` spec is consistent.
+**Mapping Rule:**
+
+- DS component implementation (`.svelte` or `.astro`): `packages/cyan/src/components/`
+- **Main Spec**: `specs/cyan-ds/components/{component}/spec.md` (Contains both engineering spec and docs context)
+- App demo/docs page: `app/cyan-ds/src/pages/components/{component}.mdx`
+
+There is **no** separate `specs/cyan-app/` component spec needed. The `specs/cyan-ds` spec serves as the single source of truth for both implementation and documentation semantics.
+
+Verify consistency across the implementation, the MDX demo page, and the single `specs/cyan-ds` spec.
 
 ### 7. After writing
 

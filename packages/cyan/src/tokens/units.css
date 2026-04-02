@@ -27,4 +27,5 @@
   --cn-width-rail: calc(var(--cn-grid) * 10);
   --cn-height-rail: calc(var(--cn-grid) * 9);
   --cn-width-tray: calc(var(--cn-grid) * 42);
+  --cn-breakpoint-tray-wide: 64rem;
 }

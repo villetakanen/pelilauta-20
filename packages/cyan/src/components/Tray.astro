@@ -1,0 +1,102 @@
+---
+import TrayButton from "./TrayButton.astro";
+
+interface Props {
+  label?: string;
+}
+
+const { label = "Menu" }: Props = Astro.props;
+---
+
+<aside class="cn-tray" data-cn-tray>
+  <input type="checkbox" id="cn-tray-toggle" class="cn-tray-toggle" aria-hidden="true" />
+  <TrayButton label={label} htmlFor="cn-tray-toggle" />
+  <div class="cn-tray__panel">
+    <div class="cn-tray__content">
+      <slot />
+    </div>
+  </div>
+</aside>
+
+<style>
+  .cn-tray {
+    position: fixed;
+    inset: 0;
+    z-index: var(--cn-z-tray, 3000);
+    pointer-events: none;
+    container-type: inline-size;
+  }
+
+  .cn-tray-toggle {
+    display: none;
+  }
+
+  /* Note: CSS Container queries cannot use var() for breakpoints, so it must be hardcoded */
+  @container (min-width: 64rem) {
+    .cn-tray__panel {
+      top: var(--cn-app-bar-height, 4rem);
+      inline-size: var(--cn-width-tray);
+      block-size: calc(100dvh - var(--cn-app-bar-height, 4rem));
+      padding-inline-start: var(--cn-width-rail);
+      border-start-end-radius: var(--cn-border-radius-medium);
+    }
+
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-tray__panel {
+      box-shadow: none;
+    }
+  }
+
+  .cn-tray__panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    inline-size: 95vw;
+    inline-size: 95cqw;
+    block-size: 100dvh;
+    pointer-events: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: var(--color-elevation-1);
+    transform: translateX(-100%);
+    transition: transform 0.11s ease-in-out;
+  }
+
+  .cn-tray:has(.cn-tray-toggle:checked) .cn-tray__panel {
+    transform: translateX(0);
+    box-shadow: 0 0 var(--cn-line) var(--color-shadow);
+  }
+
+  .cn-tray__content {
+    display: grid;
+    gap: var(--cn-gap);
+    padding: calc(var(--cn-navigation-button-size) + var(--cn-gap) * 1.5)
+      var(--cn-gap) var(--cn-gap);
+  }
+
+  .cn-tray :where(h1, h2, h3, h4, h5, h6) {
+    margin: 0;
+    padding-block: var(--cn-grid);
+    font-size: var(--cn-font-size-h4, var(--cyan-font-size-lg));
+    line-height: var(--cn-line-height-h4, var(--cyan-line-height-tight));
+    color: var(--color-text);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  .cn-tray :where(nav a, ul a) {
+    display: flex;
+    align-items: center;
+    gap: var(--cn-gap);
+    min-block-size: calc(var(--cn-grid) * 6);
+    padding-inline: var(--cn-grid);
+    color: var(--color-link);
+    font-size: var(--cn-font-size-text, var(--cyan-font-size-md));
+    line-height: var(--cn-text-line-height, calc(var(--cyan-line-height-normal) * 2));
+    text-decoration: none;
+    border-radius: var(--cn-border-radius-small, var(--cn-grid));
+  }
+
+  .cn-tray :where(nav a, ul a):hover {
+    background: var(--color-hover);
+  }
+
+</style>

@@ -1,10 +1,18 @@
 ---
-import { Button } from "@cyan/index";
+import { Tray } from "@cyan/index";
 import Base from "@shell/layouts/Base.astro";
 import TopNav from "@shell/nav/TopNav.svelte";
+import "@cyan/css/button.css";
 ---
 
 <Base title="Cyan Design System">
+  <nav slot="tray">
+    <h4>Main menu</h4>
+    <a href="#">Foundations</a>
+    <a href="#">Components</a>
+    <a href="#">Patterns</a>
+  </nav>
+
   <TopNav slot="nav" appName="Cyan DS" client:load />
 
   <h1>Cyan Design System</h1>
@@ -13,10 +21,99 @@ import TopNav from "@shell/nav/TopNav.svelte";
   <section>
     <h2>Button</h2>
     <div style="display: flex; gap: var(--cyan-space-md); align-items: center; margin-top: var(--cyan-space-md);">
-      <Button label="Primary" client:load />
-      <Button label="Outline" variant="outline" client:load />
-      <Button label="Ghost" variant="ghost" client:load />
-      <Button label="Disabled" disabled client:load />
+      <button class="button primary">Primary</button>
+      <button class="button outline">Outline</button>
+      <button class="button ghost">Ghost</button>
+      <button class="button" disabled>Disabled</button>
+    </div>
+  </section>
+
+  <section style="margin-top: var(--cyan-space-2xl);">
+    <h2>Tray</h2>
+    <p style="margin-top: var(--cyan-space-sm); max-width: 42rem;">
+      Fixed left navigation tray with a floating toggle button. This demo shows
+      both controlled states from Astro props.
+    </p>
+
+    <div class="tray-demo">
+      <div class="tray-demo__card">
+        <h3>Collapsed</h3>
+        <div class="tray-demo__viewport">
+          <Tray label="Open collapsed tray">
+            <h4>Main menu</h4>
+            <nav>
+              <a href="#">Home</a>
+              <a href="#">Projects</a>
+              <a href="#">Settings</a>
+            </nav>
+          </Tray>
+          <div class="tray-demo__content">Content area</div>
+        </div>
+      </div>
+
+      <div class="tray-demo__card">
+        <h3>Expanded</h3>
+        <div class="tray-demo__viewport">
+          <Tray  label="Close expanded tray">
+            <h4>Main menu</h4>
+            <nav>
+              <a href="#">Home</a>
+              <a href="#">Projects</a>
+              <a href="#">Settings</a>
+            </nav>
+          </Tray>
+          <div class="tray-demo__content">Content area</div>
+        </div>
+      </div>
     </div>
   </section>
 </Base>
+
+<style>
+  .tray-demo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--cyan-space-lg);
+    margin-top: var(--cyan-space-md);
+  }
+
+  .tray-demo__card {
+    padding: var(--cyan-space-md);
+    background: var(--color-elevation-1);
+    border: 1px solid var(--color-border);
+    border-radius: var(--cn-border-radius-medium);
+  }
+
+  .tray-demo__card h3 {
+    font-size: var(--cyan-font-size-md);
+  }
+
+  .tray-demo__viewport {
+    position: relative;
+    isolation: isolate;
+    min-height: 20rem;
+    margin-top: var(--cyan-space-md);
+    overflow: clip;
+    border-radius: var(--cn-border-radius-medium);
+    border: 1px dashed var(--color-border);
+    background: var(--color-background);
+  }
+
+  .tray-demo__viewport :global(.cn-tray) {
+    position: absolute;
+    inline-size: 95%;
+    block-size: 100%;
+  }
+
+  .tray-demo__viewport :global(.cn-tray-button) {
+    position: absolute;
+  }
+
+  .tray-demo__content {
+    display: grid;
+    place-items: center;
+    block-size: 100%;
+    color: var(--color-text-low);
+    font-size: var(--cyan-font-size-sm);
+  }
+</style>

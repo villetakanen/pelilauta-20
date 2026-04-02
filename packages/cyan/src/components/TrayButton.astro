@@ -1,0 +1,94 @@
+---
+interface Props {
+  label?: string;
+  htmlFor?: string;
+}
+
+const { label = "Menu", htmlFor = "cn-tray-toggle" }: Props = Astro.props;
+---
+
+<label
+  class="cn-tray-button"
+  data-cn-tray-button
+  for={htmlFor}
+  aria-label={label}
+>
+  <span class="cn-tray-button__icon" aria-hidden="true"></span>
+</label>
+
+<style>
+  .cn-tray-button {
+    position: fixed;
+    top: var(--cn-gap, 1rem);
+    left: var(--cn-gap, 1rem);
+    z-index: var(--cn-z-tray-button, 40000);
+    display: grid;
+    place-items: center;
+    inline-size: var(--cn-navigation-button-size, 3.5rem);
+    block-size: var(--cn-navigation-button-size, 3.5rem);
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--background-button-text, var(--color-text));
+    cursor: pointer;
+    isolation: isolate;
+  }
+
+  .cn-tray-button::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 50%;
+    background: var(--background-button, transparent);
+    transition: background-color 0.11s ease-in-out;
+  }
+
+  .cn-tray-button:hover::before {
+    background: var(--background-button-text-hover, var(--color-hover));
+  }
+
+  .cn-tray-button:active::before {
+    background: var(--background-button-text-hover, var(--color-hover));
+  }
+
+  .cn-tray-button:focus-within {
+    outline: 2px solid var(--color-link);
+    outline-offset: 2px;
+  }
+
+  .cn-tray-button__icon,
+  .cn-tray-button__icon::before,
+  .cn-tray-button__icon::after {
+    display: block;
+    position: absolute;
+    inline-size: var(--cn-navigation-icon-size, var(--cn-icon-size-small, 1.5rem));
+    block-size: 2px;
+    border-radius: 999px;
+    background: currentColor;
+    transform-origin: center;
+    transition: transform 0.11s ease-in-out;
+    content: "";
+  }
+
+  .cn-tray-button__icon::before {
+    transform: translateY(-0.32rem);
+  }
+
+  .cn-tray-button__icon::after {
+    transform: translateY(0.32rem);
+  }
+
+  /* The checked state CSS is handled by the parent Tray component via :has */
+  :global(.cn-tray:has(.cn-tray-toggle:checked)) .cn-tray-button__icon {
+    transform: rotate(45deg);
+  }
+
+  :global(.cn-tray:has(.cn-tray-toggle:checked)) .cn-tray-button__icon::before {
+    transform: rotate(90deg);
+  }
+
+  :global(.cn-tray:has(.cn-tray-toggle:checked)) .cn-tray-button__icon::after {
+    transform: rotate(90deg);
+  }
+</style>

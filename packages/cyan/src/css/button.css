@@ -1,0 +1,51 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--cyan-font-family); /* Should migrate to --cn tokens when available */
+  font-size: var(--cyan-font-size-sm);
+  font-weight: var(--cyan-font-weight-medium);
+  line-height: var(--cyan-line-height-normal);
+  padding: var(--cyan-space-sm) var(--cyan-space-md);
+  border-radius: var(--cyan-radius-md);
+  border: 1px solid transparent;
+  cursor: pointer;
+  background-color: var(--cyan-surface-dim);
+  color: var(--cyan-on-surface);
+  transition: background-color 0.15s, border-color 0.15s;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.button.primary {
+  background-color: var(--cyan-primary);
+  color: var(--cyan-on-primary);
+}
+
+.button.primary:hover:not(:disabled) {
+  background-color: var(--cyan-primary-dark);
+}
+
+.button.outline {
+  background-color: transparent;
+  color: var(--cyan-primary);
+  border-color: var(--cyan-primary);
+}
+
+.button.outline:hover:not(:disabled) {
+  background-color: var(--cyan-primary);
+  color: var(--cyan-on-primary);
+}
+
+.button.ghost {
+  background-color: transparent;
+  color: var(--cyan-on-surface);
+  border-color: transparent;
+}
+
+.button.ghost:hover:not(:disabled) {
+  background-color: var(--cyan-surface-dim);
+}

@@ -1,3 +1,7 @@
+---
+description: Perform an Adversarial Code Review over a specific diff.
+---
+
 # Adversarial Review Command
 
 You are a **Critic Agent** performing an ASDLC Adversarial Code Review. Your job is to be skeptical — assume code is broken or violates contracts until proven otherwise. You are not helpful. You are rigorous.
@@ -18,7 +22,7 @@ If empty, default to reviewing all staged and unstaged changes.
 
 ### 1. Gather the diff
 
-Based on `$ARGUMENTS`, collect the code changes to review:
+Based on `$ARGUMENTS` in the user's prompt or context, collect the code changes to review:
 
 - **No arguments:** `git diff` + `git diff --cached` (all uncommitted work)
 - **Branch name:** `git diff main...$ARGUMENTS`
@@ -33,14 +37,12 @@ For each changed file, find the closest matching spec under `/specs/`:
 
 - Map file paths to spec domains:
   - `packages/cyan/src/**` → `specs/cyan-ds/`
-  - `app/cyan-ds/**` → `specs/cyan-app/` or `specs/cyan-ds/`
+  - `app/cyan-ds/**` → `specs/cyan-ds/` (Note that `app/cyan-ds` maps directly to `specs/cyan-ds/` for DS rules)
   - `app/pelilauta/**` → `specs/pelilauta/`
-  - `app/shell/**` → `specs/shell/`
+  - `packages/shell/**` → `specs/shell/`
 - Read each relevant spec. If no spec exists for a changed area, note this as a **gap** (not a violation).
 
-Also check for:
-- `OPENCODE.md`, `CLAUDE.md` or `AGENTS.md` in the repo root (constitutional constraints)
-- Any `OPENCODE.md` or `CLAUDE.md` files in parent directories of changed files
+Also check for `AGENTS.md` in the repo root (constitutional constraints, especially Astro vs Svelte Architecture).
 
 ### 3. Identify relevant ASDLC patterns
 
@@ -62,7 +64,7 @@ Analyze every changed file against **three lenses**:
 - Are there behavioral divergences from what the spec describes?
 
 #### Lens 2: Constitutional / Architectural
-- Does the code follow patterns established elsewhere in the codebase?
+- Does the code follow Astro SSR/CSS vs Svelte 5 CSR progressive enhancement architectural constraints defined in `AGENTS.md`?
 - Are there security issues (injection, XSS, exposed secrets, auth bypasses)?
 - Are there performance anti-patterns (N+1 queries, unbounded loads, memory leaks)?
 - Is error handling appropriate (no silent failures, no swallowed exceptions)?
