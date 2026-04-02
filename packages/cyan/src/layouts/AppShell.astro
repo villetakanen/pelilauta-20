@@ -22,7 +22,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
   </head>
   <body class={`layout-${layout}`}>
     {layout === 'sidebar' && (
-      <Tray label={trayLabel}>
+      <Tray>
         <slot name="tray" />
       </Tray>
     )}
@@ -63,7 +63,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
     color: var(--color-text);
     background-color: var(--color-background);
     
-    /* Setup fundamental layout canvas */
+    /* Setup fundamental layout canvas (View/Modal/Editor mode) */
     display: grid;
     grid-template-rows: var(--cn-app-bar-height, 4rem) 1fr;
     grid-template-columns: 1fr;
@@ -92,18 +92,38 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
   }
 
   /* --- Layout: Sidebar --- */
-  @container (min-width: 64rem) {
-    /* If we have a Tray physically active in desktop, we pad the main content so they don't overlap.
-       Tray logic is handled inside Tray.astro pushing over the rail area */
-    .layout-sidebar .cn-app-main {
-       /* Tray container logic handles pushing */
-       max-width: 80rem;
-       width: 100%;
-       margin-inline: auto;
-       padding: var(--cn-gap, 1rem);
-    }
+  .layout-sidebar {
+    /* 
+      By default (Mobile), Tray is width 0 (overlay mode) and header/main span the full width. 
+      When Tray expands (Tablet/Desktop), its width changes and it pushes the rest of the grid.
+    */
+    grid-template-columns: max-content 1fr;
   }
 
+  .layout-sidebar .cn-app-header,
+  .layout-sidebar .cn-app-main {
+    /* In sidebar layout, Header and Main start after the Tray (column 2) */
+    grid-column: 2;
+  }
+
+  .layout-sidebar :global(.cn-tray) {
+    /* Tray occupies the full height of the left column */
+    grid-row: 1 / -1;
+    grid-column: 1;
+    z-index: var(--cn-z-tray, 3000);
+  }
+
+  .layout-sidebar .cn-app-main {
+    max-width: 80rem;
+    width: 100%;
+    margin-inline: auto;
+    padding: var(--cn-gap, 1rem);
+  }
+
+  /* When tray is expanded, tablet mode uses absolute overlay, so main shouldn't be pushed on tablet.
+     But desktop uses 'relative' pushing drawer, which max-content handles correctly!
+     However, we need to ensure mobile doesn't offset padding improperly. */
+  
   /* --- Layout: Editor --- */
   .layout-editor {
     /* lock scrolling */
