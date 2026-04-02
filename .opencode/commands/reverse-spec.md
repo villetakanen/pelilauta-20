@@ -51,18 +51,6 @@ Ask the user to confirm the spec path if the mapping is ambiguous.
 
 If a spec already exists at the target path, read it and **merge** the reversed findings — don't overwrite. Add new sections, update architecture, extend scenarios.
 
-#### 4.1 Cyan DS Unified Spec Rule
-
-When reverse-speccing Cyan DS features, map documentation and implementation specs into a single DS spec path:
-
-- DS Component execution:
-  - DS spec (Single source of truth): `specs/cyan-ds/components/{component}/spec.md`
-  - Docs route target: `app/cyan-ds/src/pages/components/{component}.mdx`
-- Principles/Layouts/CSS:
-  - DS spec: `specs/cyan-ds/{category}/{topic}/spec.md`
-  - Docs route target: `app/cyan-ds/src/pages/{category}/{topic}.mdx`
-
-Do NOT create separate `specs/cyan-app/` variants. Ensure UI Components adhere to the Lit → Astro/Svelte 5 architecture boundaries (Astro for CSS-only/SSR, Svelte for active CSR state).
 
 ### 5. Write the spec file to disk
 

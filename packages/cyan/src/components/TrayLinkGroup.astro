@@ -1,0 +1,35 @@
+---
+---
+
+<div class="cn-tray-link-group">
+  <div class="cn-tray-link-group__content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .cn-tray-link-group {
+    display: flex;
+    flex-direction: column;
+    padding-inline-start: calc(var(--cn-grid) * 5);
+    margin-block-start: calc(var(--cn-grid) * -1);
+    margin-block-end: var(--cn-gap);
+    transition: opacity 0.2s, max-block-size 0.2s;
+    overflow: hidden;
+  }
+
+  .cn-tray-link-group__content {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--cn-grid) * 0.5);
+  }
+
+  /* Structural coupling for rail mode - hide sub-links when collapsed in rail mode */
+  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-tray-link-group) {
+    @media (min-width: 621px) {
+      display: none;
+      opacity: 0;
+      max-block-size: 0;
+    }
+  }
+</style>

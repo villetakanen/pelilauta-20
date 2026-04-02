@@ -1,6 +1,8 @@
 ---
-import Base from "@shell/layouts/Base.astro";
-import TopNav from "@shell/nav/TopNav.svelte";
+import TrayButton from "@cyan/components/TrayButton.astro";
+import TrayLink from "@cyan/components/TrayLink.astro";
+import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
+import AppShell from "@cyan/layouts/AppShell.astro";
 
 interface Props {
   frontmatter: {
@@ -11,21 +13,60 @@ interface Props {
 
 const { frontmatter } = Astro.props;
 const { title, description } = frontmatter;
+
+// Hardcoded navigation for the Design System Book
+// In a more advanced version, we could use Astro.glob to find all MDX files
+const foundations = [
+  { label: "Chroma", href: "/principles/chroma", icon: "🎨" },
+  { label: "Semantic colors", href: "/principles/semantic-colors", icon: "🌈" },
+  { label: "Units and Grid", href: "/principles/units-and-grid", icon: "📏" },
+  { label: "Z-index", href: "/principles/z-index", icon: "🥞" },
+];
+
+const components = [
+  { label: "Tray", href: "/components/tray", icon: "📥" },
+  { label: "App Bar", href: "/components/app-bar", icon: "🔝" },
+];
 ---
 
-<Base title={title}>
-  <TopNav slot="nav" appName="Cyan DS" client:load />
+<AppShell title={title} layout="sidebar">
+  <div slot="tray">
+    <TrayButton icon="📖" label="Intro" href="/" />
+    
+    <h4>Foundations</h4>
+    {foundations.map(item => (
+        <TrayButton icon={item.icon} label={item.label} href={item.href} active={Astro.url.pathname.includes(item.href)} />
+    ))}
 
-  <article>
+    <h4>Components</h4>
+    {components.map(item => (
+        <TrayButton icon={item.icon} label={item.label} href={item.href} active={Astro.url.pathname.includes(item.href)} />
+    ))}
+  </div>
+
+  <article class="cn-book-article">
     <h1>{title}</h1>
     {description && <p class="description">{description}</p>}
     <slot />
   </article>
-</Base>
+</AppShell>
 
 <style>
+  .cn-book-article {
+      max-width: 60rem;
+      margin-inline: auto;
+      padding: var(--cn-gap);
+  }
   .description {
     color: var(--cyan-on-surface-variant);
     margin-block-end: var(--cn-gap);
+  }
+  h4 {
+      margin-block: var(--cn-gap) var(--cn-grid);
+      padding-inline: var(--cn-grid);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.6;
   }
 </style>

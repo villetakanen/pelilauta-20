@@ -1,6 +1,6 @@
 # AGENTS.md
 
-> **Project:** Pelilauta 20 monorepo for RPG community platform and Cyan design system.
+> **Project:** Pelilauta 20 pnpm workspace for RPG community platform and Cyan design system.
 > **Core constraints:** spec-anchored delivery, deterministic checks over inference, smallest safe change.
 > **Browser Support:** Targeted at modern (evergreen) browsers only. No legacy fallbacks required for experimental CSS features (e.g. scroll-driven animations).
 
@@ -20,12 +20,10 @@
 ```
 packages/cyan/src/
   components/     — DS components (Astro or Svelte)
+  layouts/        — Base.astro: root HTML shell used by all apps
   tokens/         — CSS custom properties (--cn-* namespace only)
   fonts/          — Font files
 
-packages/shell/src/
-  layouts/        — Base.astro: root HTML shell used by all apps
-  nav/            — TopNav.svelte: top navigation bar
 
 app/cyan-ds/src/
   pages/          — DS documentation site (Astro + MDX)
@@ -36,16 +34,13 @@ app/pelilauta/src/
   stores/         — Nanostores (user preferences, auth)
 
 specs/
-  cyan-ds/        — DS component and token contracts
-  cyan-app/       — DS documentation site page specs
-  shell/          — Shell package contracts
+  cyan-ds/        — DS component, token, layout, and documentation site contracts
   pelilauta/      — Main app feature contracts
 ```
 
 ## Specs
 
-- `specs/cyan-ds/**` — contracts for `packages/cyan/` and `packages/shell/`
-- `specs/cyan-app/**` — contracts for `app/cyan-ds/` documentation pages
+- `specs/cyan-ds/**` — contracts for `packages/cyan/` and `app/cyan-ds/`
 - `specs/pelilauta/**` — contracts for `app/pelilauta/`
 
 **Spec Formatting:**

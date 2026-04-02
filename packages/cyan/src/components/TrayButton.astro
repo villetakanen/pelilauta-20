@@ -1,94 +1,80 @@
 ---
 interface Props {
-  label?: string;
-  htmlFor?: string;
+  icon: string;
+  label: string;
+  href: string;
+  active?: boolean;
 }
 
-const { label = "Menu", htmlFor = "cn-tray-toggle" }: Props = Astro.props;
+const { icon, label, href, active = false } = Astro.props;
 ---
 
-<label
-  class="cn-tray-button"
-  data-cn-tray-button
-  for={htmlFor}
-  aria-label={label}
->
-  <span class="cn-tray-button__icon" aria-hidden="true"></span>
-</label>
+<a href={href} class:list={["cn-tray-button", { active }]}>
+  <slot name="icon">
+    <span class="cn-tray-button__icon">{icon}</span>
+  </slot>
+  <span class="cn-tray-button__label">{label}</span>
+</a>
 
 <style>
   .cn-tray-button {
-    position: fixed;
-    top: var(--cn-gap, 1rem);
-    left: var(--cn-gap, 1rem);
-    z-index: var(--cn-z-tray-button, 40000);
-    display: grid;
-    place-items: center;
-    inline-size: var(--cn-navigation-button-size, 3.5rem);
-    block-size: var(--cn-navigation-button-size, 3.5rem);
-    border: 0;
-    border-radius: 50%;
-    background: transparent;
-    color: var(--background-button-text, var(--color-text));
-    cursor: pointer;
-    isolation: isolate;
+    display: flex;
+    align-items: center;
+    gap: var(--cn-gap);
+    inline-size: 100%;
+    min-block-size: calc(var(--cn-grid) * 6);
+    padding: var(--cn-grid);
+    color: var(--color-link);
+    text-decoration: none;
+    border-radius: var(--cn-border-radius-small);
+    transition: background-color 0.2s, color 0.2s;
   }
 
-  .cn-tray-button::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    z-index: -1;
-    border-radius: 50%;
-    background: var(--background-button, transparent);
-    transition: background-color 0.11s ease-in-out;
+  .cn-tray-button:hover,
+  .cn-tray-button:focus {
+    background-color: var(--color-hover);
+    outline: none;
   }
 
-  .cn-tray-button:hover::before {
-    background: var(--background-button-text-hover, var(--color-hover));
-  }
-
-  .cn-tray-button:active::before {
-    background: var(--background-button-text-hover, var(--color-hover));
-  }
-
-  .cn-tray-button:focus-within {
-    outline: 2px solid var(--color-link);
+  .cn-tray-button:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-link);
     outline-offset: 2px;
   }
 
-  .cn-tray-button__icon,
-  .cn-tray-button__icon::before,
-  .cn-tray-button__icon::after {
-    display: block;
-    position: absolute;
-    inline-size: var(--cn-navigation-icon-size, var(--cn-icon-size-small, 1.5rem));
-    block-size: 2px;
-    border-radius: 999px;
-    background: currentColor;
-    transform-origin: center;
-    transition: transform 0.11s ease-in-out;
-    content: "";
+  .cn-tray-button.active {
+    color: var(--color-text);
+    background-color: var(--color-hover);
   }
 
-  .cn-tray-button__icon::before {
-    transform: translateY(-0.32rem);
+  .cn-tray-button__icon {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    inline-size: calc(var(--cn-grid) * 4);
+    block-size: calc(var(--cn-grid) * 4);
+    font-size: var(--cn-icon-size-small);
   }
 
-  .cn-tray-button__icon::after {
-    transform: translateY(0.32rem);
+  .cn-tray-button__label {
+    font-size: var(--cn-font-size-text);
+    line-height: var(--cn-text-line-height);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s;
   }
 
-  /* The checked state CSS is handled by the parent Tray component via :has */
-  :global(.cn-tray:has(.cn-tray-toggle:checked)) .cn-tray-button__icon {
-    transform: rotate(45deg);
+  /* Structural coupling for rail mode */
+  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-tray-button__label) {
+    @media (min-width: 621px) {
+      display: none;
+      opacity: 0;
+    }
   }
 
-  :global(.cn-tray:has(.cn-tray-toggle:checked)) .cn-tray-button__icon::before {
-    transform: rotate(90deg);
-  }
-
-  :global(.cn-tray:has(.cn-tray-toggle:checked)) .cn-tray-button__icon::after {
-    transform: rotate(90deg);
+  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-tray-button) {
+    @media (min-width: 621px) {
+      justify-content: center;
+      padding: var(--cn-grid);
+    }
   }
 </style>

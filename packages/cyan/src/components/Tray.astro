@@ -1,102 +1,180 @@
 ---
-import TrayButton from "./TrayButton.astro";
+import HamburgerButton from "./HamburgerButton.astro";
 
 interface Props {
-  label?: string;
+  id?: string;
 }
 
-const { label = "Menu" }: Props = Astro.props;
+const { id = "cn-tray-toggle" } = Astro.props;
 ---
 
-<aside class="cn-tray" data-cn-tray>
-  <input type="checkbox" id="cn-tray-toggle" class="cn-tray-toggle" aria-hidden="true" />
-  <TrayButton label={label} htmlFor="cn-tray-toggle" />
-  <div class="cn-tray__panel">
-    <div class="cn-tray__content">
+<div class="cn-tray" data-cn-tray>
+  <HamburgerButton id={id} />
+
+  <div class="cn-drawer" id="cn-tray-nav" aria-label="Main Navigation">
+    <nav class="cn-nav">
       <slot />
-    </div>
+    </nav>
   </div>
-</aside>
+
+  <label
+    for={id}
+    class="cn-scrim"
+    aria-label="Close navigation"
+  ></label>
+</div>
 
 <style>
+  /* ── Variables ───────────────────────────────────────── */
   .cn-tray {
-    position: fixed;
-    inset: 0;
-    z-index: var(--cn-z-tray, 3000);
-    pointer-events: none;
-    container-type: inline-size;
+    --cn-tray-z-index-surface: var(--cn-z-tray, 3000);
+    --cn-tray-z-index-scrim: calc(var(--cn-tray-z-index-surface) - 1);
+    
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 100%;
+    /* Start with 0 width on mobile when collapsed */
+    width: 0;
+    transition: width 0.27s ease-in-out;
+    background: transparent;
   }
 
-  .cn-tray-toggle {
-    display: none;
-  }
-
-  /* Note: CSS Container queries cannot use var() for breakpoints, so it must be hardcoded */
-  @container (min-width: 64rem) {
-    .cn-tray__panel {
-      top: var(--cn-app-bar-height, 4rem);
-      inline-size: var(--cn-width-tray);
-      block-size: calc(100dvh - var(--cn-app-bar-height, 4rem));
-      padding-inline-start: var(--cn-width-rail);
-      border-start-end-radius: var(--cn-border-radius-medium);
-    }
-
-    .cn-tray:has(.cn-tray-toggle:checked) .cn-tray__panel {
-      box-shadow: none;
-    }
-  }
-
-  .cn-tray__panel {
+  /* ── Drawer Component ────────────────────────────────── */
+  .cn-drawer {
     position: fixed;
     top: 0;
     left: 0;
-    inline-size: 95vw;
-    inline-size: 95cqw;
-    block-size: 100dvh;
-    pointer-events: auto;
-    overflow-y: auto;
-    overflow-x: hidden;
-    background: var(--color-elevation-1);
+    z-index: var(--cn-tray-z-index-surface);
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: var(--cn-width-tray, 21rem);
+    max-width: 100vw;
+    background: var(--color-elevation-1, #ffffff);
     transform: translateX(-100%);
-    transition: transform 0.11s ease-in-out;
+    transition: transform 0.15s ease-in, width 0.15s ease-in;
+    border-right: none;
+    padding-top: calc(var(--cn-navigation-button-size) + var(--cn-gap) * 2);
+    padding-bottom: var(--cn-gap);
+    padding-inline: var(--cn-gap);
+    box-sizing: border-box;
+    overflow-y: auto;
   }
 
-  .cn-tray:has(.cn-tray-toggle:checked) .cn-tray__panel {
+  /* ── Navigation Container ─────────────────────────────── */
+  .cn-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cn-grid);
+    align-items: stretch;
+    flex: 1;
+  }
+
+  /* ── Scrim ───────────────────────────────────────────── */
+  .cn-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--cn-tray-z-index-scrim);
+    background: var(--color-shadow, rgba(0,0,0,0.5));
+    opacity: 0;
+    transition: opacity 0.15s ease-in;
+    cursor: pointer;
+    pointer-events: none;
+  }
+
+  /* ── Expansion States (General/Mobile) ───────────────── */
+  .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
     transform: translateX(0);
+    transition-timing-function: ease-out;
     box-shadow: 0 0 var(--cn-line) var(--color-shadow);
   }
 
-  .cn-tray__content {
-    display: grid;
-    gap: var(--cn-gap);
-    padding: calc(var(--cn-navigation-button-size) + var(--cn-gap) * 1.5)
-      var(--cn-gap) var(--cn-gap);
+  .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
+    display: block;
+    opacity: 0.6;
+    pointer-events: auto;
   }
 
-  .cn-tray :where(h1, h2, h3, h4, h5, h6) {
-    margin: 0;
-    padding-block: var(--cn-grid);
-    font-size: var(--cn-font-size-h4, var(--cyan-font-size-lg));
-    line-height: var(--cn-line-height-h4, var(--cyan-line-height-tight));
-    color: var(--color-text);
-    border-block-end: 1px solid var(--color-border);
+  /* ── Mode 2: Tablet (Medium Rail) ────────────────────── */
+  @media (min-width: 621px) {
+    .cn-tray {
+      width: var(--cn-width-rail, 5rem);
+    }
+
+    .cn-drawer {
+      position: relative;
+      transform: translateX(0);
+      width: var(--cn-width-rail);
+      flex-shrink: 0;
+      border-right: 1px solid var(--color-border);
+      z-index: calc(var(--cn-tray-z-index-surface) + 1);
+    }
+
+    /* Tablet Expansion - Overlay Modal from Rail */
+    .cn-tray:has(.cn-tray-toggle:checked) {
+      width: var(--cn-width-tray, 21rem);
+    }
+    
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      position: absolute;
+      width: var(--cn-width-tray);
+      height: 100vh;
+      box-shadow: 4px 0 10px var(--color-shadow);
+    }
   }
 
-  .cn-tray :where(nav a, ul a) {
-    display: flex;
-    align-items: center;
-    gap: var(--cn-gap);
-    min-block-size: calc(var(--cn-grid) * 6);
-    padding-inline: var(--cn-grid);
-    color: var(--color-link);
-    font-size: var(--cn-font-size-text, var(--cyan-font-size-md));
-    line-height: var(--cn-text-line-height, calc(var(--cyan-line-height-normal) * 2));
-    text-decoration: none;
-    border-radius: var(--cn-border-radius-small, var(--cn-grid));
-  }
+  /* ── Mode 3: Desktop (Tabletop/Large Push) ─────────────── */
+  @media (min-width: 780px) {
+    /* Large expansion - Push content, no scrim */
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
+      display: none;
+      pointer-events: none;
+    }
 
-  .cn-tray :where(nav a, ul a):hover {
-    background: var(--color-hover);
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      position: relative; /* Push drawer */
+      width: var(--cn-width-tray);
+      box-shadow: none;
+    }
   }
-
 </style>
+
+<script>
+  // Keyboard Accessibility
+  const trays = document.querySelectorAll('.cn-tray');
+  trays.forEach(tray => {
+      const toggle = tray.querySelector('.cn-tray-toggle') as HTMLInputElement;
+      const drawer = tray.querySelector('.cn-drawer');
+
+      if (toggle && drawer) {
+          document.addEventListener('keydown', (e) => {
+              // Close on escape
+              if (e.key === 'Escape' && toggle.checked) {
+                  toggle.checked = false;
+              }
+
+              // Focus trapping for mobile/tablet modals (overlays)
+              const isOverlay = () => window.innerWidth < 780;
+              if (e.key === 'Tab' && toggle.checked && isOverlay()) {
+                  const focusableElements = drawer.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
+                  if (focusableElements.length === 0) return;
+
+                  const first = focusableElements[0] as HTMLElement;
+                  const last = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+                  if (e.shiftKey && document.activeElement === first) {
+                      e.preventDefault();
+                      last.focus();
+                  } else if (!e.shiftKey && document.activeElement === last) {
+                      e.preventDefault();
+                      first.focus();
+                  }
+              }
+          });
+      }
+  });
+</script>

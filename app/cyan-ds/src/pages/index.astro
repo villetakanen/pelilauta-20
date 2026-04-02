@@ -1,11 +1,8 @@
 ---
-import { AppBar, Tray } from "@cyan/index";
-import Base from "@shell/layouts/Base.astro";
-import TopNav from "@shell/nav/TopNav.svelte";
-import "@cyan/css/button.css";
+import AppShell from "@cyan/layouts/AppShell.astro";
 ---
 
-<Base title="Cyan Design System">
+<AppShell title="Cyan Design System" layout="sidebar">
   <nav slot="tray">
     <h4>Main menu</h4>
     <a href="#">Foundations</a>
@@ -13,106 +10,21 @@ import "@cyan/css/button.css";
     <a href="#">Patterns</a>
   </nav>
 
-  <TopNav slot="nav" appName="Cyan DS" client:load />
-
   <h1>Cyan Design System</h1>
-  <p>Component library for Pelilauta 20.</p>
+  <p>
+    Cyan Design System is a custom UI component library built for <a href="https://pelilauta.social">pelilauta.social</a>.
+  </p>
+  
+  <p>
+    For its fourth major redesign, the system is implemented using Astro components for structural SSR and Svelte 5 for interactive client-side progressive enhancement.
+  </p>
 
-  <section>
-    <h2>Button</h2>
-    <div style="display: flex; gap: var(--cyan-space-md); align-items: center; margin-top: var(--cyan-space-md);">
-      <button class="button primary">Primary</button>
-      <button class="button outline">Outline</button>
-      <button class="button ghost">Ghost</button>
-      <button class="button" disabled>Disabled</button>
-    </div>
-  </section>
+  <h2>Source code and licensing</h2>
+  <p>
+    Most parts of the design system are licensed under the MIT license. Please check individual plugins and components for their independent licensing info.
+  </p>
 
-  <section style="margin-top: var(--cyan-space-2xl);">
-    <h2>App Bar</h2>
-    <p style="margin-top: var(--cyan-space-sm); max-width: 42rem;">
-      Sticky and modal top navigation bars with responsive titles and CSS-driven elevation.
-    </p>
-
-    <div class="app-bar-demos">
-      <div class="demo-card">
-        <h3>Standard App Bar</h3>
-        <div class="viewport">
-          <AppBar title="Community Portal" noun="compass">
-            <button class="button primary">Join</button>
-          </AppBar>
-          <div class="content">Content area</div>
-        </div>
-      </div>
-
-      <div class="demo-card">
-        <h3>Modal Mode (with Short Title)</h3>
-        <div class="viewport">
-          <AppBar title="Edit Character Profile" shortTitle="Edit Profile" mode="modal" backHref="#" />
-          <div class="content">Content area</div>
-        </div>
-      </div>
-
-      <div class="demo-card">
-        <h3>Sticky Mode (Scroll to see elevation)</h3>
-        <div class="viewport scrollable">
-          <AppBar title="Thread: Recent RPG News" mode="sticky" noun="translate">
-              <button class="button ghost">Share</button>
-          </AppBar>
-          <div class="content">
-            <p>Scroll down inside this box to see the App Bar elevate.</p>
-            <div style="height: 40rem; background: linear-gradient(to bottom, var(--color-background), var(--color-surface-4));"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section style="margin-top: var(--cyan-space-2xl);">
-</Base>
-
-<style>
-  .app-bar-demos {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: var(--cyan-space-lg);
-    margin-top: var(--cyan-space-md);
-  }
-
-  .demo-card {
-    padding: var(--cyan-space-md);
-    background: var(--color-elevation-1);
-    border: 1px solid var(--color-border);
-    border-radius: var(--cn-border-radius-medium);
-  }
-
-  .viewport {
-    position: relative;
-    isolation: isolate;
-    min-height: 12rem;
-    margin-top: var(--cyan-space-md);
-    overflow: clip;
-    border-radius: var(--cn-border-radius-medium);
-    border: 1px dashed var(--color-border);
-    background: var(--color-background);
-  }
-
-  .viewport.scrollable {
-    overflow-y: auto;
-    height: 15rem;
-    min-height: unset;
-  }
-
-  .viewport :global(.cn-app-bar) {
-    position: sticky;
-    top: 0;
-  }
-
-  .content {
-    display: grid;
-    place-items: center;
-    padding: var(--cn-gap);
-    color: var(--color-text-low);
-    font-size: var(--cyan-font-size-sm);
-  }
-</style>
+  <p>
+    All source code is managed as an internal package within the Pelilauta 20 pnpm workspace.
+  </p>
+</AppShell>

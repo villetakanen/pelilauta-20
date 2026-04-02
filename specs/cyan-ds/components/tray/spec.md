@@ -1,161 +1,125 @@
 # Feature: Tray
 
-> Reversed from:
-> - https://github.com/villetakanen/cyan-design-system-4/blob/main/packages/cyan-lit/src/cn-tray-button
-> - https://github.com/villetakanen/cyan-design-system-4/blob/main/packages/cyan-css/src/core/tray.css
+> Inspired by: https://github.com/villetakanen/free-fall/blob/main/packages/design-system/src/components/AppTray.astro
 
 ## Blueprint
 
 ### Context
-
-The tray is a navigation sidebar that slides in and out of view. It contains a toggle button (the "tray button") as an internal child. The tray owns its open/closed state, persistence, and responsive behavior. The button is purely a visual toggle affordance — it has no independent public API.
+The tray is the primary navigation sidebar for the application. It adapts to different viewports, functioning as a hidden drawer on mobile, an icon rail with a modal drawer on tablet, and a push-content rail/sidebar on desktop. It supports hierarchical navigation via sub-menus.
 
 ### Architecture
-
-In cyan 4, the tray was split across two packages: a global CSS file (`tray.css` in `cyan-css`) for layout/animation, and a standalone Lit element (`cn-tray-button`) for the toggle. The CSS tray relied on `body:has(cn-tray-button[aria-expanded="false"])` to detect state — a clever hack that coupled global styles to a specific custom element's attribute.
-
-In v20, both are unified into a single **Astro component** that owns its markup, styles, state, and toggle button.
-
 - **Components:**
-  - `Tray.astro` — the sidebar container that embeds a `TrayButton` and owns state/persistence
-  - `TrayButton.astro` — the hamburger/X toggle. Exported as a standalone component for docs/demo use, but semantically always used inside `Tray` in production
-- **Data Models:** `expanded: boolean` (controlled by the consuming app)
+  - `Tray.astro` — The root layout container that owns state toggle (`:has()`), the drawer slide animation, and scrim.
+  - `HamburgerButton.astro` — The toggle button, included within the tray.
+  - `TrayButton.astro` — A primary navigation item with an icon and label. Displays only the icon in rail mode.
+  - `TrayLinkGroup.astro` — A container for sub-navigation items.
+  - `TrayLink.astro` — A secondary navigation item used within groups.
+  - (All components strictly `.astro` using CSS for interactions where possible, plus light client `<script>` for keyboard accessibility).
+- **Data Models:** No strict data models. Driven by markup (`slots` / nested structure) or basic props.
 - **API Contracts:**
-  - **Props:** `expanded?: boolean` (default `false`)
-  - **Slots:** Default slot for tray content (nav links, etc.)
-  - **Attributes (reflected):** `aria-expanded` on the tray root
+  - `Tray`: Manages the `<input type="checkbox" id="cn-tray-toggle">` or similar CSS-only state.
+  - `TrayButton`: Props `href`, `icon`, `label`, `active`.
+  - `TrayLink`: Props `href`, `label`, `active`.
 - **Dependencies:**
-  - Consumes design tokens for viewport mode breakpoints
-  - Consumes CSS custom properties: `--cn-navigation-button-size`, `--cn-navigation-icon-size`, `--cn-grid`, `--cn-gap`, `--cn-width-tray`, `--cn-width-rail`, `--cn-app-bar-height`, `--cn-border-radius-medium`, `--cn-font-size-h4`, `--cn-line-height-h4`, `--cn-font-size-text`, `--cn-text-line-height`, `--cn-line`, `--cn-z-tray`, `--color-text`, `--color-link`, `--color-elevation-1`, `--color-border`, `--color-shadow`, `--color-hover`, `--background-button-text`, `--background-button-text-hover`, `--background-button`
+  - Consumes `--cn-*` tokens for widths (tray and rail), spacing, and typography.
+  - `--cn-z-*` tokens for tray surface and scrim layers.
 
-### Tray Button (`TrayButton.astro`)
+### Layout & Responsive Modes
+The Tray layout scales across three distinct modes:
 
-A self-contained Astro component exported from the DS package. It renders a circular button with a hamburger icon that animates into an X when expanded.
+1. **Mobile (`< 621px`)**
+   - **Collapsed:** Hidden completely (width: 0).
+   - **Expanded:** Modal drawer sliding in over content. Clickable scrim element displayed.
 
-- **Position:** `fixed`, top-left corner of the viewport. `z-index: var(--cn-z-tray-button)` — always above tray and rail. Always visible regardless of tray state, scroll position, or other layout
-- Circular shape (`border-radius: 50%`) sized by `--cn-navigation-button-size`
-- Two pseudo-element bars animate between hamburger and X via CSS `transform: rotate()`
-- Hover/active background states via `::before` pseudo
-- Focus ring: `2px solid var(--color-link)` with `outline-offset: 2px`
-- **Props:** `expanded?: boolean` (default `false`), `label?: string` (default `"Menu"`)
-- **Behavior:** Toggles its own `expanded` visual state on click and dispatches a `click` event. Does not manage persistence or side effects — that's the parent's job
-- **Standalone usage:** When used outside a `Tray`, it toggles visually and reflects `aria-expanded`, but controls nothing. This is the intended mode for docs/demo pages to showcase states (idle, hover, focus, expanded, collapsed) and the animation transition
+2. **Medium / Tablet (`>= 621px` and `< 780px`)**
+   - **Collapsed:** Visible as a narrow Icon Rail.
+   - **Expanded:** Modal drawer sliding out from the rail (`position: absolute`), overlaying content with a clickable scrim.
 
-### Tray Container
+3. **Tabletop / Large (`>= 780px`)**
+   - **Collapsed:** Visible as a narrow Icon Rail.
+   - **Expanded:** Push drawer (`position: relative`), which pushes the application's main content wrapper rather than overlaying it. No scrim displayed.
 
-Styles are **mobile-first**. The base styles define the mobile layout; wide viewport adjustments are added via `@media` (or container query with breakpoint token).
+### Navigation Hierarchy
+- Primary routes use `TrayButton`.
+- When sub-routes exist, they are placed in `TrayLinkGroup` containing `TrayLink` items.
+- In rail mode, the sub-menus are either hidden or styled elegantly; when expanded, the groups reveal the hierarchical links.
 
-#### Mobile (base)
-
-- `position: fixed`, `top: 0`, `left: 0`, full height (`100dvh`)
-- Width: `95cqw` of the app container
-- `z-index: var(--cn-z-tray, 3000)` — always on top of content
-- When collapsed: `transform: translateX(-100%)` (fully off-screen to the left)
-- When expanded: `transform: translateX(0)` (slides into view from the left)
-- Slide transition: `transform 0.11s ease-in-out`
-- Scrollable vertically (`overflow-y: auto`), no horizontal scroll
-- Background: `--color-elevation-1`
-- Box shadow when expanded: `var(--color-shadow) 0px 0px var(--cn-line)`
-
-#### Wide viewports (breakpoint token)
-
-- Fixed-width (`--cn-width-tray`), anchored to the left below the app bar
-- Top offset: `var(--cn-app-bar-height)`
-- Height: `calc(100dvh - var(--cn-app-bar-height))`
-- Padding-left: `var(--cn-width-rail)` (space for a persistent icon rail)
-- Top-right border radius: `var(--cn-border-radius-medium)`
-- No box shadow
-
-**Content styling:** Headings inside the tray are normalized to h4 size with a bottom border. Nav links render as flex rows with icon+label, hover background, and double-line height.
-
-### Responsive Logic
-
-- Styles are mobile-first; wide mode is a progressive enhancement via breakpoint design token
-- The `expanded` prop controls visibility at all viewport sizes — the app decides when to expand/collapse
-
-### State Persistence
-
-State persistence is **not a DS concern**. The tray component is stateless — it renders whatever `expanded` value the consuming app passes in. The app decides whether and how to persist the preference (localStorage, store, cookie, etc.).
-
-In cyan 4, persistence was baked into the button component. This is removed in v20.
-
-### Migration Notes
-
-- Original was split: global CSS (`tray.css`) + standalone Lit element (`cn-tray-button`). In v20, unified into a single `Tray.astro` component with scoped styles and an inline `<script>` for client-side state
-- The `body:has(cn-tray-button[aria-expanded])` pattern is eliminated — the Astro component manages its own DOM directly
-- `aria-controls` is no longer needed — the button is inside the element it controls
-- Original `checkInitialMenuState` had a `this`-binding bug on `resize` listener — moot in Astro with direct DOM scripting
-- Breakpoint consumed from design token, not hardcoded (`621px` for container, `960px` for button state)
-- Original uses `nav#tray` ID selector — v20 should use scoped class selectors within the Astro component
-- Original mobile tray slid in from the right; v20 slides from the left (mobile-first, consistent direction)
-- Original mobile width was `100dvw - gap`; v20 uses `95cqw` (container query width)
+### Book Page
+A living book page is required to demo these components.
+- **Target path:** `app/cyan-ds/src/pages/components/tray.mdx`
+- **Format:** MDX using Book layout (`app/cyan-ds/src/layouts/Book.astro`)
+- **Structure:**
+  1. **Overview** — What the tray is, its layout modes (Mobile, Medium/Tablet, Tabletop/Large).
+  2. **TrayButton Demo** — Standalone `TrayButton` rendered in isolation, showing idle, hover, and focus states.
+  3. **Tray Sub-menus Demo** — Usage of `TrayLinkGroup` and `TrayLink`.
+  4. **Tray Layout Demo** — Embedded tray with sample hierarchical content showing layout responsiveness within a container.
+  5. **Props table** — Documents props for all tray components.
+  6. **Integration / Accessibility** — Guidance on CSS-driven focus trapping and `aria-expanded` behavior.
 
 ### Anti-Patterns
-
-- Do not use `TrayButton` outside of `Tray` in production — standalone usage is for docs/demo only
-- Do not use `body:has()` selectors to couple global CSS to component state — keep state management inside the component
-- Do not bake persistence into the DS component — the app owns state lifecycle
-- Do not use string-typed booleans for internal state — use real booleans, serialize only at the attribute boundary
-- Do not hardcode a breakpoint — consume viewport mode from a design token
-- Do not use ID selectors (`#tray`) — use scoped styles within the Astro component
+- **JS-Driven Layout:** Do not use JavaScript resize event listeners to control drawer width or position. Always use CSS Media Queries and `:has()` selectors driven by the toggle state.
+- **Persisting State in DS Component:** The presentation component should not directly read/write `localStorage`.
+- **Using deprecated tokens:** `var(--cyan-*)` and `var(--color-*)` are deprecated. Use only `var(--cn-*)` tokens.
+- **Book Persistence:** Demos toggle state in-page; they must not touch `localStorage` or app-level orchestration stores.
+- **Hardcoding values:** Demos must use `var(--cn-*)` tokens, no hardcoded z-index or sizing values.
 
 ## Contract
 
 ### Definition of Done
-
-- [ ] Tray renders as a fixed sidebar container with slotted content
-- [ ] Tray button is fixed to the top-left corner, always visible
-- [ ] Toggle button is keyboard accessible (focusable, Enter/Space to activate)
-- [ ] Focus ring visible on keyboard focus
-- [ ] Mobile: tray is 95cqw, slides from the left, overlays content
-- [ ] `aria-expanded` on the tray reflects the current state
-- [ ] Renders expanded or collapsed based on `expanded` prop
-- [ ] Does not manage persistence — that is the consuming app's responsibility
-- [ ] Tray button is demoable standalone in docs (visual states only)
+- [ ] `Tray.astro` implements the 3 adaptive modes (hidden vs rail, modal vs push) purely with CSS.
+- [ ] Scrim is properly toggled for Mobile and Medium modes, hidden on Large.
+- [ ] `TrayButton`, `TrayLinkGroup`, and `TrayLink` components exist and allow nesting sub-menus.
+- [ ] Keyboard accessibility: `Escape` closes the tray, `Tab` is trapped when acting as a modal overlay (Mobile/Medium).
+- [ ] Book page exists at `app/cyan-ds/src/pages/components/tray.mdx` using Book layout.
+- [ ] Tray and sub-menu components are demoed in isolation and together on the book page.
+- [ ] Props tables for Tray, TrayButton, TrayLinkGroup, TrayLink exist in the book.
 
 ### Regression Guardrails
+- CSS `:has()` for the checked toggle must remain structurally coupled without breaking standard rendering.
+- Expanded drawer on Large viewport must not visually obscure the main content area (must push content).
+- Demos must not read or write localStorage and all demo styling must use `var()` token references.
 
-- `aria-expanded` must always reflect the `expanded` prop
-- Animation must not cause layout shift outside the tray
-- The tray must never read or write localStorage or any persistence mechanism
+### Testing Scenarios
+All features with behavioral contracts must have corresponding automated tests mapped to their Gherkin scenarios.
 
-### Scenarios
-
+#### Scenario: Mobile Modal Toggling
 ```gherkin
-Scenario: Default render
-  Given a tray is placed in the DOM
-  When the component mounts
-  Then the tray is collapsed
-  And the toggle button displays a hamburger icon
-
-Scenario: Toggle open
-  Given the tray is collapsed
-  When the user clicks the toggle button
-  Then the tray expands
-  And the button icon animates to an X
-  And aria-expanded becomes "true"
-
-Scenario: Toggle closed
-  Given the tray is expanded
-  When the user clicks the toggle button
-  Then the tray collapses
-  And the button icon animates to a hamburger
-  And aria-expanded becomes "false"
-
-Scenario: App controls expanded state
-  Given the app passes expanded=true
-  When the tray renders
-  Then the tray is expanded
-  And aria-expanded is "true"
-
-Scenario: App collapses tray
-  Given the app changes expanded from true to false
-  When the tray re-renders
-  Then the tray collapses with animation
-
-Scenario: Demo button standalone (docs only)
-  Given the tray button is rendered without a parent tray
-  When the user interacts with it
-  Then it toggles between hamburger and X visually
-  And it reflects aria-expanded state
+Given a mobile viewport
+When the tray toggle is activated
+Then the tray expands as a modal overlay
+And a clickable scrim is displayed
 ```
+- **Vitest Unit Test:** `packages/cyan/src/components/tray.test.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/tray-mobile.spec.ts`
+
+#### Scenario: Medium Rail to Modal
+```gherkin
+Given a medium viewport
+When the tray is initially rendered
+Then it displays as an icon rail
+When the toggle is activated
+Then it expands into a modal overlay with a scrim
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/tray.test.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/tray-tablet.spec.ts`
+
+#### Scenario: Large Rail to Push Drawer
+```gherkin
+Given a large viewport
+When the toggle is activated
+Then it expands into a push drawer, widening its inline size
+And no scrim is rendered or visible
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/tray.test.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/tray-desktop.spec.ts`
+
+#### Scenario: Sub-menu Rendering
+```gherkin
+Given a Tray with a TrayButton and TrayLinkGroup
+When the tray is collapsed
+Then only the primary TrayButton icon is visible
+When the tray is expanded
+Then both the primary label and the TrayLink items become visible
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/tray-navigation.test.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/tray-navigation.spec.ts`

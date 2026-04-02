@@ -11,6 +11,11 @@
 - **API Contracts:** [Endpoints, events, public interfaces]
 - **Dependencies:** [What this depends on / what depends on this]
 
+### Book Page
+[Provide details about the component's book/story-nook page if it belongs to the Design System]
+- **Target path:** [e.g. `app/cyan-ds/src/pages/components/...`]
+- **Structure:** [Outline the standalone demos, inline layout demos, and prop tables]
+
 ### Anti-Patterns
 - [What agents must avoid when working on this feature, with rationale]
 
