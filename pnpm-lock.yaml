@@ -74,6 +74,12 @@ importers:
         specifier: ^3.1.0
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)
 
+  packages/cyan:
+    devDependencies:
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)
+
 packages:
 
   '@astrojs/compiler@2.13.1':

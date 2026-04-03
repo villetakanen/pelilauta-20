@@ -24,7 +24,7 @@ const { icon, label, href, active = false } = Astro.props;
     inline-size: 100%;
     min-block-size: calc(var(--cn-grid) * 6);
     padding: var(--cn-grid);
-    color: var(--color-link);
+    color: var(--cn-link);
     text-decoration: none;
     border-radius: var(--cn-border-radius-small);
     transition: background-color 0.2s, color 0.2s;
@@ -32,18 +32,18 @@ const { icon, label, href, active = false } = Astro.props;
 
   .cn-tray-button:hover,
   .cn-tray-button:focus {
-    background-color: var(--color-hover);
+    background-color: var(--cn-hover);
     outline: none;
   }
 
   .cn-tray-button:focus-visible {
-    box-shadow: 0 0 0 2px var(--color-link);
+    box-shadow: 0 0 0 2px var(--cn-link);
     outline-offset: 2px;
   }
 
   .cn-tray-button.active {
-    color: var(--color-text);
-    background-color: var(--color-hover);
+    color: var(--cn-text);
+    background-color: var(--cn-hover);
   }
 
   .cn-tray-button__icon {

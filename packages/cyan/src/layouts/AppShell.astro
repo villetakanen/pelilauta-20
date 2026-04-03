@@ -46,6 +46,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
 
 <style is:global>
   @import "@cyan/tokens/index.css";
+  @import "../utilities/index.css";
   @import "@cyan/fonts/fonts.css";
 
   *,
@@ -60,8 +61,8 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
     font-family: var(--cn-font-family, sans-serif);
     font-size: var(--cn-font-size-text, 16px);
     line-height: var(--cn-line-height-text, 1.5);
-    color: var(--color-text);
-    background-color: var(--color-background);
+    color: var(--cn-text);
+    background-color: var(--cn-background);
     
     /* Setup fundamental layout canvas (View/Modal/Editor mode) */
     display: grid;
@@ -136,16 +137,14 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
 
   /* --- Layout: Modal --- */
   .layout-modal {
-    background-color: var(--color-surface-4);
+    background-color: var(--cn-surface-4);
   }
   .layout-modal .cn-app-main {
-    background-color: var(--color-background);
+    background-color: var(--cn-background);
     max-width: 42rem;
     width: 100%;
     margin-inline: auto;
     min-height: calc(100dvh - var(--cn-app-bar-height, 4rem));
-    border-inline: 1px solid var(--color-border);
-    box-shadow: 0 0 2rem var(--color-shadow);
     padding: var(--cn-gap, 1rem);
   }
 

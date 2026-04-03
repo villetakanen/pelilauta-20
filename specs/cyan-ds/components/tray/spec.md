@@ -23,6 +23,12 @@ The tray is the primary navigation sidebar for the application. It adapts to dif
 - **Dependencies:**
   - Consumes `--cn-*` tokens for widths (tray and rail), spacing, and typography.
   - `--cn-z-*` tokens for tray surface and scrim layers.
+- **Visual Invariants:** Rail and Tray surfaces must NOT have visible borders (no `border-right`, etc.). Separation is achieved strictly through elevation or surface color changes.
+
+### Elevation
+- **Default (Rail / Push Drawer):** Elevation 0.
+- **Mobile Opened (Modal drawer):** Elevation 4.
+- **Tablet Opened (Modal drawer):** Elevation 4.
 
 ### Layout & Responsive Modes
 The Tray layout scales across three distinct modes:
@@ -66,6 +72,7 @@ A living book page is required to demo these components.
 ## Contract
 
 ### Definition of Done
+- [ ] No borders are used on the tray or rail surfaces.
 - [ ] `Tray.astro` implements the 3 adaptive modes (hidden vs rail, modal vs push) purely with CSS.
 - [ ] Scrim is properly toggled for Mobile and Medium modes, hidden on Large.
 - [ ] `TrayButton`, `TrayLinkGroup`, and `TrayLink` components exist and allow nesting sub-menus.

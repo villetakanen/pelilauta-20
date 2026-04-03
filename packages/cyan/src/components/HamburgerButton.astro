@@ -37,12 +37,12 @@ const { id = "cn-tray-toggle" } = Astro.props;
 
   .cn-hamburger-btn:hover,
   .cn-hamburger-btn:focus {
-    background-color: var(--color-hover);
+    background-color: var(--cn-hover);
     outline: none;
   }
 
   .cn-hamburger-btn:focus-visible {
-    box-shadow: 0 0 0 2px var(--color-link);
+    box-shadow: 0 0 0 2px var(--cn-link);
     outline-offset: 2px;
   }
 
@@ -52,7 +52,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
     display: block;
     inline-size: 1.5rem;
     block-size: 2px;
-    background-color: var(--color-text);
+    background-color: var(--cn-text);
     border-radius: 1px;
     transition: transform 0.2s, opacity 0.2s;
     content: "";

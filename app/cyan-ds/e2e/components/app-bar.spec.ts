@@ -39,6 +39,28 @@ test.describe("AppBar", () => {
 
     const scrolledShadow = await stickyBar.evaluate((el) => window.getComputedStyle(el).boxShadow);
     expect(scrolledShadow).not.toBe(initialShadow);
+    expect(scrolledShadow).not.toBe("none");
+  });
+
+  test("AppBar modal has Elevation 2 and NO borders", async ({ page }) => {
+    const modalBar = page.locator(".cn-app-bar.modal");
+    const style = await modalBar.evaluate((el) => {
+      const s = window.getComputedStyle(el);
+      return {
+        boxShadow: s.boxShadow,
+        borderBottom: s.borderBottom,
+        borderLeft: s.borderLeft,
+        borderRight: s.borderRight,
+      };
+    });
+
+    // Level 2 shadow
+    expect(style.boxShadow).not.toBe("none");
+    // Level 2 shadow should NOT be as deep as level 4 (heuristic)
+    // We can't easily check token names in computedStyle, but we confirm any border is gone.
+    expect(style.borderBottom).toContain("none");
+    expect(style.borderLeft).toContain("none");
+    expect(style.borderRight).toContain("none");
   });
 
   test("Renders modal back button with correct href", async ({ page }) => {

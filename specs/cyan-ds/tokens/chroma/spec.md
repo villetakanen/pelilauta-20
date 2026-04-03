@@ -26,21 +26,11 @@ The hue rotation must follow a **perceptual curve** (not linear interpolation). 
 
 **Hue range:** 185° (step 0/darkest) → 65° (step 100/lightest)
 
-#### Secondary Palette (13 steps: MD3 tonal scale)
-
-Derived via `color-mix()` between two anchor points:
-- **Anchor dark:** `--chroma-secondary-99` (`#232b2b` — near-black green)
-- **Anchor light:** `--chroma-secondary-20` (`#d0f0c0` — tea green)
-
-Steps are blended between the anchors. The v20 implementation must use a **consistent, evenly-spaced progression** — the upstream mix percentages drifted over time and are non-uniform.
-
-Upstream step 10 blended the light anchor with `--chroma-K-S` at 50% — in v20, step 10 follows the same even-spacing pattern as all other steps.
-
 #### Surface Palette (13 steps: MD3 tonal scale)
 
 Tonal range blending between two inline anchor values:
-- **Lightest (step 100):** `hsl(204, 78%, 97%)` — near-white, cool blue tint
-- **Darkest (step 0):** `hsl(204, 100%, 11%)` — near-black, deep blue
+- **Lightest (step 100):** `hsl(204, 100%, 100%)` — Absolute White
+- **Darkest (step 0):** `hsl(204, 100%, 0%)` — Absolute Black
 
 All intermediate steps derive from `color-mix()` between these two endpoints. No `black` mixing. The upstream K-S/S-K tokens are dropped in v20 — they were semantic roles disguised as palette primitives. The numbered steps (`--chroma-surface-0` through `--chroma-surface-100`) are the only public API.
 
@@ -64,9 +54,7 @@ Steps are added as needed by the semantic layer and components. For example, if 
 - **Accent palettes replace flat semantic colors:** Upstream `--chroma-info`, `--chroma-warning`, `--chroma-error` were single tokens. v20 replaces them with stepped palettes (`--chroma-error-40`, `--chroma-love-40`, etc.) so tints and variants derive from the same hue at different brightness levels. The [semantic layer](../semantic/spec.md) maps these to functional roles.
 - **`--color-reaction-red` becomes `--chroma-love-*`:** The upstream hardcoded hex moves into chroma as a proper tonal scale.
 - **Drop K-S / S-K anchor tokens:** The upstream `--chroma-K-S` and `--chroma-S-K` were semantic roles disguised as palette primitives. In v20, the HSL values are inlined directly in the surface palette derivation. The numbered steps (`--chroma-surface-0` through `--chroma-surface-100`) are the only public API.
-- **Align to MD3 13-step scale:** Upstream has 11 steps (10–99). Add steps 0 and 100
-- **Fix secondary palette spacing:** Replace drifted mix percentages with an even progression
-- **Fix surface palette deep darks:** Replace `black` mixing at steps 95/99 with endpoint blend
+- **Fix surface palette deep darks:** Use absolute black (0%) and white (100%) anchors for 0-100 numbering consistency.
 - `color-mix()` requires modern browser support (baseline 2023) — acceptable for v20 targets
 
 ### Anti-Patterns
@@ -81,8 +69,7 @@ Steps are added as needed by the semantic layer and components. For example, if 
 ### Definition of Done
 
 - [ ] Primary palette covers all 13 MD3 tonal steps with perceptual hue curve from teal to yellow
-- [ ] Secondary palette derives from two anchors via `color-mix()` with even spacing
-- [ ] Surface palette derives entirely from endpoint values via `color-mix()` (no `black` mixing)
+- [ ] Surface palette derives entirely from endpoint values via `color-mix()` (0% Black / 100% White)
 - [ ] Accent palettes (error, warning, info, love) use step numbering for brightness
 - [ ] No `-hsl` companion tokens
 - [ ] No flat single-value semantic tokens — all colors are stepped

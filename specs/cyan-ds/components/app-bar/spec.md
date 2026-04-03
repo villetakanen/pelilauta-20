@@ -5,6 +5,10 @@
 ### Context
 The App Bar is a structural component that provides top-level navigation, context (noun icon), titles, and actions. It supports various layout modes (e.g., sticky and modal) and includes responsive title rendering for different viewport sizes.
 
+### Elevation
+- **Default:** Elevation 0.
+- **Modal Mode:** Elevation 2.
+
 ### Architecture
 - **Components:** `packages/cyan/src/components/app-bar/AppBar.astro` (Strictly Astro. Scroll animations must be handled via CSS `animation-timeline` or similar modern CSS features to avoid JS overhead).
 - **Data Models:** `AppBarProps` interface including `title`, `shortTitle`, `noun`, `mode`, and `backHref`.
@@ -13,7 +17,18 @@ The App Bar is a structural component that provides top-level navigation, contex
   - **Slots:** Default slot for trailing actions.
 - **Dependencies:** 
   - `Icon` component (`cn-icon`).
-  - Cyan DS tokens: `--cn-app-bar-*`, `--cn-font-*`, `--cn-color-*`, `--cn-grid`.
+  - Cyan DS tokens: `--cn-app-bar-*`, `--cn-font-*`, `--cn-color-*`, `--cn-grid`, plus semantic elevation tokens.
+
+### Book Page
+A living book page is required to demo this component.
+- **Target path:** `app/cyan-ds/src/pages/components/app-bar.mdx`
+- **Format:** MDX using Book layout (`app/cyan-ds/src/layouts/Book.astro`)
+- **Structure:**
+  1. **Overview** — What the app-bar is, its responsive title truncation, and modes.
+  2. **Default App Bar Demo** — Standard app bar with title and actions.
+  3. **Sticky Scroll Demo** — Embedded scrollable container to demonstrate sticky elevation CSS changes.
+  4. **Modal Mode Demo** — Showing the modal mode with a back button.
+  5. **Props table** — Documents props for `AppBar`.
 
 ### Anti-Patterns
 - **Raw Global Event Listeners:** The original codebase bound `window.addEventListener('scroll')` per component instance using standard `setTimeout` throttling. In v20, this should ideally be solved via passive listeners, `IntersectionObserver`, or CSS `animation-timeline`.

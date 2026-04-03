@@ -53,7 +53,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
     height: 100dvh;
     width: var(--cn-width-tray, 21rem);
     max-width: 100vw;
-    background: var(--color-elevation-1, #ffffff);
+    background: var(--cn-surface-1);
     transform: translateX(-100%);
     transition: transform 0.15s ease-in, width 0.15s ease-in;
     border-right: none;
@@ -80,7 +80,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
     position: fixed;
     inset: 0;
     z-index: var(--cn-tray-z-index-scrim);
-    background: var(--color-shadow, rgba(0,0,0,0.5));
+    background: rgba(0,0,0,0.5); /* Scrim color remains static or can use a separate token */
     opacity: 0;
     transition: opacity 0.15s ease-in;
     cursor: pointer;
@@ -91,7 +91,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
   .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
     transform: translateX(0);
     transition-timing-function: ease-out;
-    box-shadow: 0 0 var(--cn-line) var(--color-shadow);
+    box-shadow: var(--cn-shadow-elevation-4);
   }
 
   .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
@@ -111,7 +111,6 @@ const { id = "cn-tray-toggle" } = Astro.props;
       transform: translateX(0);
       width: var(--cn-width-rail);
       flex-shrink: 0;
-      border-right: 1px solid var(--color-border);
       z-index: calc(var(--cn-tray-z-index-surface) + 1);
     }
 
@@ -124,7 +123,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
       position: absolute;
       width: var(--cn-width-tray);
       height: 100vh;
-      box-shadow: 4px 0 10px var(--color-shadow);
+      box-shadow: var(--cn-shadow-elevation-4);
     }
   }
 

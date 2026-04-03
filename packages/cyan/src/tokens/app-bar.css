@@ -5,10 +5,10 @@
   --cn-app-bar-padding-horizontal: var(--cn-gap);
 
   /* Colors */
-  --cn-app-bar-background: var(--color-surface);
-  --cn-app-bar-background-sticky: var(--color-surface-1);
-  --cn-app-bar-color: var(--color-on-surface);
-  --cn-app-bar-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --cn-app-bar-background: var(--cn-surface);
+  --cn-app-bar-background-sticky: var(--cn-surface-2);
+  --cn-app-bar-color: var(--cn-on-surface);
+  --cn-app-bar-shadow: var(--cn-shadow-elevation-2);
 
   /* Border radius (for specific layout variants if needed) */
   --cn-app-bar-border-radius: 0;
