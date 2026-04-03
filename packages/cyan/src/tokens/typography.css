@@ -1,20 +1,20 @@
 :root {
-  --cyan-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --cyan-font-family-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+  --cn-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --cn-font-family-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
 
-  --cyan-font-size-xs: 0.75rem;
-  --cyan-font-size-sm: 0.875rem;
-  --cyan-font-size-md: 1rem;
-  --cyan-font-size-lg: 1.25rem;
-  --cyan-font-size-xl: 1.5rem;
-  --cyan-font-size-2xl: 2rem;
-  --cyan-font-size-3xl: 2.5rem;
+  --cn-font-size-xs: 0.75rem;
+  --cn-font-size-sm: 0.875rem;
+  --cn-font-size-md: 1rem;
+  --cn-font-size-lg: 1.25rem;
+  --cn-font-size-xl: 1.5rem;
+  --cn-font-size-2xl: 2rem;
+  --cn-font-size-3xl: 2.5rem;
 
-  --cyan-line-height-tight: 1.25;
-  --cyan-line-height-normal: 1.5;
-  --cyan-line-height-relaxed: 1.75;
+  --cn-line-height-tight: 1.25;
+  --cn-line-height-normal: 1.5;
+  --cn-line-height-relaxed: 1.75;
 
-  --cyan-font-weight-normal: 400;
-  --cyan-font-weight-medium: 500;
-  --cyan-font-weight-bold: 700;
+  --cn-font-weight-normal: 400;
+  --cn-font-weight-medium: 500;
+  --cn-font-weight-bold: 700;
 }

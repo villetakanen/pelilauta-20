@@ -135,6 +135,7 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 - Changing a chroma palette step must cascade correctly through all semantic tokens that reference it
 - Light and dark theme must both produce readable contrast (WCAG AA minimum for text tokens)
 - `--color-on-*` tokens must always contrast against their corresponding `--color-*` surface
+- **Elevation 4 Contrast Rule (Dark Mode):** When the background is Elevation 4 (Step 40), typography MUST use Step 100 (White) to maintain the 4.5:1 AA contrast ratio. Step 99 and below are forbidden on Elevation 4 due to insufficient contrast.
 
 ### Scenarios
 

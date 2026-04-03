@@ -2,10 +2,10 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--cyan-font-family); /* Should migrate to --cn tokens when available */
-  font-size: var(--cyan-font-size-sm);
-  font-weight: var(--cyan-font-weight-medium);
-  line-height: var(--cyan-line-height-normal);
+  font-family: var(--cn-font-family);
+  font-size: var(--cn-font-size-sm);
+  font-weight: var(--cn-font-weight-medium);
+  line-height: var(--cn-line-height-normal);
   padding: var(--cyan-space-sm) var(--cyan-space-md);
   border-radius: var(--cyan-radius-md);
   border: 1px solid transparent;

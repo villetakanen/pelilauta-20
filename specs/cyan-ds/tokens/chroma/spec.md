@@ -1,6 +1,4 @@
-# Feature: Cyan Chroma (Color Tokens)
-
-> Reversed from: https://github.com/villetakanen/cyan-design-system-4/blob/main/packages/cyan-css/src/tokens/chroma.css
+# Feature: Chromatic color palettes
 
 Parent: [Cyan DS Tokens](../spec.md)
 
@@ -8,54 +6,68 @@ Parent: [Cyan DS Tokens](../spec.md)
 
 ### Context
 
-Chroma defines the tonal color palettes for the Cyan design system, following Material Design 3 conventions. It provides primary, secondary, and surface palettes using modern `color-mix()` for derived values. Chroma is purely about tonal scales — semantic colors (info, warning, error) belong in a separate token file.
+Chroma defines the tonal color palettes for the Cyan design system, following Material Design 3 conventions. It provides primary (brand identity) and surface (elevation baseline) palettes using modern `color-mix()` for derived values.
 
-### Architecture
+### Tonal Scale Ruleset (MD3)
 
-- **Source:** `packages/cyan-css/src/tokens/chroma.css` (upstream: cyan-design-system-4)
-- **Format:** CSS custom properties on `:root`
-- **Namespace:** `--chroma-*`
+All palettes in Cyan must follow the standard 13-point tonal scale. The step numbering indicates the **perceived lightness** and determines **accessible contrast pairs**.
 
-#### Primary Palette (13 steps: MD3 tonal scale)
+| Step | Lightness (%) | Perception | Contrast Mapping |
+| :--- | :--- | :--- | :--- |
+| **0** | **0%** | **Absolute Black** | Foundation for "darker than dark" sunken states |
+| **10** | **~10%** | Deepest Shadow | **Cyan Baseline** (Body, Background, Elevation 0) |
+| **20-30** | 20-30% | Dark Tones | Used for Surface levels 1-2 |
+| **40** | **~40%** | Mid Dark | **WCAG AA (4.5:1)** minimum against White (100) |
+| **50** | 50% | Midpoint | Neutral contrast balance |
+| **60** | **~60%** | Mid Light | **WCAG AA (4.5:1)** minimum against Black (0) |
+| **70-90** | 70-90% | Light Tones | High-light surfaces and secondary backgrounds |
+| **95-99** | 95-99% | Near White | Subtle page tints and highlights |
+| **100** | **100%** | **Absolute White** | Full brightness anchor |
 
-MD3 tonal steps: 0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100.
+#### Primary Palette (13 steps)
 
-The primary palette is unique to Cyan — it rotates hue from teal (185°) to yellow (65°) across the tonal range, unlike standard MD3 single-hue palettes. This is a deliberate Cyan identity choice.
+The primary palette is the brand identity core of Cyan. Unlike standard MD3 single-hue palettes, it rotates hue from **Teal (185°)** to **Yellow (65°)** across the tonal range.
 
-The hue rotation must follow a **perceptual curve** (not linear interpolation). The upstream implementation uses hand-tuned per-step HSL values that approximate a perceptual curve — v20 should derive these from a proper formula.
+- **Step 0 (Teal):** Deep branding anchor
+- **Step 100 (Yellow):** Bright branding anchor
+- **Curve:** Hue rotation must follow a **perceptual curve** (non-linear) to maintain consistent chroma across all steps.
 
-**Hue range:** 185° (step 0/darkest) → 65° (step 100/lightest)
+#### Surface Palette (13 steps)
 
-#### Surface Palette (13 steps: MD3 tonal scale)
+The surface palette provides the architectural depth for the system. It is **parameterized** using internal variables for rapid iteration:
+- `--_surface-hue`: 204deg (Navy)
+- `--_surface-saturation`: 20% (Slate)
 
-Tonal range blending between two inline anchor values:
-- **Lightest (step 100):** `hsl(204, 100%, 100%)` — Absolute White
-- **Darkest (step 0):** `hsl(204, 100%, 0%)` — Absolute Black
+Every tonal step is explicitly declared to ensure deterministic contrast and hand-tuned accuracy.
 
-All intermediate steps derive from `color-mix()` between these two endpoints. No `black` mixing. The upstream K-S/S-K tokens are dropped in v20 — they were semantic roles disguised as palette primitives. The numbered steps (`--chroma-surface-0` through `--chroma-surface-100`) are the only public API.
+| Token | HSL Definition | Lightness | Role |
+| :--- | :--- | :--- | :--- |
+| `--chroma-surface-0` | `hsl(204, 20%, 0%)` | 0% | **Absolute Black** |
+| `--chroma-surface-10` | `hsl(204, 20%, 10%)` | 10% | **Baseline** (Body/Ground) |
+| `--chroma-surface-20` | `hsl(204, 20%, 20%)` | 20% | Surface level 1 |
+| `--chroma-surface-30` | `hsl(204, 20%, 30%)` | 30% | Surface level 2 |
+| `--chroma-surface-40` | `hsl(204, 20%, 40%)` | 40% | Surface level 3 |
+| `--chroma-surface-50` | `hsl(204, 20%, 50%)` | 50% | Surface level 4 |
+| `--chroma-surface-60` | `hsl(204, 20%, 60%)` | 60% | Mid-light / Secondary |
+| `--chroma-surface-70` | `hsl(204, 20%, 70%)` | 70% | Light accent |
+| `--chroma-surface-80` | `hsl(204, 20%, 80%)` | 80% | High-light |
+| `--chroma-surface-90` | `hsl(204, 20%, 90%)` | 90% | Near white |
+| `--chroma-surface-95` | `hsl(204, 20%, 95%)` | 95% | Tint |
+| `--chroma-surface-99` | `hsl(204, 20%, 99%)` | 99% | Paper white |
+| `--chroma-surface-100` | `hsl(204, 20%, 100%)` | 100% | **Absolute White** |
 
 #### Accent Palettes (partial step coverage)
 
 Accent palettes define single-hue tonal scales for functional UI states. Unlike primary/secondary/surface, accents don't need all 13 steps — only the steps actually used. The step number indicates brightness on the MD3 tonal scale (0 = darkest, 100 = lightest).
 
-| Palette | Base hue | Upstream source |
-|---|---|---|
-| `--chroma-error-{step}` | Magenta `hsl(318, 83%, 40%)` | `--chroma-error` |
-| `--chroma-warning-{step}` | Yellow `hsl(65, 100%, 63%)` | `--chroma-warning` |
-| `--chroma-info-{step}` | Teal `hsl(170, 100%, 20%)` | `--chroma-info` |
-| `--chroma-love-{step}` | Red `#e03c31` | `--color-reaction-red` |
+| Palette | Base hue |
+|---|---|
+| `--chroma-error-{step}` | Magenta `hsl(318, 83%, 40%)` |
+| `--chroma-warning-{step}` | Yellow `hsl(65, 100%, 63%)` |
+| `--chroma-info-{step}` | Teal `hsl(170, 100%, 20%)` |
+| `--chroma-love-{step}` | Red `hsl(3, 74%, 54%)` |
 
 Steps are added as needed by the semantic layer and components. For example, if `--color-error` needs a step-40 and a tint at step-90, chroma provides `--chroma-error-40` and `--chroma-error-90`.
-
-### Migration Notes
-
-- **Namespace:** `--chroma-*` not `--cn-*` — decide whether to unify under `cn-` for v20 or keep chroma as a distinct namespace
-- **Drop `-hsl` companion tokens:** The upstream primary palette ships raw HSL companions (`--chroma-primary-XX-hsl`) for every step. These were a pre-`color-mix()` workaround for alpha transparency (e.g. `rgba(var(--h), var(--s), var(--l), 0.1)`). No longer needed — `color-mix(in hsl, color, transparent N%)` replaces them
-- **Accent palettes replace flat semantic colors:** Upstream `--chroma-info`, `--chroma-warning`, `--chroma-error` were single tokens. v20 replaces them with stepped palettes (`--chroma-error-40`, `--chroma-love-40`, etc.) so tints and variants derive from the same hue at different brightness levels. The [semantic layer](../semantic/spec.md) maps these to functional roles.
-- **`--color-reaction-red` becomes `--chroma-love-*`:** The upstream hardcoded hex moves into chroma as a proper tonal scale.
-- **Drop K-S / S-K anchor tokens:** The upstream `--chroma-K-S` and `--chroma-S-K` were semantic roles disguised as palette primitives. In v20, the HSL values are inlined directly in the surface palette derivation. The numbered steps (`--chroma-surface-0` through `--chroma-surface-100`) are the only public API.
-- **Fix surface palette deep darks:** Use absolute black (0%) and white (100%) anchors for 0-100 numbering consistency.
-- `color-mix()` requires modern browser support (baseline 2023) — acceptable for v20 targets
 
 ### Anti-Patterns
 
@@ -69,22 +81,22 @@ Steps are added as needed by the semantic layer and components. For example, if 
 ### Definition of Done
 
 - [ ] Primary palette covers all 13 MD3 tonal steps with perceptual hue curve from teal to yellow
-- [ ] Surface palette derives entirely from endpoint values via `color-mix()` (0% Black / 100% White)
+- [ ] Surface palette defines all 13 steps via explicit HSL (20% Saturation)
 - [ ] Accent palettes (error, warning, info, love) use step numbering for brightness
 - [ ] No `-hsl` companion tokens
 - [ ] No flat single-value semantic tokens — all colors are stepped
 
 ### Regression Guardrails
 
-- The surface palette endpoint values (`hsl(204, 78%, 97%)` and `hsl(204, 100%, 11%)`) must remain consistent across `--chroma-surface-0`, `--chroma-surface-100`, and all `color-mix()` derivations
-- Primary palette hue must progress monotonically from teal to yellow — no hue reversals between steps
+- Surface palette must maintain exactly 13 steps (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100).
+- Primary palette hue must progress monotonically from teal (185°) to yellow (65°) — no hue reversals between steps.
 
 ### Scenarios
 
 ```gherkin
-Scenario: Surface palette derives from endpoints
-  Given surface-0 and surface-100 define the dark and light anchors
-  When intermediate steps are computed via color-mix()
-  Then all steps blend only between the two endpoints
-  And no step uses an independent color value or mixes with black
+Scenario: Surface palette uses explicit HSL
+  Given the surface palette is parameterized with --_surface-hue and --_surface-saturation
+  When tonal steps (0-100) are explicitly defined using the shared variables
+  Then all steps maintain exact HSL deterministic accuracy
+  And no step relies on dynamic color-mix() or external anchor references
 ```

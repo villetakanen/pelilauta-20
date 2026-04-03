@@ -6,7 +6,7 @@ description: 'Tonal color palettes for the Cyan Design System.'
 
 ## Surface Anchors
 
-The surface palette spans from a near-black deep blue (`--chroma-surface-0`) to a near-white cool blue tint (`--chroma-surface-100`). All intermediate steps derive via `color-mix()`.
+The surface palette spans from a deep, atmospheric navy (`--chroma-surface-0`) to a bright cool-white tint (`--chroma-surface-100`). Unlike previous iterations, every step is now an **explicit HSL definition** for maximum precision.
 
 <div style="display: flex; gap: var(--cn-gap); padding: var(--cn-gap);">
   <div style="flex: 1; height: 4rem; background: var(--chroma-surface-0); border-radius: var(--cn-border-radius-small); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.875rem;">surface-0</div>
@@ -52,9 +52,7 @@ The primary palette rotates hue from **teal** (step 0) to **yellow** (step 100) 
 
 ## Surface Palette
 
-The surface palette blends entirely between `--chroma-surface-100` (light) and `--chroma-surface-0` (dark) via `color-mix()`. No step uses an independent color or mixes with black.
-
-The surface palette blends entirely between `--chroma-surface-100` (light) and `--chroma-surface-0` (dark) via `color-mix()`. No step uses an independent color or mixes with black.
+The surface palette is defined using a consistent **20% saturation** navy-hue (204°). Every tonal step is explicitly declared to ensure deterministic contrast and hand-tuned accuracy.
 
 | Token | Step |
 |-------|------|
@@ -93,4 +91,4 @@ The surface palette blends entirely between `--chroma-surface-100` (light) and `
 - **Primary** — brand identity, interactive elements (buttons, links, FABs). The teal→yellow hue shift is unique to Cyan.
 - **Surface** — backgrounds, cards, sheets, overlays. Use lower steps (0–30) for dark themes, higher steps (70–100) for light themes.
 
-All derived steps use `color-mix()` — see the [chroma token spec](/specs/cyan-ds/tokens/chroma/spec.md) for implementation details.
+All steps are explicitly defined as static HSL values — see the [chroma token spec](/specs/cyan-ds/tokens/chroma/spec.md) for the full definition table.
