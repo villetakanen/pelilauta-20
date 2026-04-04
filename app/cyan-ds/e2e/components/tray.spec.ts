@@ -5,7 +5,7 @@ test.describe("Tray and Rail Components", () => {
     await page.goto("/components/tray");
   });
 
-  test("Mobile View: Expanded drawer uses Elevation 4 and NO borders", async ({ page }) => {
+  test("Mobile View: Expanded drawer uses Elevation 3 and NO borders", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     const drawer = page.locator(".cn-drawer");

@@ -46,7 +46,7 @@ The Tray layout scales across three distinct modes:
    - **Expanded:** Push drawer (`position: relative`), which pushes the application's main content wrapper rather than overlaying it. No scrim displayed.
 
 - **Elevation:** 
-  - **Mobile (< 621px) Expanded:** Elevation 4 (using `var(--cn-shadow-elevation-4)`) to separate the drawer from the underlying content.
+  - **Mobile (< 621px) Expanded:** Elevation 3 (using `var(--cn-shadow-elevation-3)`) to separate the drawer from the underlying content.
   - **All other modes (Rail, Tablet/Desktop Expanded):** Elevation 0 (no shadow) to maintain a integrated, flat desktop aesthetic.
 
 ### Navigation Hierarchy
