@@ -15,9 +15,7 @@ test.describe("CnIcon", () => {
   });
 
   test("Renders the missing glyph for an unknown noun", async ({ page }) => {
-    // The page cannot easily inject an unknown noun dynamically,
-    // so we verify the Tier 3 gallery renders the 'missing' icon
-    const icon = page.locator('.cn-icon[data-noun="missing"]');
+    const icon = page.locator('.cn-icon[data-noun="missing"]').first();
     await expect(icon).toBeVisible();
     const svg = icon.locator("svg");
     await expect(svg).toBeVisible();

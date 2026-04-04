@@ -35,9 +35,9 @@ importers:
       '@astrojs/svelte':
         specifier: ^7.0.0
         version: 7.2.5(@types/node@25.5.0)(astro@5.18.1(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.1)(typescript@6.0.2))(jiti@2.6.1)(svelte@5.55.0)(typescript@6.0.2)
-      '@myrrys/proprietary-icons':
+      '@myrrys/proprietary':
         specifier: workspace:*
-        version: link:../../packages/myrrys-proprietary-icons
+        version: link:../../packages/myrrys-proprietary
       '@pelilauta/icons':
         specifier: workspace:*
         version: link:../../packages/pelilauta-icons
@@ -86,9 +86,9 @@ importers:
         specifier: ^3.0.0
         version: 3.0.0
     devDependencies:
-      '@myrrys/proprietary-icons':
+      '@myrrys/proprietary':
         specifier: workspace:*
-        version: link:../myrrys-proprietary-icons
+        version: link:../myrrys-proprietary
       '@pelilauta/icons':
         specifier: workspace:*
         version: link:../pelilauta-icons
@@ -96,7 +96,7 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)
 
-  packages/myrrys-proprietary-icons: {}
+  packages/myrrys-proprietary: {}
 
   packages/pelilauta-icons: {}
 

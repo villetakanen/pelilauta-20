@@ -1,0 +1,64 @@
+---
+import CnIcon from "@cyan/components/CnIcon.astro";
+import { FallbackIcons } from "@cyan/components/CnIconFallback";
+import { icons as managedIcons } from "@myrrys/proprietary";
+import { icons as communityIcons } from "@pelilauta/icons";
+
+interface Props {
+  tier?: 1 | 2 | 3;
+}
+
+const { tier } = Astro.props;
+
+const tiers = {
+  1: Object.keys(communityIcons).sort(),
+  2: Object.keys(managedIcons).sort(),
+  3: Object.keys(FallbackIcons).sort(),
+};
+
+const items = tier ? tiers[tier] : [...tiers[1], ...tiers[2], ...tiers[3]];
+---
+
+<div class="icon-gallery">
+  {items.map((noun) => (
+    <div class="icon-card" title={noun}>
+      <CnIcon noun={noun} size="large" />
+      <span class="noun">{noun}</span>
+    </div>
+  ))}
+</div>
+
+<style>
+  .icon-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--cn-color-surface-1, #f5f5f5);
+    border-radius: var(--cn-border-radius-medium, 8px);
+    margin: 1.5rem 0;
+  }
+  .icon-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: var(--cn-color-surface-2, #ffffff);
+    border-radius: var(--cn-border-radius-small, 4px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 1px solid var(--cn-color-border, #eee);
+  }
+  .icon-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--cn-shadow-medium);
+    border-color: var(--cn-color-primary);
+  }
+  .noun {
+    font-size: 0.7rem;
+    font-family: var(--cn-font-family-mono, monospace);
+    color: var(--cn-color-text-low-contrast, #666);
+    word-break: break-all;
+    text-align: center;
+  }
+</style>

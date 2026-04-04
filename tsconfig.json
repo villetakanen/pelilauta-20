@@ -17,7 +17,7 @@
     "paths": {
       "@cyan/*": ["./packages/cyan/src/*"],
       "@pelilauta/icons": ["./packages/pelilauta-icons/src/index.ts"],
-      "@myrrys/proprietary-icons": ["./packages/myrrys-proprietary-icons/src/index.ts"]
+      "@myrrys/proprietary": ["../../packages/myrrys-proprietary/index.ts"]
     }
   },
   "exclude": ["node_modules", "dist"]

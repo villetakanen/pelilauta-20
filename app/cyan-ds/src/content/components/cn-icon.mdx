@@ -5,13 +5,14 @@ order: 2
 status: stable
 ---
 import CnIcon from "@cyan/components/CnIcon.astro";
+import IconGallery from "../../components/IconGallery.astro";
 
 
 The `CnIcon` component is the high-fidelity, source-code-first icon primitive for the Cyan Design System. It resolves icons across three tiers of registries and inlines them via SSR.
 
 ## Sizing Matrix
 
-<div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; background: var(--color-surface-1); padding: 2rem; border-radius: var(--cn-border-radius-medium);">
+<div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; background: var(--cn-color-surface-1); padding: 2rem; border-radius: var(--cn-border-radius-medium);">
   <div style="text-align: center;">
     <CnIcon noun="fox" size="xsmall" />
     <div style="font-size: 0.75rem; margin-top: 0.5rem;">xsmall</div>
@@ -38,7 +39,7 @@ The `CnIcon` component is the high-fidelity, source-code-first icon primitive fo
 
 When a noun is not found in any registry, the component renders the mandatory **missing glyph**.
 
-<div style="display: flex; gap: 2rem; padding: 2rem; background: var(--color-surface-3); border-radius: var(--cn-border-radius-medium);">
+<div style="display: flex; gap: 2rem; padding: 2rem; background: var(--cn-color-surface-3); border-radius: var(--cn-border-radius-medium);">
   <div style="text-align: center;">
     <CnIcon noun="missing" size="large" />
     <div style="font-size: 0.75rem;">Unknown Noun</div>
@@ -49,17 +50,16 @@ When a noun is not found in any registry, the component renders the mandatory **
 
 These icons are available by default across all Cyan-powered apps.
 
-<div style="display: flex; gap: 2rem; padding: 2rem; background: var(--color-surface-2); border-radius: var(--cn-border-radius-medium); flex-wrap: wrap;">
-  <div style="text-align: center;">
-    <CnIcon noun="add" size="large" />
-    <div style="font-size: 0.75rem;">add</div>
-  </div>
-  <div style="text-align: center;">
-    <CnIcon noun="mekanismi" size="large" />
-    <div style="font-size: 0.75rem;">mekanismi</div>
-  </div>
-  <div style="text-align: center;">
-    <CnIcon noun="fox" size="large" />
-    <div style="font-size: 0.75rem;">fox</div>
-  </div>
-</div>
+<IconGallery tier={1} />
+
+## Managed Proprietary Registry (Tier 2)
+
+Branded, licensed, or proprietary icons available selectively.
+
+<IconGallery tier={2} />
+
+## Core Fallback Registry (Tier 3)
+
+Hardcoded SVGs for essential UI components (guaranteed availability).
+
+<IconGallery tier={3} />

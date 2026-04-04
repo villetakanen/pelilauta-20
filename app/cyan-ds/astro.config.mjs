@@ -13,9 +13,9 @@ export default defineConfig({
           import.meta.dirname,
           "../../packages/pelilauta-icons/src/index.ts",
         ),
-        "@myrrys/proprietary-icons": path.resolve(
+        "@myrrys/proprietary": path.resolve(
           import.meta.dirname,
-          "../../packages/myrrys-proprietary-icons/src/index.ts",
+          "../../packages/myrrys-proprietary/index.ts",
         ),
       },
     },

@@ -40,7 +40,7 @@ describe("CnIcon Resolution Order (T1 → T2 → T3)", () => {
   });
 
   it("Tier 2 registry is defined and ready for additions", async () => {
-    const { icons } = await import("@myrrys/proprietary-icons");
+    const { icons } = await import("@myrrys/proprietary");
     // Empty by design at bootstrap — but must be a valid object
     expect(typeof icons).toBe("object");
     expect(icons).not.toBeNull();

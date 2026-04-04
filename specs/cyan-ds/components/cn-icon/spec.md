@@ -8,7 +8,7 @@ Standardizes icon delivery across the RPG community platform. Replaces static as
 ### Architecture (3-Tier Resolution)
 - **Component:** `packages/cyan/src/components/CnIcon.astro` (SSR-only primitive)
 - **Tier 1 (Community MIT):** `packages/pelilauta-icons/` (Local workspace package. Icons are stored as **raw .svg files** and registered in a TypeScript manifest).
-- **Tier 2 (Managed Non-MIT):** `@myrrys/proprietary-icons` (External subrepo. Icons are stored as **raw .svg files** for proprietary and fair-use assets).
+- **Tier 2 (Managed Non-MIT):** `@myrrys/proprietary` (External subrepo. Icons are stored as **raw .svg files** for proprietary and fair-use assets).
 - **Tier 3 (Essential Fallback):** `packages/cyan/src/components/CnIconFallback.ts` (Essential, MIT-licensed path data defined directly in TypeScript).
 - **Dependencies:** Uses `--cn-icon-size-*` tokens from the design system for standardized scaling.
 
@@ -33,7 +33,7 @@ Unlike the asset-based model of v4, v20 treats icons as **source code fragments*
 ## Contract
 
 ### Definition of Done
-- [ ] `CnIcon` resolution order: Tier 1 (`@pelilauta/icons`) -> Tier 2 (`@myrrys/proprietary-icons`) -> Tier 3 (`CnIconFallback.ts`).
+- [ ] `CnIcon` resolution order: Tier 1 (`@pelilauta/icons`) -> Tier 2 (`@myrrys/proprietary`) -> Tier 3 (`CnIconFallback.ts`).
 - [ ] If no fallback exists, it renders a "missing" glyph (e.g., a square with a diagonal line).
 - [ ] Renders monochromatic vs branded outputs **automatically** based on the resolved icon data format.
 - [ ] Correctly applies `light-dark()` variables for branded icons as defined in the source registry.
@@ -78,7 +78,7 @@ A living book page is required to demo this component, following the principles 
 4. **Thematic Branding** — Side-by-side comparison of the `mekanismi` icon in Light and Dark modes to demonstrate automatic color-shifting.
 5. **Tiered Icon Galleries** — Three automated sections listing all available nouns for each registry:
    - **Community MIT (Tier 1)** — Icons from `@pelilauta/icons`.
-   - **Managed Assets (Tier 2)** — Proprietary and fair-use icons from `@myrrys/proprietary-icons`.
+   - **Managed Assets (Tier 2)** — Proprietary and fair-use icons from `@myrrys/proprietary`.
    - **Core Fallbacks (Tier 3)** — Essential symbols defined in `CnIconFallback.ts`.
 
 ### Technical Details (ViewBox & Scale)
@@ -89,7 +89,7 @@ A living book page is required to demo this component, following the principles 
 
 `CnIcon.astro` uses Astro's `set:html` to inline raw SVG content into the DOM, which bypasses Astro's built-in HTML escaping. This is an **intentional and accepted architectural trade-off** under the following constraints:
 
-1. **Source must be repo-internal:** SVG content may only come from workspace packages (`@pelilauta/icons`, `@myrrys/proprietary-icons`) or the hardcoded `CnIconFallback.ts`. User-supplied or externally-fetched SVGs must **never** be passed through this path.
+1. **Source must be repo-internal:** SVG content may only come from workspace packages (`@pelilauta/icons`, `@myrrys/proprietary`) or the hardcoded `CnIconFallback.ts`. User-supplied or externally-fetched SVGs must **never** be passed through this path.
 2. **No runtime path injection:** The `noun` prop maps to a compile-time-constant registry key. There is no mechanism for a caller to supply an arbitrary file path.
 3. **Trust model:** A compromised SVG file carries the same threat as a compromised `.astro` component — both require supply-chain access to the repository. This is an acceptable shared trust boundary for a closed design system.
 
