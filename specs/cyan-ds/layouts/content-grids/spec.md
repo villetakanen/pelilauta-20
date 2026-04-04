@@ -10,9 +10,18 @@ Standardize structural content layout within the `<main>` area using semantic HT
 - **Tokens:** `packages/cyan/src/tokens/units.css`
 - **Semantics:** Global rules targeting `main > section` and `main > article`.
 
+### Book Page
+- **Target path:** `app/cyan-ds/src/content/principles/content-grids.mdx`
+- **Category:** Foundational Principle
+- **Structure:** 
+  - **Standard Grid Demo:** Visualized with translucent overlays showing the 67ch center vs gutters.
+  - **Full Width Demo:** Comparison of standard text vs `.cn-grid-full` images/banners.
+  - **Vertical Rhythm Guide:** Visualizing the `2 * --cn-gap` spacing between sections.
+
 ### Anti-Patterns
 - **No Wrapper Components:** Do not create a `ContentGrid.astro` component; use global CSS selectors to keep the HTML semantic and clean.
 - **No Fixed Widths:** Never use fixed pixel widths. Use `ch` for readability or `rem`-based grid units for density.
+- **No Nested Grids:** For now, the system does not support or define rules for Content Grids nested within other Content Grids. Elements inside a grid should utilize their own internal flex/grid logic.
 
 ## Contract
 
@@ -21,6 +30,8 @@ Standardize structural content layout within the `<main>` area using semantic HT
 - [ ] `main > section` and `main > article` implement the 3-column "Holy Grail" grid.
 - [ ] Central column calculates `min(67ch, 100%)` for content readability on desktop.
 - [ ] Mobile/Narrow views enforce 16px (`--cn-gap`) gutters.
+- [ ] Direct siblings (`section + section`, `article + section`, etc.) are separated by `2 * --cn-gap`.
+- [ ] Support for **`.cn-grid-full`** class to break out of the center and span all three columns.
 
 ### Testing Scenarios
 
