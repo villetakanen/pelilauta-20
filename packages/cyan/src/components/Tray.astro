@@ -115,10 +115,6 @@ const { id = "cn-tray-toggle" } = Astro.props;
     }
 
     /* Tablet Expansion - Overlay Modal from Rail */
-    .cn-tray:has(.cn-tray-toggle:checked) {
-      width: var(--cn-width-tray, 21rem);
-    }
-    
     .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
       position: absolute;
       width: var(--cn-width-tray);
@@ -130,6 +126,10 @@ const { id = "cn-tray-toggle" } = Astro.props;
   /* ── Mode 3: Desktop (Tabletop/Large Push) ─────────────── */
   @media (min-width: 780px) {
     /* Large expansion - Push content, no scrim */
+    .cn-tray:has(.cn-tray-toggle:checked) {
+      width: var(--cn-width-tray, 21rem);
+    }
+
     .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
       display: none;
       pointer-events: none;

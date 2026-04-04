@@ -74,4 +74,46 @@ test.describe("Tray and Rail Components", () => {
     const boxShadow = await drawer.evaluate((node) => window.getComputedStyle(node).boxShadow);
     expect(boxShadow).not.toBe("none");
   });
+
+  test("Desktop View (1200px): Expanded drawer MUST PUSH main content", async ({ page }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+
+    const main = page.locator(".cn-app-main");
+
+    // Initial x-position
+    const initialBox = await main.boundingBox();
+    const initialX = initialBox?.x || 0;
+
+    // Toggle open
+    await page.click('label[for="cn-tray-toggle"]');
+    await page.waitForTimeout(300); // Wait for transition
+
+    const expandedBox = await main.boundingBox();
+    const expandedX = expandedBox?.x || 0;
+
+    // Displacement should be approximately the drawer width minus rail width
+    // (336px - 80px = 256px displacement)
+    expect(expandedX).toBeGreaterThan(initialX + 200);
+  });
+
+  test("Tablet View (700px): Expanded drawer MUST NOT push main content", async ({ page }) => {
+    await page.setViewportSize({ width: 700, height: 800 });
+
+    const main = page.locator(".cn-app-main");
+
+    // Initial x-position
+    const initialBox = await main.boundingBox();
+    const initialX = initialBox?.x || 0;
+
+    // Toggle open
+    await page.click('label[for="cn-tray-toggle"]');
+    await page.waitForTimeout(300); // Wait for transition
+
+    const expandedBox = await main.boundingBox();
+    const expandedX = expandedBox?.x || 0;
+
+    // In overlay mode, the grid column width remains the same (80px)
+    // There might be a small difference due to scrollbars, but not 256px.
+    expect(Math.abs(expandedX - initialX)).toBeLessThan(10);
+  });
 });
