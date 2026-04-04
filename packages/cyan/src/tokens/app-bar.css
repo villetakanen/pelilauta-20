@@ -5,9 +5,9 @@
   --cn-app-bar-padding-horizontal: var(--cn-gap);
 
   /* Colors */
-  --cn-app-bar-background: var(--cn-surface);
+  --cn-app-bar-background: var(--cn-background);
   --cn-app-bar-background-sticky: var(--cn-surface-2);
-  --cn-app-bar-color: var(--cn-on-surface);
+  --cn-app-bar-color: var(--cn-on-background);
   --cn-app-bar-shadow: var(--cn-shadow-elevation-2);
 
   /* Border radius (for specific layout variants if needed) */

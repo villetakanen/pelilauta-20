@@ -57,6 +57,13 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
     gap: var(--cn-app-bar-gap);
   }
 
+  /* When in a layout with a sidebar (tray), offset the app bar content on mobile to clear the hamburger */
+  @media (max-width: 620px) {
+    :global(.layout-sidebar) .container {
+      padding-left: var(--cn-width-rail, 5rem);
+    }
+  }
+
   /* Responsive Title Display */
   @media (max-width: 620px) {
     .full-title {
