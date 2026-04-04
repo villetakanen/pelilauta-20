@@ -84,9 +84,8 @@ test.describe("AppBar", () => {
 
     const paddingLeft = await container.evaluate((el) => window.getComputedStyle(el).paddingLeft);
 
-    // 10 x grid = 80px (if 16px root font)
-    // We expect a significant offset compared to the default gap (16px)
+    // 8 x grid = 64px (if 16px root font)
     const paddingValue = parseInt(paddingLeft, 10);
-    expect(paddingValue).toBeGreaterThanOrEqual(80);
+    expect(paddingValue).toBeGreaterThanOrEqual(64);
   });
 });

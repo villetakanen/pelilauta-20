@@ -69,3 +69,12 @@ Then a link to `/dashboard` is rendered with an "arrow-left" icon
 ```
 - **Vitest Unit Test:** `packages/cyan/src/components/app-bar/app-bar.test.ts`
 - **Playwright E2E Test:** `app/cyan-ds/e2e/components/app-bar.spec.ts`
+
+#### Scenario: Sidebar Displacement (Mobile)
+```gherkin
+Given an App Bar rendered within a `layout-sidebar` parent
+When the viewport width falls below 620px
+Then the App Bar's leading padding is set to 8 x grid (64px)
+To prevent overlap with the fixed Hamburger Button
+```
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/app-bar.spec.ts`
