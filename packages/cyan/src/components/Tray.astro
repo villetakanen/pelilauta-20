@@ -51,7 +51,7 @@ const id = "cn-tray-toggle";
     height: 100dvh;
     width: var(--cn-width-tray, 21rem);
     max-width: 100vw;
-    background: var(--cn-surface-1);
+    background-color: var(--cn-background); /* Formal ground level */
     transform: translateX(-100%);
     transition: transform 0.15s ease-in, width 0.15s ease-in;
     border-right: none;
@@ -94,6 +94,7 @@ const id = "cn-tray-toggle";
   /* Specific Elevation 4 rule for Mobile Overlays only */
   @media (max-width: 620px) {
     .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      background-color: var(--cn-surface-4);
       box-shadow: var(--cn-shadow-elevation-4);
     }
   }
