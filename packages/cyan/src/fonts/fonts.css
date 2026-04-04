@@ -1,2 +1,51 @@
-/* Font-face declarations for the design system.
-   Add custom @font-face rules here as the DS evolves. */
+/* 
+   Lato typography declarations. 
+   Imported from the 'lato-font' npm package but manually declared 
+   to enforce 'font-display: swap' for performance.
+*/
+
+/* Light (300) */
+@font-face {
+  font-family: Lato;
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+  src: url("../../node_modules/lato-font/fonts/lato-light/lato-light.woff2") format("woff2");
+}
+
+/* Regular (400) */
+@font-face {
+  font-family: Lato;
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("../../node_modules/lato-font/fonts/lato-normal/lato-normal.woff2") format("woff2");
+}
+
+/* Medium (500) - For specific UI annotations/buttons */
+@font-face {
+  font-family: Lato;
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("../../node_modules/lato-font/fonts/lato-medium/lato-medium.woff2") format("woff2");
+}
+
+/* Bold (700) */
+@font-face {
+  font-family: Lato;
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("../../node_modules/lato-font/fonts/lato-bold/lato-bold.woff2") format("woff2");
+}
+
+/* Italics (Normal/400) */
+@font-face {
+  font-family: Lato;
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+  src: url("../../node_modules/lato-font/fonts/lato-normal-italic/lato-normal-italic.woff2")
+    format("woff2");
+}

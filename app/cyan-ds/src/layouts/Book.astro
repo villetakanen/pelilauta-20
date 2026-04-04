@@ -59,10 +59,10 @@ const groups: {
     ))}
   </div>
 
-  <article class="cn-book-article">
-    <header class="cn-book-header">
+  <article>
+    <header>
       <h1>{title}</h1>
-      {description && <p class="description">{description}</p>}
+      {description && <p class="text-body" style="opacity: 0.7; max-width: 40rem;">{description}</p>}
     </header>
     <div class="cn-book-content">
       <slot />
@@ -71,34 +71,20 @@ const groups: {
 </AppShell>
 
 <style>
-  .cn-book-article {
-      max-width: 60rem;
-      margin-inline: auto;
-      padding: var(--cn-gap);
-  }
-  .cn-book-header {
-      margin-block-end: calc(var(--cn-gap) * 2);
-  }
-  .description {
-    color: var(--color-on-surface-variant);
-    font-size: 1.125rem;
-    margin-block-start: var(--cn-grid);
-    max-width: 40rem;
-  }
+  /* Only keep styles unique to the documentation tray navigation */
   h4.cn-book-tray-section {
-      margin-block: var(--cn-gap) var(--cn-grid);
-      padding-inline: var(--cn-grid);
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      opacity: 0.6;
-      transition: opacity 0.2s;
+    margin-block: var(--cn-gap) var(--cn-grid);
+    padding-inline: var(--cn-grid);
+    font-size: var(--cn-font-size-xs, 0.75rem);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.6;
   }
   
+  /* Hide tray sections on desktop when tray is collapsed */
   :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-book-tray-section) {
-    @media (min-width: 621px) {
+    @media (min-width: 64rem) {
       display: none;
-      opacity: 0;
     }
   }
 </style>
