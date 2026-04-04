@@ -76,6 +76,12 @@ importers:
 
   packages/cyan:
     devDependencies:
+      '@myrrys/proprietary-icons':
+        specifier: workspace:*
+        version: link:../myrrys-proprietary-icons
+      '@pelilauta/icons':
+        specifier: workspace:*
+        version: link:../pelilauta-icons
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)

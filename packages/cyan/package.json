@@ -6,6 +6,8 @@
     "test": "vitest run --passWithNoTests"
   },
   "devDependencies": {
+    "@myrrys/proprietary-icons": "workspace:*",
+    "@pelilauta/icons": "workspace:*",
     "vitest": "^3.2.4"
   }
 }

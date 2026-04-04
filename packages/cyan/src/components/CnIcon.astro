@@ -15,8 +15,19 @@ interface Props {
 
 const { noun, size = "medium" } = Astro.props;
 
+interface IconPath {
+  d: string;
+  fill?: string;
+  opacity?: number;
+}
+
+interface ResolvedIcon {
+  paths?: IconPath[];
+  viewBox?: string;
+}
+
 // 1. Resolve Tier (Resolution Order: T1 -> T2 -> T3)
-let iconData: any = null;
+let iconData: ResolvedIcon | string | null = null;
 let sourceType: "file" | "fallback" = "fallback";
 
 if (communityIcons[noun as keyof typeof communityIcons]) {
@@ -30,15 +41,15 @@ if (communityIcons[noun as keyof typeof communityIcons]) {
   sourceType = "fallback";
 } else {
   // Absolute fallback to missing glyph
-  iconData = FallbackIcons["missing"];
+  iconData = FallbackIcons.missing;
   sourceType = "fallback";
 }
 
 // 2. Load SVG Source
 let content = "";
-let viewBox = iconData?.viewBox || "0 0 128 128";
+let viewBox = (iconData as ResolvedIcon)?.viewBox || "0 0 128 128";
 
-if (sourceType === "file") {
+if (sourceType === "file" && typeof iconData === "string") {
   try {
     // Read the SVG from disk during SSR
     const rawSvg = fs.readFileSync(iconData, "utf-8");
@@ -55,14 +66,14 @@ if (sourceType === "file") {
       .replace(/<\/svg>/i, "");
   } catch (e) {
     // Fail-open to fallback if file is missing
-    iconData = FallbackIcons["missing"];
-    content = iconData.paths.map((p) => `<path d="${p.d}" fill="currentColor" />`).join("");
-    viewBox = iconData.viewBox || "0 0 24 24";
+    const fallback = FallbackIcons.missing;
+    content = fallback.paths.map((p) => `<path d="${p.d}" fill="currentColor" />`).join("");
+    viewBox = fallback.viewBox || "0 0 24 24";
   }
-} else {
+} else if (sourceType === "fallback" && iconData && typeof iconData !== "string") {
   // Render from hardcoded fallback data
-  content = iconData.paths
-    .map((p: any) => {
+  content = iconData
+    .paths!.map((p: IconPath) => {
       const fill = p.fill || "currentColor";
       const opacity = p.opacity !== undefined ? ` fill-opacity="${p.opacity}"` : "";
       return `<path d="${p.d}" fill="${fill}"${opacity} />`;
