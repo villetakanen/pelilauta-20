@@ -84,3 +84,13 @@ A living book page is required to demo this component, following the principles 
 ### Technical Details (ViewBox & Scale)
 - **Standard ViewBox:** `0 0 128 128` (Matches high-fidelity Illustrator exports).
 - **Default Fill:** `currentColor` (Inherited from parent container).
+
+### Security / Trust Boundary
+
+`CnIcon.astro` uses Astro's `set:html` to inline raw SVG content into the DOM, which bypasses Astro's built-in HTML escaping. This is an **intentional and accepted architectural trade-off** under the following constraints:
+
+1. **Source must be repo-internal:** SVG content may only come from workspace packages (`@pelilauta/icons`, `@myrrys/proprietary-icons`) or the hardcoded `CnIconFallback.ts`. User-supplied or externally-fetched SVGs must **never** be passed through this path.
+2. **No runtime path injection:** The `noun` prop maps to a compile-time-constant registry key. There is no mechanism for a caller to supply an arbitrary file path.
+3. **Trust model:** A compromised SVG file carries the same threat as a compromised `.astro` component — both require supply-chain access to the repository. This is an acceptable shared trust boundary for a closed design system.
+
+**If the trust model changes** (e.g., user-uploaded icons, external CDN assets), SVG content **must** be sanitized before passing to `set:html`. A suitable sanitizer should strip `<script>`, `<a>`, `<use>`, `<image>`, `<foreignObject>`, and `xlink:href` attributes.
