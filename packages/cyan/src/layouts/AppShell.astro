@@ -4,13 +4,21 @@ import Tray from "../components/Tray.astro";
 
 interface Props {
   title: string;
+  appTitle?: string;
   shortTitle?: string;
   layout?: "view" | "sidebar" | "editor" | "modal";
   trayLabel?: string;
   backHref?: string;
 }
 
-const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" } = Astro.props;
+const {
+  title,
+  appTitle = title,
+  shortTitle,
+  layout = "view",
+  trayLabel = "Menu",
+  backHref = "/",
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -29,7 +37,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
     
     <header class="cn-app-header">
       <AppBar 
-        title={title} 
+        title={appTitle} 
         shortTitle={shortTitle} 
         mode={layout === 'modal' ? 'modal' : ''} 
         backHref={backHref}

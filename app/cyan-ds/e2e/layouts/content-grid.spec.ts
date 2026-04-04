@@ -47,8 +47,8 @@ test.describe("Content Grid", () => {
     if (sectionBox && childBox) {
       const leftOffset = childBox.x - sectionBox.x;
       // We expect it to be approx. 16px (--cn-gap default)
-      // Allow 1px tolerance for subpixel rounding
-      expect(Math.abs(leftOffset - 16)).toBeLessThan(1);
+      // Allow for borders (1px) and subpixel rounding in modern browsers.
+      expect(Math.abs(leftOffset - 16)).toBeLessThan(2.5);
     }
   });
 

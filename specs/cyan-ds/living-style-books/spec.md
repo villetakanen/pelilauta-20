@@ -15,7 +15,7 @@ The Living Style Book (`app/cyan-ds`) is the source of truth for the Cyan Design
     - `addons`: Specialized micro-frontend / sub-site components (MFE-only).
 - **Routing:** All dynamic pages use a mandatory collection-prefixed route: `/[collection]/[slug]` (e.g., `/principles/chroma`, `/styles/units-and-grid`). This hierarchy ensures zero slug collisions and reflects the data organization.
 - **Layouts:** 
-    - `app/cyan-ds/src/layouts/Book.astro`: The root shell that dynamically builds the navigation tray by querying each collection and sorting by their categories.
+    - `app/cyan-ds/src/layouts/Book.astro`: The root shell that dynamically builds the navigation tray based on the entries. It is the **unique owner** of the primary page heading (H1) and the optional `description`. It should use the `appTitle` prop to provide broader context (e.g., "Cyan / [Category]") in the browser's top bar.
 
 ### Data Models
 - **Book Frontmatter Schema (Zod):**
@@ -35,6 +35,8 @@ The Living Style Book (`app/cyan-ds`) is the source of truth for the Cyan Design
 ### Anti-Patterns
 - **No Hardcoded Navigation:** Do not manually add links to the `Book.astro` navigation tray. It must derive from `getCollection` and follow the sorting logic: `[Ordered by priority] -> [Alphabetical Fallback]`.
 - **No Direct Pages for Books:** Documentation entries must live in `src/content/[coll]/` rather than `src/pages/`.
+- **No Redundant H1 in Content:** Markdown (`.mdx`) files must **not** include an H1 heading (e.g., `# Title`). The Layout manages the primary page heading to avoid 3x title duplication (TopBar, Layout Header, and Content Start).
+- **H2 for Content Sections:** Documentation content should start strictly with H2 (`## Heading`) to maintain correct hierarchical flow.
 
 ## Contract
 

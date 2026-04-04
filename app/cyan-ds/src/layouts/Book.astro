@@ -15,6 +15,12 @@ const { title, description } = frontmatter;
 
 type DocCategory = "principles" | "styles" | "components" | "addons";
 
+// Determine current category for the App Bar title
+const pathSegments = Astro.url.pathname.split("/").filter(Boolean);
+const currentCategory = pathSegments[0] || "";
+const formattedCategory = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
+const appTitle = formattedCategory ? `Cyan / ${formattedCategory}` : "Cyan Design System";
+
 // Fetch and sort collections for the dynamic navigation tray
 const sortEntries = (entries: CollectionEntry<DocCategory>[]) =>
   entries.sort(
@@ -40,7 +46,7 @@ const groups: {
 ];
 ---
 
-<AppShell title={title} layout="sidebar">
+<AppShell title={title} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
   <div slot="tray" style="display: contents;">
     <TrayButton icon="📖" label="Intro" href="/" active={Astro.url.pathname === '/'} />
     
