@@ -1,25 +1,23 @@
 ---
-import AppShell from "@cyan/layouts/AppShell.astro";
+import BookLayout from "../layouts/Book.astro";
+
+const frontmatter = {
+  title: "Cyan Design System",
+  description: "The official design system and UI library for pelilauta.social.",
+};
 ---
 
-<AppShell title="Cyan Design System" layout="sidebar">
-  <nav slot="tray">
-    <h4>Main menu</h4>
-    <a href="#">Foundations</a>
-    <a href="#">Components</a>
-    <a href="#">Patterns</a>
-  </nav>
-
-  <h1>Cyan Design System</h1>
+<BookLayout frontmatter={frontmatter}>
   <p>
-    Cyan Design System is a custom UI component library built for <a href="https://pelilauta.social">pelilauta.social</a>.
+    Cyan Design System is a custom UI component library built for <a href="https://pelilauta.social">pelilauta.social</a>. 
+    It focuses on high fidelity, accessibility, and high-quality design using modern web technologies.
   </p>
   
   <p>
-    For its fourth major redesign, the system is implemented using Astro components for structural SSR and Svelte 5 for interactive client-side progressive enhancement.
+    For its fourth major redesign, the system is implemented using **Astro components** for structural SSR and **Svelte 5** for interactive client-side progressive enhancement.
   </p>
 
-  <h2>Source code and licensing</h2>
+  <h2>Source Code and Licensing</h2>
   <p>
     Most parts of the design system are licensed under the MIT license. Please check individual plugins and components for their independent licensing info.
   </p>
@@ -27,4 +25,4 @@ import AppShell from "@cyan/layouts/AppShell.astro";
   <p>
     All source code is managed as an internal package within the Pelilauta 20 pnpm workspace.
   </p>
-</AppShell>
+</BookLayout>

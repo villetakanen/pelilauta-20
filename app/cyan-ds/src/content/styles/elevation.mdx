@@ -1,0 +1,66 @@
+---
+title: Elevation Utility
+description: Visual depth utilities combining surface colors and adaptive shadows.
+order: 3
+status: stable
+---
+
+# Elevation Utility
+
+Elevation utilities provide visual depth by combining surface background colors and shadows. Level 1 is strictly a surface color change without a shadow. Levels 2-4 add progressively larger shadows.
+
+## Standard Levels
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2rem; padding: 2rem; background: var(--color-background);">
+  <div class="elevation-1" style="padding: 2rem; border-radius: 8px; text-align: center;">
+    Elevation 1
+    <br/><small>(Shadowless Surface)</small>
+  </div>
+  <div class="elevation-2" style="padding: 2rem; border-radius: 8px; text-align: center;">
+    Elevation 2
+  </div>
+  <div class="elevation-3" style="padding: 2rem; border-radius: 8px; text-align: center;">
+    Elevation 3
+  </div>
+  <div class="elevation-4" style="padding: 2rem; border-radius: 8px; text-align: center;">
+    Elevation 4
+  </div>
+</div>
+
+## Relative Elevation Engine
+
+When elevated surfaces are nested, the inner surface automatically reduces its shadow to a level relative to its parent. This prevents "harsh" shadow stacking.
+
+<div class="elevation-1" style="padding: 3rem; border-radius: 12px; background: var(--color-surface-1);">
+  Parent: Elevation 1
+  <div class="elevation-2" style="margin-top: 1rem; padding: 2rem; border-radius: 8px; background: var(--color-surface-2);">
+    Child: Elevation 2 (Nested in 1)
+  </div>
+  <div class="elevation-4" style="margin-top: 1rem; padding: 2rem; border-radius: 8px; background: var(--color-surface-4);">
+    Child: Elevation 4 (Nested in 1)
+  </div>
+</div>
+
+<div class="elevation-2" style="margin-top: 2rem; padding: 3rem; border-radius: 12px; background: var(--color-surface-2);">
+  Parent: Elevation 2
+  <div class="elevation-4" style="margin-top: 1rem; padding: 2rem; border-radius: 8px; background: var(--color-surface-4);">
+    Child: Elevation 4 (Nested in 2)
+  </div>
+</div>
+
+<div class="elevation-3" style="margin-top: 2rem; padding: 3rem; border-radius: 12px; background: var(--color-surface-3);">
+  Parent: Elevation 3
+  <div class="elevation-4" style="margin-top: 1rem; padding: 2rem; border-radius: 8px; background: var(--color-surface-4);">
+    Child: Elevation 4 (Nested in 3)
+  </div>
+</div>
+
+## Classes
+
+| Class | Shadow Token | Surface Token | Visual Baseline (Dark) |
+| :--- | :--- | :--- | :--- |
+| `.elevation-0` | `none` | `transparent` | **Step 10** (Body) |
+| `.elevation-1` | `none` | `--color-surface-1` | **Step 20** |
+| `.elevation-2` | `--cn-shadow-elevation-2` | `--color-surface-2` | **Step 30** |
+| `.elevation-3` | `--cn-shadow-elevation-3` | `--color-surface-3` | **Step 40** |
+| `.elevation-4" | `--cn-shadow-elevation-4` | `--color-surface-4` | **Step 50** |

@@ -1,0 +1,28 @@
+---
+title: App Bar Component
+description: The main structural header for pages and modals.
+order: 1
+status: stable
+---
+import AppBar from "@cyan/components/AppBar.astro";
+
+# App Bar Component
+
+The `AppBar` provides context and navigation actions. It supports two main modes: `sticky` (standard page header) and `modal` (dialog header with back navigation).
+
+## Modal Mode
+
+Used for full-screen dialogs or sub-pages.
+
+<AppBar title="Full Title" shortTitle="Short" mode="modal" backHref="#" />
+
+## Sticky Mode
+
+Stays at the top of a scroll container and applies Elevation 2 shadow when content is scrolled beneath it.
+
+<div class="viewport scrollable" style="height: 200px; overflow-y: auto; background: var(--color-surface-4); padding: 1rem; border-radius: var(--cn-border-radius-medium); position: relative;">
+  <AppBar title="Sticky AppBar" mode="sticky" />
+  <div style="height: 500px; padding: 1rem;">
+    <p>Scroll down to see the sticky shadow effect (Elevation 2).</p>
+  </div>
+</div>

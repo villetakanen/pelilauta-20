@@ -1,0 +1,26 @@
+---
+title: Tray Component
+description: Multi-mode responsive navigation sidebar.
+order: 3
+status: stable
+---
+import TrayButton from "@cyan/components/TrayButton.astro";
+import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
+import TrayLink from "@cyan/components/TrayLink.astro";
+
+# Tray Component
+
+The tray is a multi-mode responsive navigation sidebar. It adapts its layout based on container width:
+- **Small (< 621px):** Toggleable drawer overlay with scrim.
+- **Medium (>= 621px):** Persistent icon rail that expands into an overlay modal on click.
+- **Large (>= 780px):** Persistent icon rail that pushes content when expanded (no scrim).
+
+## Navigation Hierarchy
+
+<div class="demo-box" style="padding: 2rem; background: var(--color-surface-1); border-radius: 8px; max-width: 20rem; position: relative; z-index: 1;">
+  <TrayButton icon="🏠" label="Home" href="#" active />
+  <TrayLinkGroup>
+    <TrayLink label="Profile" href="#" />
+    <TrayLink label="Inbox" href="#" />
+  </TrayLinkGroup>
+</div>
