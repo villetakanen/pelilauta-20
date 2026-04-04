@@ -1,4 +1,10 @@
 ---
+/**
+ * HamburgerButton.astro
+ *
+ * Reverted to legacy Pelilauta "Two-Bar" style.
+ * Matches: cyan-design-system-4/packages/cyan-lit/src/cn-tray-button/cn-tray-button.ts
+ */
 interface Props {
   id?: string;
 }
@@ -6,96 +12,112 @@ interface Props {
 const { id = "cn-tray-toggle" } = Astro.props;
 ---
 
-<input type="checkbox" id={id} class="cn-tray-toggle" aria-hidden="true" />
-<label
-  class="cn-hamburger-btn"
-  for={id}
-  aria-label="Menu"
-  tabindex="0"
->
-  <span class="icon-bar"></span>
+<label class="cn-hamburger-container" for={id} aria-label="Menu" tabindex="0">
+  <input 
+    type="checkbox" 
+    id={id} 
+    class="cn-tray-toggle" 
+    aria-hidden="true" 
+  />
+  
+  <span class="state-indicator"></span>
 </label>
 
 <style>
-  .cn-tray-toggle {
-    display: none;
-  }
-
-  .cn-hamburger-btn {
+  /* --- Layout & State Container --- */
+  .cn-hamburger-container {
     position: fixed;
     top: var(--cn-grid);
     left: var(--cn-grid);
     z-index: var(--cn-z-tray-button, 4000);
-    display: grid;
-    place-items: center;
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
     inline-size: var(--cn-navigation-button-size);
     block-size: var(--cn-navigation-button-size);
     cursor: pointer;
     border-radius: 50%;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s, left 0.27s ease-in-out;
+    background-color: transparent;
   }
 
-  .cn-hamburger-btn:hover,
-  .cn-hamburger-btn:focus {
+  /* Rail Mode / Desktop Centering */
+  @media (min-width: 621px) {
+    .cn-hamburger-container {
+      left: calc((var(--cn-width-rail) - var(--cn-navigation-button-size)) / 2);
+    }
+  }
+
+  /* Hide the Actual Checkbox */
+  .cn-tray-toggle {
+    display: none;
+  }
+
+  /* Hover & Focus states */
+  .cn-hamburger-container:hover,
+  .cn-hamburger-container:focus {
     background-color: var(--cn-hover);
     outline: none;
   }
-
-  .cn-hamburger-btn:focus-visible {
+  .cn-hamburger-container:focus-visible {
     box-shadow: 0 0 0 2px var(--cn-link);
     outline-offset: 2px;
   }
 
-  .icon-bar,
-  .icon-bar::before,
-  .icon-bar::after {
+  /* --- Legacy Two-Bar Indicator --- */
+  .state-indicator {
     display: block;
-    inline-size: 1.5rem;
-    block-size: 2px;
-    background-color: var(--cn-text);
-    border-radius: 1px;
-    transition: transform 0.2s, opacity 0.2s;
-    content: "";
-  }
-
-  .icon-bar {
     position: relative;
+    height: calc(var(--cn-grid) * 3);
+    width: calc(var(--cn-grid) * 3);
   }
 
-  .icon-bar::before {
+  .state-indicator::before,
+  .state-indicator::after {
+    content: "";
+    display: block;
     position: absolute;
-    top: -6px;
+    background-color: var(--cn-text);
+    width: calc(var(--cn-grid) * 3);
+    height: calc(var(--cn-grid) / 2);
+    border-radius: calc(var(--cn-grid) / 4);
+    transition: transform 0.2s ease-in-out;
+    left: 0;
   }
 
-  .icon-bar::after {
-    position: absolute;
-    top: 6px;
+  /* Legacy Vertical Offsets: calc(var(--cn-grid) * 0.625) */
+  .state-indicator::before {
+    top: calc(var(--cn-grid) * 0.625);
   }
 
-  /* Checked states via :has global fallback or structural coupling */
-  :global(.cn-tray:has(.cn-tray-toggle:checked)) .icon-bar {
-    background-color: transparent;
+  .state-indicator::after {
+    bottom: calc(var(--cn-grid) * 0.625);
   }
 
-  :global(.cn-tray:has(.cn-tray-toggle:checked)) .icon-bar::before {
-    transform: translateY(6px) rotate(45deg);
+  /* Legacy "X" Animation States */
+  .cn-hamburger-container:has(:checked) .state-indicator::before {
+    transform: translate3d(0, calc(var(--cn-grid) * 0.625), 0) rotate(45deg);
   }
 
-  :global(.cn-tray:has(.cn-tray-toggle:checked)) .icon-bar::after {
-    transform: translateY(-6px) rotate(-45deg);
+  .cn-hamburger-container:has(:checked) .state-indicator::after {
+    transform: translate3d(0, calc(var(--cn-grid) * -0.625), 0) rotate(-45deg);
   }
 </style>
 
 <script>
-  // Handle space/enter for accessibility on label
-  const buttons = document.querySelectorAll('.cn-hamburger-btn');
-  buttons.forEach(btn => {
-    btn.addEventListener('keydown', (e: any) => {
+  /**
+   * Keyboard Accessibility for the Label container
+   */
+  const containers = document.querySelectorAll('.cn-hamburger-container');
+  containers.forEach(container => {
+    container.addEventListener('keydown', (e: any) => {
       if (e.key === ' ' || e.key === 'Enter') {
         e.preventDefault();
-        const input = document.getElementById(btn.getAttribute('for') || '');
-        if (input instanceof HTMLInputElement) {
-          input.checked = !input.checked;
+        const input = container.querySelector('input') as HTMLInputElement;
+        if (input) {
+          input.click();
         }
       }
     });

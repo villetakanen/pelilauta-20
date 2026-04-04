@@ -1,11 +1,9 @@
 ---
 import HamburgerButton from "./HamburgerButton.astro";
 
-interface Props {
-  id?: string;
-}
+type Props = {};
 
-const { id = "cn-tray-toggle" } = Astro.props;
+const id = "cn-tray-toggle";
 ---
 
 <div class="cn-tray" data-cn-tray>

@@ -10,7 +10,7 @@ The tray is the primary navigation sidebar for the application. It adapts to dif
 ### Architecture
 - **Components:**
   - `Tray.astro` — The root layout container that owns state toggle (`:has()`), the drawer slide animation, and scrim.
-  - `HamburgerButton.astro` — The toggle button, included within the tray.
+  - [`HamburgerButton.astro`](../hamburger-button/spec.md) — The toggle button, included within the tray.
   - `TrayButton.astro` — A primary navigation item with an icon and label. Displays only the icon in rail mode.
   - `TrayLinkGroup.astro` — A container for sub-navigation items.
   - `TrayLink.astro` — A secondary navigation item used within groups.
