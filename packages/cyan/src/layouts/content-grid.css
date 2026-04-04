@@ -1,0 +1,50 @@
+/**
+ * Cyan Content Grid
+ * Implements the centered readability grid (67ch) via Container Queries.
+ * Follows spec: specs/cyan-ds/layouts/content-grids/spec.md
+ */
+
+.cn-app-main {
+  container-type: inline-size;
+  padding-inline: 0 !important; /* Gaps managed by internal sections */
+}
+
+/* Base Semantic Grid */
+.cn-app-main > section,
+.cn-app-main > article,
+.cn-content-grid {
+  display: grid;
+  /* Mobile/Narrow: Gutter | Content | Gutter */
+  grid-template-columns: var(--cn-gap, 1rem) 1fr var(--cn-gap, 1rem);
+  margin-block-end: calc(var(--cn-gap, 1rem) * 2);
+  width: 100%;
+}
+
+/* Align children to the central column by default */
+.cn-app-main > section > *,
+.cn-app-main > article > *,
+.cn-content-grid > * {
+  grid-column: 2;
+}
+
+/* Desktop/Wide: Elastic Margin | 67ch Centered | Elastic Margin */
+@container (min-width: 60rem) {
+  .cn-app-main > section,
+  .cn-app-main > article,
+  .cn-content-grid {
+    grid-template-columns: 1fr min(67ch, 100%) 1fr;
+  }
+}
+
+/* Sub-grid overrides (Full width / Bleed) */
+.cn-grid-full {
+  grid-column: 1 / -1 !important;
+}
+
+/* Vertical Rhythm: Consecutive grids get standard spacing */
+.cn-app-main > section + section,
+.cn-app-main > section + article,
+.cn-app-main > article + section,
+.cn-app-main > article + article {
+  margin-block-start: 0;
+}

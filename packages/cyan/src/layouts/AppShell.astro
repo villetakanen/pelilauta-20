@@ -48,6 +48,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
   @import "@cyan/tokens/index.css";
   @import "../utilities/index.css";
   @import "@cyan/fonts/fonts.css";
+  @import "./content-grid.css";
 
   *,
   *::before,
@@ -86,10 +87,8 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
 
   /* --- Layout: View --- */
   .layout-view .cn-app-main {
-    max-width: 80rem;
     width: 100%;
-    margin-inline: auto;
-    padding: var(--cn-gap, 1rem);
+    /* Max-width and centering managed by internal sections via content-grid.css */
   }
 
   /* --- Layout: Sidebar --- */
@@ -115,10 +114,8 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
   }
 
   .layout-sidebar .cn-app-main {
-    max-width: 80rem;
     width: 100%;
-    margin-inline: auto;
-    padding: var(--cn-gap, 1rem);
+    /* Max-width and centering managed by internal sections via content-grid.css */
   }
 
   /* When tray is expanded, tablet mode uses absolute overlay, so main shouldn't be pushed on tablet.
