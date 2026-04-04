@@ -39,36 +39,64 @@ const groups: {
   entries: CollectionEntry<DocCategory>[];
   defaultIcon: string;
 }[] = [
-  { id: "principles", label: "Principles", entries: principles, defaultIcon: "🎨" },
-  { id: "styles", label: "Styles", entries: styles, defaultIcon: "📏" },
-  { id: "components", label: "Components", entries: components, defaultIcon: "🧩" },
-  { id: "addons", label: "Addons", entries: addons, defaultIcon: "➕" },
+  {
+    id: "principles",
+    label: "Principles",
+    entries: principles,
+    defaultIcon: "palette",
+  },
+  { id: "styles", label: "Styles", entries: styles, defaultIcon: "font" },
+  {
+    id: "components",
+    label: "Components",
+    entries: components,
+    defaultIcon: "components",
+  },
+  { id: "addons", label: "Addons", entries: addons, defaultIcon: "add" },
 ];
 ---
 
 <AppShell title={title} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
   <div slot="tray" style="display: contents;">
-    <TrayButton icon="📖" label="Intro" href="/" active={Astro.url.pathname === '/'} />
-    
-    {groups.map(group => group.entries.length > 0 && (
-      <>
-        <h4 class="cn-book-tray-section">{group.label}</h4>
-        {group.entries.map(entry => (
-          <TrayButton 
-            icon={entry.data.icon || group.defaultIcon} 
-            label={entry.data.title} 
-            href={`/${group.id}/${entry.slug}`} 
-            active={Astro.url.pathname.includes(`/${group.id}/${entry.slug}`)} 
-          />
-        ))}
-      </>
-    ))}
+    <TrayButton
+      icon="design"
+      label="Intro"
+      href="/"
+      active={Astro.url.pathname === "/"}
+    />
+
+    {
+      groups.map(
+        (group) =>
+          group.entries.length > 0 && (
+            <>
+              <h4 class="cn-book-tray-section">{group.label}</h4>
+              {group.entries.map((entry) => (
+                <TrayButton
+                  icon={entry.data.icon || group.defaultIcon}
+                  label={entry.data.title}
+                  href={`/${group.id}/${entry.slug}`}
+                  active={Astro.url.pathname.includes(
+                    `/${group.id}/${entry.slug}`,
+                  )}
+                />
+              ))}
+            </>
+          ),
+      )
+    }
   </div>
 
   <article>
     <header>
       <h1>{title}</h1>
-      {description && <p class="text-body" style="opacity: 0.7; max-width: 40rem;">{description}</p>}
+      {
+        description && (
+          <p class="text-body" style="opacity: 0.7; max-width: 40rem;">
+            {description}
+          </p>
+        )
+      }
     </header>
     <div class="cn-book-content">
       <slot />
@@ -86,7 +114,7 @@ const groups: {
     letter-spacing: 0.1em;
     opacity: 0.6;
   }
-  
+
   /* Hide tray sections on desktop when tray is collapsed */
   :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-book-tray-section) {
     @media (min-width: 64rem) {

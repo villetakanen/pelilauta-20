@@ -1,6 +1,8 @@
 ---
+import CnIcon from "./CnIcon.astro";
+
 interface Props {
-  icon: string;
+  icon?: string;
   label: string;
   href: string;
   active?: boolean;
@@ -11,7 +13,7 @@ const { icon, label, href, active = false } = Astro.props;
 
 <a href={href} class:list={["cn-tray-button", { active }]}>
   <slot name="icon">
-    <span class="cn-tray-button__icon">{icon}</span>
+    {icon && <CnIcon noun={icon} size="small" />}
   </slot>
   <span class="cn-tray-button__label">{label}</span>
 </a>

@@ -11,7 +11,7 @@ Used primarily within the `Tray` component for navigation. It must be accessible
 - **Component:** `TrayButton.astro` 
 - **Structure:**
   - Root: `<a>` anchor element for standard navigation behavior.
-  - Slot `icon`: For custom icon components (e.g., `CnIcon`). Defaults to the `icon` prop string.
+  - Slot `icon`: For custom icon components. If empty, the component defaults to rendering a `CnIcon` using the `icon` prop.
   - Label: `<span class="cn-tray-button__label">` for the link text.
 - **Style Invariants:**
   - No borders.
@@ -22,7 +22,7 @@ Used primarily within the `Tray` component for navigation. It must be accessible
 - **Props:**
   - `href` (required): The destination URL.
   - `label` (required): Functional text description.
-  - `icon` (optional): String representation (emoji or text) used if the icon slot is empty.
+  - `icon` (optional): Noun identifying an icon in the registry (e.g. "fox", "add"). Rendered via `CnIcon` if the icon slot is empty.
   - `active` (optional): Boolean to apply "active" styling (surface contrast shift).
 - **Slots:**
   - `icon`: Dedicated named slot for complex icon rendering.
@@ -66,10 +66,10 @@ And have a visual surface contrast distinct from idle buttons
 
 #### Scenario: Icon Slot Prioritization
 ```gherkin
-Given a TrayButton with an icon prop "🏠" 
-And content provided in the <slot name="icon">
+Given a TrayButton with an icon prop "fox" 
+And content provided in the <slot name="icon"> (e.g. a custom SVG or <div>)
 Then the slotted content should be displayed
-And the fallback icon text should NOT be visible
+And the default CnIcon for "fox" should NOT be rendered in the slot area
 ```
 - **Vitest Unit Test:** `packages/cyan/src/components/TrayButton.test.ts`
 - **Playwright E2E Test:** `app/cyan-ds/e2e/components/tray-button.spec.ts`
