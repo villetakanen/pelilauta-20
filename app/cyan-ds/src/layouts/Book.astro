@@ -1,0 +1,80 @@
+---
+import TrayButton from "@cyan/components/TrayButton.astro";
+import TrayLink from "@cyan/components/TrayLink.astro";
+import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
+import AppShell from "@cyan/layouts/AppShell.astro";
+
+interface Props {
+  frontmatter: {
+    title: string;
+    description?: string;
+  };
+}
+
+const { frontmatter } = Astro.props;
+const { title, description } = frontmatter;
+
+// Hardcoded navigation for the Design System Book
+// In a more advanced version, we could use Astro.glob to find all MDX files
+const foundations = [
+  { label: "Chroma", href: "/principles/chroma", icon: "🎨" },
+  { label: "Semantic colors", href: "/principles/semantic-colors", icon: "🌈" },
+  { label: "Units and Grid", href: "/principles/units-and-grid", icon: "📏" },
+  { label: "Z-index", href: "/principles/z-index", icon: "🥞" },
+];
+
+const components = [
+  { label: "Tray", href: "/components/tray", icon: "📥" },
+  { label: "App Bar", href: "/components/app-bar", icon: "🔝" },
+];
+---
+
+<AppShell title={title} layout="sidebar">
+  <div slot="tray" style="display: contents;">
+    <TrayButton icon="📖" label="Intro" href="/" />
+    
+    <h4 class="cn-book-tray-section">Foundations</h4>
+    {foundations.map(item => (
+        <TrayButton icon={item.icon} label={item.label} href={item.href} active={Astro.url.pathname.includes(item.href)} />
+    ))}
+
+    <h4 class="cn-book-tray-section">Components</h4>
+    {components.map(item => (
+        <TrayButton icon={item.icon} label={item.label} href={item.href} active={Astro.url.pathname.includes(item.href)} />
+    ))}
+  </div>
+
+  <article class="cn-book-article">
+    <h1>{title}</h1>
+    {description && <p class="description">{description}</p>}
+    <slot />
+  </article>
+</AppShell>
+
+<style>
+  .cn-book-article {
+      max-width: 60rem;
+      margin-inline: auto;
+      padding: var(--cn-gap);
+  }
+  .description {
+    color: var(--cyan-on-surface-variant);
+    margin-block-end: var(--cn-gap);
+  }
+  h4.cn-book-tray-section {
+      margin-block: var(--cn-gap) var(--cn-grid);
+      padding-inline: var(--cn-grid);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+  }
+  
+  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-book-tray-section) {
+    @media (min-width: 621px) {
+      display: none;
+      opacity: 0;
+    }
+  }
+</style>

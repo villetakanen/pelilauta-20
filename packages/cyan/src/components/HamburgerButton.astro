@@ -1,0 +1,103 @@
+---
+interface Props {
+  id?: string;
+}
+
+const { id = "cn-tray-toggle" } = Astro.props;
+---
+
+<input type="checkbox" id={id} class="cn-tray-toggle" aria-hidden="true" />
+<label
+  class="cn-hamburger-btn"
+  for={id}
+  aria-label="Menu"
+  tabindex="0"
+>
+  <span class="icon-bar"></span>
+</label>
+
+<style>
+  .cn-tray-toggle {
+    display: none;
+  }
+
+  .cn-hamburger-btn {
+    position: fixed;
+    top: var(--cn-grid);
+    left: var(--cn-grid);
+    z-index: var(--cn-z-tray-button, 4000);
+    display: grid;
+    place-items: center;
+    inline-size: var(--cn-navigation-button-size);
+    block-size: var(--cn-navigation-button-size);
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background-color 0.2s;
+  }
+
+  .cn-hamburger-btn:hover,
+  .cn-hamburger-btn:focus {
+    background-color: var(--cn-hover);
+    outline: none;
+  }
+
+  .cn-hamburger-btn:focus-visible {
+    box-shadow: 0 0 0 2px var(--cn-link);
+    outline-offset: 2px;
+  }
+
+  .icon-bar,
+  .icon-bar::before,
+  .icon-bar::after {
+    display: block;
+    inline-size: 1.5rem;
+    block-size: 2px;
+    background-color: var(--cn-text);
+    border-radius: 1px;
+    transition: transform 0.2s, opacity 0.2s;
+    content: "";
+  }
+
+  .icon-bar {
+    position: relative;
+  }
+
+  .icon-bar::before {
+    position: absolute;
+    top: -6px;
+  }
+
+  .icon-bar::after {
+    position: absolute;
+    top: 6px;
+  }
+
+  /* Checked states via :has global fallback or structural coupling */
+  :global(.cn-tray:has(.cn-tray-toggle:checked)) .icon-bar {
+    background-color: transparent;
+  }
+
+  :global(.cn-tray:has(.cn-tray-toggle:checked)) .icon-bar::before {
+    transform: translateY(6px) rotate(45deg);
+  }
+
+  :global(.cn-tray:has(.cn-tray-toggle:checked)) .icon-bar::after {
+    transform: translateY(-6px) rotate(-45deg);
+  }
+</style>
+
+<script>
+  // Handle space/enter for accessibility on label
+  const buttons = document.querySelectorAll('.cn-hamburger-btn');
+  buttons.forEach(btn => {
+    btn.addEventListener('keydown', (e: any) => {
+      if (e.key === ' ' || e.key === 'Enter') {
+        e.preventDefault();
+        const input = document.getElementById(btn.getAttribute('for') || '');
+        if (input instanceof HTMLInputElement) {
+          input.checked = !input.checked;
+        }
+      }
+    });
+  });
+</script>

@@ -1,12 +1,9 @@
 ---
-import { Button } from "@cyan/index";
-import Base from "@shell/layouts/Base.astro";
-import TopNav from "@shell/nav/TopNav.svelte";
+import AppShell from "@cyan/layouts/AppShell.astro";
 ---
 
-<Base title="Pelilauta">
-  <TopNav slot="nav" appName="Pelilauta" client:load />
+<AppShell title="Pelilauta">
   <h1>Pelilauta 20</h1>
   <p>RPG community platform.</p>
-  <Button label="Get started" client:load />
-</Base>
+  <button class="button primary">Get started</button>
+</AppShell>

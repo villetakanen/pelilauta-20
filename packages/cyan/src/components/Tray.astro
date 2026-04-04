@@ -1,0 +1,180 @@
+---
+import HamburgerButton from "./HamburgerButton.astro";
+
+interface Props {
+  id?: string;
+}
+
+const { id = "cn-tray-toggle" } = Astro.props;
+---
+
+<div class="cn-tray" data-cn-tray>
+  <HamburgerButton id={id} />
+
+  <div class="cn-drawer" id="cn-tray-nav" aria-label="Main Navigation">
+    <nav class="cn-nav">
+      <slot />
+    </nav>
+  </div>
+
+  <label
+    for={id}
+    class="cn-scrim"
+    aria-label="Close navigation"
+  ></label>
+</div>
+
+<style>
+  /* ── Variables ───────────────────────────────────────── */
+  .cn-tray {
+    --cn-tray-z-index-surface: var(--cn-z-tray, 3000);
+    --cn-tray-z-index-scrim: calc(var(--cn-tray-z-index-surface) - 1);
+    
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 100%;
+    /* Start with 0 width on mobile when collapsed */
+    width: 0;
+    transition: width 0.27s ease-in-out;
+    background: transparent;
+  }
+
+  /* ── Drawer Component ────────────────────────────────── */
+  .cn-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--cn-tray-z-index-surface);
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    width: var(--cn-width-tray, 21rem);
+    max-width: 100vw;
+    background: var(--cn-surface-1);
+    transform: translateX(-100%);
+    transition: transform 0.15s ease-in, width 0.15s ease-in;
+    border-right: none;
+    padding-top: calc(var(--cn-navigation-button-size) + var(--cn-gap) * 2);
+    padding-bottom: var(--cn-gap);
+    padding-inline: var(--cn-gap);
+    box-sizing: border-box;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* ── Navigation Container ─────────────────────────────── */
+  .cn-nav {
+    display: flex;
+    flex-direction: column;
+    gap: var(--cn-grid);
+    align-items: stretch;
+    flex: 1;
+  }
+
+  /* ── Scrim ───────────────────────────────────────────── */
+  .cn-scrim {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: var(--cn-tray-z-index-scrim);
+    background: rgba(0,0,0,0.5); /* Scrim color remains static or can use a separate token */
+    opacity: 0;
+    transition: opacity 0.15s ease-in;
+    cursor: pointer;
+    pointer-events: none;
+  }
+
+  /* ── Expansion States (General/Mobile) ───────────────── */
+  .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+    transform: translateX(0);
+    transition-timing-function: ease-out;
+    box-shadow: var(--cn-shadow-elevation-4);
+  }
+
+  .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
+    display: block;
+    opacity: 0.6;
+    pointer-events: auto;
+  }
+
+  /* ── Mode 2: Tablet (Medium Rail) ────────────────────── */
+  @media (min-width: 621px) {
+    .cn-tray {
+      width: var(--cn-width-rail, 5rem);
+    }
+
+    .cn-drawer {
+      position: relative;
+      transform: translateX(0);
+      width: var(--cn-width-rail);
+      flex-shrink: 0;
+      z-index: calc(var(--cn-tray-z-index-surface) + 1);
+    }
+
+    /* Tablet Expansion - Overlay Modal from Rail */
+    .cn-tray:has(.cn-tray-toggle:checked) {
+      width: var(--cn-width-tray, 21rem);
+    }
+    
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      position: absolute;
+      width: var(--cn-width-tray);
+      height: 100vh;
+      box-shadow: var(--cn-shadow-elevation-4);
+    }
+  }
+
+  /* ── Mode 3: Desktop (Tabletop/Large Push) ─────────────── */
+  @media (min-width: 780px) {
+    /* Large expansion - Push content, no scrim */
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
+      display: none;
+      pointer-events: none;
+    }
+
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      position: relative; /* Push drawer */
+      width: var(--cn-width-tray);
+      box-shadow: none;
+    }
+  }
+</style>
+
+<script>
+  // Keyboard Accessibility
+  const trays = document.querySelectorAll('.cn-tray');
+  trays.forEach(tray => {
+      const toggle = tray.querySelector('.cn-tray-toggle') as HTMLInputElement;
+      const drawer = tray.querySelector('.cn-drawer');
+
+      if (toggle && drawer) {
+          document.addEventListener('keydown', (e) => {
+              // Close on escape
+              if (e.key === 'Escape' && toggle.checked) {
+                  toggle.checked = false;
+              }
+
+              // Focus trapping for mobile/tablet modals (overlays)
+              const isOverlay = () => window.innerWidth < 780;
+              if (e.key === 'Tab' && toggle.checked && isOverlay()) {
+                  const focusableElements = drawer.querySelectorAll('a, button, [tabindex]:not([tabindex="-1"])');
+                  if (focusableElements.length === 0) return;
+
+                  const first = focusableElements[0] as HTMLElement;
+                  const last = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+                  if (e.shiftKey && document.activeElement === first) {
+                      e.preventDefault();
+                      last.focus();
+                  } else if (!e.shiftKey && document.activeElement === last) {
+                      e.preventDefault();
+                      first.focus();
+                  }
+              }
+          });
+      }
+  });
+</script>

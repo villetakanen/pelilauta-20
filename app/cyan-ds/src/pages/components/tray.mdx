@@ -1,0 +1,43 @@
+---
+title: Tray Component
+layout: ../../layouts/Book.astro
+---
+import TrayButton from "@cyan/components/TrayButton.astro";
+import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
+import TrayLink from "@cyan/components/TrayLink.astro";
+
+# Tray Component
+
+The tray is a multi-mode responsive navigation sidebar. It adapts its layout based on viewport width:
+- **Mobile (< 621px):** Toggleable drawer overlay with scrim.
+- **Tablet (>= 621px):** Persistent icon rail that expands into an overlay modal on click.
+- **Desktop (>= 780px):** Persistent icon rail that pushes content when expanded (no scrim).
+
+## Navigation Hierarchy
+Navigation consists of `TrayButton` (primary) and `TrayLinkGroup` + `TrayLink` (hierarchical).
+
+<div class="demo-box" style="padding: 2rem; background: var(--cn-surface-1); border-radius: 8px; max-width: 20rem; position: relative; z-index: 1;">
+  <TrayButton icon="🏠" label="Home" href="#" active />
+  <TrayLinkGroup>
+    <TrayLink label="Profile" href="#" />
+    <TrayLink label="Inbox" href="#" />
+  </TrayLinkGroup>
+</div>
+
+## Props
+
+### TrayButton
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `icon` | `string` | (Required) | Icon string/emoji to display. |
+| `label` | `string` | (Required) | Text label. |
+| `href` | `string` | (Required) | Destination URL. |
+| `active` | `boolean` | `false` | Visual highlight for active item. |
+
+### TrayLink
+| Prop | Type | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `href` | `string` | (Required) | Destination URL. |
+| `label` | `string` | (Required) | Text label. |
+| `active` | `boolean` | `false` | Visual highlight for active item. |
+

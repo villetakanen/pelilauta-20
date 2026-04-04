@@ -1,0 +1,80 @@
+---
+interface Props {
+  icon: string;
+  label: string;
+  href: string;
+  active?: boolean;
+}
+
+const { icon, label, href, active = false } = Astro.props;
+---
+
+<a href={href} class:list={["cn-tray-button", { active }]}>
+  <slot name="icon">
+    <span class="cn-tray-button__icon">{icon}</span>
+  </slot>
+  <span class="cn-tray-button__label">{label}</span>
+</a>
+
+<style>
+  .cn-tray-button {
+    display: flex;
+    align-items: center;
+    gap: var(--cn-gap);
+    inline-size: 100%;
+    min-block-size: calc(var(--cn-grid) * 6);
+    padding: var(--cn-grid);
+    color: var(--cn-link);
+    text-decoration: none;
+    border-radius: var(--cn-border-radius-small);
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .cn-tray-button:hover,
+  .cn-tray-button:focus {
+    background-color: var(--cn-hover);
+    outline: none;
+  }
+
+  .cn-tray-button:focus-visible {
+    box-shadow: 0 0 0 2px var(--cn-link);
+    outline-offset: 2px;
+  }
+
+  .cn-tray-button.active {
+    color: var(--cn-text);
+    background-color: var(--cn-hover);
+  }
+
+  .cn-tray-button__icon {
+    flex-shrink: 0;
+    display: grid;
+    place-items: center;
+    inline-size: calc(var(--cn-grid) * 4);
+    block-size: calc(var(--cn-grid) * 4);
+    font-size: var(--cn-icon-size-small);
+  }
+
+  .cn-tray-button__label {
+    font-size: var(--cn-font-size-text);
+    line-height: var(--cn-text-line-height);
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity 0.2s;
+  }
+
+  /* Structural coupling for rail mode */
+  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-tray-button__label) {
+    @media (min-width: 621px) {
+      display: none;
+      opacity: 0;
+    }
+  }
+
+  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-tray-button) {
+    @media (min-width: 621px) {
+      justify-content: center;
+      padding: var(--cn-grid);
+    }
+  }
+</style>

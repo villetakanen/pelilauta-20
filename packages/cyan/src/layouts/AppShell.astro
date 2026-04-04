@@ -1,0 +1,160 @@
+---
+import AppBar from "../components/AppBar.astro";
+import Tray from "../components/Tray.astro";
+
+interface Props {
+  title: string;
+  shortTitle?: string;
+  layout?: "view" | "sidebar" | "editor" | "modal";
+  trayLabel?: string;
+  backHref?: string;
+}
+
+const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+  </head>
+  <body class={`layout-${layout}`}>
+    {layout === 'sidebar' && (
+      <Tray>
+        <slot name="tray" />
+      </Tray>
+    )}
+    
+    <header class="cn-app-header">
+      <AppBar 
+        title={title} 
+        shortTitle={shortTitle} 
+        mode={layout === 'modal' ? 'modal' : ''} 
+        backHref={backHref}
+      >
+        <slot name="actions" />
+      </AppBar>
+    </header>
+
+    <main class="cn-app-main">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  @import "@cyan/tokens/index.css";
+  @import "../utilities/index.css";
+  @import "@cyan/fonts/fonts.css";
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--cn-font-family, sans-serif);
+    font-size: var(--cn-font-size-text, 16px);
+    line-height: var(--cn-line-height-text, 1.5);
+    color: var(--cn-text);
+    background-color: var(--cn-background);
+    
+    /* Setup fundamental layout canvas (View/Modal/Editor mode) */
+    display: grid;
+    grid-template-rows: var(--cn-app-bar-height, 4rem) 1fr;
+    grid-template-columns: 1fr;
+    min-height: 100dvh;
+  }
+
+  .cn-app-header {
+    grid-row: 1;
+    grid-column: 1 / -1;
+    z-index: 100;
+  }
+
+  .cn-app-main {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* --- Layout: View --- */
+  .layout-view .cn-app-main {
+    max-width: 80rem;
+    width: 100%;
+    margin-inline: auto;
+    padding: var(--cn-gap, 1rem);
+  }
+
+  /* --- Layout: Sidebar --- */
+  .layout-sidebar {
+    /* 
+      By default (Mobile), Tray is width 0 (overlay mode) and header/main span the full width. 
+      When Tray expands (Tablet/Desktop), its width changes and it pushes the rest of the grid.
+    */
+    grid-template-columns: max-content 1fr;
+  }
+
+  .layout-sidebar .cn-app-header,
+  .layout-sidebar .cn-app-main {
+    /* In sidebar layout, Header and Main start after the Tray (column 2) */
+    grid-column: 2;
+  }
+
+  .layout-sidebar :global(.cn-tray) {
+    /* Tray occupies the full height of the left column */
+    grid-row: 1 / -1;
+    grid-column: 1;
+    z-index: var(--cn-z-tray, 3000);
+  }
+
+  .layout-sidebar .cn-app-main {
+    max-width: 80rem;
+    width: 100%;
+    margin-inline: auto;
+    padding: var(--cn-gap, 1rem);
+  }
+
+  /* When tray is expanded, tablet mode uses absolute overlay, so main shouldn't be pushed on tablet.
+     But desktop uses 'relative' pushing drawer, which max-content handles correctly!
+     However, we need to ensure mobile doesn't offset padding improperly. */
+  
+  /* --- Layout: Editor --- */
+  .layout-editor {
+    /* lock scrolling */
+    overflow: hidden; 
+  }
+  .layout-editor .cn-app-main {
+    padding: 0; /* Fully flush rendering to edges */
+    max-width: unset;
+  }
+
+  /* --- Layout: Modal --- */
+  .layout-modal {
+    background-color: var(--cn-surface-4);
+  }
+  .layout-modal .cn-app-main {
+    background-color: var(--cn-background);
+    max-width: 42rem;
+    width: 100%;
+    margin-inline: auto;
+    min-height: calc(100dvh - var(--cn-app-bar-height, 4rem));
+    padding: var(--cn-gap, 1rem);
+  }
+
+  /* Cleanup generic mobile edge cases */
+  @media (max-width: 63.99rem) {
+    .layout-sidebar .cn-app-main,
+    .layout-modal .cn-app-main {
+      padding: var(--cn-gap, 1rem);
+      border-inline: none;
+      box-shadow: none;
+    }
+  }
+</style>

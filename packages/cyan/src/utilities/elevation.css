@@ -1,0 +1,53 @@
+/* Elevation Utilities */
+
+.elevation-0 {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.elevation-1 {
+  background-color: var(--cn-surface-1);
+  box-shadow: none; /* Spec: Elevation 1 is shadowless */
+}
+
+.elevation-2 {
+  background-color: var(--cn-surface-2);
+  box-shadow: var(--cn-shadow-elevation-2);
+}
+
+.elevation-3 {
+  background-color: var(--cn-surface-3);
+  box-shadow: var(--cn-shadow-elevation-3);
+}
+
+.elevation-4 {
+  background-color: var(--cn-surface-4);
+  box-shadow: var(--cn-shadow-elevation-4);
+}
+
+/* --- Relative Elevation Engine --- */
+/* When an elevated element is nested inside another, its shadow is reduced to signify a smaller relative leap. */
+
+/* Elevation 1 parents */
+.elevation-1 .elevation-2 {
+  box-shadow: none; /* Leap from 1 to 2 is like a level 1 leap (shadowless) */
+}
+.elevation-1 .elevation-3 {
+  box-shadow: var(--cn-shadow-elevation-2);
+}
+.elevation-1 .elevation-4 {
+  box-shadow: var(--cn-shadow-elevation-3);
+}
+
+/* Elevation 2 parents */
+.elevation-2 .elevation-3 {
+  box-shadow: none;
+}
+.elevation-2 .elevation-4 {
+  box-shadow: var(--cn-shadow-elevation-2);
+}
+
+/* Elevation 3 parents */
+.elevation-3 .elevation-4 {
+  box-shadow: none;
+}

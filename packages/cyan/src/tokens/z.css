@@ -1,0 +1,17 @@
+/*
+ * Z-index hierarchy for Cyan Design System components.
+ *
+ * Values are intentionally high to avoid collisions with third-party styles.
+ * Always reference these tokens — never use raw z-index numbers.
+ *
+ * Stacking order (back to front):
+ *   tray < rail < tray-button < reply-dialog < modal < snackbar
+ */
+:root {
+  --cn-z-tray: 20000;
+  --cn-z-rail: 30000;
+  --cn-z-tray-button: 40000;
+  --cn-z-reply-dialog: 41000;
+  --cn-z-modal: 50000;
+  --cn-z-snackbar: 60000;
+}

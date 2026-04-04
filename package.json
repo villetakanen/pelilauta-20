@@ -9,16 +9,20 @@
     "build": "pnpm --filter './app/*' build",
     "test": "pnpm --filter '*' test",
     "test:e2e": "pnpm --filter './app/*' test:e2e",
-    "check": "biome check --write ."
+    "check": "biome check --write .",
+    "ship": "bash scripts/ship.sh"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.0",
-    "@commitlint/cli": "^19.0.0",
-    "@commitlint/config-conventional": "^19.0.0",
-    "lefthook": "^1.10.0",
-    "typescript": "^5.7.0"
+    "@biomejs/biome": "^2.4.9",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "lefthook": "^2.1.4",
+    "typescript": "^6.0.2"
   },
   "pnpm": {
+    "overrides": {
+      "rollup": "4.59.1"
+    },
     "onlyBuiltDependencies": [
       "@biomejs/biome",
       "@firebase/util",

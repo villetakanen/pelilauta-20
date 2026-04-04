@@ -1,22 +1,30 @@
 ---
-import { Button } from "@cyan/index";
-import Base from "@shell/layouts/Base.astro";
-import TopNav from "@shell/nav/TopNav.svelte";
+import AppShell from "@cyan/layouts/AppShell.astro";
 ---
 
-<Base title="Cyan Design System">
-  <TopNav slot="nav" appName="Cyan DS" client:load />
+<AppShell title="Cyan Design System" layout="sidebar">
+  <nav slot="tray">
+    <h4>Main menu</h4>
+    <a href="#">Foundations</a>
+    <a href="#">Components</a>
+    <a href="#">Patterns</a>
+  </nav>
 
   <h1>Cyan Design System</h1>
-  <p>Component library for Pelilauta 20.</p>
+  <p>
+    Cyan Design System is a custom UI component library built for <a href="https://pelilauta.social">pelilauta.social</a>.
+  </p>
+  
+  <p>
+    For its fourth major redesign, the system is implemented using Astro components for structural SSR and Svelte 5 for interactive client-side progressive enhancement.
+  </p>
 
-  <section>
-    <h2>Button</h2>
-    <div style="display: flex; gap: var(--cyan-space-md); align-items: center; margin-top: var(--cyan-space-md);">
-      <Button label="Primary" client:load />
-      <Button label="Outline" variant="outline" client:load />
-      <Button label="Ghost" variant="ghost" client:load />
-      <Button label="Disabled" disabled client:load />
-    </div>
-  </section>
-</Base>
+  <h2>Source code and licensing</h2>
+  <p>
+    Most parts of the design system are licensed under the MIT license. Please check individual plugins and components for their independent licensing info.
+  </p>
+
+  <p>
+    All source code is managed as an internal package within the Pelilauta 20 pnpm workspace.
+  </p>
+</AppShell>
