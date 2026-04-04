@@ -6,8 +6,7 @@
 Standardize structural content layout within the `<main>` area using semantic HTML and CSS Grid, ensuring optimal readability (67ch) and adaptive gutters (8px grid) without component overhead.
 
 ### Architecture
-- **Content Grid CSS:** `packages/cyan/src/layouts/content-grid.css` (Standard centering)
-- **Dashboard Grid CSS:** `packages/cyan/src/layouts/dashboard-grid.css` (Utility-heavy views)
+- **Content Grid CSS:** `packages/cyan/src/layouts/content-grid.css` (Standard centering & gutters)
 - **Tokens:** `packages/cyan/src/tokens/units.css`
 - **Semantics:** Global rules targeting `main > section` and `main > article`.
 
