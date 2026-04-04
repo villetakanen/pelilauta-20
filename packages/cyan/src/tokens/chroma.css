@@ -20,7 +20,7 @@
    * Parameterized HSL (Hue and Saturation variables for easy adjustments)
    * Step Number = Lightness Percentage */
   --_surface-hue: 204;
-  --_surface-saturation: 100%;
+  --_surface-saturation: 98%;
 
   --chroma-surface-0: hsl(var(--_surface-hue) var(--_surface-saturation) 0%);
   --chroma-surface-10: hsl(var(--_surface-hue) var(--_surface-saturation) 10%);
