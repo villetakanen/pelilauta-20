@@ -9,6 +9,14 @@ export default defineConfig({
     resolve: {
       alias: {
         "@cyan": path.resolve(import.meta.dirname, "../../packages/cyan/src"),
+        "@pelilauta/icons": path.resolve(
+          import.meta.dirname,
+          "../../packages/pelilauta-icons/src/index.ts",
+        ),
+        "@myrrys/proprietary-icons": path.resolve(
+          import.meta.dirname,
+          "../../packages/myrrys-proprietary-icons/src/index.ts",
+        ),
       },
     },
   },

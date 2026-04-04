@@ -35,6 +35,12 @@ importers:
       '@astrojs/svelte':
         specifier: ^7.0.0
         version: 7.2.5(@types/node@25.5.0)(astro@5.18.1(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.1)(typescript@6.0.2))(jiti@2.6.1)(svelte@5.55.0)(typescript@6.0.2)
+      '@myrrys/proprietary-icons':
+        specifier: workspace:*
+        version: link:../../packages/myrrys-proprietary-icons
+      '@pelilauta/icons':
+        specifier: workspace:*
+        version: link:../../packages/pelilauta-icons
       astro:
         specifier: ^5.7.0
         version: 5.18.1(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.1)(typescript@6.0.2)
