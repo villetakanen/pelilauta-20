@@ -61,7 +61,7 @@ test.describe("Tray and Rail Components", () => {
     expect(style.borderRight).toContain("none");
   });
 
-  test("Tablet View: Expanded modal uses Elevation 4", async ({ page }) => {
+  test("Tablet View: Expanded modal uses Elevation 0", async ({ page }) => {
     await page.setViewportSize({ width: 700, height: 800 });
 
     const drawer = page.locator(".cn-drawer");
@@ -72,7 +72,7 @@ test.describe("Tray and Rail Components", () => {
     await expect(drawer).toBeInViewport();
 
     const boxShadow = await drawer.evaluate((node) => window.getComputedStyle(node).boxShadow);
-    expect(boxShadow).not.toBe("none");
+    expect(boxShadow).toBe("none");
   });
 
   test("Desktop View (1200px): Expanded drawer MUST PUSH main content", async ({ page }) => {

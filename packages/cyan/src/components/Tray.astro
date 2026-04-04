@@ -85,11 +85,17 @@ const id = "cn-tray-toggle";
     pointer-events: none;
   }
 
-  /* ── Expansion States (General/Mobile) ───────────────── */
+  /* --- Expansion States (General/Mobile) --- */
   .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
     transform: translateX(0);
     transition-timing-function: ease-out;
-    box-shadow: var(--cn-shadow-elevation-4);
+  }
+
+  /* Specific Elevation 4 rule for Mobile Overlays only */
+  @media (max-width: 620px) {
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      box-shadow: var(--cn-shadow-elevation-4);
+    }
   }
 
   .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
@@ -117,7 +123,7 @@ const id = "cn-tray-toggle";
       position: absolute;
       width: var(--cn-width-tray);
       height: 100vh;
-      box-shadow: var(--cn-shadow-elevation-4);
+      box-shadow: none; /* Flat style for tablet/desktop */
     }
   }
 

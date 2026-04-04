@@ -45,6 +45,10 @@ The Tray layout scales across three distinct modes:
    - **Collapsed:** Visible as a narrow Icon Rail.
    - **Expanded:** Push drawer (`position: relative`), which pushes the application's main content wrapper rather than overlaying it. No scrim displayed.
 
+- **Elevation:** 
+  - **Mobile (< 621px) Expanded:** Elevation 4 (using `var(--cn-shadow-elevation-4)`) to separate the drawer from the underlying content.
+  - **All other modes (Rail, Tablet/Desktop Expanded):** Elevation 0 (no shadow) to maintain a integrated, flat desktop aesthetic.
+
 ### Navigation Hierarchy
 - Primary routes use `TrayButton`.
 - When sub-routes exist, they are placed in `TrayLinkGroup` containing `TrayLink` items.
