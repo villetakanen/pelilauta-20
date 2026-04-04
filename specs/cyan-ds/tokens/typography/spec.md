@@ -1,4 +1,4 @@
-# Feature: Typography Tokens
+# Feature: Typography Principles & Tokens
 
 Parent: [Cyan DS Tokens](../spec.md)
 
@@ -6,24 +6,65 @@ Parent: [Cyan DS Tokens](../spec.md)
 
 ### Context
 
-Typography tokens define the core fonts, scale, and readability constraints for the Cyan design system. They are designed to scale with user preferences (`rem` based) and maintain strict accessibility across different surface elevations.
+Typography defines the core personality and informational hierarchy of Cyan. It provides a set of deterministic scales, semantic tag behaviors, and accessibility-first contrast rules that ensure readability across all application surfaces.
 
 ### Architecture
 
-- **v20 target:** `packages/cyan/src/tokens/typography.css`
-- **Namespace:** `--cn-font-*` (replacing deprecated `--cyan-font-*`)
-- **Format:** CSS custom properties on `:root`
-- **Unit:** `rem` for sizes (exception: unitless line-heights and numeric weights)
+- **Implementation:** `packages/cyan/src/tokens/typography.css` and `packages/cyan/src/tokens/typography-semantics.css` (or combined).
+- **Namespace:** `--cn-font-*` (replacing deprecated `--cyan-font-*`).
+- **Hosting Strategy:** Fonts are resolved from the `lato-font` npm package. Astro/Vite will automatically bundle and hash these assets during build time, ensuring professional font delivery with local fallback and `font-display: swap` support.
+- **Unit Strategy:** 
+  - **Sizes:** `rem` for accessibility and scaling.
+  - **Line-Heights:** Unitless (1.25, 1.5, 1.75).
+  - **Weights:** Numeric (300, 400, 700).
 
-### Core Tokens
+---
 
-| Property | Token | Default Value |
-|---|---|---|
-| **Family** | `--cn-font-family` | `system-ui, -apple-system, sans-serif` |
-| **Mono** | `--cn-font-family-mono` | `ui-monospace, monospace` |
-| **Sizes** | `--cn-font-size-{xs..3xl}` | `0.75rem` to `2.5rem` |
-| **Line-Height** | `--cn-line-height-{tight, normal, relaxed}` | `1.25`, `1.5`, `1.75` |
-| **Weight** | `--cn-font-weight-{normal, medium, bold}` | `400`, `500`, `700` |
+## Typography Scales
+
+### Heading Scale
+Cyan uses a 4-level semantic heading scale (`h1-h4`). The "H5" level in legacy Cyan-4 was an implementation detail for mobile down-scaling which has been rationalized in v20 as a `bold-text` level.
+
+The scale follows a **Major Third (1.25)** ratio, starting from the `1rem` base.
+
+| Level | Desktop Size | Desktop Weight | Mobile Size (< 620px) |
+|---|---|---|---|
+| **H1** | `2.441rem` (--cn-font-size-h1) | 300 | H2 (`1.953rem`) |
+| **H2** | `1.953rem` (--cn-font-size-h2) | 400 | H3 (`1.563rem`) |
+| **H3** | `1.563rem` (--cn-font-size-h3) | 400 | H4 (`1.25rem`) |
+| **H4** | `1.25rem` (--cn-font-size-h4) | 400 | **Text-Bold** (`1rem`) |
+
+> [!NOTE]
+> **The H5 Legacy:** In v20, `h5` tags are NOT targeted globally. The `.text-h5` utility and weight-500 logic are reserved for specific UI annotations and sub-headings that require high density but low hierarchy.
+
+
+### Reading Scale
+The base text scale used for `p`, `li`, `blockquote`, and other prose elements.
+
+- **Primary Text:** `1rem` (`--cn-font-size-text`), line-height: `1.5`.
+- **Monospace Text:** `--cn-font-family-mono`, size: `--cn-font-size-mono`.
+
+---
+
+## Semantic Behavioral Contracts
+
+### 1. Vertical Rhythm & Spacing
+Typography elements manage their own downward spacing to ensure a consistent typographical flow.
+- **Headings:** `margin-bottom: var(--cn-line)` (standard grid unit).
+- **Paragraphs/Lists/Quotes:** `margin-bottom: var(--cn-gap)` (standard gap unit).
+- **Relief Rule:** The first `h1`, `h2`, `h3`, or `h4` inside an `<article>` must have `margin-top: 0` to prevent excessive gap at the top of a document.
+
+### 2. Fluid Layout Fallbacks
+To maintain header hierarchy on narrow screens, headings are down-scaled via media queries (Breakpoint: `620px`).
+- **H1** → **H2** style (1.953rem).
+- **H2** → **H3** style (1.563rem).
+- **H3** → **H4** style (1.25rem).
+- **H4** → **Bold Text** style (1rem).
+
+### 3. Utility Classes
+Applications can apply typographical styles to non-semantic tags or override defaults using utility classes:
+- **Classes:** `.text-h1` through `.text-h5`.
+- **Behavior:** These classes mirror the properties (size, weight, line-height) of their corresponding semantic tags.
 
 ---
 
@@ -37,22 +78,48 @@ Typography tokens define the core fonts, scale, and readability constraints for 
 - **Background:** `var(--chroma-surface-40)` (~13.5% relative luminance)
 - **Text:** `var(--chroma-surface-100)` (White)
 - **Resulting Contrast:** **4.6:1** (AA Pass)
-- **Why?** Even near-white Step 99 yields only 4.42:1, which is technically a failure.
 
-### General Guidelines
-
-- **Primary Text (Dark):** Use Step 95 or higher for safe AA on all surfaces up to Elevation 3.
-- **De-emphasized Text:** Step 60 is the dark-mode floor for readability; below this, text is strictly decorative or fails AA.
+---
 
 ## Contract
 
 ### Definition of Done
 
-- [ ] All typography tokens use the `--cn-font-*` namespace.
-- [ ] Font sizes are `rem` based to support browser zoom/scaling.
-- [ ] Line heights are unitless for correct proportional inheritance.
+- [ ] All typography uses the `--cn-font-*` namespace.
+- [ ] Font sizes are `rem` based to support browser scaling.
+- [ ] Line heights are unitless for correct inheritance.
+- [ ] Global `h1-h4` tags are anchored to their respective scale tokens.
+- [ ] Mobile down-scaling logic (H1->H2) is implemented for all headings.
 
-### Regression Guardrails
+### Testing Scenarios
 
-- Changes to `--cn-font-family` must be verified against vertical alignment in components like `AppBar` and `Button`.
-- Tonal changes in the `chroma` surface scale MUST trigger a re-verification of the Elevation 4 Contrast Rule.
+#### Scenario: Heading Down-scaling
+```gherkin
+  Given a <h1> element in the main content area
+  When the viewport width is reduced to 400px
+  Then the computed font-size must match the var(--cn-font-size-h2) token
+```
+- **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/typography.spec.ts`
+
+#### Scenario: Article First-Heading Relief
+```gherkin
+  Given an <article> containing an <h2> as its first child
+  When the article is rendered
+  Then the <h2> must have exactly 0px margin-top
+```
+- **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/typography.spec.ts`
+
+---
+
+## Documentation (Living Style Book)
+
+The documentation at `app/cyan-ds/src/content/principles/typography.mdx` provides the visual and behavioral reference for Cyan's type system.
+
+### Content Strategy & Demos
+
+1. **The Scale Visualizer**: A side-by-side comparison of the **Desktop** vs. **Mobile** Major Third (1.25) scale, with each level (H1-H4) explicitly labeled with its `--cn-font-*` token.
+2. **Semantic vs. Utility Labs**: A demonstration showing equivalent rendering for semantic tags (`h1`) and utility classes (`.text-h1`).
+3. **Article Relief HUD**: A live demo block showing the first-child `margin-top: 0` logic, specifically identifying the removal of the standard gap.
+4. **Contrast Guardrails**: A matrix demonstrating text readability across surface elevations (0-4), explicitly highlighting the **Elevation 4 (White Text)** mandatory rule in Dark Mode.
+5. **Layout Atomics**: Examples of paragraphs, blockquotes, and lists interacting with the system's vertical rhythm tokens (`--cn-gap` and `--cn-line`).
+
