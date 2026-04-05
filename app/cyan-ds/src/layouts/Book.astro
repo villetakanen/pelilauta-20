@@ -1,6 +1,8 @@
 ---
 import { type CollectionEntry, getCollection } from "astro:content";
 import TrayButton from "@cyan/components/TrayButton.astro";
+import TrayLink from "@cyan/components/TrayLink.astro";
+import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
 import AppShell from "@cyan/layouts/AppShell.astro";
 
 interface Props {
@@ -66,24 +68,32 @@ const groups: {
     />
 
     {
-      groups.map(
-        (group) =>
-          group.entries.length > 0 && (
-            <>
-              <h4 class="cn-book-tray-section">{group.label}</h4>
+      groups.map((group) => {
+        if (group.entries.length === 0) return null;
+        
+        const firstEntryHref = `/${group.id}/${group.entries[0].slug}`;
+        const isCurrentGroup = Astro.url.pathname.startsWith(`/${group.id}`);
+
+        return (
+          <>
+            <TrayButton
+              icon={group.defaultIcon}
+              label={group.label}
+              href={firstEntryHref}
+              active={isCurrentGroup}
+            />
+            <TrayLinkGroup ariaLabel={group.label}>
               {group.entries.map((entry) => (
-                <TrayButton
-                  icon={entry.data.icon || group.defaultIcon}
+                <TrayLink
                   label={entry.data.title}
                   href={`/${group.id}/${entry.slug}`}
-                  active={Astro.url.pathname.includes(
-                    `/${group.id}/${entry.slug}`,
-                  )}
+                  active={Astro.url.pathname === `/${group.id}/${entry.slug}`}
                 />
               ))}
-            </>
-          ),
-      )
+            </TrayLinkGroup>
+          </>
+        );
+      })
     }
   </div>
 
@@ -105,20 +115,19 @@ const groups: {
 </AppShell>
 
 <style>
-  /* Only keep styles unique to the documentation tray navigation */
-  h4.cn-book-tray-section {
-    margin-block: var(--cn-gap) var(--cn-grid);
-    padding-inline: var(--cn-grid);
-    font-size: var(--cn-font-size-xs, 0.75rem);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    opacity: 0.6;
+  /* Base styles for the Book layout */
+  article {
+    max-width: 64rem;
+    margin: 0 auto;
+    padding: var(--cn-gap);
   }
 
-  /* Hide tray sections on desktop when tray is collapsed */
-  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-book-tray-section) {
-    @media (min-width: 64rem) {
-      display: none;
-    }
+  header {
+    margin-bottom: var(--cn-gap);
+  }
+
+  h1 {
+    margin-bottom: var(--cn-grid);
+    color: var(--cn-text-high);
   }
 </style>

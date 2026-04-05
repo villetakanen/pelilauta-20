@@ -1,35 +1,33 @@
 ---
+interface Props {
+  ariaLabel?: string;
+}
+
+const { ariaLabel = "Secondary Navigation" } = Astro.props;
 ---
 
-<div class="cn-tray-link-group">
-  <div class="cn-tray-link-group__content">
-    <slot />
-  </div>
-</div>
+<ul class="cn-tray-link-group" aria-label={ariaLabel}>
+  <slot />
+</ul>
 
 <style>
   .cn-tray-link-group {
     display: flex;
     flex-direction: column;
+    list-style: none;
+    margin: 0;
+    padding: 0;
     padding-inline-start: calc(var(--cn-grid) * 5);
-    margin-block-start: calc(var(--cn-grid) * -1);
-    margin-block-end: var(--cn-gap);
-    transition: opacity 0.2s, max-block-size 0.2s;
-    overflow: hidden;
-  }
-
-  .cn-tray-link-group__content {
-    display: flex;
-    flex-direction: column;
     gap: calc(var(--cn-grid) * 0.5);
   }
 
-  /* Structural coupling for rail mode - hide sub-links when collapsed in rail mode */
-  :global(.cn-tray:not(:has(.cn-tray-toggle:checked)) .cn-tray-link-group) {
-    @media (min-width: 621px) {
+  /* 
+     Hides the sub-navigation group when the container (the Tray) 
+     is in Rail Mode (collapsed). 
+  */
+  @container (max-width: 5.5rem) {
+    .cn-tray-link-group {
       display: none;
-      opacity: 0;
-      max-block-size: 0;
     }
   }
 </style>

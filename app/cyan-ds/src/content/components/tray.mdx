@@ -10,18 +10,58 @@ import TrayLink from "@cyan/components/TrayLink.astro";
 
 
 The tray is a multi-mode responsive navigation sidebar. It adapts its layout based on container width:
-- **Small (< 621px):** Toggleable drawer overlay with scrim.
-- **Medium (>= 621px):** Persistent icon rail that expands into an overlay modal on click.
-- **Large (>= 780px):** Persistent icon rail that pushes content when expanded (no scrim).
+- **Mobile (< 621px):** Toggleable drawer overlay with scrim.
+- **Tablet (>= 621px):** Persistent icon rail that expands into an overlay modal on click.
+- **Desktop (>= 780px):** Persistent icon rail that pushes content when expanded (no scrim).
 
 ## Navigation Hierarchy
 
-<div class="demo-box" style="padding: 2rem; background: var(--cn-color-surface-1); border-radius: 8px; max-width: 20rem; position: relative; z-index: 1;">
-  <TrayButton icon="fox" label="Home" href="#" active />
-  <TrayButton icon="avatar" label="Profile" href="#" />
-  <TrayButton icon="bubble" label="Inbox" href="#" />
-  <TrayLinkGroup>
-    <TrayLink label="Archived" href="#" />
-    <TrayLink label="Spam" href="#" />
+Hierarchical navigation is achieved by pairing `TrayButton` (primary categories) with `TrayLinkGroup` and `TrayLink` (sub-pages).
+
+### Pattern: Category Navigation
+
+In this pattern, a primary `TrayButton` acts as the group header and index link. All sub-pages are nested within a `TrayLinkGroup`.
+
+<div class="demo-box" style="padding: 1rem; background: var(--cn-surface-1); border-radius: var(--cn-border-radius-medium); max-width: 20rem; border: 1px solid var(--cn-border);">
+  <TrayButton icon="components" label="Components" href="#" active />
+  <TrayLinkGroup ariaLabel="Components Sub-navigation">
+    <TrayLink label="App Bar" href="#" />
+    <TrayLink label="Button" href="#" active />
+    <TrayLink label="Tray" href="#" />
+  </TrayLinkGroup>
+  
+  <TrayButton icon="palette" label="Principles" href="#" />
+  <TrayLinkGroup ariaLabel="Principles Sub-navigation">
+    <TrayLink label="Content Grids" href="#" />
+    <TrayLink label="Elevation" href="#" />
   </TrayLinkGroup>
 </div>
+
+## Components
+
+### TrayButton
+The primary interactive element. In "Rail Mode" (collapsed), it displays only the icon. In "Expanded Mode", it displays both the icon and label.
+
+### TrayLinkGroup
+A semantic container (`<ul>`) for sub-navigation links. 
+- **Visibility:** Automatically hidden via `@container` queries when the Tray is in Rail Mode.
+- **Accessibility:** Uses `aria-label` to provide context for the link group.
+
+### TrayLink
+An individual navigation item (`<li><a>`) used within a group.
+- **Active State:** Uses `aria-current="page"` for semantic highlighting.
+- **Overflow:** Automatically applies ellipsis to long labels.
+
+## Properties
+
+### TrayLinkGroup
+| Prop        | Type     | Default                  | Description                               |
+| :---------- | :------- | :----------------------- | :---------------------------------------- |
+| `ariaLabel` | `string` | "Secondary Navigation"   | Accessible label for the `<ul>` element.    |
+
+### TrayLink
+| Prop     | Type      | Default | Description                               |
+| :------- | :-------- | :------ | :---------------------------------------- |
+| `href`   | `string`  | (Req)   | Navigation destination.                   |
+| `label`  | `string`  | (Req)   | Text label for the link.                  |
+| `active` | `boolean` | `false` | Whether the link is the current resource. |
