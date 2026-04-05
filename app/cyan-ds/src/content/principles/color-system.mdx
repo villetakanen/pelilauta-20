@@ -5,82 +5,161 @@ order: 1
 status: stable
 icon: paintbrush
 ---
+import ColorScale from "../../components/ColorScale.svelte";
 
-Cyan utilizes a **Layered Color Model** that separates brand identity from functional intent. This architecture ensures that specialized campaign or sub-site branding can be applied instantly without modifying component logic.
+Cyan treates color as a highly structured, scalable language. We utilize a **Layered Color Model** that separates mechanical brand identity from functional user intent.
+
+---
 
 ## 1. The 3-Tier Layering Model
 
-1.  **The Chroma Layer (Mechanical):** 13-step tonal scales (MD3) where "raw" HSL values live. This layer is designed to be **Swappable**.
-2.  **The Semantic Layer (Functional):** Maps Chroma steps to functional roles (e.g., `--cn-text`, `--cn-button-accent`). This layer is **Immutable**.
-3.  **The Component Layer (Consumptive):** Components consume only semantic tokens. They never reference raw HSL values.
+Our system bridges the gap between raw "Ink" and meaningful "Intent" through three distinct layers:
+
+1.  **The Chroma Layer (Mechanical):** Raw tonal scales (MD3) where hand-tuned HSL values live. This layer is **Swappable** for sub-site branding.
+2.  **The Semantic Layer (Functional):** Maps Chroma steps to functional roles (e.g., `--color-text`, `--color-button-accent`). This layer is a **Stable API**.
+3.  **The Component Layer (Consumptive):** Components only consume semantic tokens. They never reference raw HSL or hex values.
 
 ---
 
-## 2. The Chroma Scales (The Ink)
+## 2. Primitives: The Chroma Scales
 
-Cyan provides the following foundational palettes. Each follows a 13-point tonal scale from 0 (Black) to 100 (White).
+Every color in Cyan belongs to a 13-point tonal scale from 0 (Black) to 100 (White). These are the "raw ingredients" of the system.
 
-### Brand & Surface
-- **Primary:** Rotates hue from **Teal (185°)** at step 0 to **Yellow (65°)** at step 100.
-- **Surface:** Parameterized Navy slate (Hue 204°, Saturation 98%) for all UI containers.
+### Core Branding & UI Surfaces
 
-<div style="display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0;">
-  <div style="display: flex; gap: 2px;">
-    { [0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => <div key={s} style={`flex:1; height: 2rem; background: var(--chroma-primary-${s}); border-radius: 2px;`} title={`Primary ${s}`}></div>) }
-  </div>
-  <div style="display: flex; gap: 2px;">
-    { [0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => <div key={s} style={`flex:1; height: 2rem; background: var(--chroma-surface-${s}); border-radius: 2px;`} title={`Surface ${s}`}></div>) }
-  </div>
-</div>
+| Palette | Hue Range | Strategy |
+| :--- | :--- | :--- |
+| **Primary** | 185° → 65° | Perceptual hue rotation from Teal to Yellow across the tonal range. |
+| **Surface** | 204° (Navy) | Parameterized Slate (20% saturation) for stable UI containers. |
 
-### Functional Accents
-Used for status, warnings, and localized feedback.
+**Primary Scale**
+<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} />
 
-| Palette | Hue | Role |
+**Surface Scale**
+<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} />
+
+#### Technical Reference (Primary)
+| Step | HSL Value | Hex | Usage |
+| :--- | :--- | :--- | :--- |
+| **0** | `hsl(185 100% 8%)` | `#002229` | Deep Black-Teal |
+| **20** | `hsl(170 100% 20%)` | `#006655` | Accent Dark |
+| **50** | `hsl(134 44% 44%)` | `#3f965c` | Median |
+| **80** | `hsl(88 68% 58%)` | `#a9d453` | Brand Highlight |
+| **100** | `hsl(65 100% 95%)` | `#fcfde6` | Paper Yellow |
+
+### Functional Palettes
+
+| Palette | Base Hue | Intent |
 | :--- | :--- | :--- |
 | **Error** | 318° | Destructive actions, validation errors. |
-| **Warning** | 65° | Non-blocking alerts, high-visibility state. |
+| **Warning** | 65° | High-visibility alerts. |
 | **Info** | 170° | System feedback, neutral state changes. |
 | **Love** | 3° | Positive intent, heart/favorite actions. |
 
-<div style="display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0;">
-  {['error', 'warning', 'info', 'love'].map(p => (
-    <div key={p} style="display: flex; gap: 2px;">
-      {[20, 40, 60, 90].map(s => <div key={s} style={`flex:1; height: 1.5rem; background: var(--chroma-${p}-${s}); border-radius: 2px;`} title={`${p} ${s}`}></div>)}
-    </div>
-  ))}
-</div>
+**Error**
+<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-error-${s})`)} labels={['20 Critical', '40 Base', '60 High', '90 Tint']} />
+
+**Warning**
+<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-warning-${s})`)} labels={['20', '40', '60', '90']} />
+
+**Info**
+<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-info-${s})`)} labels={['20', '40', '60', '90']} />
+
+**Love**
+<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-love-${s})`)} labels={['20', '40', '60', '90']} />
 
 ---
 
-## 3. The Swappability Principle
+## 3. Semantic Mapping (Functional Interface)
 
-The core of Cyan's theming strategy is: **"Swap the Chroma, preserve the Semantic."** 
+Developers utilize role-based tokens to build UI. These tokens automatically resolve to the correct tonal step per theme using `light-dark()`.
 
-### ThemeLab: Interactive Rebranding
-Use the controls below to see how overriding a single Chroma variable rebranding the entire UI while the semantic logic (the component structure) remains unchanged.
+### Surfaces & Backgrounds
+| Semantic Token | Light Mode step | Dark Mode step | Role |
+| :--- | :--- | :--- | :--- |
+| `--color-surface` | surface-100 | surface-10 | Base container background |
+| `--color-surface-1` | white | surface-20 | Elevated Level 1 |
+| `--color-surface-4` | surface-50 | surface-40 | Elevated Level 4 (Highest) |
+| `--color-on-surface` | surface-10 | surface-100 | Standard text on surfaces |
 
-{/* Placeholder for Interactive Demo logic - using scoped styles for MDX preview */}
+### Interactive & Actions
+| Semantic Token | Light Mode step | Dark Mode step | Role |
+| :--- | :--- | :--- | :--- |
+| `--color-button-accent` | primary-20 | primary-70 | High-emphasis branding action |
+| `--color-button-cta` | error-40 | error-60 | Destructive / Final action |
+| `--color-link` | primary-30 | primary-80 | Textual navigation |
+
+---
+
+## 4. Accessibility & Contrast Matrix
+
+Accessibility is a hard constraint for Cyan. We enforce **WCAG AA (4.5:1)** contrast for all typography and iconic content.
+
+### Contrast Guardrail: The Elevation 4 Rule
+In Dark Mode, as surfaces elevate, they become lighter to represent proximity to the light source. At **Elevation 4**, the background is a mid-dark Slate.
+
+> [!CAUTION]
+> **Mandatory White Text:** On `surface-40`, standard secondary or low-contrast text is forbidden. You MUST use `chroma-surface-100` (White) to maintain a passing 4.6:1 contrast ratio.
+
+#### Contrast Verification Scale
+<ColorScale 
+  client:load 
+  colors={['var(--chroma-surface-40)', 'var(--chroma-surface-40)']} 
+  labels={['AA Pass (on White)', 'AA Fail (on Step 80)']} 
+  textColors={['white', 'var(--chroma-surface-80)']}
+/>
+
+> [!NOTE]
+> The scale above uses the same background color for both swatches. Use the **Luminance** toggle to see how the perceived brightness is identical, even though the text readability differs based on the foreground token choice.
+
+---
+
+## 5. Usage Guidelines: Do's and Don'ts
+
+### Do
+- **Do** use semantic tokens for all UI elements.
+- **Do** use `primary` for brand-affirming actions (Save, Submit, Next).
+- **Do** use `love` for social validation (Likes, Favorites) rather than `error`.
+
+### Don't
+- **Don't** use brand teal for destructive actions. Error/CTA exists for a reason.
+- **Don't** override a semantic token locally (e.g., `--color-text: red`). Override the underlying Chroma instead if rebranding.
+- **Don't** reference HSL values outside of the `chroma.css` file.
+
+---
+
+## 6. ThemeLab: The Verification Environment
+
+The **ThemeLab** serves as the definitive manual verification target for color system updates. If a change to `chroma.css` breaks the legibility in this lab, the change is rejected.
+
 <div class="theme-lab-container" style="padding: 2rem; border-radius: var(--cn-radius-lg); border: 2px solid var(--cn-border); background: var(--cn-background); position: relative;">
   <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
-    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-50', 'hsl(3 74% 50%)'); document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-20', 'hsl(3 74% 20%)')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Crimson</button>
-    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-50', 'hsl(147 56% 36%)'); document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-20', 'hsl(185 100% 14%)')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Forest</button>
-    <button onclick="document.querySelector('.theme-lab-target').style.removeProperty('--chroma-primary-50'); document.querySelector('.theme-lab-target').style.removeProperty('--chroma-primary-20')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Reset Cyan</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--_primary-hue', '3'); document.querySelector('.theme-lab-target').style.setProperty('--_surface-hue', '5')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Crimson</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--_primary-hue', '140'); document.querySelector('.theme-lab-target').style.setProperty('--_surface-hue', '150')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Forest</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.removeProperty('--_primary-hue'); document.querySelector('.theme-lab-target').style.removeProperty('--_surface-hue')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Reset Cyan</button>
   </div>
 
   <div class="theme-lab-target" style="padding: 2rem; border: 1px solid var(--cn-border); border-radius: var(--cn-radius-md); background: var(--cn-surface-1);">
-    <span class="text-h3" style="display: block; margin-top: 0;">Sample UI Section</span>
-    <p>This section uses semantic tokens like <code>--cn-button-accent</code> and <code>--cn-text</code>.</p>
-    <button style="background: var(--cn-button-accent, var(--chroma-primary-50)); color: white; border: none; padding: 0.5rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700;">Action Button</button>
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+       <div>
+         <span class="text-h3" style="display: block; margin-top: 0;">Semantic Verification</span>
+         <p style="color: var(--color-on-surface-secondary);">Verifying accessibility across themes.</p>
+       </div>
+       <div style="height: 48px; width: 48px; background: var(--color-button-accent); border-radius: 50%;"></div>
+    </div>
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <button style="background: var(--color-button-accent); color: white; border: none; padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Primary Action</button>
+      <button style="background: transparent; color: var(--color-link); border: 1px solid var(--color-link); padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Secondary Action</button>
+    </div>
   </div>
 </div>
 
 ---
 
-## 4. Semantic Immutability
+## 7. Testing Strategy
 
-> [!WARNING]
-> While Chroma can be replaced, **Semantic Tokens must never be overridden**. 
-> 
-> You should never do: `button { --cn-button-accent: red; }`. 
-> Instead, if you need a red button, you either use a dedicated functional class or, if it's for branding, you override the underlying Chroma token: `:root { --chroma-primary-50: red; }`. 
+Manual verification of the color system involves checking the following in the Style Book:
+
+1.  **Chroma Determinism:** Ensure all tonal steps in the Primitives table map correctly to the browser's computed HSL values.
+2.  **Semantic Resolution:** Verify that theme-switching correctly swaps `color-surface` between light/dark variants.
+3.  **ThemeLab Stability:** Confirm that sub-site rebranding (overriding hue variables) maintains the 3-tier layering contract without visual breakage.

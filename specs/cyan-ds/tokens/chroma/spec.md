@@ -66,7 +66,7 @@ Every tonal step is explicitly declared to ensure deterministic contrast and han
 Accent palettes define single-hue tonal scales for functional UI states. Unlike primary/secondary/surface, accents don't need all 13 steps — only the steps actually used. The step number indicates brightness on the MD3 tonal scale (0 = darkest, 100 = lightest).
 
 | Palette | Base hue |
-|---|---|
+| :--- | :--- |
 | `--chroma-error-{step}` | Magenta `hsl(318, 83%, 40%)` |
 | `--chroma-warning-{step}` | Yellow `hsl(65, 100%, 63%)` |
 | `--chroma-info-{step}` | Teal `hsl(170, 100%, 20%)` |
@@ -107,11 +107,11 @@ Scenario: Surface palette uses explicit HSL
 ```
 ## Documentation (Living Style Book)
 
-The documentation at `app/cyan-ds/src/content/principles/color-system.mdx` provides the foundational reference for Cyan's color architecture.
+The documentation at `app/cyan-ds/src/content/principles/color-system.mdx` provides the definitive reference for the entire color architecture (Chroma + Semantic).
 
 ### Content Strategy & Demos
 
-1. **The Layered Model**: Explains the 3-tier hierarchy (Chroma → Semantic → Component) and the "Ink vs. Intent" philosophy.
-2. **The Tonal Scales**: Visualizes all 6 core palettes (Primary, Surface, Error, Warning, Info, Love) across their MD3 tonal steps.
-3. **Primary Hue Rotation**: Illustrates the unique Teal-to-Yellow perceptual curve of the branding palette.
-4. **ThemeLab Interactive**: An interactive "laboratory" demo allowing real-time overriding of Chroma variables to demonstrate the system's swappability.
+1. **Color Lifecycle**: Explains the 3-tier layering model and the "Swappable Chroma" principle.
+2. **Semantic Mapping Reference**: Detailed tables showing how each functional role maps to its underlying positional chroma step.
+3. **Contrast Matrix**: A live accessibility HUD demonstrating conformance across all surface levels.
+4. **ThemeLab**: The interactive verification environment for real-time rebranding.
