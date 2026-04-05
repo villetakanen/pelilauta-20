@@ -3,9 +3,10 @@ title: Typography
 description: The core font hierarchy, high-contrast scaling, and vertical rhythm system for Cyan.
 order: 10
 status: stable
+icon: font
 ---
 
-Cyan v20 delivers a high-impact, editorial typography system anchored to the **Lato** family. 
+Cyan v20 delivers a high-impact, editorial typography system anchored to the **Lato** family. Our system prioritizing a high-contrast, "punchy" look by utilizing the **Augmented Fourth (1.414)** modular scale.
 
 ## 1. High-Contrast Base (17px)
 
@@ -15,47 +16,27 @@ To optimize Lato's legibility at modern screen resolutions, we use a **17px** ba
 
 ## 2. Augmented Fourth (1.414) Scale
 
-The hierarchy follows the intense rhythm of the **Augmented Fourth** modular scale. This creates a significant "punch" for headers while maintaining clearly distinguishable steps.
+The hierarchy follows the intense rhythm of the Augmented Fourth scale. This creates a significant "punch" for headers while maintaining clearly distinguishable steps.
 
-| Level | Size (px) | Line Height | Letter Spacing | Margin Bottom | Utility |
-|---|---|---|---|---|---|
-| <div class="text-h1">H1</div> | **4.25rem** (68px) | **1.294** (88px) | **-0.02em** | **1.5rem** (24px) | `.text-h1` |
-| <div class="text-h2">H2</div> | **3.0rem** (48px) | **1.333** (64px) | **-0.01em** | **1.5rem** (24px) | `.text-h2` |
-| <div class="text-h3">H3</div> | **2.125rem** (34px) | **1.412** (48px) | **0.01em** | **1.5rem** (24px) | `.text-h3` |
-| <div class="text-h4">H4</div> | **1.5rem** (24px) | **1.333** (32px) | **normal** | **1.5rem** (24px) | `.text-h4` |
-| <div class="text-bold">Body</div> | **1.0625rem** (17px) | **1.412** (24px) | **0.03em** | **1.0rem** (16px) | `.text-body` |
+| Level | Scale Step | Desktop Size | Line Height | Mobile Fallback (< 620px) |
+| :--- | :--- | :--- | :--- | :--- |
+| **H1** | Step 4 | **4.25rem** (68px) | **1.25** | **3.0rem** (H2 style) |
+| **H2** | Step 3 | **3.0rem** (48px) | **1.25** | **2.125rem** (H3 style) |
+| **H3** | Step 2 | **2.125rem** (34px) | **1.5** | **1.5rem** (H4 style) |
+| **H4** | Step 1 | **1.5rem** (24px) | **1.5** | **Base-Bold** (17px) |
+| **Body** | Base | **1.0625rem** (17px)| **1.5** | **1.0625rem** |
 
 ---
 
 ## 3. Responsive Fallbacks (Container Queries)
 
-Each heading responds to its container width by shifting precisely one step down the scale. The H4 (24px) falls back to our **Base Bold (17px)** weight to preserve readability. This scaling is driven by **Container Queries** on the `main` or `article` element.
-
----
-
-## 4. Vertical Rhythm (8px Grid)
-
-Typography adheres to a deterministic **8px baseline grid**. 
-
-- **Body Line-Height:** Fixed at **24px** (3 grid units) for optimal readability. 
-- **Heading Line-Heights:** Anchored to specific grid multiples (88px, 64px, 48px, 32px) to ensure consistent flow, specifically tuned to contrast with the standard body line.
-- **Letter Spacing:** Pushed significantly on large displays (H1-H2) to create an editorial, "punchy" aesthetic.
-
-<div style="background: var(--cn-surface-1); padding: 2rem; border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
-  <div style="font-size: var(--cn-font-size-h1); font-weight: var(--cn-font-weight-h1);">Display H1 (68px)</div>
-  <div style="font-size: var(--cn-font-size-h2); font-weight: var(--cn-font-weight-h2); opacity: 0.8;">H2 Mobile Shifter (48px)</div>
-</div>
+Each heading responds to its container width by shifting precisely one step down the scale. H4 (24px) falls back to our **Base Bold (17px)** weight to preserve readability. This scaling is driven by **Container Queries** on the `main` or `article` element at a **620px** threshold.
 
 ---
 
 ## 4. Article Relief
 
-Cyan automatically applies "Relief" (margin-top: 0) to the leading heading inside any `article` element. This ensures that content remains perfectly aligned with UI containers.
-
-<article style="background: var(--cn-surface-2); padding: 1.5rem; border: 1px solid var(--cn-border-color);">
-  <h2 style="background: var(--cn-color-secondary-low); color: white; padding: 0.5rem;">Leading H2 (Relief HUD Active)</h2>
-  <p>The standard top-margin of this H2 has been zeroed out to align with the parent container.</p>
-</article>
+Cyan automatically applies "Relief" (margin-top: 0) to it leading heading inside any `article` element. This ensures that content remains perfectly aligned with UI containers.
 
 ---
 
@@ -63,17 +44,20 @@ Cyan automatically applies "Relief" (margin-top: 0) to the leading heading insid
 
 Accessibility is non-negotiable. Our system enforces specific text colors based on surface elevation.
 
+> [!IMPORTANT]
+> **Elevation 4 Guardrail:** In Dark Mode, when a surface is **Elevation 4**, typography MUST use **Step 100 (White)** to maintain WCAG AA (4.5:1) compliance.
+
 <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
-  <div style="background: var(--cn-surface-1); padding: 1rem; border: 1px solid var(--cn-border-color);">
-    <span class="text-medium">Elevation 1</span>
-    <p style="opacity: 0.9;">Standard Text</p>
+  <div class="elevation-1" style="padding: 1rem; border: 1px solid var(--cn-border);">
+    <span class="text-bold">Elevation 1</span>
+    <p class="text-caption">Standard Contrast</p>
   </div>
-  <div style="background: var(--cn-surface-2); padding: 1rem; border: 1px solid var(--cn-border-color);">
-    <span class="text-medium">Elevation 2</span>
-    <p style="opacity: 0.9;">Standard Text</p>
+  <div class="elevation-2" style="padding: 1rem; border: 1px solid var(--cn-border);">
+    <span class="text-bold">Elevation 2</span>
+    <p class="text-caption">Standard Contrast</p>
   </div>
-  <div style="background: var(--cn-surface-4); padding: 1rem; color: white;">
-    <span class="text-bold" style="color: white;">Elevation 4 (Dark Only)</span>
-    <p style="color: white;">Mandatory White Text applied.</p>
+  <div class="elevation-4" style="padding: 1rem; color: white; border: 1px solid var(--cn-border-hover);">
+    <span class="text-bold" style="color: white;">Elevation 4</span>
+    <p class="text-caption" style="color: white; opacity: 0.8;">Mandatory White Text applied.</p>
   </div>
 </div>

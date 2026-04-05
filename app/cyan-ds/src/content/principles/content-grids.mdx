@@ -6,37 +6,37 @@ status: stable
 icon: card
 ---
 
-
 Content Grids are the structural backbone of Cyan. They prioritize readability and deterministic spacing by utilizing a 3-column "Holy Grail" grid applied globally to `section` and `article` tags within the main content area.
 
-## Structural Logic
+## 1. Structural Logic
 
 All content regions respond to the width of the parent `<main>` container using **Container Queries**.
 
-- **Mobile (< 60rem):** Gutter padding of `--cn-gap` (16px) is enforced.
+- **Mobile:** Gutter padding of `--cn-gap` (16px) is enforced.
 - **Desktop (>= 60rem):** Content is centered with a max-width of **`67ch`** (the optimal character measure for focused reading).
 
 ### Default Centering
 
-By default, all children of a `section` or `article` are anchored to the central column.
+By default, all children of a `section` or `article` are anchored to the central column without requiring manual utility classes.
 
-<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border-color); padding: 1rem;">
-  <section class="cn-content-grid" style="background: var(--cn-surface-2); border: 1px solid var(--cn-color-primary-low); position: relative;">
+<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; border-radius: var(--cn-border-radius-medium);">
+  <section class="cn-content-grid" style="background: var(--cn-surface-2); position: relative; border-radius: var(--cn-border-radius-small);">
     <small style="position: absolute; top: 4px; right: 8px; opacity: 0.5; font-size: 10px;">Grid Column 2</small>
-    <h3>Standard Section</h3>
+    <h3 style="margin-top: 0;">Standard Section</h3>
     <p>This section is automatically centered to exactly 67ch on wide screens. No CSS classes were applied to this paragraph or header to achieve this alignment.</p>
   </section>
 </div>
 
+---
 
-## The Full-Width Bleed
+## 2. The Full-Width Bleed
 
-When an element needs to break the 67ch constraint (e.g. for banners, large tables, or full-width imagery), use the `.cn-grid-full` class.
+When an element needs to break the 67ch constraint (e.g. for banners, large tables, or full-width imagery), use the **`.cn-grid-full`** class.
 
-<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border-color); padding: 1rem; margin-top: 2rem;">
-  <section class="cn-content-grid" style="background: var(--cn-surface-2); border: 1px solid var(--cn-color-primary-low);">
+<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; margin-top: 2rem; border-radius: var(--cn-border-radius-medium);">
+  <section class="cn-content-grid" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
     <p>I am centered (67ch).</p>
-    <div class="cn-grid-full" style="background: var(--cn-color-primary-low); padding: 1rem; color: white; text-align: center;">
+    <div class="cn-grid-full" style="background: var(--cn-button-accent); padding: 1rem; color: white; text-align: center;">
       <b>I am .cn-grid-full</b>
       <br/>(I span the entire width including the margins)
     </div>
@@ -44,9 +44,8 @@ When an element needs to break the 67ch constraint (e.g. for banners, large tabl
   </section>
 </div>
 
+---
 
-## Vertical Rhythm
+## 3. Vertical Rhythm
 
-Direct siblings are automatically separated by `2 * --cn-gap` to maintain constant typographical density without manual margin management.
-
-
+Direct siblings are automatically separated by **`2 * --cn-gap`** (32px) to maintain constant typographical density throughout long-form content.

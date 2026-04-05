@@ -152,3 +152,14 @@ Scenario: Surface elevation hierarchy
   Then each level is visually distinct (progressively elevated)
   And --color-on-surface is readable against all surface levels
 ```
+
+## Documentation (Living Style Book)
+
+The documentation at `app/cyan-ds/src/content/principles/semantic-colors.mdx` provides the functional mapping reference for role-based tokens.
+
+### Content Strategy & Demos
+
+1. **Role Hierarchies**: Tables and visual swatches for each functional group (Surfaces, Text, Interactive, Status).
+2. **Semantic Immutability**: Clearly documents the constraint that functional role names are a stable API and should not be overridden by sub-sites.
+3. **Contrast HUD**: Inline demonstrations of text readability across surface elevations, specifically enforcing the Elevation 4 mandatory white-text rule.
+4. **Theme-Awareness**: Explains how `--cn-*` tokens (standardizing from legacy `--color-*`) utilize `light-dark()` for automatic scheme adaptation.

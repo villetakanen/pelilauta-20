@@ -1,0 +1,86 @@
+---
+title: Color System
+description: The foundational 3-tier architecture of Cyan's tonal palettes and semantic roles.
+order: 1
+status: stable
+icon: paintbrush
+---
+
+Cyan utilizes a **Layered Color Model** that separates brand identity from functional intent. This architecture ensures that specialized campaign or sub-site branding can be applied instantly without modifying component logic.
+
+## 1. The 3-Tier Layering Model
+
+1.  **The Chroma Layer (Mechanical):** 13-step tonal scales (MD3) where "raw" HSL values live. This layer is designed to be **Swappable**.
+2.  **The Semantic Layer (Functional):** Maps Chroma steps to functional roles (e.g., `--cn-text`, `--cn-button-accent`). This layer is **Immutable**.
+3.  **The Component Layer (Consumptive):** Components consume only semantic tokens. They never reference raw HSL values.
+
+---
+
+## 2. The Chroma Scales (The Ink)
+
+Cyan provides the following foundational palettes. Each follows a 13-point tonal scale from 0 (Black) to 100 (White).
+
+### Brand & Surface
+- **Primary:** Rotates hue from **Teal (185°)** at step 0 to **Yellow (65°)** at step 100.
+- **Surface:** Parameterized Navy slate (Hue 204°, Saturation 98%) for all UI containers.
+
+<div style="display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0;">
+  <div style="display: flex; gap: 2px;">
+    { [0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => <div key={s} style={`flex:1; height: 2rem; background: var(--chroma-primary-${s}); border-radius: 2px;`} title={`Primary ${s}`}></div>) }
+  </div>
+  <div style="display: flex; gap: 2px;">
+    { [0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => <div key={s} style={`flex:1; height: 2rem; background: var(--chroma-surface-${s}); border-radius: 2px;`} title={`Surface ${s}`}></div>) }
+  </div>
+</div>
+
+### Functional Accents
+Used for status, warnings, and localized feedback.
+
+| Palette | Hue | Role |
+| :--- | :--- | :--- |
+| **Error** | 318° | Destructive actions, validation errors. |
+| **Warning** | 65° | Non-blocking alerts, high-visibility state. |
+| **Info** | 170° | System feedback, neutral state changes. |
+| **Love** | 3° | Positive intent, heart/favorite actions. |
+
+<div style="display: flex; flex-direction: column; gap: 1rem; margin: 2rem 0;">
+  {['error', 'warning', 'info', 'love'].map(p => (
+    <div key={p} style="display: flex; gap: 2px;">
+      {[20, 40, 60, 90].map(s => <div key={s} style={`flex:1; height: 1.5rem; background: var(--chroma-${p}-${s}); border-radius: 2px;`} title={`${p} ${s}`}></div>)}
+    </div>
+  ))}
+</div>
+
+---
+
+## 3. The Swappability Principle
+
+The core of Cyan's theming strategy is: **"Swap the Chroma, preserve the Semantic."** 
+
+### ThemeLab: Interactive Rebranding
+Use the controls below to see how overriding a single Chroma variable rebranding the entire UI while the semantic logic (the component structure) remains unchanged.
+
+{/* Placeholder for Interactive Demo logic - using scoped styles for MDX preview */}
+<div class="theme-lab-container" style="padding: 2rem; border-radius: var(--cn-radius-lg); border: 2px solid var(--cn-border); background: var(--cn-background); position: relative;">
+  <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-50', 'hsl(3 74% 50%)'); document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-20', 'hsl(3 74% 20%)')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Crimson</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-50', 'hsl(147 56% 36%)'); document.querySelector('.theme-lab-target').style.setProperty('--chroma-primary-20', 'hsl(185 100% 14%)')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Forest</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.removeProperty('--chroma-primary-50'); document.querySelector('.theme-lab-target').style.removeProperty('--chroma-primary-20')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Reset Cyan</button>
+  </div>
+
+  <div class="theme-lab-target" style="padding: 2rem; border: 1px solid var(--cn-border); border-radius: var(--cn-radius-md); background: var(--cn-surface-1);">
+    <span class="text-h3" style="display: block; margin-top: 0;">Sample UI Section</span>
+    <p>This section uses semantic tokens like <code>--cn-button-accent</code> and <code>--cn-text</code>.</p>
+    <button style="background: var(--cn-button-accent, var(--chroma-primary-50)); color: white; border: none; padding: 0.5rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700;">Action Button</button>
+  </div>
+</div>
+
+---
+
+## 4. Semantic Immutability
+
+> [!WARNING]
+> While Chroma can be replaced, **Semantic Tokens must never be overridden**. 
+> 
+> You should never do: `button { --cn-button-accent: red; }`. 
+> Instead, if you need a red button, you either use a dedicated functional class or, if it's for branding, you override the underlying Chroma token: `:root { --chroma-primary-50: red; }`. 

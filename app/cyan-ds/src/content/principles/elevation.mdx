@@ -1,0 +1,70 @@
+---
+title: Elevation
+description: Depth architecture through surface shifting and grid-derived shadows.
+order: 20
+status: stable
+icon: layers
+---
+
+Elevation in Cyan is a symbiotic system where surface color and shadows work together to create a realistic sense of depth. As an element "rises" towards the user, it becomes lighter in dark mode (absorbing more environment light) and gains a larger, softer shadow.
+
+## 1. Surfaces & Utilities
+
+Cyan provides four standard elevation levels accessed via the `.elevation-1` through `.elevation-4` utility classes.
+
+| Level | Utility | Dark Mode Surface | Shadow State |
+| :--- | :--- | :--- | :--- |
+| **1** | `.elevation-1` | `surface-20` | **Shadowless** (Surface base only) |
+| **2** | `.elevation-2` | `surface-20` | Standard Depth (E2) |
+| **3** | `.elevation-3` | `surface-30` | Floating / Active (E3) |
+| **4** | `.elevation-4` | `surface-40` | System Layer (E4) |
+
+---
+
+## 2. Relative Elevation (Nesting)
+
+To prevent visual "muddiness" from overlapping shadows, Cyan utilizes a **Relative Elevation Engine**. When an elevated element is nested inside another, its shadow is visually computed relative to its parent.
+
+For example, an `.elevation-3` element placed inside an `.elevation-2` container will visually appear as a "Level 1" leap, using the lighter shadow token to maintain a crisp, professional hierarchy.
+
+---
+
+## 3. Shadows (Grid-Derived)
+
+Shadows are derived from the `--cn-grid` (8px), ensuring spatial proportionality.
+
+| Token | Derivation |
+| :--- | :--- |
+| `--cn-shadow-elevation-2` | `0.25 × grid` offset, `grid` blur. |
+| `--cn-shadow-elevation-3` | `0.5 × grid` offset, `2 × grid` blur. |
+| `--cn-shadow-elevation-4` | `0.75 × grid` offset, `3 × grid` blur. |
+
+---
+
+## 4. The Elevation 4 Rule (Accessibility)
+
+> [!IMPORTANT]
+> **Mandatory Constraint:** When a surface reaches **Elevation 4** in Dark Mode (`surface-40`), standard "On-Surface" text no longer provides sufficient contrast. In this state, Cyan enforces **Mandatory White Text** (Step 100) to maintain WCAG AA compliance.
+
+---
+
+## 5. Interactive Depth Demo
+
+The following demo shows the progression from the shadowless base (Elevation 1) to the floating system layer (Elevation 4).
+
+<div style="background: var(--cn-background); padding: 3rem; border-radius: var(--cn-radius-lg); display: flex; flex-direction: column; gap: 2rem; border: 1px solid var(--cn-border);">
+  <div class="elevation-1" style="padding: 1.5rem; border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border);">
+    <span class="text-bold">Elevation 1 (Shadowless)</span>
+    <p class="text-caption">Used as a subtle surface differentiator.</p>
+    
+    <div class="elevation-2" style="margin-top: 1rem; padding: 1.5rem; border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-hover);">
+      <span class="text-bold">Elevation 2 (Nested)</span>
+      <p class="text-caption">Shadow is visually adjusted relative to parent Elevation 1.</p>
+    </div>
+  </div>
+  
+  <div class="elevation-4" style="padding: 1.5rem; border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-hover);">
+    <span class="text-bold" style="color: white;">Elevation 4 (System Level)</span>
+    <p class="text-caption" style="color: white; opacity: 0.8;">Floating app shell components. Note the mandatory white text and prominent shadow.</p>
+  </div>
+</div>

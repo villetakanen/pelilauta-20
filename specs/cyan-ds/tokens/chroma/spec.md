@@ -100,3 +100,13 @@ Scenario: Surface palette uses explicit HSL
   Then all steps maintain exact HSL deterministic accuracy
   And no step relies on dynamic color-mix() or external anchor references
 ```
+## Documentation (Living Style Book)
+
+The documentation at `app/cyan-ds/src/content/principles/color-system.mdx` provides the foundational reference for Cyan's color architecture.
+
+### Content Strategy & Demos
+
+1. **The Layered Model**: Explains the 3-tier hierarchy (Chroma → Semantic → Component) and the "Ink vs. Intent" philosophy.
+2. **The Tonal Scales**: Visualizes all 6 core palettes (Primary, Surface, Error, Warning, Info, Love) across their MD3 tonal steps.
+3. **Primary Hue Rotation**: Illustrates the unique Teal-to-Yellow perceptual curve of the branding palette.
+4. **ThemeLab Interactive**: An interactive "laboratory" demo allowing real-time overriding of Chroma variables to demonstrate the system's swappability.

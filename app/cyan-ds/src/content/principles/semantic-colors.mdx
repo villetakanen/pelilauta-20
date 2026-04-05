@@ -5,95 +5,12 @@ order: 2
 status: stable
 ---
 
+Semantic colors bridge the gap between the raw **Chroma** tonal scales and functional UI roles. While Chroma represents the "Ink" of the system, Semantic tokens represent the **Intent**.
 
-Semantic colors bridge the gap between raw **Chroma** (HSL values) and functional UI roles. Instead of referencing `--chroma-primary-10`, components reference `--color-primary`.
+For a deep-dive into the layering model and how to override Chroma for specific themes, see the [Color System](/principles/color-system/) principle.
 
-## Principles: Roles
+## 1. Core Principles: Roles
 
-- **Primary** — brand identity, interactive elements (buttons, links, FABs). The teal→yellow hue shift is unique to Cyan.
-- **Surface** — backgrounds, cards, sheets, overlays. Use lower steps (0–30) for dark themes, higher steps (70–100) for light themes.
-- **On-[Token]** — Always provides accessible contrast for text or icons placed on that background.
-
-## Primary Roles
-
-| Token | Role |
-|-------|------|
-| `--color-primary` | Main brand color |
-| `--color-on-primary` | Content on primary |
-| `--color-primary-variant` | Subtle variant |
-
-<div style="display: flex; gap: var(--cn-gap); padding: var(--cn-gap); flex-wrap: wrap;">
-  <div style="background: var(--color-primary); color: var(--color-on-primary); padding: var(--cn-gap); border-radius: var(--cn-border-radius-medium); font-weight: 700;">primary / on-primary</div>
-  <div style="background: var(--color-primary-variant); color: var(--color-on-primary); padding: var(--cn-gap); border-radius: var(--cn-border-radius-medium);">primary-variant</div>
-</div>
-
-## Surface Roles (Tonal Steps)
-
-| Token | Role |
-|-------|------|
-| `--color-surface` | Default surface |
-| `--color-on-surface` | Default text/icon on surface |
-| `--color-on-surface-variant` | Lower contrast text |
-| `--color-surface-1` | Elevated surface (Level 1) |
-| `--color-surface-2` | Elevated surface (Level 2) |
-| `--color-surface-3` | Elevated surface (Level 3) |
-| `--color-surface-4" | Elevated surface (Level 4) |
-
-<div style="display: flex; gap: var(--cn-gap); padding: var(--cn-gap); flex-wrap: wrap; background: var(--color-surface); border-radius: var(--cn-border-radius-medium);">
-  <div style="background: var(--color-surface-1); color: var(--color-on-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small);">surface-1</div>
-  <div style="background: var(--color-surface-2); color: var(--color-on-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small);">surface-2</div>
-  <div style="background: var(--color-surface-3); color: var(--color-on-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small);">surface-3</div>
-  <div style="background: var(--color-surface-4); color: var(--color-on-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small);">surface-4</div>
-</div>
-
-## Background
-
-The app background sits below all surfaces. It is subtly tinted to distinguish from pure surface.
-
-| Token | Role |
-|-------|------|
-| `--color-background` | App shell background |
-| `--color-on-background` | Text on background |
-
-<div style="background: var(--color-background); color: var(--color-on-background); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small);">
-  App background with on-background text
-  <div style="background: var(--color-surface); color: var(--color-on-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small); margin-top: var(--cn-grid);">Surface card on background</div>
-</div>
-
-## Text
-
-Text tokens define a hierarchy from maximum contrast to de-emphasized.
-
-| Token | Role |
-|-------|------|
-| `--color-text` | Default body text |
-| `--color-text-high` | Maximum contrast (black/white) |
-| `--color-text-low" | De-emphasized text |
-| `--color-heading-1` | H1 headings |
-| `--color-heading-2` | H2 headings |
-
-<div style="background: var(--color-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small); display: flex; flex-direction: column; gap: var(--cn-grid);">
-  <span style="color: var(--color-text-high); font-weight: 700;">text-high: Maximum contrast</span>
-  <span style="color: var(--color-heading-1); font-size: 1.5rem;">heading-1: Page title</span>
-  <span style="color: var(--color-heading-2); font-size: 1.25rem;">heading-2: Section title</span>
-  <span style="color: var(--color-text);">text: Default body text</span>
-  <span style="color: var(--color-text-low);">text-low: De-emphasized text</span>
-</div>
-
-## Links
-
-| Token | Role |
-|-------|------|
-| `--color-link" | Default link |
-| `--color-link-hover` | Hover state |
-| `--color-link-active" | Active/pressed state |
-
-<div style="background: var(--color-surface); padding: var(--cn-gap); border-radius: var(--cn-border-radius-small); display: flex; gap: var(--cn-gap);">
-  <span style="color: var(--color-link); text-decoration: underline;">Default link</span>
-  <span style="color: var(--color-link-hover); text-decoration: underline;">Hover</span>
-  <span style="color: var(--color-link-active); text-decoration: underline;">Active</span>
-</div>
-
-## Theme Switching
-
-All `--color-*` tokens use `light-dark()` and respond to the `color-scheme` property on `:root`. The semantic CSS sets `color-scheme: light dark`, so the browser's preferred color scheme applies automatically.
+- **Primary** — Brand identity and primary interactive elements (buttons, links, FABs).
+- **Surface** — Architectural backgrounds, cards, sheets, and overlays. 
+- **On-[Token]** — Always provides accessible contrast (WCAG AA) for content placed on that background.
