@@ -1,4 +1,9 @@
-# Feature: Chromatic color palettes
+---
+feature: Chroma Tonal Palettes
+stylebook_url: https://localhost:4322/principles/color-system
+---
+
+# Feature: Chroma Tonal Palettes
 
 Parent: [Cyan DS Tokens](../spec.md)
 

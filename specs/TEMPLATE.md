@@ -1,3 +1,11 @@
+---
+feature: [Feature Name]
+# [Optional] Link to the parent specification if this is a sub-feature
+parent_spec: [Path to parent spec.md]
+# [Optional] URL to the Living Style Book (Required for Design System features)
+stylebook_url: [https://...]
+---
+
 # Feature: [Feature Name]
 
 ## Blueprint
@@ -13,7 +21,7 @@
 
 ### Book Page
 [Provide details about the component's book/story-nook page if it belongs to the Design System]
-- **Target path:** [e.g. `app/cyan-ds/src/pages/components/...`]
+- **Target path:** [e.g. `app/cyan-ds/src/content/principles/...` or `app/cyan-ds/src/content/components/...`]
 - **Structure:** [Outline the standalone demos, inline layout demos, and prop tables]
 
 ### Anti-Patterns
