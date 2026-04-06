@@ -40,7 +40,7 @@ function getTextColor(index: number, total: number) {
  style:color={textColors[i] ?? getTextColor(i, colors.length)}
       >
         <span class="label">
-          {labels[i] ?? i * 10}
+          {labels[i] ?? ""}
         </span>
       </div>
     {/each}

@@ -9,43 +9,51 @@ import ColorScale from "../../components/ColorScale.svelte";
 
 Cyan treates color as a highly structured, scalable language. We utilize a **Layered Color Model** that separates mechanical brand identity from functional user intent.
 
----
+> #### The 3-Tier Token Model
+>
+> We provide 3 tiers of tokens.
+>
+> 1.  **The Chroma Layer (Mechanical):** Raw tonal scales (OKLCH) where hand-tuned perceptual values live. This layer is **Swappable** for sub-site branding.
+> 2.  **The Semantic Layer (Functional):** Maps Chroma steps to functional roles (e.g., `--color-text`, `--color-button-accent`). This layer is a **Stable API**.
+> 3.  **The Component Layer (Consumptive):** Components only consume semantic tokens. They never reference raw HSL or hex values.
 
-## 1. The 3-Tier Layering Model
+## Colors
 
-Our system bridges the gap between raw "Ink" and meaningful "Intent" through three distinct layers:
+Primary and surface colors are the foundation of the color system. They are used to create a consistent and predictable visual language that is easy to understand and use. The primary and surface colors are defined in a 13-point tonal scale following the **Material 3 (M3)** philosophy, where each color has a specific lightness value.
 
-1.  **The Chroma Layer (Mechanical):** Raw tonal scales (MD3) where hand-tuned HSL values live. This layer is **Swappable** for sub-site branding.
-2.  **The Semantic Layer (Functional):** Maps Chroma steps to functional roles (e.g., `--color-text`, `--color-button-accent`). This layer is a **Stable API**.
-3.  **The Component Layer (Consumptive):** Components only consume semantic tokens. They never reference raw HSL or hex values.
+In addition to the primary and surface colors, there are also functional palettes, for error, warning, info and reactions. For the functional palettes, only a subset of the tonal scale is provided
 
----
+The tonal step number (0-100) represents **perceived lightness**:
+- **0** corresponds to absolute black.
+- **100** corresponds to absolute white.
+- Any intermediate number (e.g., **40**) represents a percentage of perceptual difference from black.
 
-## 2. Primitives: The Chroma Scales
-
-Every color in Cyan belongs to a 13-point tonal scale from 0 (Black) to 100 (White). These are the "raw ingredients" of the system.
+This creates a consistent relationship between steps across all hues, ensuring that **Step 40** in the Primary palette has the same perceived lightness as **Step 40** in the Surface or Error palette, making accessible contrast pairs predictable.
 
 ### Core Branding & UI Surfaces
 
 | Palette | Hue Range | Strategy |
 | :--- | :--- | :--- |
-| **Primary** | 185° → 65° | Perceptual hue rotation from Teal to Yellow across the tonal range. |
-| **Surface** | 204° (Navy) | Parameterized Slate (20% saturation) for stable UI containers. |
+| **Primary** | 185° → 110° | Perceptive rotation in OKLCH from Teal to Highlighter Neon. |
+| **Surface** | 242° (Navy) | Hand-tuned Chroma Curve (Peak 0.17) for high-end balanced architecture. |
 
 **Primary Scale**
-<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} />
+<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} />
 
 **Surface Scale**
-<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} />
+<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} />
 
 #### Technical Reference (Primary)
-| Step | HSL Value | Hex | Usage |
+| Step | OKLCH Value | Hex (Approx) | Usage |
 | :--- | :--- | :--- | :--- |
-| **0** | `hsl(185 100% 8%)` | `#002229` | Deep Black-Teal |
-| **20** | `hsl(170 100% 20%)` | `#006655` | Accent Dark |
-| **50** | `hsl(134 44% 44%)` | `#3f965c` | Median |
-| **80** | `hsl(88 68% 58%)` | `#a9d453` | Brand Highlight |
-| **100** | `hsl(65 100% 95%)` | `#fcfde6` | Paper Yellow |
+| **0** | `oklch(0 0 185)` | `#000000` | Absolute Black |
+| **20** | `oklch(0.20 0.10 180)` | `#003333` | Deep Ocean |
+| **50** | `oklch(0.50 0.18 150)` | `#009e5c` | Perceptual Teal |
+| **80** | `oklch(0.80 0.27 120)` | `#c1ff00` | Acid Pulse |
+| **90** | `oklch(0.90 0.27 110)` | `#e8ff00` | Highlighter Neon |
+| **95** | `oklch(0.95 0.18 110)` | `#f9ffa4` | Neon Tint |
+| **99** | `oklch(0.99 0.05 110)` | `#fbfeef` | Minimal Mint |
+| **100** | `oklch(1 0 110)` | `#ffffff` | Absolute White |
 
 ### Functional Palettes
 
@@ -79,8 +87,8 @@ Developers utilize role-based tokens to build UI. These tokens automatically res
 | :--- | :--- | :--- | :--- |
 | `--color-surface` | surface-100 | surface-10 | Base container background |
 | `--color-surface-1` | white | surface-20 | Elevated Level 1 |
-| `--color-surface-4` | surface-50 | surface-40 | Elevated Level 4 (Highest) |
-| `--color-on-surface` | surface-10 | surface-100 | Standard text on surfaces |
+| `--color-surface-4` | surface-70 | surface-40 | Elevated Level 4 (Highest) |
+| `--color-on-surface` | surface-10 | surface-90 | Standard text on surfaces |
 
 ### Interactive & Actions
 | Semantic Token | Light Mode step | Dark Mode step | Role |
@@ -96,7 +104,7 @@ Developers utilize role-based tokens to build UI. These tokens automatically res
 Accessibility is a hard constraint for Cyan. We enforce **WCAG AA (4.5:1)** contrast for all typography and iconic content.
 
 ### Contrast Guardrail: The Elevation 4 Rule
-In Dark Mode, as surfaces elevate, they become lighter to represent proximity to the light source. At **Elevation 4**, the background is a mid-dark Slate.
+In Dark Mode, as surfaces elevate, they become lighter to represent proximity to the light source. At **Elevation 4**, the background is a mid-dark Vibrant Navy.
 
 > [!CAUTION]
 > **Mandatory White Text:** On `surface-40`, standard secondary or low-contrast text is forbidden. You MUST use `chroma-surface-100` (White) to maintain a passing 4.6:1 contrast ratio.

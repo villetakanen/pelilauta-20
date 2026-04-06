@@ -1,62 +1,64 @@
 :root {
   /* Primary palette — 13 MD3 tonal steps
-   * Hue rotates from teal (185°) to yellow (65°) across a perceptual curve.
-   * Values are hand-tuned per-step HSL from upstream cyan-design-system-4. */
-  --chroma-primary-0: hsl(185 100% 8%);
-  --chroma-primary-10: hsl(185 100% 14%);
-  --chroma-primary-20: hsl(170 100% 20%);
-  --chroma-primary-30: hsl(159 74% 27%);
-  --chroma-primary-40: hsl(147 56% 36%);
-  --chroma-primary-50: hsl(134 44% 44%);
-  --chroma-primary-60: hsl(116 41% 52%);
-  --chroma-primary-70: hsl(100 54% 56%);
-  --chroma-primary-80: hsl(88 68% 58%);
-  --chroma-primary-90: hsl(76 84% 61%);
-  --chroma-primary-95: hsl(65 100% 63%);
-  --chroma-primary-99: hsl(65 100% 83%);
-  --chroma-primary-100: hsl(65 100% 95%);
+   * OKLCH Perceptive Scale (L C H)
+   * FINALIZED NEON ROTATION (Teal 185 -> Highlighter Neon 110) 
+   * The 'Highlighter' sweet spot: Acidic, Neon, and aggressive. 
+   * 0 = Black, 1 = White. */
+  --chroma-primary-0: oklch(0 0 185);
+  --chroma-primary-10: oklch(0.12 0.09 185);
+  --chroma-primary-20: oklch(0.2 0.14 180);
+  --chroma-primary-30: oklch(0.3 0.18 175);
+  --chroma-primary-40: oklch(0.4 0.22 170);
+  --chroma-primary-50: oklch(0.5 0.24 162);
+  --chroma-primary-60: oklch(0.6 0.26 150);
+  --chroma-primary-70: oklch(0.7 0.27 135);
+  --chroma-primary-80: oklch(0.8 0.27 120);
+  --chroma-primary-90: oklch(0.9 0.27 110);
+  --chroma-primary-95: oklch(0.95 0.18 110);
+  --chroma-primary-99: oklch(0.99 0.05 110);
+  --chroma-primary-100: oklch(1 0 110);
 
   /* Surface palette — 13 MD3 tonal steps
-   * Parameterized HSL (Hue and Saturation variables for easy adjustments)
-   * Step Number = Lightness Percentage */
-  --_surface-hue: 204;
-  --_surface-saturation: 98%;
+   * CHROMA CURVE MODEL (Hue 242)
+   * Peak vibrance (0.15) at mid-tones 50-60.
+   * Tapered vibrance at terminals for stability. */
+  --_surface-hue: 242;
 
-  --chroma-surface-0: hsl(var(--_surface-hue) var(--_surface-saturation) 0%);
-  --chroma-surface-10: hsl(var(--_surface-hue) var(--_surface-saturation) 10%);
-  --chroma-surface-20: hsl(var(--_surface-hue) var(--_surface-saturation) 20%);
-  --chroma-surface-30: hsl(var(--_surface-hue) var(--_surface-saturation) 30%);
-  --chroma-surface-40: hsl(var(--_surface-hue) var(--_surface-saturation) 40%);
-  --chroma-surface-50: hsl(var(--_surface-hue) var(--_surface-saturation) 50%);
-  --chroma-surface-60: hsl(var(--_surface-hue) var(--_surface-saturation) 60%);
-  --chroma-surface-70: hsl(var(--_surface-hue) var(--_surface-saturation) 70%);
-  --chroma-surface-80: hsl(var(--_surface-hue) var(--_surface-saturation) 80%);
-  --chroma-surface-90: hsl(var(--_surface-hue) var(--_surface-saturation) 90%);
-  --chroma-surface-95: hsl(var(--_surface-hue) var(--_surface-saturation) 95%);
-  --chroma-surface-99: hsl(var(--_surface-hue) var(--_surface-saturation) 99%);
-  --chroma-surface-100: hsl(var(--_surface-hue) var(--_surface-saturation) 100%);
+  --chroma-surface-0: oklch(0 0 var(--_surface-hue));
+  --chroma-surface-10: oklch(0.1 0.05 var(--_surface-hue));
+  --chroma-surface-20: oklch(0.2 0.07 var(--_surface-hue));
+  --chroma-surface-30: oklch(0.3 0.09 var(--_surface-hue));
+  --chroma-surface-40: oklch(0.4 0.12 var(--_surface-hue));
+  --chroma-surface-50: oklch(0.5 0.14 var(--_surface-hue));
+  --chroma-surface-60: oklch(0.6 0.17 var(--_surface-hue));
+  --chroma-surface-70: oklch(0.7 0.17 var(--_surface-hue));
+  --chroma-surface-80: oklch(0.8 0.15 var(--_surface-hue));
+  --chroma-surface-90: oklch(0.9 0.11 var(--_surface-hue));
+  --chroma-surface-95: oklch(0.95 0.08 var(--_surface-hue));
+  --chroma-surface-99: oklch(0.99 0.05 var(--_surface-hue));
+  --chroma-surface-100: oklch(1 0 var(--_surface-hue));
 
-  /* Error accent — magenta (partial steps) */
-  --chroma-error-20: hsl(318 83% 20%);
-  --chroma-error-40: hsl(318 83% 40%);
-  --chroma-error-60: hsl(318 83% 60%);
-  --chroma-error-90: hsl(318 83% 90%);
+  /* Error accent — magenta */
+  --chroma-error-20: oklch(0.2 0.15 318);
+  --chroma-error-40: oklch(0.4 0.18 318);
+  --chroma-error-60: oklch(0.6 0.2 318);
+  --chroma-error-90: oklch(0.9 0.1 318);
 
-  /* Warning accent — yellow (partial steps) */
-  --chroma-warning-20: hsl(65 100% 20%);
-  --chroma-warning-40: hsl(65 100% 40%);
-  --chroma-warning-60: hsl(65 100% 63%);
-  --chroma-warning-90: hsl(65 100% 90%);
+  /* Warning accent — yellow */
+  --chroma-warning-20: oklch(0.2 0.15 65);
+  --chroma-warning-40: oklch(0.4 0.2 65);
+  --chroma-warning-60: oklch(0.6 0.25 65);
+  --chroma-warning-90: oklch(0.9 0.2 65);
 
-  /* Info accent — teal (partial steps) */
-  --chroma-info-20: hsl(170 100% 20%);
-  --chroma-info-40: hsl(170 100% 40%);
-  --chroma-info-60: hsl(170 100% 60%);
-  --chroma-info-90: hsl(170 100% 90%);
+  /* Info accent — teal */
+  --chroma-info-20: oklch(0.2 0.12 170);
+  --chroma-info-40: oklch(0.4 0.15 170);
+  --chroma-info-60: oklch(0.6 0.18 170);
+  --chroma-info-90: oklch(0.9 0.1 170);
 
-  /* Love accent — red (partial steps) */
-  --chroma-love-20: hsl(3 74% 20%);
-  --chroma-love-40: hsl(3 74% 40%);
-  --chroma-love-60: hsl(3 74% 54%);
-  --chroma-love-90: hsl(3 74% 90%);
+  /* Love accent — red */
+  --chroma-love-20: oklch(0.2 0.15 30);
+  --chroma-love-40: oklch(0.4 0.18 30);
+  --chroma-love-60: oklch(0.6 0.2 30);
+  --chroma-love-90: oklch(0.9 0.1 30);
 }
