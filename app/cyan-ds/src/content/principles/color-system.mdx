@@ -35,13 +35,21 @@ This creates a consistent relationship between steps across all hues, ensuring t
 | Palette | Hue Range | Strategy |
 | :--- | :--- | :--- |
 | **Primary** | 185° → 110° | Perceptive rotation in OKLCH from Teal to Highlighter Neon. |
-| **Surface** | 242° (Navy) | Hand-tuned Chroma Curve (Peak 0.17) for high-end balanced architecture. |
+| **Surface** | 242° (Cerulean) | Hand-tuned Chroma Curve (Peak 0.17) for high-end balanced architecture. |
 
-**Primary Scale**
-<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} />
+<ColorScale 
+  client:load 
+  title="Primary Scale (Acid-Neon)"
+  colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} 
+  labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} 
+/>
 
-**Surface Scale**
-<ColorScale client:load colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} />
+<ColorScale 
+  client:load 
+  title="Surface Scale (Cerulean)"
+  colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} 
+  labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} 
+/>
 
 #### Technical Reference (Primary)
 | Step | OKLCH Value | Hex (Approx) | Usage |
@@ -64,17 +72,33 @@ This creates a consistent relationship between steps across all hues, ensuring t
 | **Info** | 170° | System feedback, neutral state changes. |
 | **Love** | 3° | Positive intent, heart/favorite actions. |
 
-**Error**
-<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-error-${s})`)} labels={['20 Critical', '40 Base', '60 High', '90 Tint']} />
+<ColorScale 
+  client:load 
+  title="Error (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-error-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
 
-**Warning**
-<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-warning-${s})`)} labels={['20', '40', '60', '90']} />
+<ColorScale 
+  client:load 
+  title="Warning (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-warning-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
 
-**Info**
-<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-info-${s})`)} labels={['20', '40', '60', '90']} />
+<ColorScale 
+  client:load 
+  title="Info (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-info-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
 
-**Love**
-<ColorScale client:load colors={[20,40,60,90].map(s => `var(--chroma-love-${s})`)} labels={['20', '40', '60', '90']} />
+<ColorScale 
+  client:load 
+  title="Love (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-love-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
 
 ---
 
@@ -107,13 +131,13 @@ Accessibility is a hard constraint for Cyan. We enforce **WCAG AA (4.5:1)** cont
 In Dark Mode, as surfaces elevate, they become lighter to represent proximity to the light source. At **Elevation 4**, the background is a mid-dark Vibrant Navy.
 
 > [!CAUTION]
-> **Mandatory White Text:** On `surface-40`, standard secondary or low-contrast text is forbidden. You MUST use `chroma-surface-100` (White) to maintain a passing 4.6:1 contrast ratio.
+> **Mandatory White Text:** On `surface-40`, standard secondary or low-contrast text is forbidden. You MUST use `chroma-surface-100` (White) to maintain a passing 4.6:1 contrast ratio against the Cerulean background.
 
-#### Contrast Verification Scale
 <ColorScale 
   client:load 
+  title="Elevation 4 Rule Verification"
   colors={['var(--chroma-surface-40)', 'var(--chroma-surface-40)']} 
-  labels={['AA Pass (on White)', 'AA Fail (on Step 80)']} 
+  labels={['40 on White', '40 on Step 80']} 
   textColors={['white', 'var(--chroma-surface-80)']}
 />
 

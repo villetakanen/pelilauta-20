@@ -19,9 +19,8 @@
   --chroma-primary-100: oklch(1 0 110);
 
   /* Surface palette — 13 MD3 tonal steps
-   * CHROMA CURVE MODEL (Hue 242)
-   * Peak vibrance (0.15) at mid-tones 50-60.
-   * Tapered vibrance at terminals for stability. */
+   * QUINTESSENTIAL CERULEAN (High-vibrance OKLCH Surface)
+   * Hand-tuned Chroma Curve peaking at 0.17 at mid-tones 60-70. */
   --_surface-hue: 242;
 
   --chroma-surface-0: oklch(0 0 var(--_surface-hue));

@@ -34,11 +34,11 @@ The primary palette rotates hue from **Teal (185)** to **Highlighter Neon (110)*
 - **Max Chroma:** 0.27 (0.90 Lightness)
 - **Anchors:** `oklch(0 0 185)` (0) / `oklch(1 0 110)` (100)
 
-#### Surface Palette (Cerulean Navy)
+#### Surface Palette (Cerulean)
 
 Utilizes a **Hand-tuned Chroma Curve** to anchor the system's "Cerulean Soul" in the mid-tones while keeping terminals stable.
 
-- **Hue (H):** 242° (Constant)
+- **Hue (H):** 242° (Cerulean Point)
 - **Chroma Curve (C):** 
     - **Mid-Soul (60-70):** **0.17** (Peak Quintessential Vibrance)
     - **Action-Mid (50):** 0.14
