@@ -18,8 +18,8 @@
   --cn-text: light-dark(var(--chroma-surface-10), var(--chroma-surface-95));
   --cn-text-high: light-dark(black, var(--chroma-surface-100));
   --cn-text-low: light-dark(var(--chroma-surface-30), var(--chroma-surface-60));
-  --cn-heading-1: light-dark(var(--chroma-surface-30), var(--chroma-surface-70));
-  --cn-heading-2: light-dark(var(--chroma-surface-20), var(--chroma-surface-80));
+  --cn-text-heading: light-dark(var(--chroma-surface-30), var(--chroma-surface-99));
+  --cn-text-subheading: light-dark(var(--chroma-surface-40), var(--chroma-surface-80));
 
   /* Links */
   --cn-link: light-dark(var(--chroma-primary-30), var(--chroma-primary-80));

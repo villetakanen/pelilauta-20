@@ -46,8 +46,8 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 | `--color-text` | surface-90 | surface-20 | Default body text |
 | `--color-text-high` | black | white | Maximum contrast text |
 | `--color-text-low` | surface-80 | surface-40 | De-emphasized text |
-| `--color-heading-1` | surface-70 | surface-30 | H1 headings |
-| `--color-heading-2` | surface-80 | surface-20 | H2 headings |
+| `--color-text-heading` | surface-30 | surface-99 | H1 and H2 (Primary) |
+| `--color-text-subheading` | surface-40 | surface-80 | H3 and H4 (Secondary) |
 
 #### Links
 
