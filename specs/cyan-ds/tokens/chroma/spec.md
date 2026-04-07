@@ -60,6 +60,7 @@ Single-hue scales using OKLCH steps for functional intent (Error, Warning, Info,
 ### Anti-Patterns
 
 - **Don't use HSL for raw color definitions** — use OKLCH for perceptual uniformity.
+- **Don't use `color-mix(in hsl)` for derived values** — all mixing must use `color-mix(in oklch)` to preserve perceptual uniformity across the system.
 - **Don't thin out chroma at high lightness** — maintain vibrance until Step 95.
 
 ## Contract
@@ -72,5 +73,41 @@ Single-hue scales using OKLCH steps for functional intent (Error, Warning, Info,
 
 ### Regression Guardrails
 
-- OKLCH Lightness must exactly match `Step / 100` (e.g. Step 40 must have L=0.4).
-- Chroma must remain > 0.10 for all steps between 20 and 95.
+- OKLCH Lightness must match `Step / 100` (e.g. Step 40 must have L=0.4). **Exception:** Primary step 10 is hand-tuned to L=0.12 for legibility separation from step 0.
+- Chroma must remain > 0.10 for all primary steps between 20 and 95.
+- Surface chroma curve is hand-tuned and exempt from the global chroma floor.
+
+### Testing Scenarios
+
+#### Scenario: Lightness invariant
+```gherkin
+Given the chroma.css token file
+When each --chroma-{palette}-{step} token is parsed
+Then the OKLCH Lightness value equals step / 100
+Exception: primary-10 is hand-tuned to L=0.12
+```
+
+#### Scenario: Anchor purity
+```gherkin
+Given the chroma.css token file
+When step 0 or step 100 tokens are parsed
+Then Chroma (C) must be 0 (pure black or pure white)
+```
+
+#### Scenario: Primary chroma floor
+```gherkin
+Given the primary palette tokens in chroma.css
+When steps 20 through 95 are parsed
+Then Chroma (C) must be greater than 0.10
+```
+
+#### Scenario: OKLCH-only color space
+```gherkin
+Given the chroma.css and semantic.css token files
+When all color values and color-mix() calls are parsed
+Then no HSL, RGB, or hex color definitions appear (except inside comments)
+And all color-mix() calls use "in oklch"
+```
+
+- **Vitest Unit Test:** `packages/cyan/src/tokens/chroma.test.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/chroma.spec.ts`

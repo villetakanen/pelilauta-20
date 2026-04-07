@@ -16,7 +16,7 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 - **v20 target:** `packages/cyan/src/tokens/semantic.css`
 - **Format:** CSS custom properties on `:root`
 - **Namespace:** `--color-*` for core semantic tokens
-- **Dependencies:** [Chroma tokens](../chroma/spec.md) — all values derive from `--chroma-*` via `light-dark()` and `color-mix()`
+- **Dependencies:** [Chroma tokens](../chroma/spec.md) — all values derive from `--chroma-*` via `light-dark()` and `color-mix(in oklch)`
 
 ### Token Groups
 
@@ -116,14 +116,15 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 
 - **Don't reference `--chroma-*` tokens directly in components** — always go through semantic tokens so theme switching works
 - **Don't add component-specific color tokens here** — this file is the shared semantic layer. Component colors belong in component CSS.
-- **Don't use hardcoded colors** — derive everything from chroma via `light-dark()` and `color-mix()`
+- **Don't use hardcoded colors** — derive everything from chroma via `light-dark()` and `color-mix(in oklch)`
+- **Don't use `color-mix(in hsl)` or other non-OKLCH color spaces** — the system is OKLCH-native; mixing in HSL skews perceived brightness and breaks perceptual uniformity
 - **Don't duplicate chroma steps** — reference `--chroma-{accent}-{step}` tokens, don't redefine the hue values in the semantic layer
 
 ## Contract
 
 ### Definition of Done
 
-- [ ] All semantic tokens derive from `--chroma-*` palette via `light-dark()` or `color-mix()`
+- [ ] All semantic tokens derive from `--chroma-*` palette via `light-dark()` or `color-mix(in oklch)`
 - [ ] `color-scheme: light dark` is set on `:root` (via Base.astro or global reset)
 - [ ] No `--cn-color-*` legacy aliases — only `--color-*` namespace
 - [ ] No component-specific tokens (bubble, avatar, etc.) — only shared semantic roles

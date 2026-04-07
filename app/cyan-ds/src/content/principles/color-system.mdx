@@ -156,7 +156,7 @@ In Dark Mode, as surfaces elevate, they become lighter to represent proximity to
 ### Don't
 - **Don't** use brand teal for destructive actions. Error/CTA exists for a reason.
 - **Don't** override a semantic token locally (e.g., `--color-text: red`). Override the underlying Chroma instead if rebranding.
-- **Don't** reference HSL values outside of the `chroma.css` file.
+- **Don't** reference HSL values anywhere — the system is OKLCH-native. All derived values (hover overlays, selection tints) must use `color-mix(in oklch)`, never `color-mix(in hsl)`.
 
 ---
 

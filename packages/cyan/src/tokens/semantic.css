@@ -32,8 +32,8 @@
   --cn-button-accent: light-dark(var(--chroma-primary-20), var(--chroma-primary-70));
   --cn-button-cta: light-dark(var(--chroma-error-40), var(--chroma-error-40));
   --cn-hover: light-dark(
-    color-mix(in hsl, var(--chroma-surface-50), transparent 90%),
-    color-mix(in hsl, var(--chroma-surface-50), transparent 80%)
+    color-mix(in oklch, var(--chroma-surface-50), transparent 90%),
+    color-mix(in oklch, var(--chroma-surface-50), transparent 80%)
   );
 
   /* Borders */
@@ -66,8 +66,8 @@
 
   /* Selection */
   --cn-selection: light-dark(
-    color-mix(in hsl, var(--chroma-primary-60), transparent 70%),
-    color-mix(in hsl, var(--chroma-primary-40), transparent 70%)
+    color-mix(in oklch, var(--chroma-primary-60), transparent 70%),
+    color-mix(in oklch, var(--chroma-primary-40), transparent 70%)
   );
   --cn-on-selection: var(--cn-on-surface);
 }
