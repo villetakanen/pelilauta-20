@@ -42,8 +42,8 @@ Utilizes a **Hand-tuned Chroma Curve** to anchor the system's "Cerulean Soul" in
 - **Chroma Curve (C):** 
     - **Mid-Soul (60-70):** **0.17** (Peak Quintessential Vibrance)
     - **Action-Mid (50):** 0.14
+    - **Light Fade (80-99):** Chroma tapers from 0.12 → 0.015 (desaturating toward white)
     - **Baseline (10):** 0.05
-    - **Page Tint (99):** 0.05
 - **Lightness (L):** Strictly `Step / 100`
 
 | Token | OKLCH (L C H) | Role |
@@ -61,7 +61,7 @@ Single-hue scales using OKLCH steps for functional intent (Error, Warning, Info,
 
 - **Don't use HSL for raw color definitions** — use OKLCH for perceptual uniformity.
 - **Don't use `color-mix(in hsl)` for derived values** — all mixing must use `color-mix(in oklch)` to preserve perceptual uniformity across the system.
-- **Don't thin out chroma at high lightness** — maintain vibrance until Step 95.
+- **Don't thin out primary chroma at high lightness** — maintain vibrance until Step 95. Surface palette is exempt: it tapers chroma above Step 70 for clean light-mode surfaces.
 
 ## Contract
 

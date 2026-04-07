@@ -31,10 +31,10 @@
   --chroma-surface-50: oklch(0.5 0.14 var(--_surface-hue));
   --chroma-surface-60: oklch(0.6 0.17 var(--_surface-hue));
   --chroma-surface-70: oklch(0.7 0.17 var(--_surface-hue));
-  --chroma-surface-80: oklch(0.8 0.15 var(--_surface-hue));
-  --chroma-surface-90: oklch(0.9 0.11 var(--_surface-hue));
-  --chroma-surface-95: oklch(0.95 0.08 var(--_surface-hue));
-  --chroma-surface-99: oklch(0.99 0.05 var(--_surface-hue));
+  --chroma-surface-80: oklch(0.8 0.12 var(--_surface-hue));
+  --chroma-surface-90: oklch(0.9 0.06 var(--_surface-hue));
+  --chroma-surface-95: oklch(0.95 0.03 var(--_surface-hue));
+  --chroma-surface-99: oklch(0.99 0.015 var(--_surface-hue));
   --chroma-surface-100: oklch(1 0 var(--_surface-hue));
 
   /* Error accent — magenta */

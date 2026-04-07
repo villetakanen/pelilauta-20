@@ -100,7 +100,7 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 
 | Token | Role |
 |---|---|
-| `--color-shadow` | Shadow color (light-dark from surface palette) |
+| `--cn-shadow-color` | Shadow color (light-dark from surface palette) |
 | `--color-elevation-1/2/3` | Aliases to surface levels for elevation system |
 
 ### Migration Notes

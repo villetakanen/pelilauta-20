@@ -2,7 +2,7 @@ import { expect, test } from "@playwright/test";
 
 test.describe("Elevation Utilities", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/styles/elevation");
+    await page.goto("/principles/elevation");
   });
 
   test("Elevation 1 is shadowless but has surface color", async ({ page }) => {

@@ -1,7 +1,7 @@
 /* Elevation Utilities */
 
 .elevation-0 {
-  background-color: transparent;
+  background-color: var(--cn-surface);
   box-shadow: none;
 }
 
