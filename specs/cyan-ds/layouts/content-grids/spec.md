@@ -26,12 +26,12 @@ Standardize structural content layout within the `<main>` area using semantic HT
 ## Contract
 
 ### Definition of Done
-- [ ] `main` element has `container-type: inline-size`.
-- [ ] `main > section` and `main > article` implement the 3-column "Holy Grail" grid.
-- [ ] Central column calculates `min(67ch, 100%)` for content readability on desktop.
-- [ ] Mobile/Narrow views enforce 16px (`--cn-gap`) gutters.
-- [ ] Direct siblings (`section + section`, `article + section`, etc.) are separated by `2 * --cn-gap`.
-- [ ] Support for **`.cn-grid-full`** class to break out of the center and span all three columns.
+- [x] `main` element has `container-type: inline-size`.
+- [x] `main > section` and `main > article` implement the 3-column "Holy Grail" grid.
+- [x] Central column calculates `min(67ch, 100%)` for content readability on desktop.
+- [x] Mobile/Narrow views enforce 16px (`--cn-gap`) gutters.
+- [x] Direct siblings (`section + section`, `article + section`, etc.) are separated by `2 * --cn-gap`.
+- [x] Support for **`.cn-grid-full`** class to break out of the center and span all three columns.
 
 ### Testing Scenarios
 

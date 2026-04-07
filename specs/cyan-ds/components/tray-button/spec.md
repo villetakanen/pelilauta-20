@@ -15,7 +15,10 @@ Used primarily within the `Tray` component for navigation. It must be accessible
   - Label: `<span class="cn-tray-button__label">` for the link text.
 - **Style Invariants:**
   - No borders.
-  - Uses `--cn-surface-*` and `--cn-link-*` tokens.
+  - Default color: `light-dark(var(--chroma-surface-20), var(--chroma-surface-90))` — surface-tinted, not content link colors.
+  - Hover/focus: `--cn-hover` background.
+  - Active: `--cn-text` foreground, `--cn-hover` background.
+  - Focus ring: `--cn-link` (primary accent for visibility).
   - Uses CSS `:has()` or structural coupling to hide labels in rail mode.
 
 ### API Contract

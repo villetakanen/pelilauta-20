@@ -9,8 +9,8 @@ const { href, label, active = false } = Astro.props;
 ---
 
 <li class="cn-tray-link-item">
-  <a 
-    href={href} 
+  <a
+    href={href}
     class:list={["cn-tray-link", { active }]}
     aria-current={active ? "page" : undefined}
   >
@@ -30,12 +30,14 @@ const { href, label, active = false } = Astro.props;
     width: 100%;
     min-block-size: calc(var(--cn-grid) * 4);
     padding: calc(var(--cn-grid) * 0.5) var(--cn-gap);
-    color: var(--cn-text-low);
+    color: light-dark(var(--chroma-surface-30), var(--chroma-surface-80));
     text-decoration: none;
     font-size: var(--cn-font-size-text-small, 0.875rem);
     line-height: var(--cn-text-line-height, 1.5);
     border-radius: var(--cn-border-radius-small);
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
     cursor: pointer;
   }
 

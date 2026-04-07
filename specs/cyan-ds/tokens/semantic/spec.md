@@ -53,9 +53,11 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 
 | Token | Light | Dark | Role |
 |---|---|---|---|
-| `--color-link` | surface-60 | surface-40 | Default link |
-| `--color-link-hover` | surface-50 | surface-20 | Link hover |
-| `--color-link-active` | surface-40 | surface-70 | Link active |
+| `--cn-link` | primary-30 | primary-80 | Default content link |
+| `--cn-link-hover` | primary-40 | primary-90 | Link hover |
+| `--cn-link-active` | primary-50 | primary-20 | Link active/pressed |
+
+> **Note:** Tray navigation components (TrayButton, TrayLink) use surface-tinted chroma tokens directly, not `--cn-link-*`. These semantic link tokens are for content-area inline links.
 
 #### Buttons & Interactive
 

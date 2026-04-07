@@ -15,8 +15,11 @@ The `TrayLinkGroup` and `TrayLink` components form the sub-navigation system of 
 - **Rules of Association:**
   - `TrayLink` MUST always be nested inside a `TrayLinkGroup` for correct semantic list structure and indentation.
 - **Dependencies:**
-  - Consumes `--cn-grid` and `--cn-space-*` for spacing and indentation.
-  - Consumes `--cn-text-*` and `--cn-surface-*` for link states (hover, active).
+  - Consumes `--cn-grid` and `--cn-gap` for spacing and indentation.
+  - Default color: `light-dark(var(--chroma-surface-30), var(--chroma-surface-80))` — surface-tinted, not `--cn-link` (these are navigation chrome, not content links).
+  - Hover/focus: `--cn-hover` background, `--cn-text` foreground.
+  - Active page: `--cn-text-high` foreground, `--cn-surface-2` background.
+  - Focus ring: `--cn-border-focus`.
   - Uses `@container` queries to hide sub-navigation when the `Tray` is in rail mode.
 
 ### Book Page

@@ -22,9 +22,9 @@
   --cn-text-subheading: light-dark(var(--chroma-surface-40), var(--chroma-surface-80));
 
   /* Links */
-  --cn-link: light-dark(var(--chroma-primary-30), var(--chroma-primary-80));
-  --cn-link-hover: light-dark(var(--chroma-primary-40), var(--chroma-primary-90));
-  --cn-link-active: light-dark(var(--chroma-primary-50), var(--chroma-primary-20));
+  --cn-link: light-dark(var(--chroma-primary-50), var(--chroma-surface-80));
+  --cn-link-hover: light-dark(var(--chroma-surface-50), var(--chroma-primary-80));
+  --cn-link-active: light-dark(var(--chroma-primary-30), var(--chroma-surface-70));
 
   /* Buttons & Interactive */
   --cn-button: light-dark(var(--chroma-surface-50), var(--chroma-surface-20));

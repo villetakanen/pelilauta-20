@@ -38,14 +38,14 @@ This creates a consistent relationship between steps across all hues, ensuring t
 | **Surface** | 242° (Cerulean) | Hand-tuned Chroma Curve (Peak 0.17) for high-end balanced architecture. |
 
 <ColorScale 
-  client:load 
+  client:load
   title="Primary Scale (Acid-Neon)"
   colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} 
   labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} 
 />
 
 <ColorScale 
-  client:load 
+  client:load
   title="Surface Scale (Cerulean)"
   colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} 
   labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} 
@@ -73,28 +73,28 @@ This creates a consistent relationship between steps across all hues, ensuring t
 | **Love** | 3° | Positive intent, heart/favorite actions. |
 
 <ColorScale 
-  client:load 
+  client:load
   title="Error (Functional)"
   colors={[20,40,60,90].map(s => `var(--chroma-error-${s})`)} 
   labels={['20', '40', '60', '90']} 
 />
 
 <ColorScale 
-  client:load 
+  client:load
   title="Warning (Functional)"
   colors={[20,40,60,90].map(s => `var(--chroma-warning-${s})`)} 
   labels={['20', '40', '60', '90']} 
 />
 
 <ColorScale 
-  client:load 
+  client:load
   title="Info (Functional)"
   colors={[20,40,60,90].map(s => `var(--chroma-info-${s})`)} 
   labels={['20', '40', '60', '90']} 
 />
 
 <ColorScale 
-  client:load 
+  client:load
   title="Love (Functional)"
   colors={[20,40,60,90].map(s => `var(--chroma-love-${s})`)} 
   labels={['20', '40', '60', '90']} 
@@ -117,9 +117,17 @@ Developers utilize role-based tokens to build UI. These tokens automatically res
 ### Interactive & Actions
 | Semantic Token | Light Mode step | Dark Mode step | Role |
 | :--- | :--- | :--- | :--- |
-| `--color-button-accent` | primary-20 | primary-70 | High-emphasis branding action |
-| `--color-button-cta` | error-40 | error-60 | Destructive / Final action |
-| `--color-link` | primary-30 | primary-80 | Textual navigation |
+| `--cn-button-accent` | primary-20 | primary-70 | High-emphasis branding action |
+| `--cn-button-cta` | error-40 | error-60 | Destructive / Final action |
+| `--cn-link` | primary-30 | primary-80 | Default link color |
+| `--cn-link-hover` | primary-40 | primary-90 | Link hover state |
+| `--cn-link-active` | primary-50 | primary-20 | Link active/pressed state |
+
+<div style="display: flex; gap: 2rem; align-items: center; padding: 1.5rem; background: var(--cn-surface-1); border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <a href="#" style="color: var(--cn-link);">Default link</a>
+  <span style="color: var(--cn-link-hover); text-decoration: underline;">Hover state</span>
+  <span style="color: var(--cn-link-active); text-decoration: underline;">Active state</span>
+</div>
 
 ---
 
@@ -134,7 +142,7 @@ In Dark Mode, as surfaces elevate, they become lighter to represent proximity to
 > **Mandatory White Text:** On `surface-40`, standard secondary or low-contrast text is forbidden. You MUST use `chroma-surface-100` (White) to maintain a passing 4.6:1 contrast ratio against the Cerulean background.
 
 <ColorScale 
-  client:load 
+  client:load
   title="Elevation 4 Rule Verification"
   colors={['var(--chroma-surface-40)', 'var(--chroma-surface-40)']} 
   labels={['40 on White', '40 on Step 80']} 
@@ -181,7 +189,7 @@ The **ThemeLab** serves as the definitive manual verification target for color s
     </div>
     <div style="display: flex; gap: 1rem; margin-top: 2rem;">
       <button style="background: var(--color-button-accent); color: white; border: none; padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Primary Action</button>
-      <button style="background: transparent; color: var(--color-link); border: 1px solid var(--color-link); padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Secondary Action</button>
+      <button style="background: transparent; color: var(--cn-link); border: 1px solid var(--cn-link); padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Secondary Action</button>
     </div>
   </div>
 </div>
