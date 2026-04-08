@@ -2,5 +2,5 @@ import { expect, test } from "@playwright/test";
 
 test("home page loads", async ({ page }) => {
   await page.goto("/");
-  await expect(page.locator("h1")).toHaveText("Pelilauta 20");
+  await expect(page.getByRole("heading", { name: "Pelilauta 20", level: 1 })).toBeVisible();
 });

@@ -6,46 +6,89 @@ status: stable
 icon: card
 ---
 
-Content Grids are the structural backbone of Cyan. They prioritize readability and deterministic spacing by utilizing a 3-column "Holy Grail" grid applied globally to `section` and `article` tags within the main content area.
+Content Grids are the structural backbone of Cyan. They prioritize readability and deterministic spacing by providing three distinct layout patterns — **Prose**, **Golden**, and **Triad** — all driven by container queries and golden-ratio proportions.
 
 ## 1. Structural Logic
 
 All content regions respond to the width of the parent `<main>` container using **Container Queries**.
 
-- **Mobile:** Gutter padding of `--cn-gap` (16px) is enforced.
-- **Desktop (>= 60rem):** Content is centered with a max-width of **`67ch`** (the optimal character measure for focused reading).
+- **Mobile (< 60rem):** Gutter padding of `--cn-gap` (16px) is enforced, and layouts collapse to a single column.
+- **Desktop (>= 60rem):** Layouts expand into their respective proportions.
 
-### Default Centering
+---
 
-By default, all children of a `section` or `article` are anchored to the central column without requiring manual utility classes.
+## 2. Layout Variants
+
+### Prose (Readability Centered)
+The default single-column layout centered at **`67ch`**. Use `.cn-content-prose`.
 
 <div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; border-radius: var(--cn-border-radius-medium);">
-  <section class="cn-content-grid" style="background: var(--cn-surface-2); position: relative; border-radius: var(--cn-border-radius-small);">
-    <small style="position: absolute; top: 4px; right: 8px; opacity: 0.5; font-size: 10px;">Grid Column 2</small>
-    <h3 style="margin-top: 0;">Standard Section</h3>
-    <p>This section is automatically centered to exactly 67ch on wide screens. No CSS classes were applied to this paragraph or header to achieve this alignment.</p>
+  <section class="cn-content-prose" style="background: var(--cn-surface-2); position: relative; border-radius: var(--cn-border-radius-small);">
+    <h3 style="margin-top: 0;">Centered Prose</h3>
+    <p>This section is automatically centered to exactly 67ch on wide screens.</p>
+  </section>
+</div>
+
+### Golden (2.618fr : 1fr)
+A two-column layout using the golden ratio squared. Typical for thread views or main-detail views. Use `.cn-content-golden`.
+
+<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; border-radius: var(--cn-border-radius-medium); margin-top: 1rem;">
+  <section class="cn-content-golden" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
+    <div style="background: var(--cn-surface-3); padding: 1rem;">Main content area (2.618fr)</div>
+    <div style="background: var(--cn-surface-4); padding: 1rem;">Sidebar (1fr)</div>
+  </section>
+</div>
+
+### Triad (1.618fr : 1fr : 1fr)
+A three-column proportions layout. Derived from phi. Use `.cn-content-triad`.
+
+<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; border-radius: var(--cn-border-radius-medium); margin-top: 1rem;">
+  <section class="cn-content-triad" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
+    <div style="background: var(--cn-surface-3); padding: 1rem;">Primary (1.618fr)</div>
+    <div style="background: var(--cn-surface-4); padding: 1rem;">Secondary (1fr)</div>
+    <div style="background: var(--cn-surface-5); padding: 1rem;">Tertiary (1fr)</div>
   </section>
 </div>
 
 ---
 
-## 2. The Full-Width Bleed
+## 3. The Full-Width Bleed
 
-When an element needs to break the 67ch constraint (e.g. for banners, large tables, or full-width imagery), use the **`.cn-grid-full`** class.
+When an element needs to break the constraints (e.g. for banners or full-width imagery), use **`.cn-grid-full`**.
 
 <div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; margin-top: 2rem; border-radius: var(--cn-border-radius-medium);">
-  <section class="cn-content-grid" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
+  <section class="cn-content-prose" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
     <p>I am centered (67ch).</p>
     <div class="cn-grid-full" style="background: var(--cn-button-accent); padding: 1rem; color: white; text-align: center;">
-      <b>I am .cn-grid-full</b>
-      <br/>(I span the entire width including the margins)
+      <b>I am .cn-grid-full</b> (Spans all columns)
     </div>
-    <p>I am centered again.</p>
   </section>
 </div>
 
 ---
 
-## 3. Vertical Rhythm
+## 4. Vertical Rhythm
 
-Direct siblings are automatically separated by **`2 * --cn-gap`** (32px) to maintain constant typographical density throughout long-form content.
+Consecutive grid containers are automatically separated by **`2 * --cn-gap`** (32px) to maintain consistent density.
+
+<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; border-radius: var(--cn-border-radius-medium); margin-top: 1rem;">
+  <section class="cn-content-prose" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
+    <p style="margin: 0;">Grid Section A</p>
+  </section>
+  <section class="cn-content-prose" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
+    <p style="margin: 0;">Grid Section B (Separated by 2 * --cn-gap)</p>
+  </section>
+</div>
+
+---
+
+## 5. Robust Selection
+
+The grid system uses `nth-child` to reliably place children regardless of their HTML tag type (e.g. mixed `article` and `aside`).
+
+<div class="cn-grid-debug" style="background: var(--cn-surface-1); border: 1px dashed var(--cn-border); padding: 1rem; border-radius: var(--cn-border-radius-medium); margin-top: 1rem;">
+  <section class="cn-content-golden cn-grid-mixed" style="background: var(--cn-surface-2); border-radius: var(--cn-border-radius-small);">
+    <article style="background: var(--cn-surface-3); padding: 1rem;">Article (Main)</article>
+    <aside style="background: var(--cn-surface-4); padding: 1rem;">Aside (Sidebar)</aside>
+  </section>
+</div>
