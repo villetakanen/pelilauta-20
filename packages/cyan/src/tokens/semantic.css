@@ -42,11 +42,11 @@
   --cn-border-focus: light-dark(var(--chroma-primary-70), var(--chroma-primary-40));
 
   /* Functional / Status */
-  --color-success: light-dark(var(--chroma-primary-60), var(--chroma-primary-60));
-  --color-warning: light-dark(var(--chroma-warning-40), var(--chroma-warning-60));
-  --color-error: light-dark(var(--chroma-error-40), var(--chroma-error-60));
-  --color-info: light-dark(var(--chroma-info-20), var(--chroma-info-60));
-  --color-love: light-dark(var(--chroma-love-40), var(--chroma-love-60));
+  --cn-color-success: light-dark(var(--chroma-primary-60), var(--chroma-primary-60));
+  --cn-color-warning: light-dark(var(--chroma-warning-40), var(--chroma-warning-60));
+  --cn-color-error: light-dark(var(--chroma-error-40), var(--chroma-error-60));
+  --cn-color-info: light-dark(var(--chroma-info-20), var(--chroma-info-60));
+  --cn-color-love: light-dark(var(--chroma-love-40), var(--chroma-love-60));
 
   /* Inputs / Forms */
   --cn-input: light-dark(var(--chroma-surface-80), var(--chroma-surface-0));

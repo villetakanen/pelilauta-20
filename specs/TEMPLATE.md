@@ -14,7 +14,7 @@ stylebook_url: [https://...]
 [Why does this feature exist? What problem does it solve? 1-3 sentences.]
 
 ### Architecture
-- **Components:** [Key files/modules with paths. State clearly whether they are SSR/CSS (`.astro`) or CSR Progressive Enhancements (`.svelte`)]
+- **Components:** [Key files/modules with paths. Default to Svelte 5 for DS components; Astro for structural layouts. All must be 100% SSR-compatible per ADR-001.]
 - **Data Models:** [Schemas, types — reference file paths, don't duplicate code]
 - **API Contracts:** [Endpoints, events, public interfaces]
 - **Dependencies:** [What this depends on / what depends on this]
