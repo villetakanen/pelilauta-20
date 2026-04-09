@@ -1,8 +1,8 @@
 ---
-import CnIcon from "@cyan/components/CnIcon.astro";
+import CnIcon from "@cyan/components/CnIcon.svelte";
 import { FallbackIcons } from "@cyan/components/CnIconFallback";
-import { icons as managedIcons } from "@myrrys/proprietary";
-import { icons as communityIcons } from "@pelilauta/icons";
+import { getNouns as getManagedNouns } from "@myrrys/proprietary";
+import { getNouns as getCommunityNouns } from "@pelilauta/icons";
 
 interface Props {
   tier?: 1 | 2 | 3;
@@ -11,8 +11,8 @@ interface Props {
 const { tier } = Astro.props;
 
 const tiers = {
-  1: Object.keys(communityIcons).sort(),
-  2: Object.keys(managedIcons).sort(),
+  1: getCommunityNouns().sort(),
+  2: getManagedNouns().sort(),
   3: Object.keys(FallbackIcons).sort(),
 };
 

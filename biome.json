@@ -31,6 +31,11 @@
           }
         }
       }
+    },
+    {
+      "includes": ["packages/pelilauta-icons/src/index.ts", "packages/myrrys-proprietary/index.ts"],
+      "formatter": { "enabled": false },
+      "linter": { "enabled": false }
     }
   ]
 }

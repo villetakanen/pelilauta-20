@@ -1,0 +1,25 @@
+---
+title: CnCard Component
+description: Technical documentation for the CnCard Svelte component.
+order: 3
+status: stable
+---
+import CnCard from "@cyan/components/CnCard.svelte";
+
+The `CnCard` component is a flexible container for content snippets, gaming sessions, or character summaries. It supports elevations, responsive covers, and interactive clickability.
+
+## Basic Usage
+
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; background: var(--cn-surface-1); padding: 2rem; border-radius: var(--cn-border-radius-medium);">
+  <CnCard elevation={1}>
+    <h4 slot="title">Simple Card</h4>
+    <p slot="description">This is a basic card with elevation 1.</p>
+    Standard card content goes here.
+  </CnCard>
+
+  <CnCard elevation={1} href="#">
+    <h4 slot="title">Clickable Card</h4>
+    <p slot="description">This card transitions on hover.</p>
+    Clicking this card navigates to the provided href.
+  </CnCard>
+</div>

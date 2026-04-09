@@ -1,6 +1,6 @@
 {
   "name": "pelilauta-20",
-  "version": "20.0.0-alpha.1",
+  "version": "20.0.0-alpha.2",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,8 @@
     "test": "pnpm --filter '*' test",
     "test:e2e": "pnpm --filter './app/*' test:e2e",
     "check": "biome check --write .",
+    "gen:icons": "node --experimental-strip-types scripts/generate-icon-registry.ts",
+    "check:icons": "node --experimental-strip-types scripts/generate-icon-registry.ts --check",
     "ship": "bash scripts/ship.sh"
   },
   "devDependencies": {
