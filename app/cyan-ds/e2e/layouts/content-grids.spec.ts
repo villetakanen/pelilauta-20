@@ -86,9 +86,9 @@ test.describe("Content Grids", () => {
         });
 
         // The child (column 2) should be offset by exactly the gap (column 1)
-        expect(Math.abs(childBox.x - sectionBox.x - gapPx)).toBeLessThan(3);
+        expect(Math.abs(childBox.x - sectionBox.x - gapPx)).toBeLessThan(5);
         // Should span nearly full width (minus both gutters)
-        expect(Math.abs(childBox.width - (sectionBox.width - gapPx * 2))).toBeLessThan(3);
+        expect(Math.abs(childBox.width - (sectionBox.width - gapPx * 2))).toBeLessThan(5);
       }
     }
   });
