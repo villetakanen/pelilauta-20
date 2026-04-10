@@ -106,3 +106,13 @@ Then a valid Date is returned
 ```
 
 - **Vitest Unit Test:** `packages/models/src/utils/toDate.test.ts`
+
+#### Scenario: toDate normalizes invalid inputs
+
+```gherkin
+Given an invalid ISO string, unrecognized object, or null/undefined
+When passed to toDate()
+Then Date(0) (epoch) is returned to ensure stability
+```
+
+- **Vitest Unit Test:** `packages/models/src/utils/toDate.test.ts`
