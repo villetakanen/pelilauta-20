@@ -11,8 +11,8 @@ let {
   noun,
   notify = false,
   alert = false,
-  title,
-  description,
+  title = "",
+  description = "",
   actions,
   children,
 } = $props<{
@@ -24,210 +24,242 @@ let {
   noun?: string;
   notify?: boolean;
   alert?: boolean;
-  title?: Snippet;
-  description?: Snippet;
+  title?: string;
+  description?: string;
   actions?: Snippet;
   children?: Snippet;
 }>();
-
-// Root element type selection: Anchor if href is provided, otherwise Article
-const RootElement = href ? "a" : "article";
 </script>
 
-<!-- svelte-ignore a11y_missing_attribute -->
-<svelte:element 
-  this={RootElement} 
-  {href}
-  class="cn-card" 
-  class:is-clickable={!!href}
-  style="--elevation: {elevation};"
+<article
+  class="cn-card elevation-{elevation}"
+  class:has-notify={notify}
+  class:has-alert={alert}
 >
   {#if cover}
-    <div class="cover">
-      <img src={cover} {srcset} {sizes} alt="" loading="lazy" />
-      {#if noun}
-        <div class="cover-icon">
-          <CnIcon {noun} size="small" />
-        </div>
+    <div class="cover" aria-hidden="true">
+      {#if href}
+        <a href={href} tabindex="-1">
+          <img src={cover} {srcset} {sizes} alt="" loading="lazy" />
+          <div class="tint"></div>
+        </a>
+      {:else}
+        <img src={cover} {srcset} {sizes} alt="" loading="lazy" />
+        <div class="tint"></div>
       {/if}
     </div>
+    {#if noun}
+      <div class="cover-noun">
+        <CnIcon {noun} size="large" />
+      </div>
+    {/if}
   {/if}
 
-  <div class="card-content">
-    <header>
-      <div class="title-row">
-        {#if !cover && noun}
-          <div class="inline-icon">
+  <div class="card-header">
+    <h4 class="title">
+      {#if href}
+        <a href={href}>
+          {#if !cover && noun}
             <CnIcon {noun} size="small" />
-          </div>
-        {/if}
-        <h4 class="title">
-          {#if title}
-            {@render title()}
           {/if}
-        </h4>
-      </div>
-      {#if description}
-        <div class="description">
-          {@render description()}
-        </div>
+          {title}
+        </a>
+      {:else}
+        {#if !cover && noun}
+          <CnIcon {noun} size="small" />
+        {/if}
+        {title}
       {/if}
-    </header>
+    </h4>
+  </div>
+
+  <div class="card-info">
+    {#if description}
+      <p class="description">{description}</p>
+    {/if}
 
     {#if children}
-      <div class="body">
-        {@render children()}
-      </div>
-    {/if}
-
-    {#if actions}
-      <footer class="actions">
-        {@render actions()}
-      </footer>
+      {@render children()}
     {/if}
   </div>
 
-  <!-- Indicators (Top-right badges) -->
-  <div class="indicators">
-    {#if notify}
-      <span class="indicator notify" aria-label="Notification"></span>
-    {/if}
-    {#if alert}
-      <span class="indicator alert" aria-label="Alert"></span>
-    {/if}
-  </div>
-</svelte:element>
+  <div class="spacer"></div>
+
+  {#if actions}
+    <nav class="actions">
+      {@render actions()}
+    </nav>
+  {/if}
+</article>
 
 <style>
   .cn-card {
-    display: block;
-    position: relative;
-    background-color: var(--cn-card-background, var(--cn-surface-1));
-    border-radius: var(--cn-border-radius-card, var(--cn-border-radius-large));
-    border: 1px solid var(--cn-border);
-    overflow: hidden;
-    text-decoration: none;
-    color: inherit;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    
-    /* Support for elevation 0-4 using semantic shadow tokens */
-    --elevation-shadow: none;
-  }
-
-  .cn-card[style*="--elevation: 1"] {
-    --elevation-shadow: 0 2px 4px var(--cn-shadow-color);
-  }
-  .cn-card[style*="--elevation: 2"] {
-    --elevation-shadow: var(--cn-shadow-elevation-2);
-  }
-  .cn-card[style*="--elevation: 3"] {
-    --elevation-shadow: var(--cn-shadow-elevation-3);
-  }
-  .cn-card[style*="--elevation: 4"] {
-    --elevation-shadow: var(--cn-shadow-elevation-4);
-  }
-
-  .cn-card {
-    box-shadow: var(--elevation-shadow);
-  }
-
-  .is-clickable:hover {
-    border-color: var(--cn-border-hover);
-    background-color: var(--cn-surface-2);
-    transform: translateY(-2px);
-    box-shadow: var(--cn-shadow-elevation-2);
-  }
-
-  .cover {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    overflow: hidden;
-    background-color: var(--cn-surface-3);
-  }
-
-  .cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .cover-icon {
-    position: absolute;
-    bottom: var(--cn-gap);
-    left: var(--cn-gap);
-    padding: calc(var(--cn-grid) * 0.5);
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(4px);
-    border-radius: var(--cn-border-radius-small);
-    color: white;
-    display: flex;
-  }
-
-  .card-content {
-    padding: var(--cn-gap);
+    box-sizing: border-box;
     display: flex;
     flex-direction: column;
-    gap: var(--cn-grid);
+    border-radius: var(--cn-border-radius-card, var(--cn-border-radius-large));
+    position: relative;
+    container-type: inline-size;
+    flex-grow: 1;
+    transition: background 0.27s ease-in-out;
+    font-family: var(--cn-font-family);
+    font-size: var(--cn-font-size-text);
+    font-weight: var(--cn-font-weight-text);
+    line-height: var(--cn-line-height-text);
+    letter-spacing: var(--cn-letter-spacing-text);
+    color: var(--cn-text-low);
+    padding: var(--cn-grid) var(--cn-gap);
+    overflow: hidden;
+    min-height: calc(7 * var(--cn-line));
   }
 
-  .title-row {
+  /* Elevation handled by .elevation-N utility classes from elevation.css */
+
+  /* Triangular corner indicator (notify/alert) */
+  .cn-card::after {
+    content: "";
+    position: absolute;
+    top: -1px;
+    right: -1px;
+    width: calc(7 * var(--cn-grid));
+    height: calc(7 * var(--cn-grid));
+    background: none;
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
+    will-change: opacity, background;
+    clip-path: polygon(100% 0, 0 0, 100% 100%);
+    border-radius: 0 var(--cn-border-radius-large) 0 0;
+  }
+  .cn-card.has-notify::after {
+    background: var(--cn-color-info);
+    opacity: 1;
+  }
+  .cn-card.has-alert::after {
+    background: var(--cn-color-warning);
+    opacity: 1;
+  }
+
+  /* Cover image */
+  .cover {
+    padding: 0;
+    margin: calc(-1 * var(--cn-grid)) calc(-1 * var(--cn-gap));
+    margin-bottom: 0;
+    border-radius: var(--cn-border-radius-card, var(--cn-border-radius-large));
+    max-height: 100cqw;
+    overflow: hidden;
+    position: relative;
+  }
+  .cover img {
+    width: calc(100cqw + var(--cn-gap) * 2);
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--cn-border-radius-card, var(--cn-border-radius-large));
+    display: block;
+    position: relative;
+  }
+  .cover a {
+    display: contents;
+  }
+
+  /* Tint gradient over cover — uses primary chroma for punchy branded overlay */
+  .tint {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: min(95cqw, 44%);
+    width: calc(100cqw + var(--cn-gap) * 2);
+    z-index: 1;
+    background: linear-gradient(
+      0deg,
+      color-mix(in oklch,
+        light-dark(var(--chroma-primary-95), var(--chroma-primary-30)) 70%,
+        transparent),
+      transparent
+    );
+    background-blend-mode: hard-light;
+    pointer-events: none;
+    border-radius: 0 0 var(--cn-border-radius-card, var(--cn-border-radius-large)) var(--cn-border-radius-card, var(--cn-border-radius-large));
+  }
+
+  /* Card header: icon + title row */
+  .card-header {
     display: flex;
+    flex-direction: row;
     align-items: center;
+    justify-content: flex-start;
     gap: var(--cn-grid);
-    margin-bottom: calc(var(--cn-grid) * 0.5);
   }
 
+  /* Noun icon: inline beside title (no cover) */
+  .title :global(.cn-icon) {
+    flex-shrink: 0;
+    vertical-align: middle;
+    margin-right: var(--cn-grid);
+    color: var(--cn-text-heading);
+  }
+
+  /* Noun icon: top-right corner (with cover) */
+  .cover-noun {
+    position: absolute;
+    top: calc(1 * var(--cn-grid));
+    right: calc(1 * var(--cn-grid));
+    margin: 0;
+    padding: 0;
+    z-index: 2;
+    filter: drop-shadow(0 0 4px var(--cn-shadow-color));
+    color: var(--cn-text-heading);
+  }
+
+  /* Title */
   .title {
     margin: 0;
-    font-size: var(--cn-font-size-headline-card, var(--cn-font-size-h4));
-    line-height: var(--cn-line-height-h4);
+    padding: 0;
+    font-family: var(--cn-font-family);
     font-weight: var(--cn-font-weight-h4);
+    font-size: var(--cn-font-size-headline-card, var(--cn-font-size-h4));
+    line-height: var(--cn-line-height-headline-card, var(--cn-line-height-h4));
+    letter-spacing: var(--cn-letter-spacing-headline-card, normal);
     color: var(--cn-text-heading);
-    /* 2-line truncation (ADR-001 requirement) */
+    /* 2-line truncation */
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
   }
+  .title a {
+    color: var(--cn-text-heading);
+    text-decoration: none;
+  }
+  .title a:hover {
+    text-decoration: underline;
+  }
+  .title a:focus-visible {
+    outline: 2px solid var(--cn-focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
 
+  /* Card info: description + body content */
+  .card-info {
+    padding: var(--cn-grid) 0;
+  }
   .description {
+    margin: 0;
     font-size: var(--cn-font-size-text-small, 0.875rem);
     color: var(--cn-text-low);
-    margin: 0;
   }
 
+  /* Spacer pushes actions to card bottom */
+  .spacer {
+    flex-grow: 1;
+  }
+
+  /* Actions: edge-to-edge nav */
   .actions {
-    margin-top: var(--cn-gap);
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--cn-grid);
-  }
-
-  /* Indicators */
-  .indicators {
-    position: absolute;
-    top: calc(var(--cn-grid) * 1.5);
-    right: calc(var(--cn-grid) * 1.5);
-    display: flex;
-    gap: calc(var(--cn-grid) * 0.5);
-    pointer-events: none;
-  }
-
-  .indicator {
-    display: block;
-    width: calc(var(--cn-grid) * 1.5);    height: calc(var(--cn-grid) * 1.5);
-    border-radius: 50%;
-    border: 2px solid var(--cn-surface-1);
-    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
-  }
-
-  .indicator.notify {
-    background-color: var(--cn-color-info);
-  }
-
-  .indicator.alert {
-    background-color: var(--cn-color-error);
+    margin-left: calc(-1 * var(--cn-gap));
+    margin-right: calc(-1 * var(--cn-gap));
   }
 </style>

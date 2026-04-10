@@ -35,6 +35,7 @@
     color-mix(in oklch, var(--chroma-surface-50), transparent 90%),
     color-mix(in oklch, var(--chroma-surface-50), transparent 80%)
   );
+  --cn-focus-ring: light-dark(var(--chroma-primary-60), var(--chroma-primary-40));
 
   /* Borders */
   --cn-border: light-dark(var(--chroma-surface-70), var(--chroma-surface-30));

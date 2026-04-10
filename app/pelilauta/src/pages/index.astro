@@ -1,9 +1,25 @@
 ---
+import CnCard from "@cyan/components/CnCard.svelte";
 import AppShell from "@cyan/layouts/AppShell.astro";
 ---
 
 <AppShell title="Pelilauta">
   <h1>Pelilauta 20</h1>
   <p>RPG community platform.</p>
-  <button class="button primary">Get started</button>
+
+  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--cn-gap, 1rem); margin-top: 2rem;">
+    <CnCard 
+      title="Sample Session" 
+      href="/sessions/1" 
+      description="A mystery in the fog surrounding the ancient ruins of Pelilauta." 
+      notify
+    />
+    <CnCard 
+      title="Character Sheet" 
+      noun="prophet" 
+      description="Update your stats and equipment before the next adventure." 
+    />
+  </div>
+
+  <button class="button primary" style="margin-top: 2rem;">Get started</button>
 </AppShell>
