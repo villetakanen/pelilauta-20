@@ -1,21 +1,21 @@
 ---
-feature: Firebase Client Package
+feature: Firebase Infrastructure
 ---
 
-# Feature: Firebase Client Package
+# Feature: Firebase Infrastructure
 
 ## Blueprint
 
 ### Context
 
-Shared Firebase infrastructure package providing SSR-safe client initialization for all Pelilauta sub-apps. Ensures a single Firebase app instance is shared across the monorepo, with separate entry points for server (Astro SSR) and client (Svelte hydration) contexts.
+Shared Firebase infrastructure within the pnpm workspace, providing initialization for both server (Astro SSR / API routes) and client (Svelte CSR hydration) contexts. This is not a separately published package — it ships as part of the workspace and is consumed by domain packages (`packages/threads`, etc.) and the app (`app/pelilauta`). The server entry powers SSR data fetching and API endpoints; the client entry powers authenticated writes, real-time Firestore listeners, and auth flows in the browser.
 
 ### Architecture
 
-- **Package:** `packages/firebase/`
+- **Location:** `packages/firebase/` (workspace package, not independently published)
 - **Exports:**
-  - `server/` — firebase-admin initialization, `getFirestore()`, `verifyIdToken()`, admin helpers
-  - `client/` — firebase/app + firebase/firestore client SDK, `getFirestore()`, auth utilities
+  - `server/` — firebase-admin initialization, `getFirestore()`, `verifyIdToken()`, admin helpers. Used by Astro frontmatter and API routes for SSR data fetching.
+  - `client/` — firebase/app + firebase/firestore client SDK, `getFirestore()`, `getAuth()`. Used by Svelte components for authenticated writes, `onSnapshot()` real-time listeners, and client-side auth flows.
   - `config` — project config (env-backed: `PUBLIC_*` for client, `SECRET_*` for admin)
 
 #### Module Structure
@@ -37,7 +37,7 @@ packages/firebase/
   - `firebase` (client SDK) — client entry point
   - `firebase-admin` — server entry point
   - `@models` — `Entry` / `ContentEntry` types for Firestore conversion helpers
-- **Consumed by:** `packages/threads`, future domain packages, `app/pelilauta` API routes
+- **Consumed by:** `packages/threads`, future domain packages, `app/pelilauta` pages and API routes
 
 #### SSR Safety
 
