@@ -75,14 +75,12 @@ test.describe("Content Grids", () => {
       const childBox = await child.boundingBox();
 
       if (sectionBox && childBox) {
-        // Dynamically get the computed --cn-gap value in pixels
+        // Dynamically get the computed --cn-gap value in pixels.
+        // We read the first column width directly from the grid template.
         const gapPx = await section.evaluate((el) => {
-          const temp = document.createElement("div");
-          temp.style.width = "var(--cn-gap)";
-          document.body.appendChild(temp);
-          const px = parseFloat(window.getComputedStyle(temp).width);
-          document.body.removeChild(temp);
-          return px || 16; // Fallback to 16px if resolution fails
+          const style = window.getComputedStyle(el);
+          const cols = style.gridTemplateColumns.split(" ");
+          return parseFloat(cols[0]) || 16;
         });
 
         // The child (column 2) should be offset by exactly the gap (column 1)
