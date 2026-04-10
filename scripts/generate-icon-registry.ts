@@ -43,7 +43,9 @@ function generate(config: RegistryConfig): string {
 
   const registryEntries = nouns
     .map((noun) => {
-      const svg = readFileSync(join(config.svgDir, `${noun}.svg`), "utf-8");
+      let svg = readFileSync(join(config.svgDir, `${noun}.svg`), "utf-8");
+      // Strip XML comments and excess whitespace to prevent toolchain noise (e.g. Illustrator timestamps)
+      svg = svg.replace(/<!--[\s\S]*?-->/g, "").trim();
       return `  ${JSON.stringify(noun)}: ${JSON.stringify(svg)}`;
     })
     .join(",\n");
@@ -97,8 +99,19 @@ for (const config of configs) {
       console.log(`OK: ${config.outFile}`);
     }
   } else {
-    writeFileSync(config.outFile, generated, "utf-8");
-    console.log(`Generated: ${config.outFile}`);
+    let existing = "";
+    try {
+      existing = readFileSync(config.outFile, "utf-8");
+    } catch {
+      // File doesn't exist
+    }
+
+    if (existing !== generated) {
+      writeFileSync(config.outFile, generated, "utf-8");
+      console.log(`Generated: ${config.outFile}`);
+    } else {
+      console.log(`Up to date: ${config.outFile}`);
+    }
   }
 }
 
