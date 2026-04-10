@@ -14,7 +14,14 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/node_modules", "!**/dist", "!**/.astro", "!**/playwright-report"]
+    "includes": [
+      "**",
+      "!**/node_modules",
+      "!**/dist",
+      "!**/.astro",
+      "!**/playwright-report",
+      "!**/.tmp"
+    ]
   },
   "overrides": [
     {
@@ -31,6 +38,11 @@
           }
         }
       }
+    },
+    {
+      "includes": ["packages/pelilauta-icons/src/index.ts", "packages/myrrys-proprietary/index.ts"],
+      "formatter": { "enabled": false },
+      "linter": { "enabled": false }
     }
   ]
 }

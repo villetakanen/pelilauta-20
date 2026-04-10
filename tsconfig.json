@@ -12,7 +12,13 @@
     "verbatimModuleSyntax": true,
     "declaration": true,
     "declarationMap": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "baseUrl": ".",
+    "paths": {
+      "@cyan/*": ["./packages/cyan/src/*"],
+      "@pelilauta/icons": ["./packages/pelilauta-icons/src/index.ts"],
+      "@myrrys/proprietary": ["../../packages/myrrys-proprietary/index.ts"]
+    }
   },
   "exclude": ["node_modules", "dist"]
 }

@@ -4,13 +4,21 @@ import Tray from "../components/Tray.astro";
 
 interface Props {
   title: string;
+  appTitle?: string;
   shortTitle?: string;
   layout?: "view" | "sidebar" | "editor" | "modal";
   trayLabel?: string;
   backHref?: string;
 }
 
-const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" } = Astro.props;
+const {
+  title,
+  appTitle = title,
+  shortTitle,
+  layout = "view",
+  trayLabel = "Menu",
+  backHref = "/",
+} = Astro.props;
 ---
 
 <!doctype html>
@@ -29,7 +37,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
     
     <header class="cn-app-header">
       <AppBar 
-        title={title} 
+        title={appTitle} 
         shortTitle={shortTitle} 
         mode={layout === 'modal' ? 'modal' : ''} 
         backHref={backHref}
@@ -48,6 +56,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
   @import "@cyan/tokens/index.css";
   @import "../utilities/index.css";
   @import "@cyan/fonts/fonts.css";
+  @import "./content-grid.css";
 
   *,
   *::before,
@@ -62,8 +71,8 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
     font-size: var(--cn-font-size-text, 16px);
     line-height: var(--cn-line-height-text, 1.5);
     color: var(--cn-text);
-    background-color: var(--cn-background);
-    
+    background-color: var(--cn-surface);
+
     /* Setup fundamental layout canvas (View/Modal/Editor mode) */
     display: grid;
     grid-template-rows: var(--cn-app-bar-height, 4rem) 1fr;
@@ -86,10 +95,8 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
 
   /* --- Layout: View --- */
   .layout-view .cn-app-main {
-    max-width: 80rem;
     width: 100%;
-    margin-inline: auto;
-    padding: var(--cn-gap, 1rem);
+    /* Max-width and centering managed by internal sections via content-grid.css */
   }
 
   /* --- Layout: Sidebar --- */
@@ -115,10 +122,8 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
   }
 
   .layout-sidebar .cn-app-main {
-    max-width: 80rem;
     width: 100%;
-    margin-inline: auto;
-    padding: var(--cn-gap, 1rem);
+    /* Max-width and centering managed by internal sections via content-grid.css */
   }
 
   /* When tray is expanded, tablet mode uses absolute overlay, so main shouldn't be pushed on tablet.
@@ -140,7 +145,7 @@ const { title, shortTitle, layout = "view", trayLabel = "Menu", backHref = "/" }
     background-color: var(--cn-surface-4);
   }
   .layout-modal .cn-app-main {
-    background-color: var(--cn-background);
+    background-color: var(--cn-surface);
     max-width: 42rem;
     width: 100%;
     margin-inline: auto;

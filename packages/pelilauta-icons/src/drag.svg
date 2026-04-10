@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="128px" height="128px" viewBox="0 0 128 128" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/">
+    <g id="icon">
+    <g transform="matrix(5,0,0,5,-124,-143)">
+        <path d="M32,37L34,37L36,35L36,33L34,33L32,35L32,37Z"/>
+    </g>
+    <g transform="matrix(5,0,0,5,-92,-143)">
+        <path d="M32,37L34,37L36,35L36,33L34,33L32,35L32,37Z"/>
+    </g>
+    <g transform="matrix(5,0,0,5,-124,-111)">
+        <path d="M32,37L34,37L36,35L36,33L34,33L32,35L32,37Z"/>
+    </g>
+    <g transform="matrix(5,0,0,5,-92,-111)">
+        <path d="M32,37L34,37L36,35L36,33L34,33L32,35L32,37Z"/>
+    </g>
+    <g transform="matrix(5,0,0,5,-124,-79)">
+        <path d="M32,37L34,37L36,35L36,33L34,33L32,35L32,37Z"/>
+    </g>
+    <g transform="matrix(5,0,0,5,-92,-79)">
+        <path d="M32,37L34,37L36,35L36,33L34,33L32,35L32,37Z"/>
+    </g>
+    </g>
+</svg>

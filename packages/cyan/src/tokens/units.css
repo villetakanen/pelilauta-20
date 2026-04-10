@@ -28,4 +28,8 @@
   --cn-height-rail: calc(var(--cn-grid) * 9);
   --cn-width-tray: calc(var(--cn-grid) * 42);
   --cn-breakpoint-tray-wide: 64rem;
+
+  /* Content Grids (Golden Ratio) */
+  --cn-phi: 1.618;
+  --cn-phi-2: 2.618;
 }

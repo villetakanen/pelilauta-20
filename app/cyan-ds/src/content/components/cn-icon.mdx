@@ -1,0 +1,65 @@
+---
+title: CnIcon Component
+description: Technical documentation for the CnIcon component and registries.
+order: 2
+status: stable
+---
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import IconGallery from "../../components/IconGallery.astro";
+
+
+The `CnIcon` component is the high-fidelity, source-code-first icon primitive for the Cyan Design System. It resolves icons across three tiers of registries and inlines them via SSR.
+
+## Sizing Matrix
+
+<div style="display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; background: var(--cn-color-surface-1); padding: 2rem; border-radius: var(--cn-border-radius-medium);">
+  <div style="text-align: center;">
+    <CnIcon noun="fox" size="xsmall" />
+    <div style="font-size: 0.75rem; margin-top: 0.5rem;">xsmall</div>
+  </div>
+  <div style="text-align: center;">
+    <CnIcon noun="fox" size="small" />
+    <div style="font-size: 0.75rem; margin-top: 0.5rem;">small</div>
+  </div>
+  <div style="text-align: center;">
+    <CnIcon noun="fox" size="medium" />
+    <div style="font-size: 0.75rem; margin-top: 0.5rem;">medium</div>
+  </div>
+  <div style="text-align: center;">
+    <CnIcon noun="fox" size="large" />
+    <div style="font-size: 0.75rem; margin-top: 0.5rem;">large</div>
+  </div>
+  <div style="text-align: center;">
+    <CnIcon noun="fox" size="xlarge" />
+    <div style="font-size: 0.75rem; margin-top: 0.5rem;">xlarge</div>
+  </div>
+</div>
+
+## Error Handling
+
+When a noun is not found in any registry, the component renders the mandatory **missing glyph**.
+
+<div style="display: flex; gap: 2rem; padding: 2rem; background: var(--cn-color-surface-3); border-radius: var(--cn-border-radius-medium);">
+  <div style="text-align: center;">
+    <CnIcon noun="missing" size="large" />
+    <div style="font-size: 0.75rem;">Unknown Noun</div>
+  </div>
+</div>
+
+## Community MIT Registry (Tier 1)
+
+These icons are available by default across all Cyan-powered apps.
+
+<IconGallery tier={1} />
+
+## Managed Proprietary Registry (Tier 2)
+
+Branded, licensed, or proprietary icons available selectively.
+
+<IconGallery tier={2} />
+
+## Core Fallback Registry (Tier 3)
+
+Hardcoded SVGs for essential UI components (guaranteed availability).
+
+<IconGallery tier={3} />

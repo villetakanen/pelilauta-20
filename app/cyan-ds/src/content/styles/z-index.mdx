@@ -1,0 +1,49 @@
+---
+title: Z-Index
+description: Stacking hierarchy tokens for layered Cyan DS components.
+order: 2
+status: stable
+---
+
+
+Stacked components (trays, modals, toasts) use standardized z-index tokens to prevent "magic number" collisions. The `--cn-z-*` tokens define a single, explicit stacking order for the system.
+
+## Hierarchy
+
+Six layers, ordered back-to-front:
+
+| Token | Value | Component |
+|---|---|---|
+| `--cn-z-tray` | 20000 | Side navigation tray |
+| `--cn-z-rail` | 30000 | Bottom navigation rail |
+| `--cn-z-tray-button` | 40000 | Tray toggle button |
+| `--cn-z-reply-dialog` | 41000 | Docked reply dialog |
+| `--cn-z-modal` | 50000 | Modal dialogs and overlays |
+| `--cn-z-snackbar` | 60000 | Toast notifications |
+
+Values are intentionally high (20,000–60,000) to avoid collisions with third-party styles.
+
+## Visual Stack
+
+Each panel below uses `position: relative` and a `z-index` from a `--cn-z-*` token.
+
+<div style="position: relative; height: 18rem; margin-block: var(--cn-gap);">
+  <div style="position: absolute; top: 0; left: 0; width: 14rem; padding: var(--cn-gap); background: var(--color-surface-1); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-tray); font-size: 0.75rem; color: var(--color-on-surface-variant);">
+    <code>--cn-z-tray</code><br/>20 000
+  </div>
+  <div style="position: absolute; top: 2rem; left: 2rem; width: 14rem; padding: var(--cn-gap); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-rail); font-size: 0.75rem; color: var(--color-on-surface-variant);">
+    <code>--cn-z-rail</code><br/>30 000
+  </div>
+  <div style="position: absolute; top: 4rem; left: 4rem; width: 14rem; padding: var(--cn-gap); background: var(--color-surface-3); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-tray-button); font-size: 0.75rem; color: var(--color-on-surface-variant);">
+    <code>--cn-z-tray-button</code><br/>40 000
+  </div>
+  <div style="position: absolute; top: 6rem; left: 6rem; width: 14rem; padding: var(--cn-gap); background: var(--color-surface-4); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-reply-dialog); font-size: 0.75rem; color: var(--color-on-surface-variant);">
+    <code>--cn-z-reply-dialog</code><br/>41 000
+  </div>
+  <div style="position: absolute; top: 8rem; left: 8rem; width: 14rem; padding: var(--cn-gap); background: var(--color-primary); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-modal); font-size: 0.75rem; color: var(--color-on-primary);">
+    <code>--cn-z-modal</code><br/>50 000
+  </div>
+  <div style="position: absolute; top: 10rem; left: 10rem; width: 14rem; padding: var(--cn-gap); background: var(--color-button-cta); border: 1px solid var(--color-border); border-radius: var(--cn-border-radius-small); z-index: var(--cn-z-snackbar); font-size: 0.75rem; color: white;">
+    <code>--cn-z-snackbar</code><br/>60 000
+  </div>
+</div>

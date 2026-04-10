@@ -10,7 +10,7 @@ A living documentation and demo page that showcases the Cyan unit token system. 
 
 ### Architecture
 
-- **Target path:** `app/cyan-ds/src/pages/principles/units-and-grid.mdx`
+- **Target path:** `app/cyan-ds/src/content/principles/units-and-grid.mdx`
 - **Format:** MDX using [Book layout](../book-layout/spec.md) (`app/cyan-ds/src/layouts/Book.astro`)
 - **Collection:** Principles
 - **Dependencies:** `--cn-*` unit tokens from `packages/cyan/src/tokens/`, `--chroma-*` palette tokens (for demo visuals), atomic CSS classes
@@ -41,19 +41,16 @@ The following tokens are spec'd but **not yet implemented** in `packages/cyan/sr
 
 | Token | Spec | Status |
 |---|---|---|
-| `--cn-grid` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-gap` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-line` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-button-physical-size` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-button-size` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-navigation-button-size` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-border-radius-*` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-icon-size-*` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-width-rail` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--cn-width-tray` | [units spec](../../cyan-ds/tokens/units/spec.md) | Not implemented |
-| `--chroma-primary-40` | [chroma spec](../../cyan-ds/tokens/chroma/spec.md) | Not implemented |
-
-> Note: existing `--cyan-space-*` and `--cyan-radius-*` tokens in `packages/cyan/src/tokens/` are scaffolding placeholders. The canonical token names are `--cn-*` as defined in the upstream specs.
+| `--cn-grid` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-gap` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-line` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-button-physical-size` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-button-size` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-navigation-button-size` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-border-radius-*` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-icon-size-*` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-width-rail` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
+| `--cn-width-tray` | [units spec](../../cyan-ds/tokens/units/spec.md) | Implemented |
 
 ### Migration Notes
 
@@ -69,12 +66,12 @@ The following tokens are spec'd but **not yet implemented** in `packages/cyan/sr
 
 ### Definition of Done
 
-- [ ] Page exists at `app/cyan-ds/src/pages/principles/units-and-grid.mdx`
-- [ ] Page renders all token groups with accurate tables
-- [ ] Button sizing demo shows three circles at correct relative sizes using token `var()` references
+- [x] Page exists at `app/cyan-ds/src/content/principles/units-and-grid.mdx`
+- [x] Page renders all token groups with accurate tables
+- [x] Button sizing demo shows three circles at correct relative sizes using token `var()` references
 - [ ] Atomic CSS card example renders correctly using only utility classes
-- [ ] Responsive sizing section explains container query approach (no breakpoint tokens)
-- [ ] Missing tokens are clearly flagged in the page content until implemented
+- [x] Responsive sizing section explains container query approach (no breakpoint tokens)
+- [x] All tokens implemented in `packages/cyan/src/tokens/units.css`
 
 ### Regression Guardrails
 

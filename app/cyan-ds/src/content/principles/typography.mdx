@@ -1,0 +1,148 @@
+---
+title: Typography
+description: The core font hierarchy, high-contrast scaling, and vertical rhythm system for Cyan.
+order: 10
+status: stable
+icon: font
+---
+
+Cyan v20 delivers a high-impact, editorial typography system anchored to the **Lato** family. Our system prioritizes a punchy, legible look by utilizing a high-contrast **Augmented Fourth (1.414)** modular scale.
+
+## 1. The 17px Baseline
+
+To optimize **Lato's** legibility at modern screen resolutions, we use a **17px (1.0625rem)** base size. While the browser root remains at 16px to preserve user settings, Cyan's primary text is defined relative to this 17px baseline. This ensures that standard reading text remains clear and optically balanced.
+
+---
+
+## 2. Augmented Fourth (1.414) Scale
+
+The hierarchy follows the intense rhythm of the Augmented Fourth scale. This creates a significant "punch" for headers while maintaining clearly distinguishable steps. This is a migration change from the Major Third (1.25) scale used in legacy Cyan.
+
+| Level | Scale Step | Desktop Size | Line Height | Mobile Fallback (< 620px) |
+| :--- | :--- | :--- | :--- | :--- |
+| **H1** | Step 4 | **4.25rem** (68px) | **1.25** | **3.0rem** (H2 style) |
+| **H2** | Step 3 | **3.0rem** (48px) | **1.25** | **2.125rem** (H3 style) |
+| **H3** | Step 2 | **2.125rem** (34px) | **1.5** | **1.5rem** (H4 style) |
+| **H4** | Step 1 | **1.5rem** (24px) | **1.5** | **Base-Bold** (17px) |
+| **Body** | Base | **1.0625rem** (17px)| **1.5** | **1.0625rem** |
+
+---
+
+## 3. Utility Classes (Cheat Sheet)
+
+Instead of relying solely on tag targeting, Cyan provides a suite of utility classes for precise control.
+
+### Text Sizes
+| Class | Usage | Description |
+| :--- | :--- | :--- |
+| `.text-h1` to `.text-h4` | Headings | Manual heading levels. |
+| `.text-body` | Standard | Standard 17px text. |
+| `.text-small` | Secondary | Smaller text for metadata (14px). |
+| `.text-caption` | Labels | Uppercase, tracking +5 (12px). |
+
+### Text Colors & Emphasis
+Built on semantic tokens that automatically adapt to light/dark themes.
+
+- **`.text-heading`**: Primary heading color (H1 & H2). A sophisticated mid-tone that provides hierarchy without visual "shouting."
+- **`.text-subheading`**: Secondary heading color (H3 & H4). Slightly less emphasized for deeper sections.
+- **`.text-high`**: Maximum contrast (Deep Black or Pure White) for labels or critical titles.
+- **`.text-default`**: Standard reading contrast for body prose.
+- **`.text-low`**: De-emphasized text for labels or low-priority metadata.
+
+### Weights
+- **`.text-bold`**: (700) Bold emphasis.
+- **`.text-medium`**: (500) Semi-bold for UI labels.
+- **`.text-light`**: (300) Standard for large display headings.
+
+---
+
+## 4. Vertical Rhythm (var(--cn-gap))
+
+Cyan uses a deterministic vertical rhythm where `p`, `ul`, `ol`, and `blockquote` elements use `var(--cn-gap)` for bottom margin.
+
+### List Spacing
+To compress lists in densly populated UI areas, use the `.compact` utility on the container.
+
+```html
+<ul class="compact">
+  <li>Item 1 (less vertical gap)</li>
+  <li>Item 2 (less vertical gap)</li>
+</ul>
+```
+
+### Article Relief
+Within `<article>` elements, leading headings automatically receive `margin-top: 0`. This ensures that content remains perfectly aligned with UI containers.
+
+---
+
+## 5. Visual Examples
+
+Below are standard Markdown elements as styled by Cyan's base semantic rules.
+
+### Headings (The 1.414 "Punch")
+
+<h1>H1 — Heavy Display</h1>
+<h2>H2 — Section Header</h2>
+<h3>H3 — Small Section</h3>
+<h4>H4 — Editorial Subheader</h4>
+
+### Text Utilities
+
+<p class="text-body">**Body**: The standard 17px font for reading. Built for readability and rhythm.</p>
+<p class="text-small">**Small**: Secondary text used for metadata, footnotes, or minor clarifications.</p>
+<p class="text-caption">**Caption**: All-caps utility for labels, category badges, or navigation headers.</p>
+
+### Lists
+
+*   Unordered list item one
+*   Unordered list item two
+    *   Nested item with standard gap
+*   Unordered list item three
+
+1.  Ordered list item one
+2.  Ordered list item two
+
+### Compact Lists (Utility)
+
+<ul class="compact">
+  <li>Compact list item one</li>
+  <li>Compact list item two</li>
+  <li>Compact list item three</li>
+</ul>
+
+### Tables
+
+| Name | Role | Status |
+| :--- | :--- | :--- |
+| **Lina** | Lead Designer | Active |
+| **Marcus** | Developer | Offline |
+| **Sophie** | Auditor | Active |
+
+### Blockquotes
+
+> "Typography is the craft of endowing human language with a durable visual form." 
+> — Robert Bringhurst
+
+---
+
+## 6. Contrast Matrix (WCAG AA)
+
+Accessibility is non-negotiable. Our system enforces specific text colors based on surface elevation.
+
+> [!IMPORTANT]
+> **Elevation 4 Guardrail:** In Dark Mode, when a surface is **Elevation 4**, typography MUST use **Step 100 (White)** to maintain WCAG AA (4.5:1) compliance.
+
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem;">
+  <div class="elevation-1" style="padding: 1rem; border: 1px solid var(--cn-border);">
+    <span class="text-bold">Elevation 1</span>
+    <p class="text-caption text-low">Standard Contrast</p>
+  </div>
+  <div class="elevation-2" style="padding: 1rem; border: 1px solid var(--cn-border);">
+    <span class="text-bold">Elevation 2</span>
+    <p class="text-caption text-low">Standard Contrast</p>
+  </div>
+  <div class="elevation-4" style="padding: 1rem; color: white; border: 1px solid var(--cn-border-hover);">
+    <span class="text-bold" style="color: white;">Elevation 4</span>
+    <p class="text-caption" style="color: white; opacity: 0.8;">Mandatory White Text applied.</p>
+  </div>
+</div>

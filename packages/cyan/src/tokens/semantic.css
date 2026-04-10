@@ -2,29 +2,29 @@
   color-scheme: light dark;
 
   /* Surfaces */
-  --cn-surface: light-dark(var(--chroma-surface-100), var(--chroma-surface-10));
-  --cn-surface-1: light-dark(var(--chroma-surface-100), var(--chroma-surface-20));
-  --cn-surface-2: light-dark(var(--chroma-surface-100), var(--chroma-surface-20));
-  --cn-surface-3: light-dark(var(--chroma-surface-100), var(--chroma-surface-30));
-  --cn-surface-4: light-dark(var(--chroma-surface-100), var(--chroma-surface-40));
+  --cn-surface: light-dark(var(--chroma-surface-99), var(--chroma-surface-20));
+  --cn-surface-1: light-dark(var(--chroma-surface-100), var(--chroma-surface-30));
+  --cn-surface-2: light-dark(var(--chroma-surface-100), var(--chroma-surface-30));
+  --cn-surface-3: light-dark(var(--chroma-surface-100), var(--chroma-surface-40));
+  --cn-surface-4: light-dark(var(--chroma-surface-80), var(--chroma-surface-50));
   --cn-on-surface: light-dark(var(--chroma-surface-10), var(--chroma-surface-90));
   --cn-on-surface-secondary: light-dark(var(--chroma-surface-40), var(--chroma-surface-60));
 
-  /* Background */
-  --cn-background: light-dark(var(--chroma-surface-95), var(--chroma-surface-10));
-  --cn-on-background: light-dark(var(--chroma-surface-10), var(--chroma-surface-70));
+  /* Background (collapsed into surface) */
+  --cn-background: var(--cn-surface);
+  --cn-on-background: var(--cn-on-surface);
 
   /* Text */
   --cn-text: light-dark(var(--chroma-surface-10), var(--chroma-surface-95));
   --cn-text-high: light-dark(black, var(--chroma-surface-100));
   --cn-text-low: light-dark(var(--chroma-surface-30), var(--chroma-surface-60));
-  --cn-heading-1: light-dark(var(--chroma-surface-30), var(--chroma-surface-70));
-  --cn-heading-2: light-dark(var(--chroma-surface-20), var(--chroma-surface-80));
+  --cn-text-heading: light-dark(var(--chroma-surface-30), var(--chroma-surface-99));
+  --cn-text-subheading: light-dark(var(--chroma-surface-40), var(--chroma-surface-80));
 
   /* Links */
-  --cn-link: light-dark(var(--chroma-surface-40), var(--chroma-surface-60));
-  --cn-link-hover: light-dark(var(--chroma-surface-50), var(--chroma-surface-80));
-  --cn-link-active: light-dark(var(--chroma-surface-60), var(--chroma-surface-30));
+  --cn-link: light-dark(var(--chroma-primary-50), var(--chroma-surface-80));
+  --cn-link-hover: light-dark(var(--chroma-surface-50), var(--chroma-primary-80));
+  --cn-link-active: light-dark(var(--chroma-primary-30), var(--chroma-surface-70));
 
   /* Buttons & Interactive */
   --cn-button: light-dark(var(--chroma-surface-50), var(--chroma-surface-20));
@@ -32,9 +32,10 @@
   --cn-button-accent: light-dark(var(--chroma-primary-20), var(--chroma-primary-70));
   --cn-button-cta: light-dark(var(--chroma-error-40), var(--chroma-error-40));
   --cn-hover: light-dark(
-    color-mix(in hsl, var(--chroma-surface-50), transparent 90%),
-    color-mix(in hsl, var(--chroma-surface-50), transparent 80%)
+    color-mix(in oklch, var(--chroma-surface-50), transparent 90%),
+    color-mix(in oklch, var(--chroma-surface-50), transparent 80%)
   );
+  --cn-focus-ring: light-dark(var(--chroma-primary-60), var(--chroma-primary-40));
 
   /* Borders */
   --cn-border: light-dark(var(--chroma-surface-70), var(--chroma-surface-30));
@@ -42,11 +43,11 @@
   --cn-border-focus: light-dark(var(--chroma-primary-70), var(--chroma-primary-40));
 
   /* Functional / Status */
-  --color-success: light-dark(var(--chroma-primary-60), var(--chroma-primary-60));
-  --color-warning: light-dark(var(--chroma-warning-40), var(--chroma-warning-60));
-  --color-error: light-dark(var(--chroma-error-40), var(--chroma-error-60));
-  --color-info: light-dark(var(--chroma-info-20), var(--chroma-info-60));
-  --color-love: light-dark(var(--chroma-love-40), var(--chroma-love-60));
+  --cn-color-success: light-dark(var(--chroma-primary-60), var(--chroma-primary-60));
+  --cn-color-warning: light-dark(var(--chroma-warning-40), var(--chroma-warning-60));
+  --cn-color-error: light-dark(var(--chroma-error-40), var(--chroma-error-60));
+  --cn-color-info: light-dark(var(--chroma-info-20), var(--chroma-info-60));
+  --cn-color-love: light-dark(var(--chroma-love-40), var(--chroma-love-60));
 
   /* Inputs / Forms */
   --cn-input: light-dark(var(--chroma-surface-80), var(--chroma-surface-0));
@@ -56,18 +57,18 @@
   --cn-input-disabled: light-dark(var(--chroma-surface-80), var(--chroma-surface-20));
 
   /* Elevation / Shadow (Grid-derived, no magic numbers) */
-  --color-shadow: light-dark(var(--chroma-surface-30), var(--chroma-surface-0));
+  --cn-shadow-color: light-dark(var(--chroma-surface-30), var(--chroma-surface-0));
   --cn-shadow-elevation-2: calc(var(--cn-grid) * 0.25) calc(var(--cn-grid) * 0.25) var(--cn-grid)
-    var(--color-shadow);
+    var(--cn-shadow-color);
   --cn-shadow-elevation-3: calc(var(--cn-grid) * 0.5) calc(var(--cn-grid) * 0.5)
-    calc(var(--cn-grid) * 2) var(--color-shadow);
+    calc(var(--cn-grid) * 2) var(--cn-shadow-color);
   --cn-shadow-elevation-4: calc(var(--cn-grid) * 0.75) calc(var(--cn-grid) * 0.75)
-    calc(var(--cn-grid) * 3) var(--color-shadow);
+    calc(var(--cn-grid) * 3) var(--cn-shadow-color);
 
   /* Selection */
   --cn-selection: light-dark(
-    color-mix(in hsl, var(--chroma-primary-60), transparent 70%),
-    color-mix(in hsl, var(--chroma-primary-40), transparent 70%)
+    color-mix(in oklch, var(--chroma-primary-60), transparent 70%),
+    color-mix(in oklch, var(--chroma-primary-40), transparent 70%)
   );
   --cn-on-selection: var(--cn-on-surface);
 }

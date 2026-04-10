@@ -1,0 +1,140 @@
+---
+title: Units & Grid
+description: The 8px atomic spatial system and derived tokens for vertical rhythm and layout.
+order: 5
+status: stable
+icon: grid
+---
+
+Cyan follows a deterministic **8px baseline grid**. This creates a predictable vertical rhythm and horizontal alignment across all applications.
+
+## 1. The Atomic Unit (8px)
+
+The entire system is derived from a single CSS variable: `--cn-grid`. By anchoring this to `0.5rem` (8px at the standard 16px root), the entire UI remains rescalable and accessible.
+
+| Token | Derivation | Computed (16px root) | Role |
+| :--- | :--- | :--- | :--- |
+| `--cn-grid` | `0.5rem` | **8px** | The atomic unit of alignment. |
+| `--cn-gap` | `grid × 2` | **16px** | Standard element spacing (gutters). |
+| `--cn-line` | `grid × 3` | **24px** | Standard row height / vertical rhythm unit. |
+
+
+## 2. Spacing Scale
+
+Spacing should never be arbitrary. Use the grid multiples to maintain consistency.
+
+<div style="display: flex; flex-direction: column; gap: 0.5rem; background: var(--cn-surface-1); padding: 1.5rem; border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="width: 0.25rem; height: 1rem; background: var(--chroma-primary-50);"></div>
+    <code class="text-caption">0.25rem (4px)</code>
+  </div>
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="width: 0.5rem; height: 1rem; background: var(--chroma-primary-50);"></div>
+    <code class="text-caption">--cn-grid / 0.5rem (8px)</code>
+  </div>
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="width: 1.0rem; height: 1rem; background: var(--chroma-primary-50);"></div>
+    <code class="text-caption">--cn-gap / 1.0rem (16px)</code>
+  </div>
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="width: 1.5rem; height: 1rem; background: var(--chroma-primary-50);"></div>
+    <code class="text-caption">--cn-line / 1.5rem (24px)</code>
+  </div>
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="width: 2.0rem; height: 1rem; background: var(--chroma-primary-50);"></div>
+    <code class="text-caption">2.0rem (32px)</code>
+  </div>
+  <div style="display: flex; align-items: center; gap: 1rem;">
+    <div style="width: 3.0rem; height: 1rem; background: var(--chroma-primary-50);"></div>
+    <code class="text-caption">3.0rem (48px)</code>
+  </div>
+</div>
+
+
+## 3. Border Radii
+
+Cyan utilizes a soft, grid-aligned radius system to maintain a professional, slightly rounded aesthetic.
+
+| Token | Multiplier | Computed |
+| :--- | :--- | :--- |
+| `--cn-border-radius-small` | `× 0.5` | **4px** |
+| `--cn-border-radius-medium` | `× 1` | **8px** |
+| `--cn-border-radius-large` | `× 2` | **16px** |
+| `--cn-border-radius-xl` | `× 4` | **32px** |
+
+<div style="display: flex; gap: var(--cn-gap); align-items: center; padding: 1.5rem; background: var(--cn-surface-1); border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <div style="width: 4rem; height: 4rem; background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small); display: grid; place-items: center;">
+    <code style="font-size: 10px;">small</code>
+  </div>
+  <div style="width: 4rem; height: 4rem; background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-medium); display: grid; place-items: center;">
+    <code style="font-size: 10px;">medium</code>
+  </div>
+  <div style="width: 4rem; height: 4rem; background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-large); display: grid; place-items: center;">
+    <code style="font-size: 10px;">large</code>
+  </div>
+  <div style="width: 4rem; height: 4rem; background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-xl); display: grid; place-items: center;">
+    <code style="font-size: 10px;">xl</code>
+  </div>
+</div>
+
+
+## 4. Navigation & Rail Geometry
+
+Specific tokens define the persistent structural units of the Cyan application shell.
+
+- **Rail Width:** `var(--cn-grid) * 10` (**80px**). 
+- **Tray Width:** `var(--cn-grid) * 42` (**336px**).
+
+These units ensure that sidebar navigation is neither too cramped for icons nor too wide for primary content.
+
+<div style="display: flex; gap: var(--cn-gap); align-items: flex-end; padding: 1.5rem; background: var(--cn-surface-1); border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <div style="width: var(--cn-width-rail); height: 6rem; background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small); display: grid; place-items: center;">
+    <code style="font-size: 10px;">Rail 80px</code>
+  </div>
+  <div style="width: var(--cn-width-tray); max-width: 100%; height: 6rem; background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small); display: grid; place-items: center;">
+    <code style="font-size: 10px;">Tray 336px</code>
+  </div>
+</div>
+
+
+## 5. Button Sizing
+
+Three tokens control touch-target and visual sizing for interactive elements.
+
+| Token | Derivation | Computed | Role |
+| :--- | :--- | :--- | :--- |
+| `--cn-button-physical-size` | `grid × 7` | **56px** | Physical touch target (accessibility minimum). |
+| `--cn-button-size` | `grid × 4.75` | **38px** | Visual button height. |
+| `--cn-navigation-button-size` | `grid × 7` | **56px** | Navigation bar button size. |
+
+<div style="display: flex; gap: var(--cn-gap); align-items: center; padding: 1.5rem; background: var(--cn-surface-1); border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <div style="width: var(--cn-button-physical-size); height: var(--cn-button-physical-size); border-radius: 50%; background: var(--chroma-primary-50); display: grid; place-items: center;">
+    <code style="font-size: 10px;">56px</code>
+  </div>
+  <div style="width: var(--cn-button-size); height: var(--cn-button-size); border-radius: 50%; background: var(--chroma-primary-50); display: grid; place-items: center;">
+    <code style="font-size: 10px;">38px</code>
+  </div>
+  <div style="width: var(--cn-navigation-button-size); height: var(--cn-navigation-button-size); border-radius: 50%; background: var(--chroma-primary-50); display: grid; place-items: center;">
+    <code style="font-size: 10px;">56px</code>
+  </div>
+</div>
+
+
+## 6. Icon Sizes
+
+A fixed scale for icon sizing, independent of the grid but harmonious with it.
+
+| Token | Computed |
+| :--- | :--- |
+| `--cn-icon-size-xsmall` | **16px** (1rem) |
+| `--cn-icon-size-small` | **24px** (1.5rem) |
+| `--cn-icon-size` | **36px** (2.25rem) |
+| `--cn-icon-size-large` | **72px** (4.5rem) |
+| `--cn-icon-size-xlarge` | **128px** (8rem) |
+
+<div style="display: flex; gap: var(--cn-gap); align-items: flex-end; padding: 1.5rem; background: var(--cn-surface-1); border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <div style="width: var(--cn-icon-size-xsmall); height: var(--cn-icon-size-xsmall); background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small);"></div>
+  <div style="width: var(--cn-icon-size-small); height: var(--cn-icon-size-small); background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small);"></div>
+  <div style="width: var(--cn-icon-size); height: var(--cn-icon-size); background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small);"></div>
+  <div style="width: var(--cn-icon-size-large); height: var(--cn-icon-size-large); background: var(--chroma-primary-50); border-radius: var(--cn-border-radius-small);"></div>
+</div>

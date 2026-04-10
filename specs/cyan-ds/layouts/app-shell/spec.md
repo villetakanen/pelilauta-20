@@ -10,7 +10,8 @@ By orchestrating these internally, down-stream applications can remain entirely 
 
 | Name | Type | Required | Default | Description |
 |---|---|---|---|---|
-| `title` | `string` | Yes | - | Document `<title>` and `<AppBar>` title string. |
+| `title` | `string` | Yes | - | Document `<title>` (browser tab / SEO) title string. |
+| `appTitle` | `string` | No | `title` | Optional UI title for the `<AppBar>`. Allows context decoupling (e.g., "Mekanismi" or "Cyan Design System"). |
 | `shortTitle` | `string` | No | - | Optional short title for the `<AppBar>` on narrow screens. |
 | `layout` | `"view" \| "sidebar" \| "editor" \| "modal"` | No | `"view"` | Core structural layout variation determining UI elements present. |
 | `trayLabel` | `string` | No | `"Menu"` | Aria-label for the `<Tray>` component. |

@@ -1,0 +1,257 @@
+/* 
+   Typography Semantics (Global Rules) 
+   Augmented Fourth (1.414) Implementation from 17px (1.0625rem) base.
+*/
+
+body {
+  font-family: var(--cn-font-family);
+  font-size: var(--cn-font-size-text);
+  line-height: var(--cn-line-height-text);
+  letter-spacing: var(--cn-letter-spacing-text);
+  color: var(--cn-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+p,
+ul,
+ol,
+li,
+blockquote {
+  margin-top: 0;
+  margin-bottom: var(--cn-gap);
+  font-size: var(--cn-font-size-text);
+  line-height: var(--cn-line-height-text);
+  letter-spacing: var(--cn-letter-spacing-text);
+}
+
+ul,
+ol {
+  padding-left: calc(var(--cn-grid) * 3);
+}
+
+li {
+  margin-bottom: calc(var(--cn-grid) * 0.5);
+}
+
+blockquote {
+  padding: var(--cn-grid) var(--cn-gap);
+  border-left: calc(var(--cn-grid) * 0.5) solid var(--cn-border-hover);
+  background: var(--cn-surface-1);
+  font-style: italic;
+  color: var(--cn-text-low);
+}
+
+/* Links */
+a {
+  color: var(--cn-link);
+  text-decoration: underline;
+}
+a:hover {
+  color: var(--cn-link-hover);
+}
+a:active {
+  color: var(--cn-link-active);
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--cn-gap);
+  font-size: var(--cn-font-size-text);
+}
+
+th,
+td {
+  padding: var(--cn-grid) var(--cn-gap);
+  text-align: left;
+  border-bottom: 1px solid var(--cn-border);
+}
+
+th {
+  background: var(--cn-surface-1);
+  font-weight: var(--cn-font-weight-bold);
+  color: var(--cn-text-high);
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+/* Headings: Global Tag Targeting */
+h1 {
+  font-size: var(--cn-font-size-h1);
+  font-weight: var(--cn-font-weight-h1);
+  line-height: var(--cn-line-height-h1);
+  letter-spacing: var(--cn-letter-spacing-h1);
+  color: var(--cn-text-heading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+
+h2 {
+  font-size: var(--cn-font-size-h2);
+  font-weight: var(--cn-font-weight-h2);
+  line-height: var(--cn-line-height-h2);
+  letter-spacing: var(--cn-letter-spacing-h2);
+  color: var(--cn-text-heading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+
+h3 {
+  font-size: var(--cn-font-size-h3);
+  font-weight: var(--cn-font-weight-h3);
+  line-height: var(--cn-line-height-h3);
+  letter-spacing: var(--cn-letter-spacing-h3);
+  color: var(--cn-text-subheading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+
+h4 {
+  font-size: var(--cn-font-size-h4);
+  font-weight: var(--cn-font-weight-h4);
+  line-height: var(--cn-line-height-h4);
+  letter-spacing: var(--cn-letter-spacing-h4);
+  color: var(--cn-text-subheading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+
+/* Article Relief: No leading gap for the first heading in a document */
+article h1:first-child,
+article h2:first-child,
+article h3:first-child,
+article h4:first-child {
+  margin-top: 0;
+}
+
+/* Container-Based Scaling (Inline size) */
+main,
+article {
+  container-type: inline-size;
+}
+
+@container (max-width: 38.75rem) {
+  h1,
+  .text-h1 {
+    font-size: var(--cn-font-size-h2);
+    line-height: var(--cn-line-height-h2);
+    letter-spacing: var(--cn-letter-spacing-h2);
+  }
+  h2,
+  .text-h2 {
+    font-size: var(--cn-font-size-h3);
+    line-height: var(--cn-line-height-h3);
+    letter-spacing: var(--cn-letter-spacing-h3);
+  }
+  h3,
+  .text-h3 {
+    font-size: var(--cn-font-size-h4);
+    line-height: var(--cn-line-height-h4);
+    letter-spacing: var(--cn-letter-spacing-h4);
+  }
+  h4,
+  .text-h4 {
+    font-size: var(--cn-font-size-text);
+    line-height: var(--cn-line-height-text);
+    letter-spacing: var(--cn-letter-spacing-text);
+    font-weight: var(--cn-font-weight-bold);
+  }
+}
+
+/* Utilities */
+/* Utilities: Mirroring Semantic Tag Behaviors */
+.text-h1 {
+  font-size: var(--cn-font-size-h1);
+  font-weight: var(--cn-font-weight-h1);
+  line-height: var(--cn-line-height-h1);
+  letter-spacing: var(--cn-letter-spacing-h1);
+  color: var(--cn-text-heading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+.text-h2 {
+  font-size: var(--cn-font-size-h2);
+  font-weight: var(--cn-font-weight-h2);
+  line-height: var(--cn-line-height-h2);
+  letter-spacing: var(--cn-letter-spacing-h2);
+  color: var(--cn-text-heading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+.text-h3 {
+  font-size: var(--cn-font-size-h3);
+  font-weight: var(--cn-font-weight-h3);
+  line-height: var(--cn-line-height-h3);
+  letter-spacing: var(--cn-letter-spacing-h3);
+  color: var(--cn-text-subheading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+.text-h4 {
+  font-size: var(--cn-font-size-h4);
+  font-weight: var(--cn-font-weight-h4);
+  line-height: var(--cn-line-height-h4);
+  letter-spacing: var(--cn-letter-spacing-h4);
+  color: var(--cn-text-subheading);
+  margin-top: 0;
+  margin-bottom: var(--cn-line);
+}
+.text-body {
+  font-size: var(--cn-font-size-text);
+  line-height: var(--cn-line-height-text);
+  letter-spacing: var(--cn-letter-spacing-text);
+  margin-top: 0;
+  margin-bottom: var(--cn-gap);
+}
+
+/* Text Colors */
+.text-high {
+  color: var(--cn-text-high);
+}
+.text-low {
+  color: var(--cn-text-low);
+}
+.text-default {
+  color: var(--cn-text);
+}
+.text-heading {
+  color: var(--cn-text-heading);
+}
+.text-subheading {
+  color: var(--cn-text-subheading);
+}
+
+/* Text Sizes */
+.text-small {
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.text-caption {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: var(--cn-font-weight-medium);
+}
+
+/* Weights */
+.text-bold {
+  font-weight: var(--cn-font-weight-bold);
+}
+.text-medium {
+  font-weight: var(--cn-font-weight-medium);
+}
+.text-light {
+  font-weight: var(--cn-font-weight-light);
+}
+
+/* Vertical Rhythm & Layout */
+.compact {
+  --cn-gap: 0.25rem;
+}

@@ -1,0 +1,205 @@
+---
+title: Color System
+description: The foundational 3-tier architecture of Cyan's tonal palettes and semantic roles.
+order: 1
+status: stable
+icon: paintbrush
+---
+import ColorScale from "../../components/ColorScale.svelte";
+
+Cyan treates color as a highly structured, scalable language. We utilize a **Layered Color Model** that separates mechanical brand identity from functional user intent.
+
+> #### The 3-Tier Token Model
+>
+> We provide 3 tiers of tokens.
+>
+> 1.  **The Chroma Layer (Mechanical):** Raw tonal scales (OKLCH) where hand-tuned perceptual values live. This layer is **Swappable** for sub-site branding.
+> 2.  **The Semantic Layer (Functional):** Maps Chroma steps to functional roles (e.g., `--color-text`, `--color-button-accent`). This layer is a **Stable API**.
+> 3.  **The Component Layer (Consumptive):** Components only consume semantic tokens. They never reference raw HSL or hex values.
+
+## Colors
+
+Primary and surface colors are the foundation of the color system. They are used to create a consistent and predictable visual language that is easy to understand and use. The primary and surface colors are defined in a 13-point tonal scale following the **Material 3 (M3)** philosophy, where each color has a specific lightness value.
+
+In addition to the primary and surface colors, there are also functional palettes, for error, warning, info and reactions. For the functional palettes, only a subset of the tonal scale is provided
+
+The tonal step number (0-100) represents **perceived lightness**:
+- **0** corresponds to absolute black.
+- **100** corresponds to absolute white.
+- Any intermediate number (e.g., **40**) represents a percentage of perceptual difference from black.
+
+This creates a consistent relationship between steps across all hues, ensuring that **Step 40** in the Primary palette has the same perceived lightness as **Step 40** in the Surface or Error palette, making accessible contrast pairs predictable.
+
+### Core Branding & UI Surfaces
+
+| Palette | Hue Range | Strategy |
+| :--- | :--- | :--- |
+| **Primary** | 185° → 110° | Perceptive rotation in OKLCH from Teal to Highlighter Neon. |
+| **Surface** | 242° (Cerulean) | Hand-tuned Chroma Curve (Peak 0.17) for high-end balanced architecture. |
+
+<ColorScale 
+  client:load
+  title="Primary Scale (Acid-Neon)"
+  colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-primary-${s})`)} 
+  labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} 
+/>
+
+<ColorScale 
+  client:load
+  title="Surface Scale (Cerulean)"
+  colors={[0,10,20,30,40,50,60,70,80,90,95,99,100].map(s => `var(--chroma-surface-${s})`)} 
+  labels={[0,10,20,30,40,50,60,70,80,90,95,99,100]} 
+/>
+
+#### Technical Reference (Primary)
+| Step | OKLCH Value | Hex (Approx) | Usage |
+| :--- | :--- | :--- | :--- |
+| **0** | `oklch(0 0 185)` | `#000000` | Absolute Black |
+| **20** | `oklch(0.20 0.10 180)` | `#003333` | Deep Ocean |
+| **50** | `oklch(0.50 0.18 150)` | `#009e5c` | Perceptual Teal |
+| **80** | `oklch(0.80 0.27 120)` | `#c1ff00` | Acid Pulse |
+| **90** | `oklch(0.90 0.27 110)` | `#e8ff00` | Highlighter Neon |
+| **95** | `oklch(0.95 0.18 110)` | `#f9ffa4` | Neon Tint |
+| **99** | `oklch(0.99 0.05 110)` | `#fbfeef` | Minimal Mint |
+| **100** | `oklch(1 0 110)` | `#ffffff` | Absolute White |
+
+### Functional Palettes
+
+| Palette | Base Hue | Intent |
+| :--- | :--- | :--- |
+| **Error** | 318° | Destructive actions, validation errors. |
+| **Warning** | 65° | High-visibility alerts. |
+| **Info** | 170° | System feedback, neutral state changes. |
+| **Love** | 3° | Positive intent, heart/favorite actions. |
+
+<ColorScale 
+  client:load
+  title="Error (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-error-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
+
+<ColorScale 
+  client:load
+  title="Warning (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-warning-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
+
+<ColorScale 
+  client:load
+  title="Info (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-info-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
+
+<ColorScale 
+  client:load
+  title="Love (Functional)"
+  colors={[20,40,60,90].map(s => `var(--chroma-love-${s})`)} 
+  labels={['20', '40', '60', '90']} 
+/>
+
+---
+
+## 3. Semantic Mapping (Functional Interface)
+
+Developers utilize role-based tokens to build UI. These tokens automatically resolve to the correct tonal step per theme using `light-dark()`.
+
+### Surfaces & Backgrounds
+| Semantic Token | Light Mode step | Dark Mode step | Role |
+| :--- | :--- | :--- | :--- |
+| `--color-surface` | surface-100 | surface-10 | Base container background |
+| `--color-surface-1` | white | surface-20 | Elevated Level 1 |
+| `--color-surface-4` | surface-70 | surface-40 | Elevated Level 4 (Highest) |
+| `--color-on-surface` | surface-10 | surface-90 | Standard text on surfaces |
+
+### Interactive & Actions
+| Semantic Token | Light Mode step | Dark Mode step | Role |
+| :--- | :--- | :--- | :--- |
+| `--cn-button-accent` | primary-20 | primary-70 | High-emphasis branding action |
+| `--cn-button-cta` | error-40 | error-60 | Destructive / Final action |
+| `--cn-link` | primary-30 | primary-80 | Default link color |
+| `--cn-link-hover` | primary-40 | primary-90 | Link hover state |
+| `--cn-link-active` | primary-50 | primary-20 | Link active/pressed state |
+
+<div style="display: flex; gap: 2rem; align-items: center; padding: 1.5rem; background: var(--cn-surface-1); border-radius: var(--cn-radius-md); border: 1px solid var(--cn-border-color);">
+  <a href="#" style="color: var(--cn-link);">Default link</a>
+  <span style="color: var(--cn-link-hover); text-decoration: underline;">Hover state</span>
+  <span style="color: var(--cn-link-active); text-decoration: underline;">Active state</span>
+</div>
+
+---
+
+## 4. Accessibility & Contrast Matrix
+
+Accessibility is a hard constraint for Cyan. We enforce **WCAG AA (4.5:1)** contrast for all typography and iconic content.
+
+### Contrast Guardrail: The Elevation 4 Rule
+In Dark Mode, as surfaces elevate, they become lighter to represent proximity to the light source. At **Elevation 4**, the background is a mid-dark Vibrant Navy.
+
+> [!CAUTION]
+> **Mandatory White Text:** On `surface-40`, standard secondary or low-contrast text is forbidden. You MUST use `chroma-surface-100` (White) to maintain a passing 4.6:1 contrast ratio against the Cerulean background.
+
+<ColorScale 
+  client:load
+  title="Elevation 4 Rule Verification"
+  colors={['var(--chroma-surface-40)', 'var(--chroma-surface-40)']} 
+  labels={['40 on White', '40 on Step 80']} 
+  textColors={['white', 'var(--chroma-surface-80)']}
+/>
+
+> [!NOTE]
+> The scale above uses the same background color for both swatches. Use the **Luminance** toggle to see how the perceived brightness is identical, even though the text readability differs based on the foreground token choice.
+
+---
+
+## 5. Usage Guidelines: Do's and Don'ts
+
+### Do
+- **Do** use semantic tokens for all UI elements.
+- **Do** use `primary` for brand-affirming actions (Save, Submit, Next).
+- **Do** use `love` for social validation (Likes, Favorites) rather than `error`.
+
+### Don't
+- **Don't** use brand teal for destructive actions. Error/CTA exists for a reason.
+- **Don't** override a semantic token locally (e.g., `--color-text: red`). Override the underlying Chroma instead if rebranding.
+- **Don't** reference HSL values anywhere — the system is OKLCH-native. All derived values (hover overlays, selection tints) must use `color-mix(in oklch)`, never `color-mix(in hsl)`.
+
+---
+
+## 6. ThemeLab: The Verification Environment
+
+The **ThemeLab** serves as the definitive manual verification target for color system updates. If a change to `chroma.css` breaks the legibility in this lab, the change is rejected.
+
+<div class="theme-lab-container" style="padding: 2rem; border-radius: var(--cn-radius-lg); border: 2px solid var(--cn-border); background: var(--cn-background); position: relative;">
+  <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--_primary-hue', '3'); document.querySelector('.theme-lab-target').style.setProperty('--_surface-hue', '5')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Crimson</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.setProperty('--_primary-hue', '140'); document.querySelector('.theme-lab-target').style.setProperty('--_surface-hue', '150')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Brand: Forest</button>
+    <button onclick="document.querySelector('.theme-lab-target').style.removeProperty('--_primary-hue'); document.querySelector('.theme-lab-target').style.removeProperty('--_surface-hue')" class="elevation-2" style="padding: 0.5rem 1rem; cursor: pointer; border-radius: var(--cn-radius-sm); border: 1px solid var(--cn-border);">Reset Cyan</button>
+  </div>
+
+  <div class="theme-lab-target" style="padding: 2rem; border: 1px solid var(--cn-border); border-radius: var(--cn-radius-md); background: var(--cn-surface-1);">
+    <div style="display: flex; justify-content: space-between; align-items: start;">
+       <div>
+         <span class="text-h3" style="display: block; margin-top: 0;">Semantic Verification</span>
+         <p style="color: var(--color-on-surface-secondary);">Verifying accessibility across themes.</p>
+       </div>
+       <div style="height: 48px; width: 48px; background: var(--color-button-accent); border-radius: 50%;"></div>
+    </div>
+    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+      <button style="background: var(--color-button-accent); color: white; border: none; padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Primary Action</button>
+      <button style="background: transparent; color: var(--cn-link); border: 1px solid var(--cn-link); padding: 0.8rem 2rem; border-radius: var(--cn-radius-sm); font-weight: 700; flex: 1;">Secondary Action</button>
+    </div>
+  </div>
+</div>
+
+---
+
+## 7. Testing Strategy
+
+Manual verification of the color system involves checking the following in the Style Book:
+
+1.  **Chroma Determinism:** Ensure all tonal steps in the Primitives table map correctly to the browser's computed HSL values.
+2.  **Semantic Resolution:** Verify that theme-switching correctly swaps `color-surface` between light/dark variants.
+3.  **ThemeLab Stability:** Confirm that sub-site rebranding (overriding hue variables) maintains the 3-tier layering contract without visual breakage.

@@ -1,0 +1,190 @@
+---
+title: CnCard Component
+description: Technical documentation for the CnCard Svelte component.
+order: 3
+status: stable
+---
+import CnCard from "@cyan/components/CnCard.svelte";
+
+A `CnCard` is a fixed container for a piece of content. It can be used to display a small amount of information, or to highlight a piece of content.
+
+## Basic Usage
+
+```svelte
+<CnCard title="Card Title">
+  Card content goes here.
+</CnCard>
+```
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnCard title="Simple Card">
+    A basic card with default elevation.
+  </CnCard>
+  <CnCard title="Card with Description" description="A short blurb about this card.">
+    Body content goes here.
+  </CnCard>
+  <CnCard title="Linked Title" href="#linked">
+    The title above is a link. The card itself is not clickable.
+  </CnCard>
+</div>
+
+## Properties
+
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `elevation` | `number` | `1` | Card elevation level (0-4). Affects both background and shadow. |
+| `cover` | `string` | `undefined` | URL for the cover image |
+| `srcset` | `string` | `undefined` | Responsive image sources for the cover image |
+| `sizes` | `string` | `undefined` | Media conditions for selecting the appropriate image from srcset |
+| `noun` | `string` | `''` | Icon name to display |
+| `title` | `string` | `''` | Card title (string, not a slot) |
+| `description` | `string` | `''` | Secondary text below the title |
+| `href` | `string` | `''` | Link URL — wraps the title (and cover if present) |
+| `notify` | `boolean` | `false` | Shows blue triangular notification indicator |
+| `alert` | `boolean` | `false` | Shows amber/warning triangular alert indicator |
+
+## Slots
+
+| Slot | Description |
+|------|-------------|
+| default | Card body content. Use sparingly — 1-3 paragraphs of text. |
+| `actions` | Bottom nav area for buttons and controls. Bleeds to card edges. |
+
+## Elevation
+
+Cards support 5 levels of elevation (0-4). Each level maps to a different surface background and shadow depth. The default elevation is 1.
+
+```svelte
+<CnCard elevation={0} title="Flat Card">Bordered card with no shadow</CnCard>
+<CnCard elevation={1} title="Default Card">Default elevation, shadowless</CnCard>
+<CnCard elevation={2} title="Raised Card">Higher elevation with medium shadow</CnCard>
+<CnCard elevation={3} title="Floating Card">High elevation with prominent shadow</CnCard>
+<CnCard elevation={4} title="Top Card">Highest elevation with maximum shadow</CnCard>
+```
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnCard elevation={0} title="Elevation 0">Flat, bordered</CnCard>
+  <CnCard elevation={1} title="Elevation 1">Default (shadowless)</CnCard>
+  <CnCard elevation={2} title="Elevation 2">Raised</CnCard>
+  <CnCard elevation={3} title="Elevation 3">Floating</CnCard>
+  <CnCard elevation={4} title="Elevation 4">Top</CnCard>
+</div>
+
+## UI States
+
+The card supports notification and alert states, shown as triangular corner flags in the top-right.
+
+```svelte
+<CnCard title="Default Card">Normal card state</CnCard>
+<CnCard title="Notification Card" notify>Blue indicator in the top-right corner.</CnCard>
+<CnCard title="Alert Card" alert>Amber warning indicator in the top-right corner.</CnCard>
+```
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnCard title="Default">Normal state</CnCard>
+  <CnCard title="Notification" notify>Has new activity.</CnCard>
+  <CnCard title="Alert" alert>Needs attention.</CnCard>
+</div>
+
+## Cover Image
+
+Cards can display a cover image with a 16:9 aspect ratio. A tint gradient overlay is applied for readability. When a `noun` icon is set, it appears in the top-right corner of the card above the cover.
+
+```svelte
+<CnCard 
+  title="Beautiful Landscape" 
+  cover="https://picsum.photos/400/225"
+  noun="camera">
+  A stunning view captured during the golden hour.
+</CnCard>
+```
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnCard title="Cover Only" cover="https://picsum.photos/seed/card1/400/225">
+    Card with a cover image.
+  </CnCard>
+  <CnCard title="Cover + Icon" cover="https://picsum.photos/seed/card2/400/225" noun="fox">
+    Icon is positioned at the top-right.
+  </CnCard>
+  <CnCard title="Cover + Link" cover="https://picsum.photos/seed/card3/400/225" href="#cover-link" noun="books">
+    Both cover and title are linked.
+  </CnCard>
+</div>
+
+## Responsive Images (srcset)
+
+For optimized image delivery, use `srcset` and `sizes` to let the browser choose the best image for the viewport.
+
+```svelte
+<CnCard 
+  title="Optimized Image" 
+  cover="https://picsum.photos/seed/srcset/800/450"
+  srcset="https://picsum.photos/seed/srcset/400/225 400w, https://picsum.photos/seed/srcset/800/450 800w"
+  sizes="(max-width: 768px) 100vw, 800px">
+  This card uses responsive images for optimal performance.
+</CnCard>
+```
+
+## Linked Title
+
+When `href` is set, the title text becomes a link. If a cover image is also present, the cover is linked too. The card surface itself is never an `<a>`.
+
+```svelte
+<CnCard title="Session Report" href="/sessions/42" noun="books">
+  Click the title to navigate.
+</CnCard>
+```
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnCard title="Text-only Link" href="#text-link">
+    Title is linked.
+  </CnCard>
+  <CnCard title="Icon + Link" href="#icon-link" noun="fox">
+    Title is linked, icon adjacent.
+  </CnCard>
+  <CnCard title="Cover + Link" href="#cover-link" cover="https://picsum.photos/seed/link/400/225" noun="books">
+    Both title and cover are linked.
+  </CnCard>
+</div>
+
+## Long Title Truncation
+
+Titles are automatically truncated to 2 lines with an ellipsis.
+
+<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnCard title="101 with ellipsis in the title, which is long enough to cut off after two full lines of text" noun="fox">
+    Card titles automatically truncate to 2 lines with ellipsis.
+  </CnCard>
+  <CnCard title="Short">
+    Normal length title.
+  </CnCard>
+</div>
+
+## Actions Slot
+
+The `actions` slot renders a `<nav>` at the bottom of the card, pushed down by a flex spacer. Actions bleed to the card edges for alignment with card padding.
+
+```svelte
+<CnCard title="Product Card">
+  This is a product description with action buttons.
+  {#snippet actions()}
+    <div class="toolbar border border-radius">
+      <button>Action</button>
+    </div>
+  {/snippet}
+</CnCard>
+```
+
+## CSS Custom Properties
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--cn-border-radius-card` | `var(--cn-border-radius-large)` | Card border radius |
+
+### Typography Tokens
+
+| Property | Default | Description |
+|----------|---------|-------------|
+| `--cn-font-size-headline-card` | `var(--cn-font-size-h4)` | Card title font size |
+| `--cn-line-height-headline-card` | `var(--cn-line-height-h4)` | Card title line height |
+| `--cn-letter-spacing-headline-card` | `normal` | Card title letter spacing |

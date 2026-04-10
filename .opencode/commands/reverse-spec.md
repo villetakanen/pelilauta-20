@@ -1,5 +1,6 @@
 ---
 description: Bootstrap a living spec by reverse-engineering intent from existing source code.
+model: github/gemini-3.1-pro-preview
 ---
 
 # Reverse-Spec Command
@@ -28,7 +29,7 @@ Fetch the raw file content from GitHub. Use the `raw.githubusercontent.com` URL 
 Read the fetched source and identify:
 
 - **Intent** — What does this feature do? What problem does it solve?
-- **Architecture** — Components, data models, API contracts, dependencies
+- **Architecture** — Components, data models, API contracts, dependencies. **Tooling: Utilize the best available GPT model via the GitHub Copilot sub-service.**
 - **Behavioral contracts** — What invariants does the code enforce? What are the edge cases?
 - **Anti-patterns in the code** — Bugs, tech debt, or patterns we should NOT carry forward to v20
 

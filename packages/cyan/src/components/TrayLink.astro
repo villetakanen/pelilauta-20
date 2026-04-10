@@ -8,38 +8,60 @@ interface Props {
 const { href, label, active = false } = Astro.props;
 ---
 
-<a href={href} class:list={["cn-tray-link", { active }]}>
-  {label}
-</a>
+<li class="cn-tray-link-item">
+  <a
+    href={href}
+    class:list={["cn-tray-link", { active }]}
+    aria-current={active ? "page" : undefined}
+  >
+    <span class="cn-tray-link__label">{label}</span>
+  </a>
+</li>
 
 <style>
+  .cn-tray-link-item {
+    display: flex;
+    list-style: none;
+  }
+
   .cn-tray-link {
     display: flex;
     align-items: center;
+    width: 100%;
     min-block-size: calc(var(--cn-grid) * 4);
-    padding: calc(var(--cn-grid) * 0.5) var(--cn-grid);
-    color: var(--color-link);
+    padding: calc(var(--cn-grid) * 0.5) var(--cn-gap);
+    color: light-dark(var(--chroma-surface-30), var(--chroma-surface-80));
     text-decoration: none;
     font-size: var(--cn-font-size-text-small, 0.875rem);
     line-height: var(--cn-text-line-height, 1.5);
     border-radius: var(--cn-border-radius-small);
-    transition: background-color 0.2s, color 0.2s;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+    cursor: pointer;
+  }
+
+  .cn-tray-link__label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .cn-tray-link:hover,
   .cn-tray-link:focus {
-    background-color: var(--color-hover);
-    color: var(--color-text);
+    background-color: var(--cn-hover);
+    color: var(--cn-text);
     outline: none;
   }
 
   .cn-tray-link:focus-visible {
-    box-shadow: 0 0 0 2px var(--color-link);
+    box-shadow: 0 0 0 2px var(--cn-border-focus);
     outline-offset: 2px;
   }
 
-  .cn-tray-link.active {
-    color: var(--color-text);
-    font-weight: 600;
+  .cn-tray-link[aria-current="page"] {
+    color: var(--cn-text-high);
+    background-color: var(--cn-surface-2);
+    font-weight: 500;
   }
 </style>

@@ -1,0 +1,49 @@
+---
+title: Tray Button
+description: The primary interactive navigation element for the application.
+order: 4
+status: stable
+---
+import TrayButton from "@cyan/components/TrayButton.astro";
+import CnIcon from "@cyan/components/CnIcon.svelte";
+
+The `TrayButton` is the primary interactive element for the application navigation system (used within the [Tray](/components/tray)). 
+It provides consistent styling for primary routes, supports icons and labels, and adapts visually when the parent navigation is in rail mode.
+
+## Implementation Details
+The component is built using **Astro** and is strictly CSS-driven for its responsive modes and active states. It uses an `<a>` element as its root, ensuring standard navigation behavior and full accessibility.
+
+## Variants Demo
+
+### Idle
+<div class="demo-box" style="padding: 1rem; background: var(--cn-surface-1); border-radius: 8px; max-width: 20rem;">
+  <TrayButton icon="fox" label="Home" href="#" />
+</div>
+
+### Active
+<div class="demo-box" style="padding: 1rem; background: var(--cn-surface-1); border-radius: 8px; max-width: 20rem;">
+  <TrayButton icon="fox" label="Home" href="#" active />
+</div>
+
+### Custom Icon (via Slot)
+<div class="demo-box" style="padding: 1rem; background: var(--cn-surface-1); border-radius: 8px; max-width: 20rem;">
+  <TrayButton label="New Action" href="#">
+    <CnIcon slot="icon" noun="add" size="small" />
+  </TrayButton>
+</div>
+
+## Props Reference
+
+| Prop | Type | Required | Description |
+|---|---|---|---|
+| `href` | `string` | Yes | The destination URL. |
+| `label` | `string` | Yes | The text label visible in the expanded tray. |
+| `icon` | `string` | No | Icon noun from the registry (rendered via `CnIcon`) if slot is empty. |
+| `active` | `boolean` | No | Applies the active styling (current route). |
+
+## CSS Tokens Used
+- `--cn-surface-1`: Background surface color.
+- `--cn-link`: Text and icon color.
+- `--cn-hover`: Background color during hover/focus.
+- `--cn-font-size-text`: Standard text size for the label.
+- `--cn-gap`: Standard spacing between icon and label.

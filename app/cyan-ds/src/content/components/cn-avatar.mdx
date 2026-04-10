@@ -1,0 +1,77 @@
+---
+title: CnAvatar
+description: A circular avatar primitive used for user visual identity.
+status: stable
+---
+
+import CnAvatar from "@cyan/components/CnAvatar.astro";
+
+The `CnAvatar` component is used to represent users across the platform. It handles image loading with a graceful fallback to initials or a generic icon.
+
+## Usage
+
+```astro
+import CnAvatar from "@cyan/components/CnAvatar.astro";
+
+<!-- Image Avatar -->
+<CnAvatar src="https://i.pravatar.cc/150?u=1" nick="Alice" />
+
+<!-- Initials Fallback -->
+<CnAvatar nick="Bob" />
+
+<!-- Icon Placeholder (Default) -->
+<CnAvatar />
+```
+
+## Demos
+
+### Image Avatar
+Renders an `<img>` with `loading="lazy"` and `decoding="async"`.
+
+<div style="display: flex; gap: 1rem; align-items: center;">
+  <CnAvatar src="https://i.pravatar.cc/150?u=1" nick="Alice" />
+  <CnAvatar src="https://i.pravatar.cc/150?u=2" nick="Charlie" />
+</div>
+
+### Initials & Deterministic Background
+When no `src` is provided (or if the image fails to load), the component renders the first two characters of the `nick`. The background color is a deterministic OKLCH tint derived from the `nick` string.
+
+<div style="display: flex; gap: 1rem; align-items: center;">
+  <CnAvatar nick="Alice" />
+  <CnAvatar nick="Bob" />
+  <CnAvatar nick="Charlie" />
+  <CnAvatar nick="Dave" />
+  <CnAvatar nick="Eve" />
+</div>
+
+### Generic Placeholder
+When neither `src` nor `nick` is provided, a generic `account` icon placeholder is shown against a neutral surface background.
+
+<CnAvatar />
+
+### Sizes
+Supports `small` (36px) and `medium` (48px, default) variants.
+
+<div style="display: flex; gap: 1rem; align-items: center;">
+  <CnAvatar size="small" nick="Small" />
+  <CnAvatar size="medium" nick="Medium" />
+</div>
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `src` | `string` | - | Optional image URL. |
+| `nick` | `string` | - | Optional username for initials and color tinting. |
+| `size` | `'small' \| 'medium'` | `'medium'` | The component diameter. |
+
+## CSS Tokens
+
+The component consumes the following tokens:
+
+- `--cn-grid`: Base unit for spacing (if used).
+- `--cn-line`: Base unit for sizing.
+- `--chroma-surface-30`: Base for dark tints.
+- `--chroma-surface-60`: Tint multiplier base.
+- `--chroma-surface-95`: Text color for initials.
+- `--cn-surface-2`: Default fallback background.

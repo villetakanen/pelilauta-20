@@ -1,0 +1,3 @@
+[submodule "packages/myrrys-proprietary"]
+	path = packages/myrrys-proprietary
+	url = https://github.com/villetakanen/myrrys-proprietary

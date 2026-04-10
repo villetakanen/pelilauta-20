@@ -6,16 +6,26 @@
 Standardizes icon delivery across the RPG community platform. Replaces static assets with a deterministic, "source-code-first" architecture. This enables high-performance SSR rendering, type-safe icon nouns, and granular styling (monochromatic and branded).
 
 ### Architecture (3-Tier Resolution)
-- **Component:** `packages/cyan/src/components/CnIcon.astro` (SSR-only primitive)
+- **Component Type**: Svelte 5 (Runes)
+- **File**: `packages/cyan/src/components/CnIcon.svelte` (SSR-only primitive)
 - **Tier 1 (Community MIT):** `packages/pelilauta-icons/` (Local workspace package. Icons are stored as **raw .svg files** and registered in a TypeScript manifest).
-- **Tier 2 (Managed Non-MIT):** `@myrrys/proprietary-icons` (External subrepo. Icons are stored as **raw .svg files** for proprietary and fair-use assets).
+- **Tier 2 (Managed Non-MIT):** `@myrrys/proprietary` (External subrepo. Icons are stored as **raw .svg files** for proprietary and fair-use assets).
 - **Tier 3 (Essential Fallback):** `packages/cyan/src/components/CnIconFallback.ts` (Essential, MIT-licensed path data defined directly in TypeScript).
 - **Dependencies:** Uses `--cn-icon-size-*` tokens from the design system for standardized scaling.
+
+### Registry Codegen
+Icon registries are **generated**, not hand-maintained. A single script reads `.svg` files from each package and produces a typed TypeScript entry point with inlined SVG content.
+
+- **Script:** `scripts/generate-icon-registry.ts`
+- **Run:** `pnpm gen:icons` — regenerate after adding/removing SVGs.
+- **Check:** `pnpm check:icons` — CI guard, exits nonzero if registries are stale.
+- **Output:** Each package's `index.ts` is overwritten with a typed `IconNoun` union, `getIcon()`, `getNouns()`, and `contents` exports.
+- **Generated files are committed** — consumers do not need to run codegen before builds.
 
 ### Sources vs. Assets
 Unlike the asset-based model of v4, v20 treats icons as **source code fragments**:
 - **Source:** Standard `.svg` files in the icon repositories (enabling easy design tooling sync).
-- **Delivery:** These files are read and **inlined** during SSR/Build. They are never served as standalone `.svg` network requests.
+- **Delivery:** These files are read and **inlined** at codegen time into typed TypeScript registries. They are never served as standalone `.svg` network requests.
 
 ### API Contract (Props)
 - `noun` (string): The unique identifier for the icon (e.g., `'account'`, `'sword'`).
@@ -33,7 +43,7 @@ Unlike the asset-based model of v4, v20 treats icons as **source code fragments*
 ## Contract
 
 ### Definition of Done
-- [ ] `CnIcon` resolution order: Tier 1 (`@pelilauta/icons`) -> Tier 2 (`@myrrys/proprietary-icons`) -> Tier 3 (`CnIconFallback.ts`).
+- [ ] `CnIcon` resolution order: Tier 1 (`@pelilauta/icons`) -> Tier 2 (`@myrrys/proprietary`) -> Tier 3 (`CnIconFallback.ts`).
 - [ ] If no fallback exists, it renders a "missing" glyph (e.g., a square with a diagonal line).
 - [ ] Renders monochromatic vs branded outputs **automatically** based on the resolved icon data format.
 - [ ] Correctly applies `light-dark()` variables for branded icons as defined in the source registry.
@@ -78,9 +88,19 @@ A living book page is required to demo this component, following the principles 
 4. **Thematic Branding** — Side-by-side comparison of the `mekanismi` icon in Light and Dark modes to demonstrate automatic color-shifting.
 5. **Tiered Icon Galleries** — Three automated sections listing all available nouns for each registry:
    - **Community MIT (Tier 1)** — Icons from `@pelilauta/icons`.
-   - **Managed Assets (Tier 2)** — Proprietary and fair-use icons from `@myrrys/proprietary-icons`.
+   - **Managed Assets (Tier 2)** — Proprietary and fair-use icons from `@myrrys/proprietary`.
    - **Core Fallbacks (Tier 3)** — Essential symbols defined in `CnIconFallback.ts`.
 
 ### Technical Details (ViewBox & Scale)
 - **Standard ViewBox:** `0 0 128 128` (Matches high-fidelity Illustrator exports).
 - **Default Fill:** `currentColor` (Inherited from parent container).
+
+### Security / Trust Boundary
+
+`CnIcon.svelte` uses Svelte's `{@html}` tag to inline raw SVG content into the DOM, which bypasses standard HTML escaping. This is an **intentional and accepted architectural trade-off** under the following constraints:
+
+1. **Source must be repo-internal:** SVG content may only come from workspace packages (`@pelilauta/icons`, `@myrrys/proprietary`) or the hardcoded `CnIconFallback.ts`. User-supplied or externally-fetched SVGs must **never** be passed through this path.
+2. **No runtime path injection:** The `noun` prop maps to a compile-time-constant registry key. There is no mechanism for a caller to supply an arbitrary file path.
+3. **Trust model:** A compromised SVG file carries the same threat as a compromised Svelte component — both require supply-chain access to the repository. This is an acceptable shared trust boundary for a closed design system.
+
+**If the trust model changes** (e.g., user-uploaded icons, external CDN assets), SVG content **must** be sanitized before passing to `{@html}`. A suitable sanitizer should strip `<script>`, `<a>`, `<use>`, `<image>`, `<foreignObject>`, and `xlink:href` attributes.

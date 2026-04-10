@@ -74,4 +74,18 @@ test.describe("AppBar", () => {
     const icon = backBtn.locator('.cn-icon[data-noun="arrow-left"]');
     await expect(icon).toBeVisible();
   });
+
+  test("Mobile View: Offsets content to clear hamburger in sidebar layout", async ({ page }) => {
+    await page.setViewportSize({ width: 375, height: 667 });
+
+    // The DS book uses layout-sidebar, so the AppBar should have the offset
+    const appBar = page.locator(".cn-app-bar").first();
+    const container = appBar.locator(".container");
+
+    const paddingLeft = await container.evaluate((el) => window.getComputedStyle(el).paddingLeft);
+
+    // 8 x grid = 64px (if 16px root font)
+    const paddingValue = parseInt(paddingLeft, 10);
+    expect(paddingValue).toBeGreaterThanOrEqual(64);
+  });
 });

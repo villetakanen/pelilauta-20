@@ -1,0 +1,68 @@
+---
+title: Iconography
+description: Standard icon sizing scale and the v20 3-tier resolution system.
+order: 15
+status: stable
+icon: layout
+---
+
+Iconography in Cyan provides essential visual cues for navigation, actions, and status. Unlike asset-based icon models, Cyan v20 treats icons as **source-code fragments** that are inlined during SSR for maximum fluid performance.
+
+## 1. The 3-Tier Resolution System
+
+To manage a vast library of RPG icons while maintaining strict licensing and performance, the `CnIcon` component resolves requested "nouns" through three tiers:
+
+1.  **Tier 1: Community MIT** (`@pelilauta/icons`) - The foundational set for common UI and RPG themes.
+2.  **Tier 2: Managed Assets** (`@myrrys/proprietary`) - Specialized or licensed icons for specific campaigns or systems.
+3.  **Tier 3: Core Fallbacks** (`CnIconFallback.ts`) - Essential UI symbols (Add, Close, Arrow) defined directly in the core package to ensure they are always available.
+
+---
+
+## 2. Icon Sizing Scale
+
+Cyan icons utilize a deterministic, non-linear sizing scale. These are anchored to **rem** units to remain accessible.
+
+| Token | Prop Value | Size (px/rem) | Typical Usage |
+| :--- | :--- | :--- | :--- |
+| `--cn-icon-size-xsmall` | `xsmall` | **16px** (1rem) | Inline Help, Status Markers |
+| `--cn-icon-size-small` | `small` | **24px** (1.5rem) | Standard Buttons, List Items |
+| `--cn-icon-size` | `medium` | **36px** (2.25rem) | Core Navigation (Rail/Tray) |
+| `--cn-icon-size-large` | `large` | **72px** (4.5rem) | Large Feature Headers |
+| `--cn-icon-size-xlarge` | `xlarge` | **128px** (8rem) | Empty State Illustrations |
+
+---
+
+## 3. High-Performance SSR Delivery
+
+Cyan v20 eliminates the "Flash of Unstyled Icon" and extra network requests by inlining SVG data directly into the HTML:
+
+- **Type-Safe Nouns:** Icons are requested via semantic identifiers (e.g., `<CnIcon noun="sword" />`).
+- **Monochrome vs. Branded:** The system automatically detects the icon type. Monochrome icons use `currentColor` inheritance, while Branded icons support automatic Light/Dark mode color-shifting.
+- **Layout Locking:** Icons maintain a standard `0 0 128 128` ViewBox to prevent Cumulative Layout Shift (CLS) during rendering.
+
+---
+
+## 4. Visual Comparator
+
+<div style="background: var(--cn-surface-1); padding: 2rem; border-radius: var(--cn-radius-md); display: flex; align-items: flex-end; gap: 2rem; border: 1px solid var(--cn-border-color);">
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <div style="width: 1rem; height: 1rem; background: var(--cn-color-secondary-low); opacity: 0.2;"></div>
+    <code class="text-caption">16</code>
+  </div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <div style="width: 1.5rem; height: 1.5rem; background: var(--cn-color-secondary-low); opacity: 0.4;"></div>
+    <code class="text-caption">24</code>
+  </div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <div style="width: 2.25rem; height: 2.25rem; background: var(--cn-color-secondary-low); opacity: 0.6;"></div>
+    <code class="text-caption">36</code>
+  </div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <div style="width: 4.5rem; height: 4.5rem; background: var(--cn-color-secondary-low); opacity: 0.8;"></div>
+    <code class="text-caption">72</code>
+  </div>
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5rem;">
+    <div style="width: 8rem; height: 8rem; background: var(--cn-color-secondary-low);"></div>
+    <code class="text-caption">128</code>
+  </div>
+</div>

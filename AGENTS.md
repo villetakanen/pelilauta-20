@@ -19,7 +19,7 @@
 
 ```
 packages/cyan/src/
-  components/     — DS components (Astro or Svelte)
+  components/     — DS components (Svelte 5 default; Astro for structural shells)
   layouts/        — Base.astro: root HTML shell used by all apps
   tokens/         — CSS custom properties (--cn-* namespace only)
   fonts/          — Font files
@@ -46,10 +46,15 @@ specs/
 **Spec Formatting:**
 All specs MUST follow the structure outlined in `specs/TEMPLATE.md`. Importantly, specs must define automated test mappings (Vitest unit tests & Playwright E2E tests) to ensure deterministic feedback loops for agents acting on them.
 
-## UI Architecture (Lit → Astro/Svelte)
+## UI Architecture (Modern SSR + Progressive Svelte)
 
-- **Astro (`.astro`)**: Default for all structural components, shells, data-fetching, and CSS-only interactions (SSR + CSS). For example, `Tray` is CSS-driven and must be an Astro component with no client-side JavaScript.
-- **Svelte 5 (`.svelte`)**: Reserved strictly for client-side progressive enhancement (CSR) where complex reactive state is unavoidable (e.g., highly interactive widgets). Use Runes (`$props`).
+- **Astro (`.astro`)**: Reserved for structural components, shells, layouts, and page-level data fetching (e.g., `AppShell`, `AppBar`, `Tray`). Tray toggle must remain pure CSS — no client-side JavaScript.
+- **Svelte 5 (`.svelte`)**: **Default for Design System components** (Cards, Tags, Buttons, Icons). This ensures compatibility across both static Astro pages and interactive Svelte collections (sortable grids, filters).
+- **Core Constraints (ADR-001)**:
+  - **100% SSR-Compatible**: No reliance on browser globals (`window`, `document`) or logic that breaks during server rendering.
+  - **100% Progressive**: Design-system level visuals and layout MUST work without client-side JavaScript. JS is strictly for "high-fidelity" progressive enhancements.
+  - **Lazy Upgrade**: Existing Astro components remain in Astro until a requirement (like insertion into a Svelte list) necessitates an upgrade.
+  - **Decision rule**: If a component will ever appear inside a Svelte-managed collection (list, grid, filter), it must be Svelte. If it wraps a `<body>`, owns a page-level `<nav>`, or defines the HTML shell, it stays Astro.
 
 ## Tokens
 

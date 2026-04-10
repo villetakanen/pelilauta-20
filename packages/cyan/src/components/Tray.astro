@@ -1,11 +1,9 @@
 ---
 import HamburgerButton from "./HamburgerButton.astro";
 
-interface Props {
-  id?: string;
-}
+type Props = {};
 
-const { id = "cn-tray-toggle" } = Astro.props;
+const id = "cn-tray-toggle";
 ---
 
 <div class="cn-tray" data-cn-tray>
@@ -53,7 +51,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
     height: 100dvh;
     width: var(--cn-width-tray, 21rem);
     max-width: 100vw;
-    background: var(--cn-surface-1);
+    background-color: var(--cn-surface); /* Formal ground level */
     transform: translateX(-100%);
     transition: transform 0.15s ease-in, width 0.15s ease-in;
     border-right: none;
@@ -63,6 +61,7 @@ const { id = "cn-tray-toggle" } = Astro.props;
     box-sizing: border-box;
     overflow-y: auto;
     overflow-x: hidden;
+    container-type: inline-size;
   }
 
   /* ── Navigation Container ─────────────────────────────── */
@@ -87,11 +86,18 @@ const { id = "cn-tray-toggle" } = Astro.props;
     pointer-events: none;
   }
 
-  /* ── Expansion States (General/Mobile) ───────────────── */
+  /* --- Expansion States (General/Mobile) --- */
   .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
     transform: translateX(0);
     transition-timing-function: ease-out;
-    box-shadow: var(--cn-shadow-elevation-4);
+  }
+
+  /* Specific Elevation 3 rule for Mobile Overlays only */
+  @media (max-width: 620px) {
+    .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
+      background-color: var(--cn-surface-3);
+      box-shadow: var(--cn-shadow-elevation-3);
+    }
   }
 
   .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
@@ -115,21 +121,21 @@ const { id = "cn-tray-toggle" } = Astro.props;
     }
 
     /* Tablet Expansion - Overlay Modal from Rail */
-    .cn-tray:has(.cn-tray-toggle:checked) {
-      width: var(--cn-width-tray, 21rem);
-    }
-    
     .cn-tray:has(.cn-tray-toggle:checked) .cn-drawer {
       position: absolute;
       width: var(--cn-width-tray);
       height: 100vh;
-      box-shadow: var(--cn-shadow-elevation-4);
+      box-shadow: none; /* Flat style for tablet/desktop */
     }
   }
 
   /* ── Mode 3: Desktop (Tabletop/Large Push) ─────────────── */
   @media (min-width: 780px) {
     /* Large expansion - Push content, no scrim */
+    .cn-tray:has(.cn-tray-toggle:checked) {
+      width: var(--cn-width-tray, 21rem);
+    }
+
     .cn-tray:has(.cn-tray-toggle:checked) .cn-scrim {
       display: none;
       pointer-events: none;

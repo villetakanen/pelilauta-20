@@ -11,6 +11,8 @@
   "dependencies": {
     "@astrojs/mdx": "^4.3.14",
     "@astrojs/svelte": "^7.0.0",
+    "@myrrys/proprietary": "workspace:*",
+    "@pelilauta/icons": "workspace:*",
     "astro": "^5.7.0",
     "svelte": "^5.0.0"
   },

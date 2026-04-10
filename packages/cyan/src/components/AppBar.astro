@@ -57,6 +57,13 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
     gap: var(--cn-app-bar-gap);
   }
 
+  /* When in a layout with a sidebar (tray), offset the app bar content on mobile to clear the hamburger */
+  @media (max-width: 620px) {
+    :global(.layout-sidebar) .container {
+      padding-left: calc(var(--cn-grid) * 8);
+    }
+  }
+
   /* Responsive Title Display */
   @media (max-width: 620px) {
     .full-title {
@@ -124,11 +131,12 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
 
   @media (max-width: 620px) {
     .title {
-      font-size: var(--cn-font-size-h5);
-      line-height: var(--cn-line-height-h5);
-      letter-spacing: var(--cn-letter-spacing-h5, 0);
+      font-size: var(--cn-font-size-h4);
+      line-height: var(--cn-line-height-h4);
+      letter-spacing: var(--cn-letter-spacing-h4, 0);
       max-height: calc(var(--cn-app-bar-height) - var(--cn-grid));
       white-space: normal;
+      margin-top: calc(var(--cn-grid) * 0.5); /* Aligns with button center */
     }
     .noun-icon {
       display: none;

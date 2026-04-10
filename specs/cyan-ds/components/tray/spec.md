@@ -10,16 +10,15 @@ The tray is the primary navigation sidebar for the application. It adapts to dif
 ### Architecture
 - **Components:**
   - `Tray.astro` — The root layout container that owns state toggle (`:has()`), the drawer slide animation, and scrim.
-  - `HamburgerButton.astro` — The toggle button, included within the tray.
+  - [`HamburgerButton.astro`](../hamburger-button/spec.md) — The toggle button, included within the tray.
   - `TrayButton.astro` — A primary navigation item with an icon and label. Displays only the icon in rail mode.
-  - `TrayLinkGroup.astro` — A container for sub-navigation items.
-  - `TrayLink.astro` — A secondary navigation item used within groups.
+  - [`TraySubNav.astro`](../tray-sub-navigation/spec.md) — Hierarchical sub-navigation system (combining `TrayLinkGroup` and `TrayLink`).
   - (All components strictly `.astro` using CSS for interactions where possible, plus light client `<script>` for keyboard accessibility).
 - **Data Models:** No strict data models. Driven by markup (`slots` / nested structure) or basic props.
 - **API Contracts:**
   - `Tray`: Manages the `<input type="checkbox" id="cn-tray-toggle">` or similar CSS-only state.
   - `TrayButton`: Props `href`, `icon`, `label`, `active`.
-  - `TrayLink`: Props `href`, `label`, `active`.
+  - [`TrayLink`](../tray-sub-navigation/spec.md): Props `href`, `label`, `active`.
 - **Dependencies:**
   - Consumes `--cn-*` tokens for widths (tray and rail), spacing, and typography.
   - `--cn-z-*` tokens for tray surface and scrim layers.
@@ -44,6 +43,10 @@ The Tray layout scales across three distinct modes:
 3. **Tabletop / Large (`>= 780px`)**
    - **Collapsed:** Visible as a narrow Icon Rail.
    - **Expanded:** Push drawer (`position: relative`), which pushes the application's main content wrapper rather than overlaying it. No scrim displayed.
+
+- **Elevation:** 
+  - **Mobile (< 621px) Expanded:** Elevation 3 (using `var(--cn-shadow-elevation-3)`) to separate the drawer from the underlying content.
+  - **All other modes (Rail, Tablet/Desktop Expanded):** Elevation 0 (no shadow) to maintain a integrated, flat desktop aesthetic.
 
 ### Navigation Hierarchy
 - Primary routes use `TrayButton`.

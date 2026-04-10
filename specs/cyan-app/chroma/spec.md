@@ -17,13 +17,12 @@ A living documentation and demo page that showcases the Cyan chroma (color) toke
 
 ### Page Structure
 
-The page documents the three palettes with tables and inline swatch demos:
+The page documents the two core palettes and functional accents with tables and inline swatch demos:
 
-1. **Surface Anchors** — `--chroma-surface-0` and `--chroma-surface-100`, two swatches showing the dark/light endpoints
-2. **Primary Palette** — all 13 MD3 tonal steps (0–100), swatch strip showing the teal→yellow hue rotation, table with token name and step
-3. **Secondary Palette** — all 13 MD3 tonal steps, swatch strip, table with token name and step
-4. **Surface Palette** — all 13 MD3 tonal steps, swatch strip showing K-S to S-K range, table with token name and step
-5. **Usage Notes** — brief guidance on when to use primary vs. secondary vs. surface tokens, and the `color-mix()` derivation model
+1. **Primary Palette** — all 13 MD3 tonal steps (0–100), swatch strip showing the teal→highlighter neon hue rotation, table with token name and step
+2. **Surface Palette** — all 13 MD3 tonal steps, swatch strip showing the Cerulean hand-tuned chroma curve, table with token name and step
+3. **Functional Palettes** — selective tonal steps for Error, Warning, Info, and Love accents
+4. **Usage Notes** — brief guidance on when to use primary vs. surface tokens, and the `color-mix(in oklch)` derivation model
 
 ### Inline Demos
 
@@ -37,7 +36,7 @@ Each palette section renders a horizontal swatch strip of `<div>` elements style
 ### Anti-Patterns
 
 - **Don't hardcode color values in demos** — always use `var(--chroma-*)` so demos stay in sync with tokens
-- **Don't include semantic colors** — chroma is tonal palettes only; info/warning/error belong elsewhere
+- **Don't include semantic token mapping details** — the semantic layer has its own documentation page; this page covers tonal palettes and functional accent scales only
 - **Don't use placeholder token names** — use the canonical `--chroma-*` names even if the implementation doesn't exist yet
 - **Don't explain the color-mix() math in detail** — the docs page is for consumers, not implementors. Link to the token spec for internals.
 
@@ -47,7 +46,7 @@ Each palette section renders a horizontal swatch strip of `<div>` elements style
 
 - [ ] Page exists at `app/cyan-ds/src/pages/principles/chroma.mdx`
 - [ ] Page uses Book layout via frontmatter
-- [ ] All three palettes (primary, secondary, surface) shown with swatch demos and token tables
+- [ ] Both core palettes (primary, surface) shown with swatch demos and token tables
 - [ ] Surface endpoints displayed as a pair of contrasting swatches (surface-0, surface-100)
 - [ ] Swatch demos reference tokens via `var()`, never hardcoded values
 - [ ] Primary palette demo visually demonstrates the teal→yellow hue progression
@@ -56,5 +55,24 @@ Each palette section renders a horizontal swatch strip of `<div>` elements style
 ### Regression Guardrails
 
 - Inline demos must reference tokens via `var()`, never hardcoded color values
-- Token tables must list all 13 MD3 tonal steps per palette (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100)
-- Page must not contain semantic color tokens (info, warning, error)
+- Token tables must list all 13 MD3 tonal steps for primary and surface palettes (0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 95, 99, 100)
+- Page must not contain semantic token mapping tables (those belong in the semantic-colors page)
+
+### Testing Scenarios
+
+#### Scenario: Color system page loads
+```gherkin
+Given the cyan-ds dev server is running
+When the color system page is visited
+Then the page renders with a visible heading
+And ColorScale swatch strips are rendered for primary and surface palettes
+```
+
+#### Scenario: Swatch strips render all tonal steps
+```gherkin
+Given the color system page is loaded
+When the primary ColorScale component is visible
+Then it contains 13 swatch elements (one per tonal step)
+```
+
+- **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/chroma.spec.ts`

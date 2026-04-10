@@ -1,0 +1,29 @@
+---
+import { type CollectionEntry, getCollection, render } from "astro:content";
+import BookLayout from "../layouts/Book.astro";
+
+type DocCategory = "principles" | "styles" | "components" | "addons";
+
+export async function getStaticPaths() {
+  const collections: DocCategory[] = ["principles", "styles", "components", "addons"];
+
+  const allEntries = await Promise.all(
+    collections.map(async (name) => {
+      const entries = await getCollection(name);
+      return entries.map((entry: CollectionEntry<DocCategory>) => ({
+        params: { slug: `${name}/${entry.slug}` },
+        props: { entry },
+      }));
+    }),
+  );
+
+  return allEntries.flat();
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BookLayout frontmatter={entry.data}>
+  <Content />
+</BookLayout>

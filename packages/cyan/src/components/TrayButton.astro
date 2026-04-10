@@ -1,6 +1,8 @@
 ---
+import CnIcon from "./CnIcon.svelte";
+
 interface Props {
-  icon: string;
+  icon?: string;
   label: string;
   href: string;
   active?: boolean;
@@ -11,7 +13,7 @@ const { icon, label, href, active = false } = Astro.props;
 
 <a href={href} class:list={["cn-tray-button", { active }]}>
   <slot name="icon">
-    <span class="cn-tray-button__icon">{icon}</span>
+    {icon && <CnIcon noun={icon} size="small" />}
   </slot>
   <span class="cn-tray-button__label">{label}</span>
 </a>
@@ -24,10 +26,12 @@ const { icon, label, href, active = false } = Astro.props;
     inline-size: 100%;
     min-block-size: calc(var(--cn-grid) * 6);
     padding: var(--cn-grid);
-    color: var(--cn-link);
+    color: light-dark(var(--chroma-surface-20), var(--chroma-surface-90));
     text-decoration: none;
-    border-radius: var(--cn-border-radius-small);
-    transition: background-color 0.2s, color 0.2s;
+    border-radius: var(--cn-border-radius-xl);
+    transition:
+      background-color 0.2s,
+      color 0.2s;
   }
 
   .cn-tray-button:hover,

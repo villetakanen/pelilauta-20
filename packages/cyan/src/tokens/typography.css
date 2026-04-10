@@ -1,20 +1,45 @@
 :root {
-  --cn-font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --cn-font-family-mono: ui-monospace, "Cascadia Code", "Source Code Pro", monospace;
+  --cn-font-family: Lato, system-ui, -apple-system, sans-serif;
+  --cn-font-family-mono: "Roboto Mono", ui-monospace, monospace;
 
-  --cn-font-size-xs: 0.75rem;
-  --cn-font-size-sm: 0.875rem;
-  --cn-font-size-md: 1rem;
-  --cn-font-size-lg: 1.25rem;
-  --cn-font-size-xl: 1.5rem;
-  --cn-font-size-2xl: 2rem;
-  --cn-font-size-3xl: 2.5rem;
+  /* Root Alignment (17px Baseline)
+     Canonical font-size is set on html{} in typography-semantics.css */
 
-  --cn-line-height-tight: 1.25;
-  --cn-line-height-normal: 1.5;
-  --cn-line-height-relaxed: 1.75;
+  /* Canonical font-size is 16px (1rem) browser default.
+     Scale starts from 17px base (1.0625rem). */
 
+  /* Augmented Fourth (1.414) Scale from 17px (1.0625rem) base */
+  --cn-font-size-h1: 4.24rem; /* ~68px */
+  --cn-font-size-h2: 3rem; /* 48px */
+  --cn-font-size-h3: 2.12rem; /* ~34px */
+  --cn-font-size-h4: 1.5rem; /* 24px */
+  --cn-font-size-text: 1.0625rem; /* 17px */
+
+  /* Line Heights (Augmented Fourth / 8px Grid aligned) */
+  --cn-line-height-h1: 1.294; /* 88px */
+  --cn-line-height-h2: 1.333; /* 64px */
+  --cn-line-height-h3: 1.412; /* 48px */
+  --cn-line-height-h4: 1.333; /* 32px */
+  --cn-line-height-text: 1.412; /* 24px */
+
+  /* Letter Spacing */
+  --cn-letter-spacing-h1: -0.02em;
+  --cn-letter-spacing-h2: -0.01em;
+  --cn-letter-spacing-h3: 0.01em;
+  --cn-letter-spacing-h4: normal;
+  --cn-letter-spacing-text: 0.03em;
+
+  --cn-font-weight-light: 300;
   --cn-font-weight-normal: 400;
   --cn-font-weight-medium: 500;
   --cn-font-weight-bold: 700;
+
+  /* Semantic Weight Mapping */
+  --cn-font-weight-display: 300;
+  --cn-font-weight-h1: 300;
+  --cn-font-weight-h2: 400;
+  --cn-font-weight-h3: 400;
+  --cn-font-weight-h4: 400;
+  --cn-font-weight-text: 400;
+  --cn-font-weight-text-strong: 700;
 }

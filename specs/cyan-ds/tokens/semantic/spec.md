@@ -16,7 +16,7 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 - **v20 target:** `packages/cyan/src/tokens/semantic.css`
 - **Format:** CSS custom properties on `:root`
 - **Namespace:** `--color-*` for core semantic tokens
-- **Dependencies:** [Chroma tokens](../chroma/spec.md) — all values derive from `--chroma-*` via `light-dark()` and `color-mix()`
+- **Dependencies:** [Chroma tokens](../chroma/spec.md) — all values derive from `--chroma-*` via `light-dark()` and `color-mix(in oklch)`
 
 ### Token Groups
 
@@ -46,16 +46,18 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 | `--color-text` | surface-90 | surface-20 | Default body text |
 | `--color-text-high` | black | white | Maximum contrast text |
 | `--color-text-low` | surface-80 | surface-40 | De-emphasized text |
-| `--color-heading-1` | surface-70 | surface-30 | H1 headings |
-| `--color-heading-2` | surface-80 | surface-20 | H2 headings |
+| `--color-text-heading` | surface-30 | surface-99 | H1 and H2 (Primary) |
+| `--color-text-subheading` | surface-40 | surface-80 | H3 and H4 (Secondary) |
 
 #### Links
 
 | Token | Light | Dark | Role |
 |---|---|---|---|
-| `--color-link` | surface-60 | surface-40 | Default link |
-| `--color-link-hover` | surface-50 | surface-20 | Link hover |
-| `--color-link-active` | surface-40 | surface-70 | Link active |
+| `--cn-link` | primary-30 | primary-80 | Default content link |
+| `--cn-link-hover` | primary-40 | primary-90 | Link hover |
+| `--cn-link-active` | primary-50 | primary-20 | Link active/pressed |
+
+> **Note:** Tray navigation components (TrayButton, TrayLink) use surface-tinted chroma tokens directly, not `--cn-link-*`. These semantic link tokens are for content-area inline links.
 
 #### Buttons & Interactive
 
@@ -100,7 +102,7 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 
 | Token | Role |
 |---|---|
-| `--color-shadow` | Shadow color (light-dark from surface palette) |
+| `--cn-shadow-color` | Shadow color (light-dark from surface palette) |
 | `--color-elevation-1/2/3` | Aliases to surface levels for elevation system |
 
 ### Migration Notes
@@ -116,14 +118,15 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 
 - **Don't reference `--chroma-*` tokens directly in components** — always go through semantic tokens so theme switching works
 - **Don't add component-specific color tokens here** — this file is the shared semantic layer. Component colors belong in component CSS.
-- **Don't use hardcoded colors** — derive everything from chroma via `light-dark()` and `color-mix()`
+- **Don't use hardcoded colors** — derive everything from chroma via `light-dark()` and `color-mix(in oklch)`
+- **Don't use `color-mix(in hsl)` or other non-OKLCH color spaces** — the system is OKLCH-native; mixing in HSL skews perceived brightness and breaks perceptual uniformity
 - **Don't duplicate chroma steps** — reference `--chroma-{accent}-{step}` tokens, don't redefine the hue values in the semantic layer
 
 ## Contract
 
 ### Definition of Done
 
-- [ ] All semantic tokens derive from `--chroma-*` palette via `light-dark()` or `color-mix()`
+- [ ] All semantic tokens derive from `--chroma-*` palette via `light-dark()` or `color-mix(in oklch)`
 - [ ] `color-scheme: light dark` is set on `:root` (via Base.astro or global reset)
 - [ ] No `--cn-color-*` legacy aliases — only `--color-*` namespace
 - [ ] No component-specific tokens (bubble, avatar, etc.) — only shared semantic roles
@@ -152,3 +155,14 @@ Scenario: Surface elevation hierarchy
   Then each level is visually distinct (progressively elevated)
   And --color-on-surface is readable against all surface levels
 ```
+
+## Documentation (Living Style Book)
+
+The documentation at `app/cyan-ds/src/content/principles/semantic-colors.mdx` provides the functional mapping reference for role-based tokens.
+
+### Content Strategy & Demos
+
+1. **Role Hierarchies**: Tables and visual swatches for each functional group (Surfaces, Text, Interactive, Status).
+2. **Semantic Immutability**: Clearly documents the constraint that functional role names are a stable API and should not be overridden by sub-sites.
+3. **Contrast HUD**: Inline demonstrations of text readability across surface elevations, specifically enforcing the Elevation 4 mandatory white-text rule.
+4. **Theme-Awareness**: Explains how `--cn-*` tokens (standardizing from legacy `--color-*`) utilize `light-dark()` for automatic scheme adaptation.
