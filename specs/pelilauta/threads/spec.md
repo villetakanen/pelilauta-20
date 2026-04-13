@@ -165,19 +165,45 @@ The host (`app/pelilauta/src/i18n.ts`) imports from `@pelilauta/threads/i18n` an
 
 ### Definition of Done
 
-- [ ] `packages/threads` exists as a pnpm workspace package named `@pelilauta/threads`
+DoD is split across three ship stages so incremental commits can land green
+without having to satisfy clauses that depend on later stages. Stages are
+cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
+
+#### Scaffold DoD (Stage 1 — empty package shell)
+
+- [ ] `packages/threads` exists as a pnpm workspace package named `@pelilauta/threads`, picked up by `pnpm-workspace.yaml`
+- [ ] All four sub-exports declared in `package.json`: `./server`, `./client`, `./components`, `./i18n` (empty barrels permitted until the stage that populates them)
+- [ ] Module directories exist per §Module Structure: `src/{schemas,api,server,client,components,i18n}/`
+- [ ] Workspace dependencies listed in `package.json`: `@pelilauta/models`, `@pelilauta/firebase`, `@pelilauta/i18n`, `zod`; dev deps sufficient for vitest + svelte component tests
+- [ ] `vitest.config.ts` present; mirrors the `envPrefix` / `envDir` convention used by `packages/firebase`
+- [ ] `server/` barrel has zero client SDK imports (trivially true while empty; becomes load-bearing at stage 2)
+- [ ] Package passes `pnpm check`
+
+#### Read & Render DoD (Stage 2 — unblocks `TopThreadsStream`)
+
 - [ ] `ThreadSchema`, `ReplySchema`, and `ChannelSchema` validate against legacy Firestore data unchanged
 - [ ] `parseThread()` handles legacy data (string images, missing author, Timestamp dates)
 - [ ] `parseChannel()` is ported from v17 with `category` default removed
 - [ ] `getThreads(limit, { order, public })` returns `Thread[]` with documented defaults (`order='flowTime'`, `public=true`)
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
-- [ ] CRUD operations for threads and replies work via the `client/` API
-- [ ] Bluesky syndication creates/tracks posts
-- [ ] `server/` entry has zero client SDK imports
-- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card`
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
-- [ ] Package passes `pnpm check` and unit tests
+- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card`
+- [ ] `server/` entry still has zero client SDK imports now that it carries real content
+- [ ] Vitest scenarios below that reference schemas, read accessors, `ThreadCard`, and i18n pass
+- [ ] `passWithNoTests` removed from `vitest.config.ts`
+
+#### Writes & Syndication DoD (Stage 3 — user authorship)
+
+- [ ] CRUD operations for threads (create/update/delete) work via the `client/` API
+- [ ] CRUD operations for replies (add/update/delete) work via the `client/` API
+- [ ] Adding a reply bumps the parent thread's `flowTime` and increments `replyCount`
+- [ ] Deleting a thread cascades to its reply sub-collection
+- [ ] Love/unlove reactions update `lovedCount` atomically
+- [ ] Bluesky syndication creates posts and stores `blueskyPostUri` / `blueskyPostUrl` / `blueskyPostCreatedAt` on the thread
+- [ ] `ThreadDetail`, `ThreadEditor`, `DiscussionSection`, `ReplyArticle`, `ReplyDialog`, and `BlueskyCard` components render
+- [ ] `DiscussionSection`'s real-time `onSnapshot` listener runs only after client hydration (never during SSR)
+- [ ] Vitest scenarios below that reference writes and syndication pass
 
 ### Regression Guardrails
 
