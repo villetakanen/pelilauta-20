@@ -144,6 +144,25 @@ importers:
 
   packages/pelilauta-icons: {}
 
+  packages/threads:
+    dependencies:
+      '@pelilauta/firebase':
+        specifier: workspace:*
+        version: link:../firebase
+      '@pelilauta/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@pelilauta/models':
+        specifier: workspace:*
+        version: link:../models
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)
+
 packages:
 
   '@asamuzakjp/css-color@5.1.5':

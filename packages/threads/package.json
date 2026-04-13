@@ -1,0 +1,23 @@
+{
+  "name": "@pelilauta/threads",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": "./src/server/index.ts",
+    "./client": "./src/client/index.ts",
+    "./components": "./src/components/index.ts",
+    "./i18n": "./src/i18n/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@pelilauta/firebase": "workspace:*",
+    "@pelilauta/i18n": "workspace:*",
+    "@pelilauta/models": "workspace:*",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}
