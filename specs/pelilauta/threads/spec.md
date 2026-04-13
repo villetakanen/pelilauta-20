@@ -24,15 +24,15 @@ The Threads package owns the entire "Discussions" vertical of Pelilauta — sche
 packages/threads/
   src/
     schemas/
-      ThreadSchema.ts        → Zod schema, Thread type, parseThread(), createThread()
-      ReplySchema.ts         → Zod schema, Reply type, parseReply()
-      ChannelSchema.ts       → Zod schema, Channel type, parseChannel(), constants
+      ThreadSchema.ts        → Zod schema (legacy-tolerant), Thread type, createThread() factory
+      ReplySchema.ts         → Zod schema (legacy-tolerant), Reply type
+      ChannelSchema.ts       → Zod schema (legacy-tolerant), Channel type, constants
     api/
       getThreads.ts          → paginated query by flowTime/createdAt, channel/visibility filters
       getThread.ts           → single thread by key
       getReplies.ts          → replies for a thread
       getChannels.ts         → full channel directory (read-through cache)
-      createThread.ts        → write thread doc + update channel metadata
+      writeThread.ts         → write thread doc + update channel metadata (uses createThread() factory for blanks)
       updateThread.ts        → update thread fields
       deleteThread.ts        → delete thread + replies
       addReply.ts            → write reply + increment replyCount + update flowTime
@@ -117,7 +117,7 @@ ChannelSchema (z.object)
 ChannelsSchema = z.array(ChannelSchema)
 ```
 
-`parseChannel(c)` is ported from v17 with one deliberate change: it does NOT coalesce `category` to a default. Other coalescings (`description: '' || ...`, `icon: 'discussion' || ...`, `flowTime: 0 || ...`) are preserved. Legacy docs without `category` parse with `category: undefined`; consumers handle that.
+`ChannelSchema` is ported from v17 with one deliberate change: it does NOT coalesce `category` to a default. Other coalescings (`description: ''` when missing, `icon: 'discussion'` when missing, `flowTime: 0` when missing) are preserved and encoded directly on the schema via `.default(...)` / `z.preprocess(...)`. Legacy docs without `category` parse with `category: undefined`; consumers handle that. Call sites use `ChannelSchema.parse(raw)` — there is no separate `parseChannel()` wrapper.
 
 **Constants** (`packages/threads/src/schemas/ChannelSchema.ts`):
 - `CHANNELS_META_REF = 'meta/threads'`
@@ -181,9 +181,10 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 
 #### Read & Render DoD (Stage 2 — unblocks `TopThreadsStream`)
 
-- [ ] `ThreadSchema`, `ReplySchema`, and `ChannelSchema` validate against legacy Firestore data unchanged
-- [ ] `parseThread()` handles legacy data (string images, missing author, Timestamp dates)
-- [ ] `parseChannel()` is ported from v17 with `category` default removed
+- [ ] `ThreadSchema`, `ReplySchema`, and `ChannelSchema` validate against legacy Firestore data unchanged, with legacy tolerance encoded directly on the schema (no separate `parseX()` wrapper — callers use `Schema.parse(raw)`)
+- [ ] `ThreadSchema.parse(raw)` accepts legacy data (string images → `[{url, alt}]`, missing author → derived from `owners[0]`, Timestamp → Date) via `z.preprocess` / `.transform` on the schema
+- [ ] `ChannelSchema.parse(raw)` is ported from v17 with `category` default removed; other coalescings (`description`, `icon`, `flowTime`) preserved via `.default(...)`
+- [ ] `createThread(source?, key?)` factory exported from `schemas/ThreadSchema.ts` — returns a fully-populated `Thread` with defaults filled in (blank titles, empty owners sentinel, current timestamps). Does NOT write to Firestore.
 - [ ] `getThreads(limit, { order, public })` returns `Thread[]` with documented defaults (`order='flowTime'`, `public=true`)
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
@@ -221,10 +222,28 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 
 ```gherkin
 Given a raw Firestore document with Timestamp fields and legacy string images
-When parsed through parseThread()
+When parsed through ThreadSchema.parse()
 Then dates are converted to Date objects
 And string images are converted to [{url, alt}] format
 And a valid Thread is returned
+```
+
+- **Vitest Unit Test:** `packages/threads/src/schemas/ThreadSchema.test.ts`
+
+#### Scenario: createThread factory produces a valid blank Thread
+
+```gherkin
+Given no source object
+When createThread() is called
+Then the returned Thread satisfies ThreadSchema.parse() as a valid Thread
+And createdAt/updatedAt are set to the current time
+And owners is a non-empty array (sentinel "-" when no author supplied)
+And replyCount and lovedCount are 0
+
+Given a partial source object with { title: "X", channel: "yleinen" }
+When createThread(source) is called
+Then title and channel are preserved from source
+And missing fields receive factory defaults
 ```
 
 - **Vitest Unit Test:** `packages/threads/src/schemas/ThreadSchema.test.ts`
@@ -262,11 +281,11 @@ And channel.category is undefined when missing on a doc (no implicit default)
 
 - **Vitest Unit Test:** `packages/threads/src/api/getChannels.test.ts`
 
-#### Scenario: parseChannel does not default category
+#### Scenario: ChannelSchema does not default category
 
 ```gherkin
 Given a channel object missing the category field
-When parsed through parseChannel()
+When parsed through ChannelSchema.parse()
 Then the result has category === undefined
 And other missing fields receive their documented defaults (description "", icon "discussion", flowTime 0)
 ```
