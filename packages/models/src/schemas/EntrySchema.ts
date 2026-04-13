@@ -6,6 +6,7 @@ export const EntrySchema = z.object({
   createdAt: z.coerce.date().optional(),
   updatedAt: z.coerce.date().optional(),
   owners: z.array(z.string()).default([]),
+  locale: z.string().default("fi"),
 });
 
 export type Entry = z.infer<typeof EntrySchema>;

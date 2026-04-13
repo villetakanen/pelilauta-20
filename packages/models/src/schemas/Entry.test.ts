@@ -8,8 +8,20 @@ describe("EntrySchema", () => {
     expect(result.key).toBe("");
     expect(result.flowTime).toBe(0);
     expect(result.owners).toEqual([]);
+    expect(result.locale).toBe("fi");
     expect(result.createdAt).toBeUndefined();
     expect(result.updatedAt).toBeUndefined();
+  });
+
+  it("preserves an explicitly set locale", () => {
+    const result = EntrySchema.parse({ locale: "en" });
+    expect(result.locale).toBe("en");
+  });
+
+  it("accepts non-default locale strings without enumeration", () => {
+    // Schema is permissive — UI surfaces constrain the picker, not the schema.
+    const result = EntrySchema.parse({ locale: "sv" });
+    expect(result.locale).toBe("sv");
   });
 
   it("parses a full entry", () => {
