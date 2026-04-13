@@ -6,6 +6,12 @@ const bookSchema = z.object({
   icon: z.string().optional(),
   order: z.number().optional(),
   status: z.enum(["stable", "alpha", "draft"]).default("stable"),
+  /**
+   * When true, Book.astro does NOT wrap the MDX slot in a prose <article> cage.
+   * The MDX author owns its own content-grid shells. Use for pages that need
+   * main-wide layout demos (e.g. Golden / Triad). See specs/cyan-ds/living-style-books/spec.md.
+   */
+  multipart: z.boolean().optional().default(false),
 });
 
 export const collections = {

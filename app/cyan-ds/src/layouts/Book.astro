@@ -1,133 +1,56 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
-import TrayButton from "@cyan/components/TrayButton.astro";
-import TrayLink from "@cyan/components/TrayLink.astro";
-import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
-import AppShell from "@cyan/layouts/AppShell.astro";
+/**
+ * Book.astro — documentation book layout for the cyan-ds site.
+ *
+ * Contract: specs/cyan-ds/living-style-books/spec.md
+ *
+ * Composes on Page (from @cyan/layouts). Owns the page H1 + description from
+ * frontmatter. By default wraps the MDX slot in a .cn-content-prose section
+ * (67ch readability cage). When frontmatter.multipart === true, skips the
+ * wrapper so the MDX author can place their own <section class="cn-content-*">
+ * shells directly under <main class="cn-app-main">.
+ *
+ * Navigation tray is delegated to DocsTray (site-wide primitive, not a Book concern).
+ *
+ * This layout contains no <style> block. All styling (prose readability,
+ * typography, spacing) is provided by the DS via .cn-content-prose and
+ * typography-semantics.css in packages/cyan.
+ */
+import Page from "@cyan/layouts/Page.astro";
+import DocsTray from "../components/DocsTray.astro";
 
 interface Props {
   frontmatter: {
     title: string;
     description?: string;
+    multipart?: boolean;
   };
 }
 
 const { frontmatter } = Astro.props;
-const { title, description } = frontmatter;
+const { title, description, multipart = false } = frontmatter;
 
-type DocCategory = "principles" | "styles" | "components" | "addons";
-
-// Determine current category for the App Bar title
 const pathSegments = Astro.url.pathname.split("/").filter(Boolean);
 const currentCategory = pathSegments[0] || "";
 const formattedCategory = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
 const appTitle = formattedCategory ? `Cyan / ${formattedCategory}` : "Cyan Design System";
-
-// Fetch and sort collections for the dynamic navigation tray
-const sortEntries = (entries: CollectionEntry<DocCategory>[]) =>
-  entries.sort(
-    (a, b) =>
-      (a.data.order ?? 9999) - (b.data.order ?? 9999) || a.data.title.localeCompare(b.data.title),
-  );
-
-const principles = sortEntries(await getCollection("principles"));
-const styles = sortEntries(await getCollection("styles"));
-const components = sortEntries(await getCollection("components"));
-const addons = sortEntries(await getCollection("addons"));
-
-const groups: {
-  id: DocCategory;
-  label: string;
-  entries: CollectionEntry<DocCategory>[];
-  defaultIcon: string;
-}[] = [
-  {
-    id: "principles",
-    label: "Principles",
-    entries: principles,
-    defaultIcon: "palette",
-  },
-  { id: "styles", label: "Styles", entries: styles, defaultIcon: "font" },
-  {
-    id: "components",
-    label: "Components",
-    entries: components,
-    defaultIcon: "components",
-  },
-  { id: "addons", label: "Addons", entries: addons, defaultIcon: "add" },
-];
 ---
 
-<AppShell title={title} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
-  <div slot="tray" style="display: contents;">
-    <TrayButton
-      icon="design"
-      label="Intro"
-      href="/"
-      active={Astro.url.pathname === "/"}
-    />
+<Page title={title} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
+  <DocsTray slot="tray" />
 
-    {
-      groups.map((group) => {
-        if (group.entries.length === 0) return null;
-        
-        const firstEntryHref = `/${group.id}/${group.entries[0].slug}`;
-        const isCurrentGroup = Astro.url.pathname.startsWith(`/${group.id}`);
+  <header class="cn-content-prose">
+    <h1>{title}</h1>
+    {description && <p>{description}</p>}
+  </header>
 
-        return (
-          <>
-            <TrayButton
-              icon={group.defaultIcon}
-              label={group.label}
-              href={firstEntryHref}
-              active={isCurrentGroup}
-            />
-            <TrayLinkGroup ariaLabel={group.label}>
-              {group.entries.map((entry) => (
-                <TrayLink
-                  label={entry.data.title}
-                  href={`/${group.id}/${entry.slug}`}
-                  active={Astro.url.pathname === `/${group.id}/${entry.slug}`}
-                />
-              ))}
-            </TrayLinkGroup>
-          </>
-        );
-      })
-    }
-  </div>
-
-  <article>
-    <header>
-      <h1>{title}</h1>
-      {
-        description && (
-          <p class="text-body" style="opacity: 0.7; max-width: 40rem;">
-            {description}
-          </p>
-        )
-      }
-    </header>
-    <div class="cn-book-content">
+  {
+    multipart ? (
       <slot />
-    </div>
-  </article>
-</AppShell>
-
-<style>
-  /* Base styles for the Book layout */
-  article {
-    max-width: 64rem;
-    margin: 0 auto;
-    padding: var(--cn-gap);
+    ) : (
+      <section class="cn-content-prose">
+        <slot />
+      </section>
+    )
   }
-
-  header {
-    margin-bottom: var(--cn-gap);
-  }
-
-  h1 {
-    margin-bottom: var(--cn-grid);
-    color: var(--cn-text-high);
-  }
-</style>
+</Page>

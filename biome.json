@@ -40,6 +40,30 @@
       }
     },
     {
+      "includes": ["**/*.svelte"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/cyan/src/**/*.css"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDescendingSpecificity": "off"
+          },
+          "complexity": {
+            "noImportantStyles": "off"
+          }
+        }
+      }
+    },
+    {
       "includes": ["packages/pelilauta-icons/src/index.ts", "packages/myrrys-proprietary/index.ts"],
       "formatter": { "enabled": false },
       "linter": { "enabled": false }

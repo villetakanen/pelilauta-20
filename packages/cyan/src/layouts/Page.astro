@@ -1,0 +1,27 @@
+---
+import AppShell from "./AppShell.astro";
+
+interface Props {
+  title: string;
+  appTitle?: string;
+  shortTitle?: string;
+  layout?: "view" | "sidebar" | "editor" | "modal";
+  trayLabel?: string;
+  backHref?: string;
+}
+
+const { title, appTitle, shortTitle, layout = "sidebar", trayLabel, backHref } = Astro.props;
+---
+
+<AppShell
+  title={title}
+  appTitle={appTitle}
+  shortTitle={shortTitle}
+  layout={layout}
+  trayLabel={trayLabel}
+  backHref={backHref}
+>
+  <slot name="tray" slot="tray" />
+  <slot name="actions" slot="actions" />
+  <slot />
+</AppShell>

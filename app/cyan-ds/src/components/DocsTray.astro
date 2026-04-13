@@ -1,0 +1,81 @@
+---
+/**
+ * DocsTray — cyan-ds site-wide navigation tray.
+ *
+ * Contract: specs/cyan-ds/components/docs-tray/spec.md
+ *
+ * Fetches the four documentation collections, sorts them, and renders the
+ * tray markup (intro button + group entry points + per-entry links). Reads
+ * Astro.url.pathname itself for active-state derivation.
+ *
+ * Consumed via `<DocsTray slot="tray" />` by any layout in app/cyan-ds —
+ * Book.astro, pages/index.astro, etc. Do not duplicate this markup elsewhere.
+ */
+import { type CollectionEntry, getCollection } from "astro:content";
+import TrayButton from "@cyan/components/TrayButton.astro";
+import TrayLink from "@cyan/components/TrayLink.astro";
+import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
+
+type DocCategory = "principles" | "styles" | "components" | "addons";
+
+const sortEntries = (entries: CollectionEntry<DocCategory>[]) =>
+  entries.sort(
+    (a, b) =>
+      (a.data.order ?? 9999) - (b.data.order ?? 9999) || a.data.title.localeCompare(b.data.title),
+  );
+
+const principles = sortEntries(await getCollection("principles"));
+const styles = sortEntries(await getCollection("styles"));
+const components = sortEntries(await getCollection("components"));
+const addons = sortEntries(await getCollection("addons"));
+
+const groups: {
+  id: DocCategory;
+  label: string;
+  entries: CollectionEntry<DocCategory>[];
+  defaultIcon: string;
+}[] = [
+  { id: "principles", label: "Principles", entries: principles, defaultIcon: "palette" },
+  { id: "styles", label: "Styles", entries: styles, defaultIcon: "font" },
+  { id: "components", label: "Components", entries: components, defaultIcon: "components" },
+  { id: "addons", label: "Addons", entries: addons, defaultIcon: "add" },
+];
+
+const pathname = Astro.url.pathname;
+---
+
+<TrayButton
+  icon="design"
+  label="Intro"
+  href="/"
+  active={pathname === "/"}
+/>
+
+{
+  groups.map((group) => {
+    if (group.entries.length === 0) return null;
+
+    const firstEntryHref = `/${group.id}/${group.entries[0].slug}`;
+    const isCurrentGroup = pathname.startsWith(`/${group.id}`);
+
+    return (
+      <>
+        <TrayButton
+          icon={group.defaultIcon}
+          label={group.label}
+          href={firstEntryHref}
+          active={isCurrentGroup}
+        />
+        <TrayLinkGroup ariaLabel={group.label}>
+          {group.entries.map((entry) => (
+            <TrayLink
+              label={entry.data.title}
+              href={`/${group.id}/${entry.slug}`}
+              active={pathname === `/${group.id}/${entry.slug}`}
+            />
+          ))}
+        </TrayLinkGroup>
+      </>
+    );
+  })
+}

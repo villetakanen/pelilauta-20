@@ -39,6 +39,6 @@ describe("toDate", () => {
   });
 
   it("returns epoch for an unrecognized object shape", () => {
-    expect(toDate({ foo: 1 } as any)).toEqual(new Date(0));
+    expect(toDate({ foo: 1 } as unknown)).toEqual(new Date(0));
   });
 });
