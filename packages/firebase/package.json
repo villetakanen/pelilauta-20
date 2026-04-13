@@ -1,0 +1,21 @@
+{
+  "name": "@pelilauta/firebase",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": "./src/server/index.ts",
+    "./client": "./src/client/index.ts",
+    "./config": "./src/config.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "smoke": "RUN_SMOKE=1 vitest run --mode development src/server/smoke.test.ts"
+  },
+  "dependencies": {
+    "firebase": "^11.0.0",
+    "firebase-admin": "^13.0.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}

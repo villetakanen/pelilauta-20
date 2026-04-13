@@ -36,6 +36,10 @@ app/pelilauta/src/
 specs/
   cyan-ds/        — DS component, token, layout, and documentation site contracts
   pelilauta/      — Main app feature contracts
+
+plans/            — Transient scratch: multi-session implementation plans,
+                    porting checklists. NOT authoritative. Delete when work
+                    ships. See plans/README.md.
 ```
 
 ## Specs

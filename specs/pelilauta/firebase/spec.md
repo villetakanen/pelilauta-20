@@ -47,14 +47,35 @@ packages/firebase/
 
 #### Environment Variables
 
+Env var names are inherited verbatim from pelilauta-17 so that the same dev/prod
+Firebase projects can be reused across versions without re-provisioning secrets.
+They intentionally do **not** follow a `PUBLIC_FIREBASE_*` / `SECRET_FIREBASE_*`
+convention — the v17 contract predates that style and changing it would force
+re-provisioning in Netlify and every contributor's local `.env`. Treat the list
+below as authoritative; do not rename.
+
 | Variable | Context | Purpose |
 |---|---|---|
-| `PUBLIC_FIREBASE_API_KEY` | Client | Firebase API key |
-| `PUBLIC_FIREBASE_AUTH_DOMAIN` | Client | Auth domain |
-| `PUBLIC_FIREBASE_PROJECT_ID` | Both | Project ID |
-| `PUBLIC_FIREBASE_STORAGE_BUCKET` | Both | Storage bucket |
-| `SECRET_FIREBASE_CLIENT_EMAIL` | Server | Service account email |
-| `SECRET_FIREBASE_PRIVATE_KEY` | Server | Service account private key |
+| `PUBLIC_apiKey` | Client | Firebase Web API key |
+| `PUBLIC_authDomain` | Client | Auth domain |
+| `PUBLIC_projectId` | Both | Project ID |
+| `PUBLIC_storageBucket` | Both | Storage bucket |
+| `PUBLIC_messagingSenderId` | Client | FCM sender ID |
+| `PUBLIC_appId` | Client | Firebase app ID |
+| `PUBLIC_measurementId` | Client | Analytics measurement ID (optional) |
+| `PUBLIC_databaseURL` | Both | Realtime Database URL |
+| `SECRET_universe_domain` | Server | Service-account universe domain |
+| `SECRET_private_key_id` | Server | Service account private key ID |
+| `SECRET_private_key` | Server | Service account private key |
+| `SECRET_client_email` | Server | Service account email |
+| `SECRET_client_id` | Server | Service account client ID |
+| `SECRET_auth_uri` | Server | Service account auth URI |
+| `SECRET_token_uri` | Server | Service account token URI |
+| `SECRET_auth_provider_x509_cert_url` | Server | Service account auth provider cert URL |
+| `SECRET_client_x509_cert_url` | Server | Service account client cert URL |
+
+A `.env.example` at the repo root documents the full set for local dev. The
+v17 dev Firebase project is the canonical dev target — no emulator.
 
 ### Anti-Patterns
 
@@ -67,13 +88,25 @@ packages/firebase/
 
 ### Definition of Done
 
-- [ ] `packages/firebase` exists as a pnpm workspace package
-- [ ] Server entry exports `getFirestore()`, `getAuth()`, `verifyIdToken()`
-- [ ] Client entry exports `getFirestore()`, `getAuth()`
-- [ ] `initializeApp` is memoized (safe to call multiple times)
-- [ ] Firestore timestamp conversion helper exported from client entry
-- [ ] No cross-import between server and client modules
+DoD is split across two ship stages so a scaffold-only PR can land green without
+having to satisfy accessor-level clauses that depend on domain packages.
+
+#### Scaffold DoD (Stage 1 — infrastructure only)
+
+- [ ] `packages/firebase` exists as a pnpm workspace package, picked up by `pnpm-workspace.yaml`
+- [ ] `src/server/index.ts` and `src/client/index.ts` exist with `initializeApp` memoized (guarded by `getApps().length`)
+- [ ] `initializeApp` / `getFirestore` / `getAuth` are exposed as lazy accessors — no unguarded top-level `initializeApp(...)` call
+- [ ] `src/config.ts` centralizes env-var reads; both entries import from it
+- [ ] No cross-import between server and client modules (server must not import `firebase/*`, client must not import `firebase-admin/*`)
+- [ ] Any pre-existing `app/pelilauta/src/firebase/{server,client}/` directories are deleted in the same commit that adds this package
 - [ ] Package passes `pnpm check`
+
+#### Accessor DoD (Stage 2 — domain-consumable API)
+
+- [ ] Server entry exports `verifyIdToken()` (from `src/server/tokenToUid.ts`)
+- [ ] Server entry exports `isAdmin()` (from `src/server/admin.ts`)
+- [ ] Client entry exports the Firestore timestamp conversion helper (`src/client/toFirestoreEntry.ts`)
+- [ ] Vitest scenarios below are implemented and green
 
 ### Regression Guardrails
 
