@@ -1,18 +1,18 @@
 /**
  * Converts various date-like values to a native Date.
  *
- * Accepted inputs:
+ * Accepts `unknown` because the primary caller is schema preprocessing over
+ * raw Firestore documents where the field's runtime shape is unknown until
+ * inspected. All non-date-like inputs fall back to new Date(0).
+ *
+ * Recognised inputs:
  *   - Date instance → returned as-is
  *   - ISO string or numeric string → parsed via new Date()
  *   - number → treated as epoch milliseconds
  *   - Firestore Timestamp-shaped object { seconds: number, nanoseconds: number }
- *   - null / undefined → returns new Date(0)
- *
- * Unrecognised shapes return new Date(0) (epoch) to stay consistent and predictable.
+ *   - null / undefined / anything else → returns new Date(0)
  */
-export function toDate(
-  value: Date | string | number | { seconds: number; nanoseconds: number } | null | undefined,
-): Date {
+export function toDate(value: unknown): Date {
   if (value === null || value === undefined) {
     return new Date(0);
   }
@@ -33,12 +33,14 @@ export function toDate(
   // Firestore Timestamp-shaped object
   if (
     typeof value === "object" &&
+    value !== null &&
     "seconds" in value &&
     "nanoseconds" in value &&
-    typeof value.seconds === "number" &&
-    typeof value.nanoseconds === "number"
+    typeof (value as { seconds: unknown }).seconds === "number" &&
+    typeof (value as { nanoseconds: unknown }).nanoseconds === "number"
   ) {
-    return new Date(value.seconds * 1000 + Math.floor(value.nanoseconds / 1_000_000));
+    const ts = value as { seconds: number; nanoseconds: number };
+    return new Date(ts.seconds * 1000 + Math.floor(ts.nanoseconds / 1_000_000));
   }
 
   return new Date(0);

@@ -23,7 +23,7 @@ describe("CnCard title", () => {
     const { container } = render(CnCard, { props: { title: "Hello World" } });
     const h4 = container.querySelector("h4.title");
     expect(h4).not.toBeNull();
-    expect(h4!.textContent).toContain("Hello World");
+    expect(h4?.textContent).toContain("Hello World");
   });
 
   it("wraps title in a link when href is provided", () => {
@@ -32,8 +32,8 @@ describe("CnCard title", () => {
     });
     const link = container.querySelector("h4.title a");
     expect(link).not.toBeNull();
-    expect(link!.getAttribute("href")).toBe("/session/1");
-    expect(link!.textContent).toContain("Linked");
+    expect(link?.getAttribute("href")).toBe("/session/1");
+    expect(link?.textContent).toContain("Linked");
   });
 
   it("does not render a link when href is absent", () => {
@@ -49,7 +49,7 @@ describe("CnCard description", () => {
     });
     const p = container.querySelector("p.description");
     expect(p).not.toBeNull();
-    expect(p!.textContent).toBe("A short blurb");
+    expect(p?.textContent).toBe("A short blurb");
   });
 
   it("does not render description <p> when empty", () => {
@@ -82,7 +82,7 @@ describe("CnCard indicators (triangular corner)", () => {
       props: { title: "Test", notify: true },
     });
     const card = container.querySelector(".cn-card");
-    expect(card!.classList.contains("has-notify")).toBe(true);
+    expect(card?.classList.contains("has-notify")).toBe(true);
   });
 
   it("adds has-alert class when alert=true", () => {
@@ -90,7 +90,7 @@ describe("CnCard indicators (triangular corner)", () => {
       props: { title: "Test", alert: true },
     });
     const card = container.querySelector(".cn-card");
-    expect(card!.classList.contains("has-alert")).toBe(true);
+    expect(card?.classList.contains("has-alert")).toBe(true);
   });
 
   it("supports both notify and alert simultaneously", () => {
@@ -98,15 +98,15 @@ describe("CnCard indicators (triangular corner)", () => {
       props: { title: "Test", notify: true, alert: true },
     });
     const card = container.querySelector(".cn-card");
-    expect(card!.classList.contains("has-notify")).toBe(true);
-    expect(card!.classList.contains("has-alert")).toBe(true);
+    expect(card?.classList.contains("has-notify")).toBe(true);
+    expect(card?.classList.contains("has-alert")).toBe(true);
   });
 
   it("has no indicator classes by default", () => {
     const { container } = render(CnCard, { props: { title: "Test" } });
     const card = container.querySelector(".cn-card");
-    expect(card!.classList.contains("has-notify")).toBe(false);
-    expect(card!.classList.contains("has-alert")).toBe(false);
+    expect(card?.classList.contains("has-notify")).toBe(false);
+    expect(card?.classList.contains("has-alert")).toBe(false);
   });
 });
 
@@ -134,10 +134,10 @@ describe("CnCard cover", () => {
     });
     const link = container.querySelector(".cover a");
     expect(link).not.toBeNull();
-    expect(link!.getAttribute("href")).toBe("/page");
-    expect(link!.getAttribute("tabindex")).toBe("-1");
+    expect(link?.getAttribute("href")).toBe("/page");
+    expect(link?.getAttribute("tabindex")).toBe("-1");
     // The link should contain the image
-    expect(link!.querySelector("img")).not.toBeNull();
+    expect(link?.querySelector("img")).not.toBeNull();
   });
 
   it("does not wrap cover in a link when href is absent", () => {
@@ -181,7 +181,7 @@ describe("CnCard noun icon", () => {
     });
     const link = container.querySelector("h4.title a");
     expect(link).not.toBeNull();
-    expect(link!.querySelector(".cn-icon")).not.toBeNull();
+    expect(link?.querySelector(".cn-icon")).not.toBeNull();
   });
 
   it("renders icon in cover-noun position when both noun and cover are set", () => {

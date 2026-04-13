@@ -86,6 +86,25 @@ ThreadSchema extends ContentEntrySchema
   author: string (derived from owners[0])
 ```
 
+##### The `"-"` owner sentinel
+
+`createThread()` populates `owners: ["-"]` (and therefore `author: "-"`) when no
+owner is supplied. This is not a random placeholder — it is a known v17 pattern
+with specific downstream semantics:
+
+- When the UI fetches the profile for a thread's author and hits `"-"`, the
+  fetch fails gracefully and the thread is rendered as authored by "anonymous."
+- The same path handles genuinely deleted users — a stale `uid` that no longer
+  has a profile doc resolves to the same anonymous render.
+- An empty string (`""`) would *also* fail the fetch, but would do so as an
+  error condition rather than a recognized sentinel; callers and UI code treat
+  `""` as a missing-owner bug, not as an anonymous author.
+
+The contract: `"-"` is the only permitted placeholder value for an owner slot
+in a Thread constructed by the factory. Write-path code must replace it with a
+real `uid` before persisting to Firestore, or accept that the thread will
+surface as anonymous everywhere the owner profile is looked up.
+
 #### Reply Schema (v20)
 
 Extends `ContentEntrySchema` from `@pelilauta/models`:
@@ -93,10 +112,15 @@ Extends `ContentEntrySchema` from `@pelilauta/models`:
 ```
 ReplySchema extends ContentEntrySchema
   images: ImageArray (optional)
-  quoteRef: string (optional)
+  quoteref: string (optional)       ← note lowercase — v17 storage name, preserved verbatim
   threadKey: string (required)
   owners: string[] (min 1)
 ```
+
+Reply's `quoteref` field intentionally diverges in casing from Thread's
+`quoteRef`. The inconsistency predates v20 and is inherited from pelilauta-17's
+on-disk storage shape; per `feedback_no_breaking_data_contracts`, the field
+name is preserved verbatim rather than normalised.
 
 #### Channel Schema (v20)
 
@@ -123,6 +147,20 @@ ChannelsSchema = z.array(ChannelSchema)
 - `CHANNELS_META_REF = 'meta/threads'`
 - `CHANNEL_DEFAULT_SLUG = 'yleinen'`
 - `CHANNEL_DEFAULT_ICON = 'discussion'`
+
+**Constants** (`packages/threads/src/schemas/ThreadSchema.ts`):
+- `THREADS_COLLECTION_NAME = 'stream'` — Firestore collection root for thread
+  documents. v17 name preserved verbatim (the collection is named `stream`, not
+  `threads`, for historical reasons).
+
+**Constants** (`packages/threads/src/schemas/ReplySchema.ts`):
+- `REPLIES_COLLECTION = 'comments'` — Firestore sub-collection name under each
+  thread document (`stream/{threadKey}/comments/{replyKey}`). v17 name
+  preserved verbatim — the sub-collection is `comments`, not `replies`.
+
+The inconsistent suffixes (`_COLLECTION_NAME` vs `_COLLECTION`) are also
+inherited from v17 and preserved to keep `grep` parity with v17 source during
+the migration. Harmonizing them is out of scope for v20.
 
 #### Accessor Surfaces
 
@@ -153,6 +191,7 @@ The host (`app/pelilauta/src/i18n.ts`) imports from `@pelilauta/threads/i18n` an
 ### Constraints
 
 - **No breaking data contract changes.** Firestore document shapes from v17 (threads, replies, the `meta/threads` channels array) are preserved verbatim. v20 may add optional fields with `.default()` on schemas — never rename, retype, or restructure existing fields.
+- **Parse-behavior parity with v17's `parseX()` wrappers.** The v17 wrappers applied coalescings beyond what Zod's `.default()` catches — notably `||`-style falsy coalescing (`c.icon || 'discussion'` treats `""`, `null`, `0` as absent), unconditional `author` derivation from `owners[0]`, `new Date(0)` fallbacks for missing timestamps, and missing-required-field fallbacks (`title`/`channel` → `""`). v20 ports these into schema-level `z.preprocess` / `.transform` so that any document that parsed in v17 parses in v20. Deliberate divergences require an explicit spec note.
 - **The `server/` entry point is the only path that imports `@pelilauta/firebase/server`.** The `client/` entry point exclusively uses `@pelilauta/firebase/client`. Mixing breaks SSR/CSR isolation.
 - **Page-level Astro components live in `app/pelilauta`.** This package owns schemas, accessors, and reusable components — not routes.
 - **Schemas extend `ContentEntrySchema` / `EntrySchema` from `@pelilauta/models`.** Field shapes are not duplicated.

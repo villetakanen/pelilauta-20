@@ -9,7 +9,7 @@
     "./i18n": "./src/i18n/index.ts"
   },
   "scripts": {
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
     "@pelilauta/firebase": "workspace:*",

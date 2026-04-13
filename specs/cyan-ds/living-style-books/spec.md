@@ -36,9 +36,8 @@ The Living Style Book (`app/cyan-ds`) is the source of truth for the Cyan Design
 
 ### Multipart Books
 
-By default (`multipart: false`), a Book page is treated as a single continuous prose document:
-- Book renders a `<header>` with the page H1 and optional description.
-- The MDX slot is wrapped in an `<article>` whose width is capped for readability (aligned with the `.cn-content-prose` contract — `min(67ch, 100%)` centered).
+- By default, Book renders a `<header>` containing the page H1 and optional description.
+- For prose documents (`multipart: false`), the header and MDX slot are wrapped in an `<article>` whose width is capped for readability (aligned with the `.cn-content-prose` contract — `min(67ch, 100%)` centered).
 - MDX authors should begin body content with `## Heading` (H2); H1 is owned by Book, not the content.
 
 When `multipart: true`:
@@ -80,7 +79,7 @@ When `multipart: true`:
 Given a documentation entry without a multipart flag
 When the entry is rendered
 Then the MDX content is wrapped in an <article> whose effective width is capped at the prose contract (67ch centered)
-  And the Book-owned <h1> appears once above the article
+  And the Book-owned <h1> appears once inside the article
 ```
 - **Playwright E2E Test:** `app/cyan-ds/e2e/ds.spec.ts`
 

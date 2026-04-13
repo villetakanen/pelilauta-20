@@ -1,7 +1,10 @@
 // Client-only barrel for @pelilauta/threads.
 //
-// Stage 1 scaffold — empty until write accessors, onSnapshot listeners, and
-// interactive components land in Stage 3. Re-exports here must not be imported
-// during SSR (they touch the browser Firebase SDK).
+// Schemas are re-exported from both barrels (spec decision: type/schema
+// imports should track the consumer's execution context, not be forced
+// through a second import path). Client-specific behaviour (writes,
+// listeners, interactive components) lands here in the Writes stage.
 
-export {};
+export * from "../schemas/ChannelSchema";
+export * from "../schemas/ReplySchema";
+export * from "../schemas/ThreadSchema";

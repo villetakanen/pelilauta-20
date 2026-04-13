@@ -3,7 +3,7 @@
 ## Blueprint
 
 ### Context
-The App Bar is a structural component that provides top-level navigation, context (noun icon), titles, and actions. It supports various layout modes (e.g., sticky and modal) and includes responsive title rendering for different viewport sizes.
+The App Bar is a structural component that provides top-level navigation, context (noun icon), titles, and actions. The title represents the current "App" or "Chapter" context (e.g., "Mekanismi" or "Cyan Design System") and is rendered as an `<h3>` to maintain a single `<h1>` per page (owned by the page content). It supports various layout modes (e.g., sticky and modal) and includes responsive title rendering for different viewport sizes.
 
 ### Elevation
 - **Default:** Elevation 0.

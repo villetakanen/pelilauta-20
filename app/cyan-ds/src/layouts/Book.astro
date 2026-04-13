@@ -39,18 +39,21 @@ const appTitle = formattedCategory ? `Cyan / ${formattedCategory}` : "Cyan Desig
 <Page title={title} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
   <DocsTray slot="tray" />
 
-  <header class="cn-content-prose">
-    <h1>{title}</h1>
-    {description && <p>{description}</p>}
-  </header>
-
   {
     multipart ? (
+      <header class="cn-content-prose">
+        <h1>{title}</h1>
+        {description && <p>{description}</p>}
+      </header>
       <slot />
     ) : (
-      <section class="cn-content-prose">
+      <article class="cn-content-prose">
+        <header>
+          <h1>{title}</h1>
+          {description && <p>{description}</p>}
+        </header>
         <slot />
-      </section>
+      </article>
     )
   }
 </Page>

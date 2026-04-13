@@ -9,7 +9,10 @@ test.describe("Content Grids", () => {
   test("Prose: Centering and 67ch readability", async ({ page }) => {
     await page.setViewportSize({ width: 1200, height: 800 });
 
-    const section = page.locator(".cn-content-prose").first();
+    const section = page
+      .locator(".cn-content-prose")
+      .filter({ has: page.locator("h3") })
+      .first();
     const child = section.locator("h3").first();
 
     const childWidth = await child.evaluate((node) => node.getBoundingClientRect().width);
@@ -94,7 +97,10 @@ test.describe("Content Grids", () => {
   test("Utility: Full-width override", async ({ page }) => {
     await page.setViewportSize({ width: 1000, height: 800 });
 
-    const section = page.locator(".cn-content-prose").nth(1); // The one with .cn-grid-full
+    const section = page
+      .locator(".cn-content-prose")
+      .filter({ has: page.locator(".cn-grid-full") })
+      .first();
     const fullWidthDiv = section.locator(".cn-grid-full");
 
     const sectionBox = await section.boundingBox();

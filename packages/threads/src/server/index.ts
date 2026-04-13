@@ -1,8 +1,9 @@
 // SSR-safe barrel for @pelilauta/threads.
 //
-// Stage 1 scaffold — empty until schemas + read accessors land in Stage 2.
-// Re-exports here must stay SSR-safe: only types, schemas, and read-only
-// accessors that live under `../schemas/` and `../api/`. Must not import
-// from `../client/` or any `firebase/*` (non-admin) module.
+// Re-exports schemas, types, and (once they land in the Read-and-Render stage)
+// read-only accessors. Must not import from `../client/` or any `firebase/*`
+// (non-admin) module.
 
-export {};
+export * from "../schemas/ChannelSchema";
+export * from "../schemas/ReplySchema";
+export * from "../schemas/ThreadSchema";
