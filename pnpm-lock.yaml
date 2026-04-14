@@ -60,6 +60,9 @@ importers:
       '@pelilauta/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@pelilauta/threads':
+        specifier: workspace:*
+        version: link:../../packages/threads
       astro:
         specifier: ^5.7.0
         version: 5.18.1(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.1)(typescript@6.0.2)

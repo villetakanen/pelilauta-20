@@ -5,15 +5,17 @@
 // they hang in the registry. See specs/pelilauta/i18n/spec.md.
 
 import { createT, type Locales } from "@pelilauta/i18n";
+import { en as threadsEn, fi as threadsFi } from "@pelilauta/threads/i18n";
 import { en as appEn, fi as appFi } from "./locales/app/index.js";
 
 const locales: Locales = {
   fi: {
     app: appFi,
-    // threads: threadsFi, sites: sitesFi, … — added as feature packages land.
+    threads: threadsFi,
   },
   en: {
     app: appEn,
+    threads: threadsEn,
   },
 };
 
