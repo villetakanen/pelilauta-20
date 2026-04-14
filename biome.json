@@ -20,7 +20,8 @@
       "!**/dist",
       "!**/.astro",
       "!**/playwright-report",
-      "!**/.tmp"
+      "!**/.tmp",
+      "!**/.netlify"
     ]
   },
   "overrides": [

@@ -7,6 +7,15 @@
 // Read lazily via getters — importing this module must not require any env
 // var to be set. Missing vars fail loudly when an accessor is actually called.
 
+import { logError } from "@pelilauta/utils/log";
+import { config as loadDotenv } from "dotenv";
+
+// Vite populates import.meta.env from .env files for PUBLIC_ vars, but
+// process.env only gets vars from the shell/host. In dev, SECRET_ vars
+// live in .env.development — load them into process.env explicitly.
+// In production (Netlify), env vars are set on the host and this is a no-op.
+loadDotenv({ path: ".env.development" });
+
 export const publicConfig = {
   get apiKey() {
     return import.meta.env.PUBLIC_apiKey;
@@ -34,9 +43,29 @@ export const publicConfig = {
   },
 } as const;
 
+// Required SECRET_ env vars for the service account. Read from process.env
+// so they are NEVER inlined into client bundles via Vite's import.meta.env.
+const SECRET_KEYS = [
+  "SECRET_private_key_id",
+  "SECRET_private_key",
+  "SECRET_client_email",
+  "SECRET_client_id",
+  "SECRET_auth_uri",
+  "SECRET_token_uri",
+  "SECRET_auth_provider_x509_cert_url",
+  "SECRET_client_x509_cert_url",
+  "SECRET_universe_domain",
+] as const;
+
 export function buildServiceAccount() {
-  // SECRET_ vars use process.env — they must NEVER be exposed via Vite's
-  // import.meta.env / envPrefix, which would inline them into client bundles.
+  const missing = SECRET_KEYS.filter((k) => !process.env[k]);
+  if (missing.length > 0) {
+    logError(
+      "buildServiceAccount: missing SECRET_ env vars — Firebase Admin will fail to init:",
+      missing,
+    );
+  }
+
   return {
     type: "service_account",
     project_id: import.meta.env.PUBLIC_projectId,

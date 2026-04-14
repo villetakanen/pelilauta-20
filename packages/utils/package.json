@@ -1,0 +1,17 @@
+{
+  "name": "@pelilauta/utils",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./log": "./src/log.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}

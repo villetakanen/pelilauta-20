@@ -18,40 +18,44 @@ import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
 
     <div>
       <h2>Blog-roll</h2>
-      <CnCard
-        title="Why West Marches Works"
-        href="/blog/why-west-marches-works"
-        description="A syndicated post from roleplayingtips.com on emergent storytelling in open-world campaigns."
-      />
-      <CnCard
-        title="Designing Encounter Balance"
-        href="/blog/designing-encounter-balance"
-        description="From theangrygm.com — a hard look at CR math and why it falls apart in actual play."
-      />
-      <CnCard
-        title="Session Zero Checklist 2026"
-        href="/blog/session-zero-checklist"
-        description="Refreshed starter kit from dmsguild-community for kicking off a new campaign without rework."
-      />
+      <div class="cn-card-grid">
+        <CnCard
+          title="Why West Marches Works"
+          href="/blog/why-west-marches-works"
+          description="A syndicated post from roleplayingtips.com on emergent storytelling in open-world campaigns."
+        />
+        <CnCard
+          title="Designing Encounter Balance"
+          href="/blog/designing-encounter-balance"
+          description="From theangrygm.com — a hard look at CR math and why it falls apart in actual play."
+        />
+        <CnCard
+          title="Session Zero Checklist 2026"
+          href="/blog/session-zero-checklist"
+          description="Refreshed starter kit from dmsguild-community for kicking off a new campaign without rework."
+        />
+      </div>
     </div>
 
     <div>
       <h2>Latest sites</h2>
-      <CnCard
-        title="Ebon Vale Chronicles"
-        href="/sites/ebon-vale"
-        description="A Forgotten Realms homebrew wiki updated this week with three new factions."
-      />
-      <CnCard
-        title="Kiven Aavat"
-        href="/sites/kiven-aavat"
-        description="Finnish-language Mothership campaign site with ship schematics and crew manifests."
-      />
-      <CnCard
-        title="The Spire Campaign"
-        href="/sites/the-spire"
-        description="Session logs and NPC dossiers for an ongoing Spire: The City Must Fall campaign."
-      />
+      <div class="cn-card-grid">
+        <CnCard
+          title="Ebon Vale Chronicles"
+          href="/sites/ebon-vale"
+          description="A Forgotten Realms homebrew wiki updated this week with three new factions."
+        />
+        <CnCard
+          title="Kiven Aavat"
+          href="/sites/kiven-aavat"
+          description="Finnish-language Mothership campaign site with ship schematics and crew manifests."
+        />
+        <CnCard
+          title="The Spire Campaign"
+          href="/sites/the-spire"
+          description="Session logs and NPC dossiers for an ongoing Spire: The City Must Fall campaign."
+        />
+      </div>
     </div>
   </section>
 </Page>

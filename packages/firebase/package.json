@@ -12,6 +12,8 @@
     "smoke": "RUN_SMOKE=1 vitest run --mode development src/server/smoke.test.ts"
   },
   "dependencies": {
+    "@pelilauta/utils": "workspace:*",
+    "dotenv": "^17.4.1",
     "firebase": "^11.0.0",
     "firebase-admin": "^13.0.0"
   },

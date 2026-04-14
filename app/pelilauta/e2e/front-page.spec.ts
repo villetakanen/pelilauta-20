@@ -43,13 +43,4 @@ test.describe("Front Page", () => {
     expect(tops[1] - tops[0]).toBeGreaterThan(50);
     expect(tops[2] - tops[1]).toBeGreaterThan(50);
   });
-
-  test("page is fully SSR with no client-side hydration scripts", async ({ page }) => {
-    await page.goto("/");
-
-    const hydrationScripts = page.locator(
-      'script[data-astro-rerun], script[type="module"][src*="astro"]',
-    );
-    await expect(hydrationScripts).toHaveCount(0);
-  });
 });

@@ -66,6 +66,9 @@ importers:
       '@pelilauta/threads':
         specifier: workspace:*
         version: link:../../packages/threads
+      '@pelilauta/utils':
+        specifier: workspace:*
+        version: link:../../packages/utils
       astro:
         specifier: ^6.1.5
         version: 6.1.5(@netlify/blobs@10.7.4)(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.1)(typescript@6.0.2)(yaml@2.8.3)
@@ -119,6 +122,12 @@ importers:
 
   packages/firebase:
     dependencies:
+      '@pelilauta/utils':
+        specifier: workspace:*
+        version: link:../utils
+      dotenv:
+        specifier: ^17.4.1
+        version: 17.4.1
       firebase:
         specifier: ^11.0.0
         version: 11.10.0
@@ -180,6 +189,16 @@ importers:
       svelte:
         specifier: ^5.55.3
         version: 5.55.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
+
+  packages/utils:
+    dependencies:
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
@@ -2902,6 +2921,10 @@ packages:
 
   dotenv@16.6.1:
     resolution: {integrity: sha512-uBq4egWHTcTt33a72vpSG0z3HnPuIl6NqYcTrKEg2azoEyl2hpW0zqlxysq2pK9HlDIHyHyakeYaYnSAwd8bow==}
+    engines: {node: '>=12'}
+
+  dotenv@17.4.1:
+    resolution: {integrity: sha512-k8DaKGP6r1G30Lx8V4+pCsLzKr8vLmV2paqEj1Y55GdAgJuIqpRp5FfajGF8KtwMxCz9qJc6wUIJnm053d/WCw==}
     engines: {node: '>=12'}
 
   dset@3.1.4:
@@ -8867,6 +8890,8 @@ snapshots:
       type-fest: 4.41.0
 
   dotenv@16.6.1: {}
+
+  dotenv@17.4.1: {}
 
   dset@3.1.4: {}
 
