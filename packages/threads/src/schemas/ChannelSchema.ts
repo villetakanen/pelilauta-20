@@ -13,9 +13,8 @@ export const CHANNELS_META_REF = "meta/threads";
 export const CHANNEL_DEFAULT_SLUG = "yleinen";
 export const CHANNEL_DEFAULT_ICON = "discussion";
 
-// Inline latestThread / latestReply snapshot shape. The spec flags
-// EntryMetadataSchema as a deferred extraction — if a second consumer
-// appears, lift this out. See review note for step 3.
+// Inline latestThread / latestReply snapshot shape. If a second consumer
+// appears, lift this out into @pelilauta/models as EntryMetadataSchema.
 const ChannelSnapshotSchema = z.object({
   key: z.string().default(""),
   createTime: z.number().default(0),

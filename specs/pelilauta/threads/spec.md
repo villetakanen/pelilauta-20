@@ -170,6 +170,8 @@ the migration. Harmonizing them is out of scope for v20.
 - `getReplies(threadKey: string): Promise<Reply[]>`
 - `getChannels(): Promise<Channel[]>` — reads the `meta/threads` doc, parses `topics` through `ChannelsSchema`, returns the array. Module-level cached; cache invalidated on channel writes.
 
+**Error behavior:** Read-only accessors (`getThreads`, `getThread`, `getReplies`, `getChannels`) propagate errors to the caller — Firestore network/permission failures and Zod parse failures are not caught internally. Callers (e.g., `TopThreadsStream.astro`) are responsible for try/catch and rendering error states. This is a deliberate divergence from v17, which returned empty results on error; v20 prefers surfacing failures so callers can distinguish "no data" from "fetch broken."
+
 #### i18n
 
 The `./i18n` sub-export ships only static locale data — no runtime, no side effects. Initial owned key set:

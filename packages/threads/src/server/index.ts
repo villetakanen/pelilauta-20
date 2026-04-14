@@ -4,6 +4,7 @@
 // read-only accessors. Must not import from `../client/` or any `firebase/*`
 // (non-admin) module.
 
+export { clearChannelsCache, getChannels } from "../api/getChannels";
 export * from "../schemas/ChannelSchema";
 export * from "../schemas/ReplySchema";
 export * from "../schemas/ThreadSchema";
