@@ -174,11 +174,11 @@ the migration. Harmonizing them is out of scope for v20.
 
 #### i18n
 
-The `./i18n` sub-export ships only static locale data — no runtime, no side effects. Initial owned key set:
+The `./i18n` sub-export ships only static locale data — no runtime, no side effects. Threads-owned key set:
 
 - `threads:card.inChannel` — label preceding a channel link on a thread card.
-- `threads:frontpage.showMore` — "show more" link text on front-page streams.
-- `threads:frontpage.error.fetchFailed` — error block text on front-page streams.
+
+Front-page "show more" and error strings are app-level concerns, owned by the host (`pelilauta:action.showMore`, `pelilauta:error.fetch`), not by the threads package.
 
 The host (`app/pelilauta/src/i18n.ts`) imports from `@pelilauta/threads/i18n` and assigns the trees to the `threads` namespace. See [`../i18n/spec.md`](../i18n/spec.md) for the engine contract and host composition rules.
 

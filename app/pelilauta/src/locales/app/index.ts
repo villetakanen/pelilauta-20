@@ -4,6 +4,20 @@
 
 import type { NestedTranslation } from "@pelilauta/i18n";
 
-export const fi: NestedTranslation = {};
+export const fi: NestedTranslation = {
+  action: {
+    showMore: "Näytä lisää",
+  },
+  error: {
+    fetch: "Lataaminen epäonnistui",
+  },
+};
 
-export const en: NestedTranslation = {};
+export const en: NestedTranslation = {
+  action: {
+    showMore: "Show more",
+  },
+  error: {
+    fetch: "Failed to load",
+  },
+};
