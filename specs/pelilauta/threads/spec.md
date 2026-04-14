@@ -43,7 +43,7 @@ packages/threads/
     server/                  → SSR-safe re-exports (schemas, types, read-only fetches)
     client/                  → Client-only exports (writes, listeners, interactive UI)
     components/              → Svelte 5 / Astro UI components
-      ThreadCard.svelte      → preview card used in lists/streams (built on cn-card)
+      ThreadCard.svelte      → preview card used in lists/streams (built on cn-card, plain-text snippet truncated to 220 characters)
       ThreadDetail.svelte    → full thread view with metadata
       ThreadEditor.svelte    → create/edit form (title, content, channel, tags, files)
       DiscussionSection.svelte → reply list with real-time Firestore listener
@@ -230,7 +230,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
-- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card`
+- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card` with a plain-text snippet (max 220 characters, truncated with ellipsis at word boundary)
 - [ ] `server/` entry still has zero client SDK imports now that it carries real content
 - [ ] Vitest scenarios below that reference schemas, read accessors, `ThreadCard`, and i18n pass
 - [ ] `passWithNoTests` removed from `vitest.config.ts`

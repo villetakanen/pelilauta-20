@@ -1,13 +1,19 @@
 import { resolve } from "node:path";
+import { svelte } from "@sveltejs/vite-plugin-svelte";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  // Astro-style env prefixes — mirror of packages/firebase's config so real
-  // Firestore smokes (once Stage 2 accessors land) resolve the same env tree
-  // as `astro dev`. Env files live at the repo root.
+  plugins: [svelte({ hot: false })],
   envPrefix: ["PUBLIC_", "SECRET_"],
   envDir: resolve(__dirname, "../.."),
+  resolve: {
+    alias: {
+      "@cyan": resolve(__dirname, "../cyan/src"),
+    },
+    conditions: ["browser"],
+  },
   test: {
     include: ["src/**/*.test.ts"],
+    environment: "jsdom",
   },
 });
