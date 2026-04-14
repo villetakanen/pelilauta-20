@@ -1,6 +1,7 @@
 ---
 import CnCard from "@cyan/components/CnCard.svelte";
 import Page from "@cyan/layouts/Page.astro";
+import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
 ---
 
 <Page title="Pelilauta 20" layout="view">
@@ -13,31 +14,7 @@ import Page from "@cyan/layouts/Page.astro";
 
   <section class="cn-content-triad">
 
-    <div>
-      <h2>Threads</h2>
-      <CnCard
-        title="Mystery in the Fog"
-        href="/threads/1"
-        description="A mystery in the fog surrounding the ancient ruins. Our party faces an impossible choice at the gates of Mirkwood."
-        notify
-      />
-      <CnCard
-        title="Campaign Kickoff: Icewind Dale"
-        href="/threads/2"
-        description="Looking for 3-4 players for a long-term Icewind Dale campaign. Session zero scheduled for next weekend."
-      />
-      <CnCard
-        title="House Rules Discussion"
-        href="/threads/3"
-        description="Sharing our table's homebrew critical hit table — has made combat much more cinematic and fun."
-      />
-      <CnCard
-        title="One-Shot: The Haunted Mill"
-        href="/threads/4"
-        description="Three-hour horror one-shot using Call of Cthulhu rules. All experience levels welcome."
-        notify
-      />
-    </div>
+    <TopThreadsStream />
 
     <div>
       <h2>Blog-roll</h2>

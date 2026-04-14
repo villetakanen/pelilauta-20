@@ -11,10 +11,12 @@ import { en as appEn, fi as appFi } from "./locales/app/index.js";
 const locales: Locales = {
   fi: {
     app: appFi,
+    pelilauta: appFi,
     threads: threadsFi,
   },
   en: {
     app: appEn,
+    pelilauta: appEn,
     threads: threadsEn,
   },
 };

@@ -33,8 +33,9 @@ The Top Threads Stream is the medium (primary) region of the front-page triad. I
   - `Thread` — from `@pelilauta/threads`, extends `ContentEntry` from `@pelilauta/models`.
   - `Channel` — from `@pelilauta/threads`. **Not an Entry**; channels are stored as an array on a single Firestore document (v17 contract preserved unchanged in v20). Fields: `slug`, `name`, `description`, `icon` (default `"discussion"`), `category`, `threadCount`, plus optional denormalised `latestThread` / `latestReply` snapshots.
 - **i18n:**
-  - Strings used: `threads:frontpage.showMore`, `threads:frontpage.error.fetchFailed`, `threads:card.inChannel` (consumed by `ThreadCard`).
-  - Owned by `@pelilauta/threads/i18n` and assigned to the `threads` namespace in the host composition seam (see [`../../i18n/spec.md`](../../i18n/spec.md)).
+  - Host-owned app keys: `pelilauta:action.showMore` (show-more link), `pelilauta:error.fetch` (error block). Defined in `app/pelilauta/src/locales/app/`.
+  - Threads-owned key: `threads:card.inChannel` (consumed by `ThreadCard`). Defined in `@pelilauta/threads/i18n`.
+  - All resolved through the host-bound `t` from `app/pelilauta/src/i18n.ts`.
 - **Content lang:** Each rendered `ThreadCard` stamps `lang={thread.locale}` on its root element per the i18n spec's DOM lang attribution rule. `TopThreadsStream` itself emits no `lang` attribute — it's a chrome container.
 - **Constraints:**
   - **Pure SSR.** No `client:` directives on the stream itself. `ThreadCard` may have its own islands for reactions/subscriptions but the list and links render server-side.
@@ -54,7 +55,7 @@ The Top Threads Stream is the medium (primary) region of the front-page triad. I
 - [ ] Each thread renders as a `ThreadCard` with title, snippet, channel context, and a link to `/threads/{key}`.
 - [ ] Each rendered card has `lang={thread.locale}` on its root element.
 - [ ] A "show more" link to `/channels` is always present, regardless of result count or error state.
-- [ ] On data-fetch failure, a localized error block (`threads:frontpage.error.fetchFailed`) replaces the list; the rest of the front page renders normally.
+- [ ] On data-fetch failure, a localized error block (`pelilauta:error.fetch`) replaces the list; the rest of the front page renders normally.
 - [ ] Component contains no `<script>` tags, no `client:` directives, no `<style>` blocks, no inline styles, no utility/local classes.
 - [ ] No use of `fetch(Astro.url.origin + ...)` — data is loaded via the shared internal accessor module.
 - [ ] The shared accessor module is also the source the public HTTP API endpoints (`/api/threads.json`, `/api/meta/channels.json`) call — no duplicate query logic.

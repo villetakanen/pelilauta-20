@@ -1,0 +1,40 @@
+---
+// TopThreadsStream — data-bound widget for the front-page Threads region.
+//
+// Pure SSR: no client: directives, no <style>, no inline styles.
+// Errors are isolated — a Firestore failure renders the error block, not a 5xx.
+// See specs/pelilauta/front-page/top-threads-stream/spec.md.
+
+import { ThreadCard } from "@pelilauta/threads/components";
+import type { Channel, Thread } from "@pelilauta/threads/server";
+import { getChannels, getThreads } from "@pelilauta/threads/server";
+import { t } from "../../i18n";
+
+let threads: Thread[] = [];
+let channels: Channel[] = [];
+let error = false;
+
+try {
+  threads = await getThreads(5);
+  channels = await getChannels();
+} catch {
+  error = true;
+}
+
+function channelIcon(channelSlug: string): string | undefined {
+  const channel = channels.find((c) => c.slug === channelSlug);
+  return channel?.icon;
+}
+---
+
+<div>
+  <h2>Threads</h2>
+
+  {error && <p>{t("pelilauta:error.fetch")}</p>}
+
+  {!error && threads.map((thread) => (
+    <ThreadCard thread={thread} noun={channelIcon(thread.channel)} />
+  ))}
+
+  <p><a href="/channels">{t("pelilauta:action.showMore")}</a></p>
+</div>

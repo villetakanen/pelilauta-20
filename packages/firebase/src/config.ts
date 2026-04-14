@@ -35,18 +35,20 @@ export const publicConfig = {
 } as const;
 
 export function buildServiceAccount() {
+  // SECRET_ vars use process.env — they must NEVER be exposed via Vite's
+  // import.meta.env / envPrefix, which would inline them into client bundles.
   return {
     type: "service_account",
     project_id: import.meta.env.PUBLIC_projectId,
-    private_key_id: import.meta.env.SECRET_private_key_id,
-    private_key: import.meta.env.SECRET_private_key,
-    client_email: import.meta.env.SECRET_client_email,
-    client_id: import.meta.env.SECRET_client_id,
-    auth_uri: import.meta.env.SECRET_auth_uri,
-    token_uri: import.meta.env.SECRET_token_uri,
-    auth_provider_x509_cert_url: import.meta.env.SECRET_auth_provider_x509_cert_url,
-    client_x509_cert_url: import.meta.env.SECRET_client_x509_cert_url,
-    universe_domain: import.meta.env.SECRET_universe_domain,
+    private_key_id: process.env.SECRET_private_key_id,
+    private_key: process.env.SECRET_private_key,
+    client_email: process.env.SECRET_client_email,
+    client_id: process.env.SECRET_client_id,
+    auth_uri: process.env.SECRET_auth_uri,
+    token_uri: process.env.SECRET_token_uri,
+    auth_provider_x509_cert_url: process.env.SECRET_auth_provider_x509_cert_url,
+    client_x509_cert_url: process.env.SECRET_client_x509_cert_url,
+    universe_domain: process.env.SECRET_universe_domain,
   };
 }
 
