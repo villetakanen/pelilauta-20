@@ -61,13 +61,65 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 
 #### Buttons & Interactive
 
+> **Namespace note [2026-04-17]:** The canonical namespace in v20 is
+> `--cn-*`, not `--color-*` (see CLAUDE.md; the codebase at
+> `packages/cyan/src/tokens/semantic.css` already uses `--cn-*`). The
+> `--color-*` entries in the tables above are stale and should be renamed
+> in a dedicated pass. The Button Foregrounds, Interaction Wash, Motion,
+> and Button Shadow sub-sections below are authored in the correct
+> `--cn-*` form.
+
+**Container surfaces (existing):**
+
 | Token | Light | Dark | Role |
 |---|---|---|---|
-| `--color-button` | surface-50 | surface-80 | Default button fill |
-| `--color-button-light` | primary-60 | primary-95 | Light variant |
-| `--color-button-accent` | primary-20 | primary-70 | Accent/emphasized |
-| `--color-button-cta` | error | error | Call-to-action (destructive) |
-| `--color-hover` | surface-50 @ 10% | surface-50 @ 20% | Hover overlay |
+| `--cn-button` | surface-50 | surface-80 | Default button fill |
+| `--cn-button-light` | primary-60 | primary-95 | Upper stop of the default gradient |
+| `--cn-button-accent` | primary-20 | primary-70 | Accent / emphasized variant |
+| `--cn-button-cta` | error-40 | error-40 | Call-to-action fill (destructive) |
+
+**Button foregrounds (to be added):** every `--cn-button*` container is
+paired with a foreground token that's been picked for AA contrast on that
+container. The `.text` variant sits on surface rather than on a button
+fill, so it continues to use `--cn-on-surface`.
+
+| Token | Light | Dark | Pairs with | Role |
+|---|---|---|---|---|
+| `--cn-on-button` | surface-100 (white) | surface-100 (white) | `--cn-button`, `--cn-button-light`, `--cn-button-accent`, `.secondary` button | Label + icon color on the default gradient |
+| `--cn-on-button-cta` | surface-100 (white) | surface-100 (white) | `--cn-button-cta` | Label + icon color on the CTA fill |
+
+Exact chroma steps to be verified during implementation against contrast
+audits — the shape of the pairing (container ↔ on-container) is the
+contract; the step choice is tunable.
+
+**Interaction wash (hover / active):**
+
+| Token | Light | Dark | Role |
+|---|---|---|---|
+| `--cn-hover` (existing) | surface-50 @ 10% opacity | surface-50 @ 20% opacity | Hover overlay — composited over any interactive surface via a pseudo-element |
+| `--cn-active` (to be added) | surface-50 @ 20% opacity | surface-50 @ 30% opacity | Active/pressed overlay — one step darker than `--cn-hover`, same composition model |
+
+Interaction feedback is **additive overlay**, not `filter: brightness()`.
+Overlays preserve label/icon colors (which stay locked to their
+`--cn-on-*` token) and can be theme-tuned per mode.
+
+**Button shadow (to be added):**
+
+| Token | Value | Role |
+|---|---|---|
+| `--cn-shadow-button-hover` | alias of `--cn-shadow-elevation-2` | Hover/active shadow for buttons |
+
+Named separately from the raw elevation scale so theme authors can retune
+button elevation without touching every other elevated surface.
+
+**Motion (to be added):** shared by every interactive component, not
+button-specific — lives in the semantic layer so hover/active/focus
+transitions look consistent across the DS.
+
+| Token | Value | Role |
+|---|---|---|
+| `--cn-duration-ui` | `0.22s` | Default duration for interactive state transitions |
+| `--cn-easing-ui` | `ease-in-out` | Default easing curve for interactive state transitions |
 
 #### Borders
 
@@ -114,13 +166,16 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 - **Component-specific tokens should move out** — `--color-bubble`, `--color-reply-bubble`, `--cn-color-avatar-*` are DS component tokens (bubble, avatar). In v20, they belong in each component's own CSS with their own `light-dark()` derivations, not in the shared semantic layer.
 - **`--color-reaction-red` is replaced by `--chroma-love-{step}`** — the hardcoded hex moves to chroma as a proper tonal scale. The semantic layer references the appropriate step.
 
-### Anti-Patterns
+### Constraints
 
-- **Don't reference `--chroma-*` tokens directly in components** — always go through semantic tokens so theme switching works
-- **Don't add component-specific color tokens here** — this file is the shared semantic layer. Component colors belong in component CSS.
-- **Don't use hardcoded colors** — derive everything from chroma via `light-dark()` and `color-mix(in oklch)`
-- **Don't use `color-mix(in hsl)` or other non-OKLCH color spaces** — the system is OKLCH-native; mixing in HSL skews perceived brightness and breaks perceptual uniformity
-- **Don't duplicate chroma steps** — reference `--chroma-{accent}-{step}` tokens, don't redefine the hue values in the semantic layer
+- Components reference semantic tokens, not `--chroma-*` directly — theme
+  switching works only through the semantic layer.
+- This file holds shared semantic roles only; component-specific color
+  tokens live with their component CSS.
+- Every color value derives from the chroma palette via `light-dark()` or
+  `color-mix(in oklch)`. Chroma steps are referenced, not duplicated.
+- Color mixing uses OKLCH (`color-mix(in oklch, ...)`). The system is
+  OKLCH-native; perceptual uniformity across mixes depends on it.
 
 ## Contract
 
@@ -132,6 +187,10 @@ Exact steps TBD during implementation — the semantic layer picks the steps tha
 - [ ] No component-specific tokens (bubble, avatar, etc.) — only shared semantic roles
 - [ ] Functional colors (success, warning, error, info) defined with their accent hues and tints
 - [ ] No `-hsl` companion tokens
+- [ ] Every `--cn-button*` container token has a paired `--cn-on-button*` foreground token that passes WCAG AA against the container in both light and dark modes.
+- [ ] `--cn-active` is defined alongside `--cn-hover`, one step darker in each mode.
+- [ ] `--cn-shadow-button-hover`, `--cn-duration-ui`, and `--cn-easing-ui` are defined on `:root`.
+- [ ] No `filter: brightness()` appears anywhere in DS CSS — interactive feedback is overlay-based.
 
 ### Regression Guardrails
 
