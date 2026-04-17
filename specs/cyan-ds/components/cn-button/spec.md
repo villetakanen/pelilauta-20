@@ -35,9 +35,11 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
 - **API Contracts (CSS surface consumers may rely on):**
   - **Selectors:** `button`, `a.button` (base); `.text`, `.cta` (variants);
     `.secondary` (ancestor context).
-  - **Inner slot elements:** a single leading `<cn-icon>` or `<cn-loader>`
-    followed by a label; or a single icon/loader with no label (icon-only
-    button). No other layout assumptions.
+  - **Inner slot elements:** a single leading `.cn-icon` or `.cn-loader`
+    (rendered by the `CnIcon` / `CnLoader` Svelte components —
+    class-tagged `<span>` markup, not custom-element tags) followed by a
+    label; or a single icon/loader with no label (icon-only button). No
+    other layout assumptions.
   - **States:** `:hover`, `:active`, `:disabled`.
 - **Dependencies:**
   - Tokens from `packages/cyan/src/tokens/units.css`: `--cn-grid`,
@@ -66,12 +68,15 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
     (aliased to `--cn-font-size-text-small`), `--cn-font-weight-button`
     (500), `--cn-letter-spacing-button`, `--cn-line-height-button`
     (unitless — not the same as the geometric `--cn-button-size` height).
-  - `<cn-icon>` (custom element) for icon affordances.
-  - `<cn-loader>` (custom element, see [cn-loader spec](../cn-loader/spec.md))
-    — the canonical loading-state pattern is a disabled button containing a
-    `<cn-loader>` (optionally with a label span), not a static icon.
-    `packages/cyan/src/core/buttons.css` special-cases
-    `cn-loader:first-child:not(:only-child)` and `cn-loader:only-child`
+  - `CnIcon` Svelte component (see [cn-icon spec](../cn-icon/spec.md))
+    — produces `<span class="cn-icon">` in the light DOM. Buttons target
+    this by class (`.cn-icon`), not by element tag.
+  - `CnLoader` Svelte component (see [cn-loader spec](../cn-loader/spec.md))
+    — produces `<span class="cn-loader">` in the light DOM. The canonical
+    loading-state pattern is a disabled button containing a `<CnLoader />`
+    (optionally followed by a label `<span>`), not a static icon.
+    `packages/cyan/src/core/buttons.css` targets this via
+    `.cn-loader:first-child:not(:only-child)` and `.cn-loader:only-child`
     so the spinner aligns correctly in both forms.
 - **Constraints:**
   - Zero JavaScript. Styling is pure CSS; the button works before hydration.
@@ -161,12 +166,14 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
     layouts; no inline styles and no Tailwind utilities in the book
     page.
 - **Loading state pattern (resolved):** the loading state is
-  `<button disabled><cn-loader/></button>` for icon-only buttons and
-  `<button disabled><cn-loader/><span>Loading...</span></button>` for
-  labelled buttons. cyan-4's book page showed a static icon instead,
-  which contradicted the CSS's `cn-loader`-specific margin rules;
-  v20 chooses the spinner pattern so async progress is visible, and the
-  cn-loader selectors in `buttons.css` stay.
+  `<button disabled><CnLoader /></button>` for icon-only buttons and
+  `<button disabled><CnLoader /><span>Loading...</span></button>` for
+  labelled buttons. `CnLoader` renders `<span class="cn-loader">`, and
+  `buttons.css` targets `.cn-loader:first-child:not(:only-child)` and
+  `.cn-loader:only-child` to align it. cyan-4's book page showed a
+  static icon instead, which contradicted the CSS's loader-specific
+  margin rules; v20 chooses the spinner pattern so async progress is
+  visible, and the `.cn-loader` selectors in `buttons.css` stay.
 
 ## Contract
 
@@ -184,8 +191,9 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
 - [ ] A bare `<button>` rendered in any consumer app adopts DS styling
       without further opt-in.
 - [ ] `.text`, `.cta`, `.secondary` variants render as documented in the book.
-- [ ] `<cn-icon>` inside a button renders at `--cn-icon-size-small`
-      regardless of its default size.
+- [ ] A `.cn-icon` element inside a button renders at
+      `--cn-icon-size-small` regardless of the `size` prop passed to
+      the enclosing `CnIcon` component.
 - [ ] Icon-only buttons render as a circular pill of `--cn-button-size`
       diameter.
 - [ ] Disabled buttons are visually and interactively inert
@@ -257,9 +265,11 @@ And opacity is reduced to 0.5
 #### Scenario: Icon inside button is forced small
 
 ```gherkin
-Given a button containing a `<cn-icon>` whose default size is medium
+Given a button containing a `<CnIcon size="medium" />`
+  (or any size other than small)
 When the button is rendered
-Then the icon's computed width and height equal `--cn-icon-size-small`
+Then the resulting `.cn-icon` element's computed width and height
+  equal `--cn-icon-size-small`
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
 - **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
@@ -267,7 +277,7 @@ Then the icon's computed width and height equal `--cn-icon-size-small`
 #### Scenario: Icon-only button is circular
 
 ```gherkin
-Given a button whose only child is a `<cn-icon>`
+Given a button whose only child is a `<CnIcon />` (rendering `.cn-icon`)
 When the button is rendered
 Then the rendered bounding box is square
   (width equals `--cn-button-size`)
