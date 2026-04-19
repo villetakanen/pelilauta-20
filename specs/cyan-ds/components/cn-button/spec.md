@@ -52,9 +52,12 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
       `--cn-button*` container is paired with an `--cn-on-button*`
       foreground — the `.text` variant continues to use `--cn-on-surface`
       since it sits on surface, not on a button color.
-    - Interaction wash: `--cn-hover` (exists) and `--cn-active` (new —
-      must be added: a slightly darker wash than `--cn-hover`, applied
-      via overlay rather than `filter: brightness()`).
+    - Interaction wash: `--cn-hover` (exists) and `--cn-active` (new).
+      `--cn-active` mirrors `--cn-hover`'s `light-dark(color-mix(in
+      oklch, var(--chroma-surface-50), transparent …), …)` structure
+      with one opacity step deeper (~20% light / ~30% dark, roughly 2×
+      the hover visibility). Both are applied via overlay
+      pseudo-elements, never via `filter: brightness()`.
     - Shadow: `--cn-shadow-button-hover` (new — aliases
       `--cn-shadow-elevation-2`, kept as a named token so theme authors
       can retune button elevation without touching the global scale).
@@ -113,13 +116,18 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
   1. **Intro** — one paragraph explaining that consumers write semantic
      HTML and the DS styles it. No API surface to learn beyond three
      class modifiers (`.text`, `.cta`, `.secondary`).
-  2. **Dual-theme demo (headline)** — a side-by-side grid: the same demo
-     rendered inside a `.dark surface` container and a `.light surface`
-     container, so a reviewer sees both themes without toggling mode. The
-     demo contents mirror cyan-4's `ButtonDemo`: icon-only / label /
+  2. **Dual-theme demo (headline)** — a
+     [`ThemeSplit`](../../living-style-books/theme-split/spec.md) block
+     wraps the full button demo so a reviewer sees both themes
+     side-by-side without toggling OS/browser mode. The slotted
+     content mirrors cyan-4's `ButtonDemo`: icon-only / label /
      icon+label rows, disabled / text / loading rows, oversized-icon
      rows (proving the forced-small override), and a `.secondary`
      ancestor row with default + text + CTA buttons nested inside.
+     Interactive behaviours (focus, hover, active) are not demoed here
+     because `ThemeSplit` renders static HTML duplicated into both
+     panes — JS-hydrated demos, if ever needed, live outside the
+     split block.
   3. **Stretched button** — a single button in a `width: 100%` parent,
      demonstrating that the button fills the flex/grid cell rather than
      staying intrinsic-width. Label: "buttons stretch with their
