@@ -20,6 +20,8 @@ The Living Style Book (`app/cyan-ds`) is the source of truth for the Cyan Design
     - [`Page`](../layouts/page/spec.md) — Standard non-book page layout composed on `AppShell`. Part of `packages/cyan`. Does not own H1 or wrap content.
     - `app/cyan-ds/src/layouts/Book.astro` — Documentation-book layout composed on `Page`. Owns the primary page heading (H1) and optional `description` from frontmatter. By default wraps content in a prose `<article>`; opts out when `multipart: true` is set.
 - **Site navigation:** Rendered by [`DocsTray`](../components/docs-tray/spec.md) — a site-wide component dropped into the `tray` slot of every page (Book-rendered or not). Book does NOT inline collection fetches or tray markup; it composes `DocsTray` via `Page`'s tray slot.
+- **Book-authoring primitives:** DS-internal Astro components that MDX pages consume to honour the "No App-Layer Overrides" rule without reaching for inline styles or `<style>` blocks. Each primitive has its own spec under `specs/cyan-ds/living-style-books/`.
+    - [`ThemeSplit`](theme-split/spec.md) — side-by-side light/dark pane wrapper for dual-theme demos.
 
 ### Data Models
 - **Book Frontmatter Schema (Zod):**

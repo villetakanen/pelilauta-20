@@ -55,9 +55,15 @@ names.
   - `noun` — `string`, default `"fox"`. Forwarded to the nested
     `<CnIcon>` as its `noun` prop.
   - `inline` — `boolean`, default `false`. When `true`, the loader
-    shrinks to `--cn-line` (24px) square and the nested `<CnIcon>` is
-    passed `size="medium"`. When `false`, the loader renders at
-    `--cn-loader-size` and the icon is passed `size="large"`.
+    shrinks to `--cn-line` (24px) square. When `false`, the loader
+    renders at `--cn-loader-size` (72px).
+  - `label` — `string`, default `"Loading"`. Emitted as `aria-label`
+    on the host `<span>` and announced via `role="status"` to assistive
+    technology.
+  - The nested `<CnIcon>`'s size is an **implementation detail** — it is
+    chosen to satisfy the geometric-fit constraint (see _Constraints_
+    below) and may change if `--cn-icon-size-*` tokens are re-tuned.
+    Callers do not override it.
 - **Data Models:** N/A (presentational).
 - **Dependencies:**
   - `CnIcon` (see [cn-icon spec](../cn-icon/spec.md)) — the centre icon
@@ -83,6 +89,16 @@ names.
   - The centre icon is always present — `noun` has a default so a bare
     `<CnLoader />` renders meaningfully. Consumers can override but not
     suppress it.
+  - **Icon fills the loader square.** The nested `<CnIcon>` renders at
+    the same square dimensions as the loader host (`large` token →
+    `--cn-icon-size-large` = 72px for the default variant; `small`
+    token → `--cn-icon-size-small` = 24px for the inline variant). The
+    spinning ring sits on top of the icon via absolute positioning and
+    carves `--cn-loader-line-width` into the icon edge on each side;
+    this matches cyan-4's behaviour where the icon is "as large as
+    possible" and the ring is a decorative overlay. The icon's opacity
+    (0.44) keeps it visually subordinate to the ring, so the overlap
+    reads as a ring *on* the icon rather than a collision.
   - Animation respects `prefers-reduced-motion: reduce` — when the user
     has requested reduced motion the ring does not rotate (stays
     static). cyan-4 omits this; v20 must include it.
@@ -93,10 +109,16 @@ names.
     `--cn-duration-*` token — spinner timing is purposely independent
     of UI interaction duration (`--cn-duration-ui`, 0.22s), which would
     be far too fast for a progress indicator.
-  - Placed as a direct child of `section`, `article`, or
-    `article.cn-card`, the loader is centre-aligned with vertical
-    margin `--cn-line` — authored in the companion global stylesheet
-    so the rule applies without the component knowing its container.
+  - Placed as a direct child of `<section>` or `<article>`, the loader
+    is centre-aligned with vertical margin `--cn-line` — authored in
+    the companion global stylesheet so the rule applies without the
+    component knowing its container.
+  - Inside a `<CnCard>`, the loader is placed in the card's `actions`
+    snippet (it renders as `<nav class="actions">` — a direct child of
+    `<article class="cn-card">`). The auto-centre rule targets
+    `article.cn-card > nav.actions > .cn-loader`. Placing the loader in
+    the default children position puts it inside `<div class="card-info">`,
+    where the auto-centre rule does not apply.
 
 ### Book Page
 
@@ -107,24 +129,38 @@ names.
      motion + context icon, and the note that consumers use it as a
      Svelte component (`<CnLoader />`) rather than a custom element
      tag.
-  2. **Dual-theme demo** — standard light/dark side-by-side grid
-     showing: default loader, `inline` loader, loader inside a button
-     with a "Loading media…" label, and a contrasting button with a
-     plain icon (to make the value of the spinner obvious).
-  3. **Prop reference** — table of `noun` and `inline` with types and
-     defaults.
-  4. **Container behaviours** — three mini-demos showing the
-     auto-centre rule firing inside `<section>`, `<article>`, and
-     `<CnCard>`.
-  5. **Reduced motion** — callout plus a demo emulating
-     `prefers-reduced-motion: reduce` (via browser devtools in the
-     demo, or a preview class in the book page), showing the static
-     fallback state.
-  6. **Token table** — `--cn-loader-size`, `--cn-loader-line-width`,
+  2. **Dual-theme demo** — authored via the
+     [`ThemeSplit`](../../living-style-books/theme-split/spec.md)
+     Astro primitive, which renders its slot content side-by-side in a
+     light-mode pane and a dark-mode pane. The slot contains a default
+     `<CnLoader />` and an inline `<CnLoader inline />`.
+  3. **Accessibility & context** — one demo of
+     `<CnLoader noun="cat" label="Loading feline data…" />`
+     showing custom noun + ARIA label.
+  4. **Inside buttons** — minimal HTML snippets for `<button><CnLoader inline/>Loading…</button>`
+     and the icon-only equivalent. Buttons are bare `<button>` elements
+     per the cn-button spec — no invented classes.
+  5. **Prop reference** — table of `noun`, `inline`, `label` with
+     types and defaults.
+  6. **Container behaviours** — two mini-demos:
+     (a) inside `<section>` — demonstrates the auto-centre rule;
+     (b) inside `<CnCard>` via the `actions` snippet — demonstrates
+     the card-specific auto-centre path.
+  7. **Token table** — `--cn-loader-size`, `--cn-loader-line-width`,
      `--cn-loader-color` with their resolved values in both themes.
-- **Layout adaptations from cyan-4:** no `column-l`, no `two-col` grid,
-  no Tailwind-style `p-1` / `mb-1`. Use the `Book.astro` layout and
-  `--cn-*`-driven utilities only.
+- **Layout authoring constraints:** per the living-style-books spec's
+  "No App-Layer Overrides" rule, the MDX MUST NOT contain `<style>`
+  blocks or inline `style="..."` attributes. All theming, spacing,
+  and layout values come from DS primitives (`ThemeSplit`, `CnCard`,
+  etc.) and `--cn-*`-driven utilities. Missing demo-authoring
+  capabilities are DS bugs, fixed in `packages/cyan`, not papered
+  over in the book.
+- **Reduced motion is not demoed in the book.** CSS has no way to
+  emulate `prefers-reduced-motion: reduce` for a single subtree
+  without duplicating the animation declarations, and a fake live
+  demo confuses readers. Coverage lives exclusively in the
+  Playwright e2e test (see _Testing Scenarios > Reduced-motion
+  fallback_), which uses `emulateMedia({ reducedMotion: "reduce" })`.
 
 ## Contract
 
@@ -133,21 +169,31 @@ names.
 - [ ] `CnLoader.svelte` exports a Svelte 5 component rendering
       `<span class="cn-loader">…</span>` with the dual-ring element and
       a nested `<CnIcon>` inside.
-- [ ] `noun` (default `"fox"`) and `inline` (default `false`) props
-      work as specified; `inline=true` toggles the dimensions to
-      `--cn-line` and the nested `<CnIcon>` to `size="medium"`.
-- [ ] When `inline` is `false`, the nested `<CnIcon>` receives
-      `size="large"`.
+- [ ] `noun` (default `"fox"`), `inline` (default `false`), and
+      `label` (default `"Loading"`) props work as specified; `inline=true`
+      switches the host dimensions to `--cn-line`.
+- [ ] Host `<span>` has `role="status"` and `aria-label={label}` so
+      screen readers announce the loading state.
+- [ ] The nested `<CnIcon>` renders at the same square dimensions as
+      the loader host in both variants — `size="large"` (72px) for the
+      default loader, `size="small"` (24px) for the inline loader.
+      Verified via a computed-style test that reads the icon's
+      `--icon-dim` and the loader's width.
 - [ ] Tokens `--cn-loader-size`, `--cn-loader-line-width`, and
       `--cn-loader-color` are defined on `:root` with `light-dark()`
       values.
 - [ ] Companion stylesheet at
       `packages/cyan/src/components/cn-loader/cn-loader.css` auto-centres
-      the loader when it is a direct child of `section`, `article`, or
-      `article.cn-card`, and is imported from the DS CSS entry.
-- [ ] Ring animation honours `prefers-reduced-motion: reduce`.
+      the loader when it is a direct child of `section` or `article`,
+      or a child of `<nav class="actions">` inside `<article class="cn-card">`,
+      and is imported from the DS CSS entry.
+- [ ] Ring animation honours `prefers-reduced-motion: reduce` — the
+      `.lds-dual-ring::after` keyframed rotation resolves to
+      `animation: none` under that media query.
 - [ ] Book page at `app/cyan-ds/src/content/components/cn-loader.mdx`
-      exists and covers all scenarios below.
+      exists, uses the `ThemeSplit` primitive for its dual-theme demo,
+      uses the `actions` snippet for the `CnCard` demo, and contains
+      no `<style>` blocks or inline `style="..."` attributes.
 - [ ] Only `--cn-*` tokens are referenced; no `--color-*` or
       `--cyan-*`.
 
@@ -170,24 +216,35 @@ names.
 Given a <CnLoader /> component is mounted
 When rendering completes
 Then the rendered DOM contains `span.cn-loader`
+And the host `<span>` has `role="status"` and `aria-label="Loading"`
 And the rendered DOM contains `.lds-dual-ring` inside it
-And the rendered DOM contains `.cn-icon` inside it with the "fox" icon
-  sized at `--cn-icon-size-large`
+And the rendered DOM contains `.cn-icon[data-noun="fox"]` inside it
+And the icon's computed width equals the loader's computed width
+  (icon fills the loader square; ring overlays on top)
 ```
 - **Vitest Unit Test:** `packages/cyan/src/components/cn-loader/CnLoader.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-loader.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-loader.spec.ts`
 
 #### Scenario: Inline variant
 
 ```gherkin
 Given a <CnLoader inline /> component is mounted
 When rendering completes
-Then `span.cn-loader`'s computed width equals `var(--cn-line)`
-And the inner `.cn-icon` is sized at `--cn-icon-size-medium`
-  (corresponding to `size="medium"` on CnIcon)
+Then `span.cn-loader`'s computed width equals `var(--cn-line)` (24px)
+And the icon's computed width also equals `var(--cn-line)` (24px)
 ```
 - **Vitest Unit Test:** `packages/cyan/src/components/cn-loader/CnLoader.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-loader.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-loader.spec.ts`
+
+#### Scenario: Custom ARIA label
+
+```gherkin
+Given a <CnLoader label="Processing…" /> component is mounted
+When rendering completes
+Then the host `<span>` has `aria-label="Processing…"`
+And the host retains `role="status"`
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/cn-loader/CnLoader.test.ts`
 
 #### Scenario: Noun forwarding
 
@@ -206,10 +263,23 @@ Then the rendered `.cn-icon` element's `data-noun` updates to "dog"
 ```gherkin
 Given a <section> whose only child is a <CnLoader />
 When the section is rendered
-Then the `.cn-loader` has `margin: var(--cn-line) auto`
-And it is horizontally centred within the section
+Then the `.cn-loader` is horizontally centred within the section
+  (measured by comparing the section's centre-X to the loader's centre-X,
+  within sub-pixel tolerance)
 ```
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-loader.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-loader.spec.ts`
+
+#### Scenario: Auto-centre inside a CnCard actions slot
+
+```gherkin
+Given a <CnCard> whose `actions` snippet is a <CnLoader />
+When the card is rendered
+Then the rendered DOM contains
+  `article.cn-card > nav.actions > .cn-loader`
+And the `.cn-loader` is horizontally centred within `nav.actions`
+  (the centre-X comparison holds within sub-pixel tolerance)
+```
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-loader.spec.ts`
 
 #### Scenario: Loader inside a button aligns correctly
 
@@ -222,7 +292,7 @@ Then the `.cn-loader`'s computed margins match the icon-only overrides
 And the button's outer bounding box stays circular
   (width equals `--cn-button-size`)
 ```
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-loader.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-loader.spec.ts`
 
 #### Scenario: Reduced-motion fallback
 
@@ -233,5 +303,5 @@ Then the `.lds-dual-ring` element's animation resolves to `none`
   (the ring does not rotate)
 And the icon and ring remain visible as a static loading glyph
 ```
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-loader.spec.ts` (using
+- **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-loader.spec.ts` (using
   Playwright's `emulateMedia({ reducedMotion: 'reduce' })`)
