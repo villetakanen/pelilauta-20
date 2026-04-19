@@ -17,8 +17,10 @@ This is the root specification for all UI components in the Cyan design system. 
   - `CnAvatar`: User representation.
   - `CnIcon`: Vector iconography.
   - `CnTag`: Taxonomy indicators.
-  - `CnButton`: Interactive actions (global atomic CSS — lives in `packages/cyan/src/core/buttons.css`, not under `components/`).
   - `CnLoader`: Async progress indicator (dual-ring spinner + context icon). Consumed inside buttons and as a standalone block.
+
+  Interactive actions (`<button>` / `<a class="button">`) are **not**
+  a component — they are atomic CSS shipped by [Core > Buttons](../core/buttons/spec.md).
 - **Constraints:**
   - Components draw all visual values from `--cn-*` semantic tokens. Hardcoded pixel values, colors, or durations have no place in a component.
   - CSS and Astro SSR drive interaction. Svelte/JS appears only for high-fidelity progressive enhancements beyond what CSS can express.

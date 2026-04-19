@@ -1,10 +1,10 @@
 ---
-feature: CnButton
-parent_spec: specs/cyan-ds/components/spec.md
-stylebook_url: https://cyan.pelilauta.social/components/cn-button
+feature: Buttons
+parent_spec: specs/cyan-ds/core/spec.md
+stylebook_url: https://cyan.pelilauta.social/core/buttons
 ---
 
-# Feature: CnButton
+# Feature: Buttons
 
 ## Blueprint
 
@@ -12,9 +12,11 @@ stylebook_url: https://cyan.pelilauta.social/components/cn-button
 
 Native `<button>` and anchor-as-button (`<a class="button">`) elements in every
 Pelilauta app must share one consistent, tokenized visual language without
-requiring consumers to wrap them in a component. CnButton is the atomic CSS
-layer that styles those elements globally so that any raw `<button>` or
-`a.button` renders correctly even before JavaScript hydrates.
+requiring consumers to wrap them in a component. This spec covers the
+atomic CSS layer (`packages/cyan/src/core/buttons.css`) that styles those
+elements globally so that any raw `<button>` or `a.button` renders
+correctly even before JavaScript hydrates. There is no `CnButton` Svelte
+or Astro component — consumers write semantic HTML and the DS styles it.
 
 Reversed from `packages/cyan-css/src/core/buttons.css` in
 [`villetakanen/cyan-design-system-4`](https://github.com/villetakanen/cyan-design-system-4/blob/main/packages/cyan-css/src/core/buttons.css).
@@ -84,6 +86,21 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
 - **Constraints:**
   - Zero JavaScript. Styling is pure CSS; the button works before hydration.
   - Only `--cn-*` tokens are referenced; no `--color-*` or `--cyan-*`.
+  - **Surface is a two-stop linear gradient ("sliding colors").** The
+    cyan signature is a `137deg` linear gradient between a lighter
+    accent stop and the base surface token; a flat/solid background
+    or a top-down (180deg) gradient is a regression. Per variant:
+    - Default: `linear-gradient(in oklab 137deg, var(--cn-button-light), var(--cn-button))`.
+    - `.cta`: `linear-gradient(in oklab 137deg, var(--cn-button-cta), var(--cn-button))`.
+    - `.secondary` ancestor (default children): two `--chroma-primary-*`
+      stops — `light-dark(var(--chroma-primary-40), var(--chroma-primary-80))`
+      → `light-dark(var(--chroma-primary-60), var(--chroma-primary-95))`.
+      Use the chroma ramp directly; **do not** introduce a dedicated
+      `--cn-button-secondary` semantic token.
+    - `.text`: no filled surface (transparent).
+    The colour-space hint (`in oklab` in v20, `in lab` in cyan-4) is
+    deliberate — it keeps the interpolation perceptually smooth in
+    both themes.
   - Pill shape is derived from button height (`border-radius` = half of
     `--cn-button-size`), so changing the height token keeps the pill correct.
   - Total vertical footprint (including margin) equals
@@ -103,7 +120,14 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
 
 ### Book Page
 
-- **Target path:** `app/cyan-ds/src/content/components/cn-button.mdx`
+- **Target path:** `app/cyan-ds/src/content/core/buttons.mdx`, rendered
+  at URL `/core/buttons`. The URL and book-page path mirror the source
+  location (`packages/cyan/src/core/buttons.css`) and this spec's own
+  location (`specs/cyan-ds/core/buttons/`). **Not** `content/components/`
+  — the DS styles raw `<button>` globally; there is no Svelte component.
+  The `core` content collection must be registered in
+  `app/cyan-ds/src/content/config.ts` (same `bookSchema` as
+  `components` / `styles` / `principles`).
 - **Reverse-spec reference:** cyan-4 book page
   [`apps/cyan-docs/src/books/styles/buttons.mdx`](https://github.com/villetakanen/cyan-design-system-4/blob/main/apps/cyan-docs/src/books/styles/buttons.mdx)
   and its demo component
@@ -193,6 +217,10 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
       globally-applied atomic CSS.
 - [ ] Stylesheet references only `--cn-*` tokens. No `--color-*`, `--cyan-*`,
       `filter: brightness()`, or hardcoded colors / durations.
+- [ ] Default, `.cta`, and `.secondary`-ancestor surfaces all render as a
+      `137deg` two-stop `linear-gradient(in oklab …)`, never as a flat
+      colour or a different angle. The `.text` variant has no filled
+      surface.
 - [ ] `semantic.css` defines `--cn-on-button`, `--cn-on-button-cta`,
       `--cn-active`, `--cn-shadow-button-hover`, `--cn-duration-ui`, and
       `--cn-easing-ui` before this stylesheet is authored.
@@ -206,8 +234,12 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
       diameter.
 - [ ] Disabled buttons are visually and interactively inert
       (`pointer-events: none`, 50% opacity, `cursor: not-allowed`).
-- [ ] Book page at `app/cyan-ds/src/content/components/cn-button.mdx` exists
-      and demonstrates all variants + states.
+- [ ] Book page at `app/cyan-ds/src/content/core/buttons.mdx` exists,
+      rendering at URL `/core/buttons` (mirrors the source path
+      `packages/cyan/src/core/buttons.css`), and demonstrates all
+      variants + states.
+- [ ] `app/cyan-ds/src/content/config.ts` registers a `core` collection
+      with the shared `bookSchema`, so the book page resolves.
 
 ### Regression Guardrails
 
@@ -220,6 +252,13 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
   forms that should be inert.
 - Icon sizing inside buttons stays locked to `--cn-icon-size-small`; do
   not let an icon's own size token leak through.
+- The `137deg` two-stop gradient surface is the cyan signature. Reverting
+  to a solid background, a `180deg` top-down gradient, or a
+  `color-mix(… white …)` recipe erases the "sliding colours" identity
+  and is a visual regression.
+- No new `--cn-button-secondary` token creeps into `semantic.css` — the
+  `.secondary` ancestor rule uses `--chroma-primary-*` stops directly
+  per the cyan-4 recipe.
 
 ### Testing Scenarios
 
@@ -228,8 +267,11 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
 ```gherkin
 Given the DS stylesheet is loaded on a page
 When a consumer renders `<button>Save</button>` with no extra classes
-Then the button displays the default gradient surface, pill border-radius,
-  UI-scale typography, and hover/active transitions
+Then the button's computed `background-image` is a
+  `linear-gradient(… 137deg …)` with two colour stops resolved from
+  `--cn-button-light` and `--cn-button` (not a flat colour, not 180deg)
+And the button has pill border-radius, UI-scale typography, and
+  hover/active transitions driven by `--cn-duration-ui` / `--cn-easing-ui`
 And no `--color-*` or `--cyan-*` custom property is read by the button
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
@@ -240,9 +282,10 @@ And no `--color-*` or `--cyan-*` custom property is read by the button
 ```gherkin
 Given a button with class `cta`
 When it is rendered
-Then its background derives from `--cn-button-cta` blended toward
-  `--cn-button`
-And its text color contrasts against that surface at WCAG AA
+Then its computed `background-image` is a 137deg two-stop
+  `linear-gradient` from `--cn-button-cta` to `--cn-button`
+And its text colour equals `--cn-on-button-cta`
+And its text colour contrasts against that surface at WCAG AA
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
 - **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
