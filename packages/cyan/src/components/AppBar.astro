@@ -7,9 +7,19 @@ interface Props {
   shortTitle?: string;
   mode?: "sticky" | "modal" | "";
   backHref?: string;
+  asPageHeading?: boolean;
 }
 
-const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.props;
+const {
+  noun,
+  title,
+  shortTitle,
+  mode = "",
+  backHref = "/",
+  asPageHeading = false,
+}: Props = Astro.props;
+
+const TitleTag: "h1" | "h3" = asPageHeading ? "h1" : "h3";
 ---
 
 <header class:list={["cn-app-bar", mode]} data-mode={mode}>
@@ -26,10 +36,10 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
       ) : null
     }
 
-    <h3 class="title">
+    <TitleTag class="title">
       <span class="full-title">{title}</span>
       {shortTitle && <span class="short-title">{shortTitle}</span>}
-    </h3>
+    </TitleTag>
 
     {
       mode !== "modal" && (

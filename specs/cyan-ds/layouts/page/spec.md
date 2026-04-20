@@ -32,6 +32,8 @@ Historically pages reached directly into `AppShell`, causing each app to reinven
 | `layout` | `"view" \| "sidebar" \| "editor" \| "modal"` | No | `"sidebar"` | Forwarded to `AppShell.layout`. Page defaults to `"sidebar"` because the common app-page case expects a tray. |
 | `trayLabel` | `string` | No | `"Menu"` | Forwarded to `AppShell.trayLabel`. |
 | `backHref` | `string` | No | `"/"` | Forwarded to `AppShell.backHref`. |
+| `noun` | `string` | No | — | Forwarded to `AppShell.noun` (AppBar leading noun icon). |
+| `asPageHeading` | `boolean` | No | `false` | Forwarded to `AppShell.asPageHeading`. Pages that do not render their own `<h1>` set this to `true` so the AppBar title becomes the document's single top-level heading. |
 
 ### Slots
 

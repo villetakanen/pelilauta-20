@@ -16,6 +16,8 @@ By orchestrating these internally, down-stream applications can remain entirely 
 | `layout` | `"view" \| "sidebar" \| "editor" \| "modal"` | No | `"view"` | Core structural layout variation determining UI elements present. |
 | `trayLabel` | `string` | No | `"Menu"` | Aria-label for the `<Tray>` component. |
 | `backHref` | `string` | No | `"/"` | Provide a specific return URL for the `<AppBar>` when `layout='modal'`. |
+| `noun` | `string` | No | — | Forwarded to `<AppBar>` as the leading noun-icon glyph. |
+| `asPageHeading` | `boolean` | No | `false` | Forwarded to `<AppBar>`. When `true`, the AppBar title renders as `<h1>` instead of `<h3>` so the shell owns the page's single top-level heading. |
 
 ## Layout Variants & Semantics
 

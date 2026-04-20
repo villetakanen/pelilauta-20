@@ -10,6 +10,7 @@ interface Props {
   trayLabel?: string;
   backHref?: string;
   noun?: string;
+  asPageHeading?: boolean;
 }
 
 const {
@@ -20,6 +21,7 @@ const {
   trayLabel = "Menu",
   backHref = "/",
   noun,
+  asPageHeading = false,
 } = Astro.props;
 ---
 
@@ -46,6 +48,7 @@ const {
         shortTitle={shortTitle}
         mode={layout === "modal" ? "modal" : ""}
         backHref={backHref}
+        asPageHeading={asPageHeading}
       >
         <slot name="actions" />
       </AppBar>

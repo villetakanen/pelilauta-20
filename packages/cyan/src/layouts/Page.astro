@@ -9,9 +9,19 @@ interface Props {
   trayLabel?: string;
   backHref?: string;
   noun?: string;
+  asPageHeading?: boolean;
 }
 
-const { title, appTitle, shortTitle, layout = "sidebar", trayLabel, backHref, noun } = Astro.props;
+const {
+  title,
+  appTitle,
+  shortTitle,
+  layout = "sidebar",
+  trayLabel,
+  backHref,
+  noun,
+  asPageHeading,
+} = Astro.props;
 ---
 
 <AppShell
@@ -22,6 +32,7 @@ const { title, appTitle, shortTitle, layout = "sidebar", trayLabel, backHref, no
   trayLabel={trayLabel}
   backHref={backHref}
   noun={noun}
+  asPageHeading={asPageHeading}
 >
   <slot name="tray" slot="tray" />
   <slot name="actions" slot="actions" />
