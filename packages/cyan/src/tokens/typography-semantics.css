@@ -239,7 +239,6 @@ article {
   text-transform: uppercase;
   font-weight: var(--cn-font-weight-medium);
 }
-
 /* Weights */
 .text-bold {
   font-weight: var(--cn-font-weight-bold);

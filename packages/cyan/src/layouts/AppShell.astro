@@ -54,6 +54,7 @@ const {
 
 <style is:global>
   @import "@cyan/tokens/index.css";
+  @import "../core/index.css";
   @import "../utilities/index.css";
   @import "@cyan/fonts/fonts.css";
   @import "./content-grid.css";
@@ -65,6 +66,13 @@ const {
   *::after {
     box-sizing: border-box;
     margin: 0;
+  }
+
+  /* Astro hydration wrapper — transparent to layout so it never interposes
+     a box between an element and its semantic child (e.g. an icon inside
+     a flex button). Safe: Astro uses the custom element only as a JS hook. */
+  astro-island {
+    display: contents;
   }
 
   body {

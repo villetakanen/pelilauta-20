@@ -82,7 +82,11 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
     (optionally followed by a label `<span>`), not a static icon.
     `packages/cyan/src/core/buttons.css` targets this via
     `.cn-loader:first-child:not(:only-child)` and `.cn-loader:only-child`
-    so the spinner aligns correctly in both forms.
+    so the spinner aligns correctly in both forms. The same leading-glyph
+    margin rule also applies to `.cn-icon:first-child:not(:only-child)`
+    — a leading icon gets a `-1 × --cn-grid` left margin so its visual
+    weight sits flush with the button's start padding (matching cyan-4's
+    optical alignment).
 - **Constraints:**
   - Zero JavaScript. Styling is pure CSS; the button works before hydration.
   - Only `--cn-*` tokens are referenced; no `--color-*` or `--cyan-*`.
@@ -97,7 +101,10 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
       → `light-dark(var(--chroma-primary-60), var(--chroma-primary-95))`.
       Use the chroma ramp directly; **do not** introduce a dedicated
       `--cn-button-secondary` semantic token.
-    - `.text`: no filled surface (transparent).
+    - `.text`: no gradient; a low-opacity wash
+      (`color-mix(in oklab, var(--cn-button) 33%, transparent)`) rather
+      than a flat fill. Keeps the variant recessive against the page
+      surface while remaining tactile-visible.
     The colour-space hint (`in oklab` in v20, `in lab` in cyan-4) is
     deliberate — it keeps the interpolation perceptually smooth in
     both themes.
@@ -259,6 +266,11 @@ Reversed from `packages/cyan-css/src/core/buttons.css` in
 - No new `--cn-button-secondary` token creeps into `semantic.css` — the
   `.secondary` ancestor rule uses `--chroma-primary-*` stops directly
   per the cyan-4 recipe.
+- `--cn-on-button` on a `.secondary` ancestor default button must meet
+  WCAG AA (4.5:1) against `--chroma-primary-40` (light) and
+  `--chroma-primary-80` (dark). If a future chroma-ramp retune drops
+  either below 4.5:1, the `.secondary` path must switch its foreground
+  to `--cn-on-surface` rather than continue inheriting `--cn-on-button`.
 
 ### Testing Scenarios
 
@@ -275,7 +287,7 @@ And the button has pill border-radius, UI-scale typography, and
 And no `--color-*` or `--cyan-*` custom property is read by the button
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: CTA variant
 
@@ -288,18 +300,20 @@ And its text colour equals `--cn-on-button-cta`
 And its text colour contrasts against that surface at WCAG AA
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: Text variant
 
 ```gherkin
 Given a button with class `text`
 When it is rendered
-Then it has no filled surface (transparent / surface-colored background)
+Then its computed `background-image` is `none` (no gradient)
+And its `background-color` is a low-opacity color-mix of `--cn-button`
+  (subtle surface wash, not a flat fill)
 And its label color matches `--cn-on-surface`
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: Disabled state is inert
 
@@ -311,7 +325,7 @@ And the cursor displays `not-allowed`
 And opacity is reduced to 0.5
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: Icon inside button is forced small
 
@@ -323,7 +337,7 @@ Then the resulting `.cn-icon` element's computed width and height
   equal `--cn-icon-size-small`
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: Icon-only button is circular
 
@@ -335,7 +349,7 @@ Then the rendered bounding box is square
 And the border-radius makes it visually circular
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: Secondary context re-tints nested buttons
 
@@ -346,7 +360,7 @@ Then the button surface derives from the `--chroma-primary-*` ramp
   rather than the default `--cn-button` surface
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`
 
 #### Scenario: Anchor-as-button
 
@@ -357,4 +371,4 @@ Then it displays identical visuals to a `<button>` (shape, typography, states)
 And `text-decoration` is suppressed
 ```
 - **Vitest Unit Test:** `packages/cyan/src/core/buttons.test.ts`
-- **Playwright E2E Test:** `app/cyan-ds/e2e/cn-button.spec.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/core/buttons.spec.ts`

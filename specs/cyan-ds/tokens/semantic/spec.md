@@ -73,8 +73,8 @@ Semantic color tokens map the raw chroma palette to functional UI roles (surface
 
 | Token | Light | Dark | Role |
 |---|---|---|---|
-| `--cn-button` | surface-50 | surface-80 | Default button fill |
-| `--cn-button-light` | primary-60 | primary-95 | Upper stop of the default gradient |
+| `--cn-button` | surface-50 | surface-40 | Default button fill — lower stop of the default gradient |
+| `--cn-button-light` | primary-50 | primary-50 | Upper stop of the default gradient (unified across modes for a consistent sliding-colour signature) |
 | `--cn-button-accent` | primary-20 | primary-70 | Accent / emphasized variant |
 | `--cn-button-cta` | error-40 | error-40 | Call-to-action fill (destructive) |
 

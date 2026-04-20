@@ -17,6 +17,7 @@ const bookSchema = z.object({
 export const collections = {
   principles: defineCollection({ type: "content", schema: bookSchema }),
   styles: defineCollection({ type: "content", schema: bookSchema }),
+  core: defineCollection({ type: "content", schema: bookSchema }),
   components: defineCollection({ type: "content", schema: bookSchema }),
   addons: defineCollection({ type: "content", schema: bookSchema }),
 };
