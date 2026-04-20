@@ -9,7 +9,7 @@ parent_spec: ../spec.md
 
 ### Context
 
-The front page is the landing surface for Pelilauta — it orients visitors and returning users by surfacing recent community activity across three information streams. This v20 spec defines the **minimum viable front page** needed to scaffold the app shell, routing, and content-grid integration. It intentionally defers rich data features (real syndication, FABs, background posters) from v17 to later iterations.
+The front page is the landing surface for Pelilauta — it orients visitors and returning users by surfacing recent community activity across three information streams. This v20 spec defines the **minimum viable front page** needed to scaffold the app shell, routing, and content-grid integration. It still defers rich data features (real syndication, FABs) from v17. **Background poster support has landed**: the front page mounts the `juno-viinikka-dragon-1.jpg` atmospheric image from `@myrrys/proprietary` via the [`CnBackgroundPoster`](../../cyan-ds/components/cn-background-poster/spec.md) DS primitive.
 
 ### Architecture
 
@@ -18,6 +18,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 - **Components used:**
   - `Page` (`packages/cyan/src/layouts/Page.astro`) — standard non-book page shell with tray + content area
   - `CnCard` (`packages/cyan/src/components/CnCard.svelte`) — preview cards for all three streams
+  - `CnBackgroundPoster` (`packages/cyan/src/components/CnBackgroundPoster.astro`) — singleton atmospheric-background primitive, mounted via the `app-background-poster` named slot on `Page`. Sourced with an ES import of `@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg` — Astro/Vite hashes and serves the asset at build time; the poster consumes `heroImg.src` from the returned `ImageMetadata`.
 - **Data:** Static placeholder content for now; designed so each stream can later be fetched server-side in the Astro frontmatter and mapped to `CnCard` props.
 
 #### Sections
@@ -31,12 +32,14 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 ### Dependencies
 
 - `packages/cyan` — AppShell, CnCard, content-grid, tokens
+- `@myrrys/proprietary` — source of the front-page atmospheric image (`juno-viinikka-dragon-1.jpg`). Workspace dependency declared in `app/pelilauta/package.json`.
 - Future: Firebase/data layer for live thread data (out of scope for this spec)
 
 ### Anti-Patterns
 
 - Do not add client-side JavaScript for initial render — the front page must be fully SSR, zero-JS by default
 - Do not import v17 components or patterns directly — build on the v20 DS primitives
+- Do not reference the background image via a hardcoded URL string (e.g. `"/myrrys-proprietary/..."` from v17's `public/` symlink pattern). Use an ES import so Astro/Vite hashes the asset at build time and validates the path at compile-time.
 - Apps never override the DS: the page MUST NOT contain `<style>` blocks, inline `style=""`, or locally-defined classes that override, substitute for, or patch around DS behavior. Missing DS capability is a DS bug fixed in `packages/cyan`, not a page workaround.
 - Do not reach directly into `AppShell` — compose through [`Page`](../../cyan-ds/layouts/page/spec.md).
 - Do not add i18n/l10n plumbing yet — English placeholder strings are fine for scaffolding
@@ -54,12 +57,16 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 - [ ] Page passes `pnpm check` with no errors
 - [ ] Page renders correctly at mobile / narrow (triad collapses to a single stacked column per the content-grid contract) and desktop / wide (triad renders three columns side-by-side)
 - [ ] `index.astro` contains no `<style>` block, no inline `style=""` attributes, and no locally-defined classes
+- [ ] `app/pelilauta/package.json` declares `@myrrys/proprietary` as a workspace dependency.
+- [ ] `index.astro` mounts `<CnBackgroundPoster slot="app-background-poster" src={heroImg.src} />` inside `<Page>`, where `heroImg` is an ES import of `@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg`.
+- [ ] The poster renders behind the content-triad; the triad itself is unaffected visually (same layout, same CnCard structure) and continues to render correctly on narrow and wide viewports.
 
 ### Regression Guardrails
 
 - Front page must load with zero client-side JavaScript (no `client:` directives)
 - Token references in the page are disallowed entirely (the page must not contain any CSS). Token discipline is enforced at the DS layer.
 - `Page` `title` prop must be set to "Pelilauta"
+- **Image path resolution.** The poster's `src` MUST resolve via the ES `import` from `@myrrys/proprietary/...` — no hardcoded `/myrrys-proprietary/...` URL. Reverting to a string literal would break build-time asset hashing and silently 404 when the image is moved.
 
 ### Testing Scenarios
 

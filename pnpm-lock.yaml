@@ -60,6 +60,9 @@ importers:
       '@astrojs/svelte':
         specifier: ^8.0.4
         version: 8.0.4(@types/node@25.5.0)(astro@6.1.5(@netlify/blobs@10.7.4)(@types/node@25.5.0)(jiti@2.6.1)(rollup@4.59.1)(typescript@6.0.2)(yaml@2.8.3))(jiti@2.6.1)(svelte@5.55.0)(typescript@6.0.2)(yaml@2.8.3)
+      '@myrrys/proprietary':
+        specifier: workspace:*
+        version: link:../../packages/myrrys-proprietary
       '@pelilauta/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
