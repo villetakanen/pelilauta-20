@@ -27,6 +27,7 @@ packages/firebase/
       index.ts          → initializeApp (firebase-admin), getFirestore, getAuth
       admin.ts           → isAdmin() helper (reads meta/pelilauta doc)
       tokenToUid.ts      → verifyIdToken from Bearer header
+      sessionCookie.ts   → createSessionCookie / verifySessionCookie wrappers
     client/
       index.ts          → initializeApp (firebase/app), getFirestore, getAuth
       toFirestoreEntry.ts → serverTimestamp() conversion for writes
@@ -105,6 +106,8 @@ having to satisfy accessor-level clauses that depend on domain packages.
 
 - [ ] Server entry exports `verifyIdToken()` (from `src/server/tokenToUid.ts`)
 - [ ] Server entry exports `isAdmin()` (from `src/server/admin.ts`)
+- [ ] Server entry exports `createSessionCookie(idToken, { expiresIn })` (from `src/server/sessionCookie.ts`), wrapping `firebase-admin` `auth().createSessionCookie`
+- [ ] Server entry exports `verifySessionCookie(cookie, checkRevoked?)` (from `src/server/sessionCookie.ts`), wrapping `firebase-admin` `auth().verifySessionCookie`
 - [ ] Client entry exports the Firestore timestamp conversion helper (`src/client/toFirestoreEntry.ts`)
 - [ ] Vitest scenarios below are implemented and green
 
@@ -137,3 +140,36 @@ And getFirestore() returns a valid instance
 ```
 
 - **Vitest Unit Test:** `packages/firebase/src/client/index.test.ts`
+
+#### Scenario: createSessionCookie wraps firebase-admin
+
+```gherkin
+Given a valid Firebase ID token
+When createSessionCookie(idToken, { expiresIn: 5 days in ms }) is called
+Then firebase-admin auth().createSessionCookie is invoked with the same arguments
+And the resulting cookie string is returned to the caller
+```
+
+- **Vitest Unit Test:** `packages/firebase/src/server/sessionCookie.test.ts`
+
+#### Scenario: verifySessionCookie returns decoded claims
+
+```gherkin
+Given a valid session cookie produced by createSessionCookie
+When verifySessionCookie(cookie, true) is called
+Then firebase-admin auth().verifySessionCookie is invoked with checkRevoked=true
+And the decoded token (including uid and custom claims) is returned
+```
+
+- **Vitest Unit Test:** `packages/firebase/src/server/sessionCookie.test.ts`
+
+#### Scenario: verifySessionCookie rejects an invalid cookie
+
+```gherkin
+Given an expired, revoked, or malformed session cookie
+When verifySessionCookie is called
+Then the underlying firebase-admin error is surfaced to the caller
+And no partial / unverified token payload is returned
+```
+
+- **Vitest Unit Test:** `packages/firebase/src/server/sessionCookie.test.ts`

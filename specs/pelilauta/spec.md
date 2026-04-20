@@ -22,12 +22,14 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
   - `packages/i18n` — translation engine consumed by the host. See [`i18n/spec.md`](i18n/spec.md).
   - [`packages/cyan`](../cyan-ds/spec.md) — design system, including `AppShell`. DS components do **not** carry locale-bound strings; they accept text via props/slots from the host.
 - **Sub-specs:**
+  - [`auth/`](auth/spec.md) — login/logout UX and `/login` page.
   - [`firebase/`](firebase/spec.md) — Firebase workspace + auth.
   - [`front-page/`](front-page/spec.md) — landing page composition.
   - [`i18n/`](i18n/spec.md) — translation engine and host composition.
   - [`migrations/`](migrations/spec.md) — data migrations from prior versions.
   - [`models/`](models/spec.md) — shared schemas.
   - [`preferences/`](preferences/spec.md) — user preference store.
+  - [`session/`](session/spec.md) — session cookie, SSR identity, token repair, store.
   - [`threads/`](threads/spec.md) — discussions vertical.
 - **Constraints:**
   - **Host owns the seams, not the domain.** Domain logic lives in feature packages. Host code is composition: routing, layout, registry assembly, session boundary.
