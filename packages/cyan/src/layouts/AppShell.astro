@@ -33,6 +33,8 @@ const {
     <title>{title}</title>
   </head>
   <body class={`layout-${layout}`}>
+    <slot name="app-background-poster" />
+
     {
       layout === "sidebar" && (
         <Tray>

@@ -74,17 +74,27 @@ co-located as a DS primitive so every consumer gets identical behaviour.
     the poster never intercepts pointer events.
   - **Full-bleed.** Spans `100dvw` width (dynamic viewport — respects
     mobile browser chrome retraction).
-  - **Theme-aware.** Dark mode keeps the image at higher saturation
-    and layers a four-stop surface-to-primary-to-primary-to-surface
-    wash; light mode reduces image opacity (≈0.55) and applies a
-    simpler two-stop wash that fades the image straight into
-    `--cn-surface`. Both branches MUST use `color-mix(in oklab, …)`
-    (or `oklch`) — not `hsl` — matching the rest of v20's gradient
-    contract (see [buttons spec](../../core/buttons/spec.md)).
-  - **Image colour grading.** In light mode the image is rendered at
-    `opacity: 0.55` with `filter: sepia(50%)` to calm it against the
-    lighter page surface. Dark mode ships the image at `opacity: 0.72`
-    with no filter.
+  - **Theme-aware.** The wash is painted by **two pseudo-elements**:
+    - `::before` — atmospheric colour-shift layer. A
+      `linear-gradient(180deg, …)` of `--chroma-primary-*` stops (10 →
+      80) with `mix-blend-mode: hard-light` and `opacity: 44%` in dark
+      mode. In light mode, `::before` is overridden with a different ramp
+      (`--chroma-surface-90 → --chroma-primary-40 → --chroma-primary-80`)
+      and `mix-blend-mode: overlay, opacity: 1`. The blend mode is the
+      primary theme cue — dark hard-lights, light overlays.
+    - `::after` — bottom fade. `linear-gradient(180deg, transparent 0%,
+      var(--cn-surface) 95%)`. This dissolves the image into the page
+      surface (matching body's `--cn-surface`) in both themes without any
+      media override.
+    Both branches MUST use `color-mix(in oklab, …)` (or `oklch`) — not
+    `hsl` — matching the rest of v20's gradient contract (see [buttons
+    spec](../../core/buttons/spec.md)).
+  - **Image colour grading.** The image (`#cn-background-poster img`)
+    sits at `opacity: 0.72` in both themes. There is no
+    `filter: sepia(…)` anywhere — earlier drafts applied one in light
+    mode; that approach was dropped. Dark mode ships the image at
+    `opacity: 0.72` with no filter; light mode keeps the same `0.72`
+    opacity.
   - **No `nav#rail` rule.** cyan-4's light-mode rule
     `body:has(#cn-background-poster) nav#rail { mix-blend-mode: multiply; }`
     targets a legacy cyan-4 rail nav that v20 does not ship. This
@@ -94,6 +104,31 @@ co-located as a DS primitive so every consumer gets identical behaviour.
     first thing to cut on small screens). v20 uses `@media
     (max-width: 620px) { display: none; }` — the cyan-4 `.sm-hidden`
     utility class is replaced by a scoped media query.
+  - **Chrome cedes to the poster.** When the poster is mounted
+    (`body:has(#cn-background-poster)`):
+    - Body background is **not** overridden — it keeps `var(--cn-surface)`
+      from `AppShell.astro`. The poster's `::after` pseudo-element fades
+      the image into the same `var(--cn-surface)` at its bottom, so body
+      and poster meet seamlessly.
+    - AppBar token overrides unchanged: `--cn-app-bar-background` and
+      `--cn-app-bar-background-sticky` both `transparent`, preserving the
+      sticky-scroll animation while making it interpolate between two
+      transparent values.
+    - Tray's `.cn-drawer` (the element that paints the rail surface) gets
+      a semi-transparent surface wash: `background-color: color-mix(in
+      oklab, var(--cn-surface), transparent 66%)`. The outer `.cn-tray`
+      wrapper is unchanged — it's already transparent by default, so only
+      the drawer needs a rule.
+    - No `backdrop-filter`. The semi-transparent surface + the poster's
+      wash together provide enough separation.
+  - **Chrome legibility halo.** Chrome selectors (`.cn-app-bar`,
+    `.cn-tray`) carry a three-stop `text-shadow` glow — `0 0 4px`,
+    `0 0 8px`, `0 0 16px` (larger radii than the earlier draft). All
+    three stops use `color-mix(in oklab, var(--cn-surface), transparent
+    77%)` — the halo colour derives from the page surface token, NOT the
+    raw chroma ramp. This ties the halo visually to whatever the page
+    surface is in the current theme. `text-shadow` inherits, so
+    descendant labels and icons pick it up without per-element styling.
 
 ### Layout wiring
 
@@ -130,6 +165,13 @@ co-located as a DS primitive so every consumer gets identical behaviour.
   5. **Props table** — `src` (required), `md` (optional).
   6. **Token table** — `--cn-surface`, plus the chroma ramp stops
      consumed by the wash.
+- **Live demo mechanism:** the book page does NOT mount the component
+  inline in its MDX body. Instead, the `poster` frontmatter field
+  (declared in `bookSchema` at `app/cyan-ds/src/content/config.ts` and
+  forwarded by `Book.astro`) renders `<CnBackgroundPoster slot="app-background-poster" src={frontmatter.poster} />`
+  inside the book's underlying `<Page>`. This keeps the slot-only
+  mounting contract intact — `Book.astro` is simply a slot consumer
+  with a frontmatter-driven convenience layer.
 
 ## Contract
 
@@ -148,9 +190,10 @@ co-located as a DS primitive so every consumer gets identical behaviour.
       No `--color-*`, no `--cyan-*`, no hardcoded colours or
       pixel values other than gradient percentage stops.
 - [ ] `color-mix()` calls use `in oklab` or `in oklch`, never `hsl`.
-- [ ] Light-mode branch reduces image opacity (≈0.55) and applies
-      `filter: sepia(50%)`; dark-mode branch ships the image at
-      `opacity: 0.72` with no filter.
+- [ ] Image is rendered at `opacity: 0.72` in both themes with no
+      `filter`. Light-mode branch overrides `::before` with a distinct
+      gradient ramp and `mix-blend-mode: overlay`; dark-mode `::before`
+      uses `mix-blend-mode: hard-light`. No `filter: sepia(…)` anywhere.
 - [ ] The poster is hidden below the `620px` viewport via a scoped
       media query. No reliance on a `.sm-hidden` utility class.
 - [ ] `AppShell.astro` exposes an `app-background-poster` named slot
@@ -199,7 +242,7 @@ Then the DOM contains exactly one element with id `cn-background-poster`
 And that element is a sibling of (not a descendant of) `<main>`
 And the rendered `<img>` has `alt=""` and `loading="lazy"`
 ```
-- **Vitest Unit Test:** `packages/cyan/src/components/cn-background-poster/cn-background-poster.test.ts`
+- **Vitest Unit Test:** `packages/cyan/src/components/CnBackgroundPoster.test.ts`
 - **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-background-poster.spec.ts`
 
 #### Scenario: Responsive source selection
@@ -210,7 +253,7 @@ Then the rendered `<picture>` contains a `<source>` with
   `media="(min-width: 960px)"` and `srcset="/md.webp"`
 And the fallback `<img>` has `src="/sm.webp"`
 ```
-- **Vitest Unit Test:** `packages/cyan/src/components/cn-background-poster/cn-background-poster.test.ts`
+- **Vitest Unit Test:** `packages/cyan/src/components/CnBackgroundPoster.test.ts`
 
 #### Scenario: Hidden on narrow viewports
 
@@ -228,10 +271,13 @@ Given a `CnBackgroundPoster` mounted on a page
 When the document color-scheme resolves to dark
 Then the `<img>` computed `opacity` is 0.72
 And the computed `filter` is `none`
+And `#cn-background-poster::before` uses `mix-blend-mode: hard-light`
 
 When the document color-scheme resolves to light
-Then the `<img>` computed `opacity` is approximately 0.55
-And the computed `filter` includes `sepia(0.5)` / `sepia(50%)`
+Then the `<img>` computed `opacity` is still 0.72 (unchanged between themes)
+And the computed `filter` is `none` (no sepia or other filter applied)
+And the light-mode branch overrides `#cn-background-poster::before` with
+  a distinct `linear-gradient` ramp and `mix-blend-mode: overlay`
 ```
 - **Playwright E2E Test:** `app/cyan-ds/e2e/components/cn-background-poster.spec.ts`
 
@@ -245,7 +291,23 @@ Then every `color-mix(...)` call uses `in oklab` or `in oklch`
 And the bottom stop of the wash is `var(--cn-surface)`
   (never `--color-background` or a hardcoded colour)
 ```
-- **Vitest Unit Test:** `packages/cyan/src/components/cn-background-poster/cn-background-poster.test.ts`
+- **Vitest Unit Test:** `packages/cyan/src/components/CnBackgroundPoster.test.ts`
   (parses the scoped stylesheet text from the `.astro` source and
   asserts selector / token invariants — same pattern as
   `packages/cyan/src/core/buttons.test.ts`)
+
+#### Scenario: Chrome backgrounds and halo under the poster
+
+```gherkin
+Given the CnBackgroundPoster stylesheet is loaded
+When the stylesheet text is inspected
+Then `body:has(#cn-background-poster)` overrides `--cn-app-bar-background`
+  and `--cn-app-bar-background-sticky` to `transparent` (body background
+  itself is NOT overridden — it keeps `var(--cn-surface)` from AppShell)
+And `body:has(#cn-background-poster) .cn-drawer` declares
+  `background-color: color-mix(in oklab, var(--cn-surface), transparent 66%)`
+And chrome selectors `.cn-app-bar` and `.cn-tray` carry a multi-stop
+  `text-shadow` using `color-mix(in oklab, var(--cn-surface), transparent 77%)`
+  stops for label legibility over the image
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/CnBackgroundPoster.test.ts`

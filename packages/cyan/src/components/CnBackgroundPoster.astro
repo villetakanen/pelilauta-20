@@ -1,0 +1,120 @@
+---
+type Props = {
+  src: string;
+  md?: string;
+};
+
+const { src, md } = Astro.props;
+---
+
+<div id="cn-background-poster">
+  <picture>
+    {md && <source media="(min-width: 960px)" srcset={md} />}
+    <img src={src} alt="" loading="lazy" />
+  </picture>
+</div>
+
+<style is:global>
+  /* When mounted, the poster owns the page background layer.
+     Chrome cedes its surface so the wash alone carries readability —
+     stacking a second semi-transparent surface under chrome would
+     double-layer the same attenuation effect. */
+  body:has(#cn-background-poster) {
+    /*background-color: transparent;*/
+    --cn-app-bar-background: transparent;
+    --cn-app-bar-background-sticky: transparent;
+  }
+
+  /* Target both the outer wrapper and the inner drawer — the drawer is
+     what actually paints the rail surface on wide screens. */
+  body:has(#cn-background-poster) .cn-drawer {
+    background-color: color-mix(in oklab, var(--cn-surface), transparent 66%);
+  }
+
+  /* Legibility halo for chrome text sitting directly on the image.
+     text-shadow is inheritable, so descendant labels pick it up. */
+  body:has(#cn-background-poster) .cn-app-bar,
+  body:has(#cn-background-poster) .cn-tray {
+    text-shadow:
+      0 0 4px color-mix(in oklab, var(--cn-surface), transparent 77%),
+      0 0 8px color-mix(in oklab, var(--cn-surface), transparent 77%),
+      0 0 16px color-mix(in oklab, var(--cn-surface), transparent 77%);
+  }
+
+  #cn-background-poster {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100dvw;
+    height: 100dvh;
+    overflow: hidden;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  #cn-background-poster picture,
+  #cn-background-poster picture img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  #cn-background-poster img {
+    opacity: 0.72;
+  }
+
+  /* Gradient wash — dissolves the image into the page surface at the bottom. */
+  #cn-background-poster::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      var(--chroma-primary-10) 10%,
+      var(--chroma-primary-20) 20%,
+      var(--chroma-primary-30) 30%,
+      var(--chroma-primary-40) 40%,
+      var(--chroma-primary-50) 50%,
+      var(--chroma-primary-60) 60%,
+      var(--chroma-primary-70) 70%,
+      var(--chroma-primary-80) 80%
+    );
+    mix-blend-mode: hard-light;
+    opacity: 44%;
+  }
+  #cn-background-poster::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: linear-gradient(180deg, transparent 0%, var(--cn-surface) 95%);
+  }
+
+  @media (prefers-color-scheme: light) {
+    #cn-background-poster::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(
+        180deg,
+        var(--chroma-surface-90) 10%,
+        var(--chroma-primary-40) 40%,
+        var(--chroma-primary-80) 70%
+      );
+      mix-blend-mode: overlay;
+      opacity: 1;
+    }
+  }
+
+  @media (max-width: 620px) {
+    #cn-background-poster {
+      display: none;
+    }
+  }
+</style>

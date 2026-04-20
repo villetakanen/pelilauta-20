@@ -32,9 +32,16 @@ The Living Style Book (`app/cyan-ds`) is the source of truth for the Cyan Design
       icon: z.string().optional(),
       order: z.number().optional(), // Sorting priority within its category
       status: z.enum(['stable', 'alpha', 'draft']).default('stable'),
-      multipart: z.boolean().optional().default(false) // Opt out of the prose <article> wrapper
+      multipart: z.boolean().optional().default(false), // Opt out of the prose <article> wrapper
+      poster: z.string().optional() // Background image URL; see below
     }
     ```
+
+#### `poster` field
+
+When `poster` is set, `Book.astro` renders `<CnBackgroundPoster slot="app-background-poster" src={poster} />` inside the book's underlying `<Page>`, producing an atmospheric background behind the book content. This is the primary mechanism for book pages that want to visually demo `CnBackgroundPoster` itself (e.g. `app/cyan-ds/src/content/components/cn-background-poster.mdx`), and may be used by future pages wanting atmospheric branding (e.g. the cyan-ds landing page). The slot-only mounting contract is preserved — `Book.astro` acts as a slot consumer with a frontmatter-driven convenience layer; the MDX body never mounts the component inline.
+
+> **Note:** `poster` accepts a single URL only. No `md` / srcset support is provided from frontmatter in this pass — consumers that need responsive sources must use `CnBackgroundPoster` directly via the slot.
 
 ### Multipart Books
 

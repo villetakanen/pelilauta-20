@@ -12,6 +12,8 @@ const bookSchema = z.object({
    * main-wide layout demos (e.g. Golden / Triad). See specs/cyan-ds/living-style-books/spec.md.
    */
   multipart: z.boolean().optional().default(false),
+  /** URL of a decorative background image that Book.astro forwards to the CnBackgroundPoster slot. */
+  poster: z.string().optional(),
 });
 
 export const collections = {

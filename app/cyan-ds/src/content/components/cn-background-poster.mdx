@@ -1,0 +1,93 @@
+---
+title: CnBackgroundPoster
+description: Singleton atmospheric background image for landing and hub pages.
+order: 10
+status: stable
+poster: "https://picsum.photos/1920/1080"
+---
+
+# CnBackgroundPoster
+
+A singleton decorative background-image primitive for landing and hub
+pages — front page, site index, channels index, library. The component
+renders a full-viewport image behind the page content, dissolved into
+the page surface by a gradient wash so text at any vertical position
+stays readable.
+
+**This book page is itself a live demo.** The `poster` frontmatter
+declares an image URL; `Book.astro` forwards it to the
+`app-background-poster` slot on `<Page>`. Scroll the page and notice
+the gradient fade-out toward the bottom.
+
+## Usage
+
+Mount via the `app-background-poster` slot on `<Page>` (or `<AppShell>`
+directly). The component is slot-only — no other mounting point is
+supported.
+
+```astro
+---
+import Page from "@cyan/layouts/Page.astro";
+import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
+---
+
+<Page title="Front page" layout="view">
+  <CnBackgroundPoster
+    slot="app-background-poster"
+    src="/images/hero-1920.webp"
+    md="/images/hero-2560.webp"
+  />
+  <section class="cn-content-prose">
+    <h1>Page content</h1>
+  </section>
+</Page>
+```
+
+For book pages in the cyan-ds site, declare the poster via frontmatter
+and Book.astro takes care of the slot wiring:
+
+```yaml
+---
+title: My Page
+poster: "https://example.com/hero.webp"
+---
+```
+
+## Responsive source
+
+The optional `md` prop supplies a higher-resolution image to viewports
+at or above `960px` via a `<source media="(min-width: 960px)" srcset={md}>`
+entry inside the `<picture>`. Below that threshold the base `src` is
+used as the fallback.
+
+## Narrow-viewport behaviour
+
+Below `620px` the poster is hidden via `display: none`. Decorative
+chrome is the first thing to cut on small screens; the page content
+alone carries the experience on mobile.
+
+## Theme-aware treatment
+
+- **Dark mode** — image at `opacity: 0.72`, no filter. A four-stop
+  `color-mix(in oklab, …)` gradient fades surface → primary → primary
+  → surface → `var(--cn-surface)` from top to bottom.
+- **Light mode** — image at `opacity: 0.55` with `filter: sepia(50%)`
+  to calm it against the lighter page surface. A simpler two-stop
+  `color-mix(in oklab, …)` gradient fades surface → `var(--cn-surface)`.
+
+## Props
+
+| Prop | Type | Required | Description |
+|------|------|----------|-------------|
+| `src` | `string` | Yes | Image URL. Also the `<img>` fallback below the `md` breakpoint. |
+| `md` | `string` | No | Larger-viewport image URL rendered at `≥ 960px` via `<source media>`. |
+
+## Tokens
+
+| Token | Role |
+|-------|------|
+| `--cn-surface` | Bottom gradient stop — the page surface the image dissolves into. |
+| `--chroma-surface-80` | Dark-mode mid-stop (softens the image). |
+| `--chroma-surface-90` | Both modes — surface anchor in the wash. |
+| `--chroma-primary-20` | Dark-mode accent stop. |
+| `--chroma-primary-70` | Dark-mode accent stop. |
