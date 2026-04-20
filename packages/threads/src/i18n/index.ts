@@ -7,12 +7,14 @@
 import type { NestedTranslation } from "@pelilauta/i18n";
 
 export const fi: Record<string, NestedTranslation> = {
+  title: "Keskustelut",
   card: {
     inChannel: "Aiheessa ",
   },
 };
 
 export const en: Record<string, NestedTranslation> = {
+  title: "Discussions",
   card: {
     inChannel: "In ",
   },

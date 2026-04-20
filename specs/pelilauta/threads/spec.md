@@ -176,6 +176,13 @@ the migration. Harmonizing them is out of scope for v20.
 
 The `./i18n` sub-export ships only static locale data — no runtime, no side effects. Threads-owned key set:
 
+- `threads:title` — the canonical heading for the Discussions vertical.
+  Used wherever the threads domain needs to name itself: the front-page
+  `TopThreadsStream` `<h2>`, the future `/channels` index `<h1>`, and
+  any other surface that hosts threads content. Finnish: "Keskustelut".
+  English: "Discussions". Owned here (not in the host) so every consumer
+  — including sub-apps that aren't the main Pelilauta host — reads the
+  same label.
 - `threads:card.inChannel` — label preceding a channel link on a thread card.
 
 Front-page "show more" and error strings are app-level concerns, owned by the host (`pelilauta:action.showMore`, `pelilauta:error.fetch`), not by the threads package.

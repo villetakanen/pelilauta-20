@@ -30,15 +30,20 @@ function channelIcon(channelSlug: string): string | undefined {
 ---
 
 <div>
-  <h2>Threads</h2>
+  <h2>{t("threads:title")}</h2>
 
   {error && <p>{t("pelilauta:error.fetch")}</p>}
 
   <div class="cn-card-grid">
-    {!error && threads.map((thread) => (
-      <ThreadCard thread={thread} noun={channelIcon(thread.channel)} />
-    ))}
+    {
+      !error &&
+        threads.map((thread) => (
+          <ThreadCard thread={thread} noun={channelIcon(thread.channel)} />
+        ))
+    }
   </div>
 
-  <p><a href="/channels">{t("pelilauta:action.showMore")}</a></p>
+  <div class="toolbar items-center">
+    <a class="button" href="/channels">{t("pelilauta:action.showMore")}</a>
+  </div>
 </div>

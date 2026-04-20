@@ -34,7 +34,7 @@ The Top Threads Stream is the medium (primary) region of the front-page triad. I
   - `Channel` — from `@pelilauta/threads`. **Not an Entry**; channels are stored as an array on a single Firestore document (v17 contract preserved unchanged in v20). Fields: `slug`, `name`, `description`, `icon` (default `"discussion"`), `category`, `threadCount`, plus optional denormalised `latestThread` / `latestReply` snapshots.
 - **i18n:**
   - Host-owned app keys: `pelilauta:action.showMore` (show-more link), `pelilauta:error.fetch` (error block). Defined in `app/pelilauta/src/locales/app/`.
-  - Threads-owned key: `threads:card.inChannel` (consumed by `ThreadCard`). Defined in `@pelilauta/threads/i18n`.
+  - Threads-owned keys: `threads:title` (stream `<h2>` — the canonical Discussions heading, shared with the future `/channels` index `<h1>`) and `threads:card.inChannel` (consumed by `ThreadCard`). Defined in `@pelilauta/threads/i18n`.
   - All resolved through the host-bound `t` from `app/pelilauta/src/i18n.ts`.
 - **Content lang:** Each rendered `ThreadCard` stamps `lang={thread.locale}` on its root element per the i18n spec's DOM lang attribution rule. `TopThreadsStream` itself emits no `lang` attribute — it's a chrome container.
 - **Constraints:**
