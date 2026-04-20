@@ -16,12 +16,12 @@ Previously this logic was inlined inside `Book.astro`, which coupled navigation 
 ### Architecture
 
 - **Component:** `app/cyan-ds/src/components/DocsTray.astro` (Astro, SSR-only).
-- **Not part of `packages/cyan`.** DocsTray is specific to the cyan-ds site's four content collections (`principles`, `styles`, `components`, `addons`) — it is not a reusable DS primitive.
+- **Not part of `packages/cyan`.** DocsTray is specific to the cyan-ds site's five content collections (`principles`, `styles`, `core`, `components`, `addons`) — it is not a reusable DS primitive.
 - **Renders with:**
   - `TrayButton.astro` (intro + group entry points)
   - `TrayLinkGroup.astro` + `TrayLink.astro` (per-entry links)
 - **Data sources:**
-  - `astro:content.getCollection('principles' | 'styles' | 'components' | 'addons')`
+  - `astro:content.getCollection('principles' | 'styles' | 'core' | 'components' | 'addons')`
   - `Astro.url.pathname` for active-state derivation (DocsTray reads this itself — consumers do NOT forward pathname props).
 
 ### Navigation Model
@@ -30,8 +30,9 @@ The tray groups are fixed and ordered:
 
 1. **Principles** (icon: `palette`) — `/principles/<slug>`
 2. **Styles** (icon: `font`) — `/styles/<slug>`
-3. **Components** (icon: `components`) — `/components/<slug>`
-4. **Addons** (icon: `add`) — `/addons/<slug>`
+3. **Core** (icon: `css`) — `/core/<slug>` — atomic CSS targeting raw HTML elements (`<button>`, `<hr>`, …).
+4. **Components** (icon: `components`) — `/components/<slug>`
+5. **Addons** (icon: `add`) — `/addons/<slug>`
 
 Plus an **Intro** button (icon: `design`) at the top pointing to `/`.
 
@@ -58,7 +59,7 @@ A group's `TrayButton` links to the first entry in that group (to provide a stab
 - **No Duplication.** No page or layout in `app/cyan-ds/src/` may reimplement the tray markup. Every consumer renders `DocsTray` via `<DocsTray slot="tray" />` — nothing else.
 - **No Prop Forwarding for Active State.** DocsTray MUST read `Astro.url.pathname` itself. Consumers do not pass a `currentPath` or similar prop.
 - **No Styling.** DocsTray owns structure only; all visual styling comes from `TrayButton` / `TrayLink` / `TrayLinkGroup` in `packages/cyan`.
-- **Not in the DS package.** DocsTray encodes the four-collection taxonomy of the docs site. It is not a generic DS primitive and must not be moved to `packages/cyan`.
+- **Not in the DS package.** DocsTray encodes the five-collection taxonomy of the docs site. It is not a generic DS primitive and must not be moved to `packages/cyan`.
 
 ## Contract
 

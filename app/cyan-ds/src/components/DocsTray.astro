@@ -16,7 +16,7 @@ import TrayButton from "@cyan/components/TrayButton.astro";
 import TrayLink from "@cyan/components/TrayLink.astro";
 import TrayLinkGroup from "@cyan/components/TrayLinkGroup.astro";
 
-type DocCategory = "principles" | "styles" | "components" | "addons";
+type DocCategory = "principles" | "styles" | "core" | "components" | "addons";
 
 const sortEntries = (entries: CollectionEntry<DocCategory>[]) =>
   entries.sort(
@@ -26,6 +26,7 @@ const sortEntries = (entries: CollectionEntry<DocCategory>[]) =>
 
 const principles = sortEntries(await getCollection("principles"));
 const styles = sortEntries(await getCollection("styles"));
+const core = sortEntries(await getCollection("core"));
 const components = sortEntries(await getCollection("components"));
 const addons = sortEntries(await getCollection("addons"));
 
@@ -37,6 +38,7 @@ const groups: {
 }[] = [
   { id: "principles", label: "Principles", entries: principles, defaultIcon: "palette" },
   { id: "styles", label: "Styles", entries: styles, defaultIcon: "font" },
+  { id: "core", label: "Core", entries: core, defaultIcon: "css" },
   { id: "components", label: "Components", entries: components, defaultIcon: "components" },
   { id: "addons", label: "Addons", entries: addons, defaultIcon: "add" },
 ];

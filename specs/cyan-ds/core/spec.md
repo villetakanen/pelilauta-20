@@ -29,6 +29,7 @@ Distinct from:
 ### Sub-Specs
 
 - [Buttons](buttons/spec.md) — atomic CSS for `<button>` / `<a class="button">`.
+- [Dividers](dividers/spec.md) — atomic CSS for `<hr>`.
 
 ## Contract
 
