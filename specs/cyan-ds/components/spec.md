@@ -18,6 +18,7 @@ This is the root specification for all UI components in the Cyan design system. 
   - `CnIcon`: Vector iconography.
   - `CnTag`: Taxonomy indicators.
   - `CnLoader`: Async progress indicator (dual-ring spinner + context icon). Consumed inside buttons and as a standalone block.
+  - `CnBackgroundPoster`: Singleton decorative background image for landing / hub pages, mounted via the `app-background-poster` layout slot.
 
   Interactive actions (`<button>` / `<a class="button">`) are **not**
   a component — they are atomic CSS shipped by [Core > Buttons](../core/buttons/spec.md).
