@@ -1,5 +1,5 @@
 import { getAuth as adminGetAuth, type DecodedIdToken } from "firebase-admin/auth";
-import { getApp } from "./index";
+import { getApp } from "./app";
 
 export interface SessionCookieOptions {
   expiresIn: number;

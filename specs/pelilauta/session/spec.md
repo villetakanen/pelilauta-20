@@ -25,7 +25,7 @@ The session boundary exists once; every other feature composes against it.
 
 - **Data models:**
   - `SessionState = 'initial' | 'loading' | 'active' | 'error'`
-  - `SessionContext = { uid: string; claims: Record<string, unknown> } | null` — the value populated on `Astro.locals` by middleware.
+  - `SessionContext = { uid: string; claims: Record<string, unknown> } | null` — the value populated on `Astro.locals` by middleware. `claims` contains **custom claims only**; reserved firebase-admin fields (`iss`, `aud`, `iat`, `exp`, `auth_time`, `user_id`, `sub`, `email`, `email_verified`, `firebase`, `uid`) are stripped before assignment via `extractCustomClaims` so pages may forward `locals.claims` to client-rendered HTML without leaking token metadata.
   - `profile` shape: reuses the minimal public-facing projection needed by `ProfileButton` (`nick`, `avatarURL`). Full `Profile` schema lives in its own feature spec; session only surfaces the fields consumed by chrome.
 
 - **API contracts:**
@@ -140,6 +140,36 @@ When middleware runs
 Then Astro.locals.uid is null
 And Astro.locals.sessionState equals "initial"
 And no redirect is issued
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/middleware.test.ts`
+
+#### Scenario: Middleware never issues a redirect
+
+```gherkin
+Given any incoming request (cookie present, absent, valid, or invalid)
+When middleware runs
+Then context.redirect is never called
+And middleware returns the value produced by next()
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/middleware.test.ts`
+
+#### Scenario: Infrastructure failures during verification are logged
+
+```gherkin
+Given verifySessionCookie rejects with an error whose code does NOT start with "auth/"
+When middleware runs
+Then console.error is called once with a "[middleware]" prefix
+And Astro.locals.sessionState is "initial"
+And no redirect is issued
+```
+
+```gherkin
+Given verifySessionCookie rejects with an error whose code starts with "auth/" (revoked, expired, argument-error)
+When middleware runs
+Then console.error is NOT called
+And Astro.locals.sessionState is "initial"
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/middleware.test.ts`

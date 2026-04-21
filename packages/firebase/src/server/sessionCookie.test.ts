@@ -12,7 +12,7 @@ vi.mock("firebase-admin/auth", () => ({
   })),
 }));
 
-vi.mock("./index", () => ({
+vi.mock("./app", () => ({
   getApp: vi.fn(() => ({ name: "[DEFAULT]" })),
 }));
 

@@ -65,19 +65,23 @@ Analyze every changed file against **three lenses**:
 - Does the code violate any Anti-Patterns documented in the spec?
 - Does the code break any Regression Guardrails?
 - Are there behavioral divergences from what the spec describes?
+- **Negative Assertions:** Do the tests explicitly assert that forbidden behaviors (e.g., Regression Guardrails) *do not* occur? (e.g., `expect(mock).not.toHaveBeenCalled()`).
+- **Mock Contracts:** If the spec defines specific positional arguments or options shapes for external API calls, do the tests explicitly lock those parameters using `toHaveBeenCalledWith(...)`?
 
 #### Lens 2: Constitutional / Architectural
 - Does the code follow Astro SSR/CSS vs Svelte 5 CSR progressive enhancement architectural constraints defined in `AGENTS.md`?
 - Are there security issues (injection, XSS, exposed secrets, auth bypasses)?
+- **Data Boundaries / Over-fetching:** Are raw external payloads (like opaque tokens or full database records) filtered before being assigned to host state/locals to prevent internal state leakage?
 - Are there performance anti-patterns (N+1 queries, unbounded loads, memory leaks)?
-- Is error handling appropriate (no silent failures, no swallowed exceptions)?
-- Are types used correctly (no `any`, no unsafe casts)?
+- Is error handling appropriate? A `catch` block that gracefully degrades user state *must still log the error* (e.g., `console.error`). Discarding errors entirely masks infrastructure misconfigurations and is considered a "swallowed exception".
+- Are types used correctly across **both source and test files** (no `any`, no unsafe casts)?
 
 #### Lens 3: Correctness & Edge Cases
 - Are there logic errors, off-by-one bugs, or race conditions?
 - Are edge cases handled (empty inputs, null/undefined, boundary values)?
 - Are there dead code paths or unreachable branches?
 - Could this break existing functionality (regression risk)?
+- **Intent Verification:** Do inline comments accurately reflect the reasoning established in the spec, rather than inventing orthogonal justifications?
 
 ### 5. Produce the verdict
 

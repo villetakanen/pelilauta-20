@@ -63,6 +63,9 @@ importers:
       '@myrrys/proprietary':
         specifier: workspace:*
         version: link:../../packages/myrrys-proprietary
+      '@pelilauta/firebase':
+        specifier: workspace:*
+        version: link:../../packages/firebase
       '@pelilauta/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n

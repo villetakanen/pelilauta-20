@@ -13,6 +13,7 @@
     "@astrojs/netlify": "^7.0.6",
     "@astrojs/svelte": "^8.0.4",
     "@myrrys/proprietary": "workspace:*",
+    "@pelilauta/firebase": "workspace:*",
     "@pelilauta/i18n": "workspace:*",
     "@pelilauta/threads": "workspace:*",
     "@pelilauta/utils": "workspace:*",
