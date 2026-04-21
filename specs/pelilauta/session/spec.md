@@ -68,8 +68,13 @@ The session boundary exists once; every other feature composes against it.
 
 4. **Write request (API-mediated):**
    - Feature calls `authedFetch('/api/threads', { method: 'POST', body })`.
-   - `authedFetch` awaits `auth.currentUser.getIdToken()`, attaches the Bearer header, issues the request.
-   - On `401`: exactly one retry with `user.getIdToken(true)` (force refresh). On repeated failure, calls `logout()` and rejects.
+   - If `auth.currentUser` is null at entry, `authedFetch` invokes `logout()` and rejects with `AuthedFetchError` (defensive: callers should guard, but the store is kept consistent if they don't).
+   - Otherwise `authedFetch` awaits `auth.currentUser.getIdToken(false)`, attaches the Bearer header, and issues the request. Callers MUST NOT pre-set the `Authorization` header; `authedFetch` owns it and any caller-supplied value is silently overwritten.
+   - If the initial `getIdToken()` throws (Firebase SDK error), `authedFetch` invokes `logout()` and rejects.
+   - On `401`: exactly one retry with `user.getIdToken(true)` (force refresh). If the refresh `getIdToken(true)` throws, `authedFetch` invokes `logout()` and rejects.
+   - If the retry request also returns `401`, `authedFetch` invokes `logout()` and rejects.
+   - Transport-level errors (DNS, network unreachable, TLS) propagate from `fetch()` unchanged — `authedFetch` does NOT retry or call `logout()` for these. Callers handle transient failures themselves.
+   - Every `logout()`-triggering path emits a structured `logError` with the `[authedFetch]` prefix via `@pelilauta/utils/log` so ops can distinguish infra failures from expected session expiration.
    - No silent failures, no multi-step repair loops.
 
 5. **Logout:**
@@ -96,6 +101,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - **Token-repair loops.** Exactly one retry. Failure means logout.
 - **Custom-claim enforcement from middleware.** Onboarding / EULA redirects are a future concern (see deferred `specs/pelilauta/onboarding/spec.md`). Session spec surfaces claims on `Astro.locals`; policy consumes them.
 - **Divergent cookie verification.** `middleware.ts`, `/api/auth/session` GET, and `/api/auth/status` all resolve SSR identity from the `session` cookie. They MUST delegate to the single shared helper `app/pelilauta/src/utils/resolveSession.ts` (`resolveSessionFromCookie`), which encapsulates `verifySessionCookie(cookie, true)` → `extractCustomClaims` → log-before-degrade catch (only infra errors — non-`auth/*` codes — are logged; both error classes fall through to a `null` identity). Direct calls to `verifySessionCookie` from route handlers or middleware are a regression.
+- **Caller-supplied `Authorization` headers to `authedFetch`.** `authedFetch` owns the Bearer header; any `Authorization` value in the caller's `init.headers` is silently overwritten. Callers MUST NOT attempt to pre-set auth headers — use the `init` argument for other headers only.
 
 ## Contract
 
@@ -105,7 +111,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - [ ] Middleware never issues a redirect based on session state.
 - [ ] `stores/session.ts` exposes `sessionState`, `uid`, and `profile` atoms, with no `localStorage` persistence.
 - [ ] `AuthHandler.svelte` mounts only when `Astro.locals.uid` is non-null at SSR render time.
-- [ ] `authedFetch` attaches the Bearer token, retries 401 responses once with a forced token refresh, and calls `logout()` on repeated failure.
+- [ ] `authedFetch` attaches the Bearer token, retries 401 responses once with a forced token refresh, and invokes `logout()` (with a `[authedFetch]` `logError` from `@pelilauta/utils/log`) on any of: null `currentUser` at entry, `getIdToken()` failure (initial or refresh), or repeated 401. Transport-level `fetch()` errors propagate unchanged.
 - [ ] `/api/auth/session` supports `POST` (cookie set from ID token), `DELETE` (cookie cleared), and `GET` (verify cookie, return uid + claims).
 - [ ] `/api/auth/status` verifies the cookie and returns authoritative `{ loggedIn, uid, claims }` with claims projected via `extractCustomClaims` and responses tagged `Cache-Control: no-store`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope.
 - [ ] Logout clears the cookie, signs out of Firebase, and triggers a full page reload.
@@ -285,6 +291,34 @@ And profile is null
 
 - **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
 
+#### Scenario: authedFetch attaches the Bearer token on the happy path
+
+```gherkin
+Given auth.currentUser has a valid Firebase user
+And an API endpoint returns 200 on the first call
+When authedFetch is invoked against that endpoint
+Then user.getIdToken(false) is called exactly once
+And the request carries "Authorization: Bearer <idToken>"
+And the response is returned as-is with status 200
+And logout() is NOT invoked
+And logError is NOT called
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+
+#### Scenario: authedFetch rejects and logs out when currentUser is null at entry
+
+```gherkin
+Given auth.currentUser is null
+When authedFetch is invoked
+Then no fetch request is issued
+And logout() is invoked
+And logError is called once with a "[authedFetch]" prefix
+And the returned promise rejects with AuthedFetchError
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+
 #### Scenario: authedFetch retries once on 401
 
 ```gherkin
@@ -307,7 +341,36 @@ And returns 401 again after the token is force-refreshed
 When authedFetch is invoked against that endpoint
 Then user.getIdToken(true) is called exactly once
 And logout() is invoked
+And logError is called once with a "[authedFetch]" prefix
 And the returned promise rejects with a clear authentication error
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+
+#### Scenario: authedFetch rejects and logs out when the initial getIdToken throws
+
+```gherkin
+Given auth.currentUser is a valid Firebase user
+And user.getIdToken(false) rejects with a Firebase SDK error
+When authedFetch is invoked
+Then no fetch request is issued
+And logout() is invoked
+And logError is called once with a "[authedFetch]" prefix
+And the returned promise rejects with AuthedFetchError
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+
+#### Scenario: authedFetch rejects and logs out when the refresh getIdToken throws
+
+```gherkin
+Given the first request returned 401
+And user.getIdToken(true) rejects with a Firebase SDK error
+When authedFetch is invoked
+Then fetch is called exactly once (no retry is issued after the refresh failure)
+And logout() is invoked
+And logError is called once with a "[authedFetch]" prefix
+And the returned promise rejects with AuthedFetchError
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
