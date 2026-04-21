@@ -11,7 +11,9 @@ import {
   type Auth,
   browserLocalPersistence,
   getAuth as clientGetAuth,
+  GoogleAuthProvider,
   setPersistence,
+  signInWithPopup,
 } from "firebase/auth";
 import { getFirestore as clientGetFirestore, type Firestore } from "firebase/firestore";
 import { publicConfig } from "../config";
@@ -48,3 +50,5 @@ function applyLocalhostPersistence(auth: Auth): void {
     console.warn("Failed to set auth persistence:", error);
   });
 }
+
+export { GoogleAuthProvider, signInWithPopup };

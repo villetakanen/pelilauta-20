@@ -22,13 +22,13 @@ Before starting the loop, gather the necessary context:
 2. **Specs:** Identify relevant specs in `specs/` for the task domain.
 3. **Constraints:** Read `AGENTS.md` and `CLAUDE.md` for architectural rules (e.g., Astro vs Svelte 5, `--cn-*` tokens).
 
-### Step 2: Dev Cycle
-Implement the task following the **[/dev](file:///.agents/workflows/dev.md)** workflow:
-1. **Plan:** Outline changes and tests.
-2. **Execute:** Modify code and add tests.
+### Step 2: Dev Cycle (Contract First)
+Implement the task following the **[/dev](file:///.agents/workflows/dev.md)** workflow, treating the contract as the absolute prerequisite:
+1. **Contract/Plan:** Before writing application code, identify and write missing spec scenarios, API contracts, and define dependencies. Modify `specs/` first.
+2. **Execute:** Modify application code and add tests that map strictly to the spec scenarios just established.
 3. **Verify:** Run `pnpm check`, `pnpm build`, and `pnpm test`.
 4. **Fix:** Address any failures immediately.
-5. **Summary:** Capture a summary of changes made for the Critic.
+5. **Summary:** Capture a summary of changes made for the Critic, explicitly calling out the updated spec files.
 
 ### Step 3: Critic Cycle
 Perform an adversarial review of the changes using the **[/adversarial-review](file:///.agents/workflows/adversarial-review.md)** workflow:

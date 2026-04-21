@@ -16,6 +16,13 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 - **Host components** (`app/pelilauta/src/`):
   - `pages/login.astro` — SSR-rendered anonymous-only landing page. Simple centered layout with a call-to-action and the login button island. If the request already carries a valid `session` cookie, middleware+page responds with a `302` to `next` (or `/`).
   - `components/auth/LoginButton.svelte` — CSR island that triggers `signInWithPopup(auth, GoogleAuthProvider)`, then `POST /api/auth/session` with the resulting ID token, then triggers a full page reload to `next` (or `/`). This button is the only CSR that `login.astro` ships.
+    - **Styling contract:** Uses the DS `cta` button class and DS tokens (`--cn-grid`, `--cn-color-error`, `--cn-font-size-text-small`). The component MAY define a local `<style>` block only for layout composition (flex stacking of the button + error message); it MUST NOT redefine button, icon, or typography styles — those are DS concerns.
+    - **Error-code mapping:** Firebase popup errors are mapped to curated user-facing messages before display. The mapping table lives inline in the component:
+      - `auth/popup-closed-by-user` → "Sign-in popup was closed. Please try again."
+      - `auth/popup-blocked` → "Popup was blocked by the browser."
+      - `auth/network-request-failed` → "Network error. Please check your connection."
+      - Fallback (any other error, including POST failure) → "Login failed. Please try again."
+    - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` before redirect, falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense.
   - `components/auth/LogoutAction.svelte` (or equivalent) — small CSR island mounted wherever the authenticated chrome exposes "Sign out". Calls `logout()` from the session module; full-page-reload fan-out is session's responsibility.
 
 - **API contracts consumed** (owned by [session/](../session/spec.md)):
@@ -86,6 +93,57 @@ Then the response is a 302 to "/threads"
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/pages/login.test.ts`
+
+#### Scenario: LoginButton triggers popup and posts ID token on success
+
+```gherkin
+Given a mounted LoginButton with next="/threads"
+And signInWithPopup resolves with a Firebase user
+And POST /api/auth/session returns ok
+When the user clicks the button
+Then signInWithPopup is called with GoogleAuthProvider
+And user.getIdToken() is called
+And fetch posts the ID token to "/api/auth/session"
+And window.location.assign is called with "/threads"
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+
+#### Scenario: LoginButton surfaces popup errors inline
+
+```gherkin
+Given signInWithPopup rejects (popup dismissed, blocked, or network)
+When the user clicks the button
+Then an alert-role element displays a curated user-facing message
+And the button is re-enabled
+And no navigation occurs
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+
+#### Scenario: LoginButton surfaces server-POST errors inline
+
+```gherkin
+Given signInWithPopup resolves successfully
+But POST /api/auth/session returns not-ok
+When the user clicks the button
+Then an alert-role element displays "Login failed. Please try again."
+And the button is re-enabled
+And no navigation occurs
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+
+#### Scenario: LoginButton discards unsafe next values
+
+```gherkin
+Given a LoginButton is rendered with next="http://evil.example.com"
+And the login flow succeeds
+When the user clicks the button
+Then window.location.assign is called with "/" (the unsafe next is discarded)
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
 
 #### Scenario: Successful Google login
 

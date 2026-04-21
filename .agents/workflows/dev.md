@@ -12,12 +12,14 @@ The Dev workflow handles the implementation of a task, ensuring it meets functio
 3. **Spec Review:** Read the relevant spec in `specs/`. Check `CLAUDE.md` and `AGENTS.md` for architectural constraints.
 4. **Source Exploration:** Read the source files mentioned in the spec's Architecture section.
 
-## Step 2: Plan the Implementation
-Create a brief plan before modifying code:
-- Identify affected packages/apps.
-- Identify required tests (unit and E2E).
-- Verify package boundaries (`packages/models`, `packages/firebase`, `packages/threads`, `packages/cyan`, `app/pelilauta`).
-- Note the required commit message format (Conventional Commits).
+## Step 2: Contract-Driven Planning (Phase 0)
+Before ANY code is written, you MUST establish the contract. Code cannot lead the spec.
+1. **Update Specs First:** Propose and outline missing Gherkin scenarios, new API contracts, and new tool/package exports in the relevant `specs/**/spec.md` files.
+2. **Identify Dependencies:** Map out which workspace packages will cross-communicate and explicitly state the aliases or workspace deps required.
+3. **Security/Guardrail Check:** State how the plan honors the Regression Guardrails defined in the spec.
+4. **Validation:** Review your contract extensions. Do do they introduce orphan tests? Do they bypass architectural layers?
+
+*Note: If the spec is incomplete for your task, use tools to modify the spec as your very first action.*
 
 ## Step 3: Implement
 Execute the changes:
