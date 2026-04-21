@@ -7,7 +7,8 @@ description: "Dev-Critic loop: implement, review, fix — repeat until clean"
 The Assemble workflow orchestrates a **Dev -> Critic** feedback loop, driving a task from implementation to a clean, verified state.
 
 > [!IMPORTANT]
-> **Sub-Agent Model Policy:** Per user preference, all sub-agent operations (e.g., `browser_subagent` or tasks delegated to sub-processes) should prefer **Gemini 3 Flash** for speed and efficiency, unless high-reasoning (Pro models) is explicitly required for architectural decisions.
+> **Sub-Agent Model Policy:** Per user preference, all sub-agent operations should prefer **Gemini 3 Flash** for speed and efficiency, unless high-reasoning (Pro models) is explicitly required.
+> **DO NOT** use `browser_subagent` or other sandboxed tools to perform the Critic Cycle. Sandbox agents lack terminal/file access to the workspace repository and cannot perform code review. The primary agent MUST perform the Critic review directly.
 
 ## Goal
 
@@ -31,8 +32,9 @@ Implement the task following the **[/dev](file:///.agents/workflows/dev.md)** wo
 
 ### Step 3: Critic Cycle
 Perform an adversarial review of the changes using the **[/adversarial-review](file:///.agents/workflows/adversarial-review.md)** workflow:
-1. **Context:** Provide the Critic with the Task Brief and the Dev Cycle summary.
-2. **Verdict:** Capture the verdict (PASS, PASS WITH NOTES, or FAIL).
+1. **Context:** Run `git diff` and `git diff --cached` using your terminal tools to capture the exact raw code changes. **Do NOT merely use a summary.** The Critic must analyze the actual code.
+2. **Execution:** Evaluate the code changes locally within your own context. Do not spawn a subagent for this.
+3. **Verdict:** Capture the verdict (PASS, PASS WITH NOTES, or FAIL).
 
 ### Step 4: Decision Gate
 Based on the Critic's verdict:

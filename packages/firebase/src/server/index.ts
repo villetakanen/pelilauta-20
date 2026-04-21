@@ -32,3 +32,9 @@ export function getDb(): Firestore {
 export function getAuth(): Auth {
   return adminGetAuth(getApp());
 }
+
+export {
+  createSessionCookie,
+  type SessionCookieOptions,
+  verifySessionCookie,
+} from "./sessionCookie";
