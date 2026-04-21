@@ -21,7 +21,7 @@ The session boundary exists once; every other feature composes against it.
   - `components/auth/AuthHandler.svelte` — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
   - `utils/authedFetch.ts` — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
   - `pages/api/auth/session.ts` — `POST` (login: verify ID token, set cookie), `DELETE` (logout: clear cookie), `GET` (verify cookie, return `{ uid, claims }`).
-  - `pages/api/auth/status.ts` — oracle endpoint. Verifies cookie, reads Firestore for claim backfill, returns authoritative `{ loggedIn, uid, claims }`. Used by client to resolve stale-token races.
+  - `pages/api/auth/status.ts` — oracle endpoint. Verifies cookie and returns authoritative `{ loggedIn, uid, claims }`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope. Used by client to resolve stale-token races.
 
 - **Data models:**
   - `SessionState = 'initial' | 'loading' | 'active' | 'error'`
@@ -249,6 +249,41 @@ And the response sets Cache-Control: no-store
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/pages/api/auth/status.test.ts`
+
+#### Scenario: Session store initializes to anonymous/initial
+
+```gherkin
+Given the session store module is freshly imported (or reset via logout())
+Then sessionState equals "initial"
+And uid is null
+And profile is null
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+
+#### Scenario: Session store transitions through the documented lifecycle
+
+```gherkin
+Given the session store is in "initial" state
+When sessionState is set to "loading", then uid/profile are populated, then sessionState is set to "active"
+Then sessionState equals "active"
+And uid holds the authenticated user's uid
+And profile holds the populated projection
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+
+#### Scenario: logout() clears all session atoms
+
+```gherkin
+Given the session store holds an active uid and profile
+When logout() is invoked
+Then sessionState equals "initial"
+And uid is null
+And profile is null
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
 
 #### Scenario: authedFetch retries once on 401
 

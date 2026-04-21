@@ -62,7 +62,10 @@ Analyze every changed file against **three lenses**:
 
 #### Lens 1: Spec Compliance (Code & Document Health)
 - **Spec Consistency & Completeness:** Does the spec have internal contradictions (e.g. DoD vs Out of Scope)? Does every new test or behavior map to an *already explicitly written* Scenario in the spec? Code must never lead the spec.
+- **Diff Integrity:** Did the commit accidentally delete, orphan, or corrupt adjacent, unrelated scenarios, rules, or test mappings in the spec?
+- **Formatting Consistency:** Do additions to the spec strictly match the existing formatting of the document (e.g., using standard fenced Gherkin ` ```gherkin ` blocks instead of reverting to ad-hoc dashed lists)?
 - Does the code satisfy the spec's Contract (Definition of Done, Scenarios)?
+- **Mutation Authority:** Does the code introduce new state mutators, endpoints, or public exports that the spec does not explicitly authorize? Unsanctioned mutators are violations.
 - Does the code violate any Anti-Patterns documented in the spec?
 - Does the code break any Regression Guardrails?
 - Are there behavioral divergences from what the spec describes?
@@ -73,6 +76,7 @@ Analyze every changed file against **three lenses**:
 - Does the code follow Astro SSR/CSS vs Svelte 5 CSR progressive enhancement architectural constraints defined in `AGENTS.md`?
 - Are there security issues (injection, XSS, exposed secrets, auth bypasses)?
 - **Data Boundaries / Over-fetching:** Are raw external payloads (like opaque tokens or full database records) filtered before being assigned to host state/locals to prevent internal state leakage?
+- **Test Orphan Prevention:** Does every new test cover an *explicitly defined* scenario in the spec? Tests verifying structural code internals or side-effects without a mapping scenario must be flagged.
 - Are there performance anti-patterns (N+1 queries, unbounded loads, memory leaks)?
 - Is error handling appropriate? A `catch` block that gracefully degrades user state *must still log the error* (e.g., `console.error`). Discarding errors entirely masks infrastructure misconfigurations and is considered a "swallowed exception".
 - **Typing Discipline:** Are types used correctly across both source and test files? The use of `any`, `never`, or incorrect type assertions (`as unknown as WrongType`) just to silence the compiler is prohibited.
