@@ -32,6 +32,7 @@ The session boundary exists once; every other feature composes against it.
   - **Cookie** (SSR identity): name `session`, `httpOnly: true`, `secure: true`, `sameSite: 'Lax'`, `path: '/'`, `maxAge: 5 days`. Set via `firebase-admin` `createSessionCookie(idToken, { expiresIn })`. Verified via `verifySessionCookie(cookie, /* checkRevoked */ true)`.
   - **Bearer** (API writes): `Authorization: Bearer <firebase_id_token>` on every mutating API request. Verified via `verifyIdToken()` from [`@pelilauta/firebase/server`](../firebase/spec.md). The session cookie is **irrelevant** to API calls — they stand alone on the bearer token.
   - **Session store consumers** read atoms via nanostore subscriptions. They do **not** write atoms directly — only `AuthHandler` and `logout()` mutate session state.
+  - **Status oracle cache posture:** `/api/auth/status` responses MUST set `Cache-Control: no-store`. The endpoint resolves live session state and must never be cached by intermediaries or the browser.
 
 - **Dependencies:**
   - [`@pelilauta/firebase/server`](../firebase/spec.md) — `verifyIdToken`, `createSessionCookie`, `verifySessionCookie`, admin Firestore for claim reads in the oracle.
@@ -94,6 +95,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - **Persisted `uid` in `localStorage`.** v17's `persistentAtom` approach forced the `isRehydrating` computed helper to exist. v20 resolves `uid` from the verified cookie at SSR time; if the cookie is absent, the user is anonymous. There is no in-between.
 - **Token-repair loops.** Exactly one retry. Failure means logout.
 - **Custom-claim enforcement from middleware.** Onboarding / EULA redirects are a future concern (see deferred `specs/pelilauta/onboarding/spec.md`). Session spec surfaces claims on `Astro.locals`; policy consumes them.
+- **Divergent cookie verification.** `middleware.ts`, `/api/auth/session` GET, and `/api/auth/status` all resolve SSR identity from the `session` cookie. They MUST delegate to the single shared helper `app/pelilauta/src/utils/resolveSession.ts` (`resolveSessionFromCookie`), which encapsulates `verifySessionCookie(cookie, true)` → `extractCustomClaims` → log-before-degrade catch (only infra errors — non-`auth/*` codes — are logged; both error classes fall through to a `null` identity). Direct calls to `verifySessionCookie` from route handlers or middleware are a regression.
 
 ## Contract
 
@@ -105,7 +107,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - [ ] `AuthHandler.svelte` mounts only when `Astro.locals.uid` is non-null at SSR render time.
 - [ ] `authedFetch` attaches the Bearer token, retries 401 responses once with a forced token refresh, and calls `logout()` on repeated failure.
 - [ ] `/api/auth/session` supports `POST` (cookie set from ID token), `DELETE` (cookie cleared), and `GET` (verify cookie, return uid + claims).
-- [ ] `/api/auth/status` verifies the cookie, reads Firestore for claim backfill, and returns authoritative `{ loggedIn, uid, claims }`.
+- [ ] `/api/auth/status` verifies the cookie and returns authoritative `{ loggedIn, uid, claims }` with claims projected via `extractCustomClaims` and responses tagged `Cache-Control: no-store`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope.
 - [ ] Logout clears the cookie, signs out of Firebase, and triggers a full page reload.
 - [ ] Anonymous page loads ship zero bytes of Firebase client SDK, session store, or `AuthHandler`.
 
@@ -196,6 +198,57 @@ And the response status is 204
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/pages/api/auth/session.test.ts`
+
+#### Scenario: Status oracle reports loggedIn=true with uid and custom claims
+
+```gherkin
+Given a GET to "/api/auth/status" with a valid "session" cookie
+When the route handler runs
+Then verifySessionCookie is called with checkRevoked=true
+And the response status is 200
+And the response sets Cache-Control: no-store
+And the response body is { loggedIn: true, uid, claims } where claims contains only custom claims (projected via extractCustomClaims)
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/api/auth/status.test.ts`
+
+#### Scenario: Status oracle reports loggedIn=false for a missing cookie
+
+```gherkin
+Given a GET to "/api/auth/status" with no "session" cookie
+When the route handler runs
+Then verifySessionCookie is NOT called
+And extractCustomClaims is NOT called
+And the response status is 200
+And the response sets Cache-Control: no-store
+And the response body is { loggedIn: false, uid: null, claims: null }
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/api/auth/status.test.ts`
+
+#### Scenario: Status oracle degrades silently on auth/* verification errors
+
+```gherkin
+Given verifySessionCookie rejects with an error whose code starts with "auth/" (revoked, expired, argument-error)
+When the route handler runs
+Then the response body is { loggedIn: false, uid: null, claims: null }
+And extractCustomClaims is NOT called
+And console.error is NOT called
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/api/auth/status.test.ts`
+
+#### Scenario: Status oracle logs infrastructure errors while degrading
+
+```gherkin
+Given verifySessionCookie rejects with an error whose code does NOT start with "auth/"
+When the route handler runs
+Then console.error is called once with a "[api/auth/status]" prefix
+And the response body is { loggedIn: false, uid: null, claims: null }
+And the response sets Cache-Control: no-store
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/api/auth/status.test.ts`
 
 #### Scenario: authedFetch retries once on 401
 

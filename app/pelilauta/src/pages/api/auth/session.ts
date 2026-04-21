@@ -1,11 +1,7 @@
-import {
-  createSessionCookie,
-  extractCustomClaims,
-  verifyIdToken,
-  verifySessionCookie,
-} from "@pelilauta/firebase/server";
+import { createSessionCookie, verifyIdToken } from "@pelilauta/firebase/server";
 import type { APIRoute } from "astro";
 import type { DecodedIdToken } from "firebase-admin/auth";
+import { resolveSessionFromCookie } from "../../../utils/resolveSession";
 
 const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
 
@@ -56,32 +52,12 @@ export const DELETE: APIRoute = async ({ cookies }) => {
 };
 
 export const GET: APIRoute = async ({ cookies }) => {
-  const sessionCookie = cookies.get("session")?.value;
-
-  if (!sessionCookie) {
-    return new Response(JSON.stringify({ uid: null, claims: null }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  try {
-    const decodedClaims = await verifySessionCookie(sessionCookie, true);
-    return new Response(
-      JSON.stringify({
-        uid: decodedClaims.uid,
-        claims: extractCustomClaims(decodedClaims),
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } },
-    );
-  } catch (error) {
-    const code = (error as { code?: string })?.code;
-    if (!code?.startsWith("auth/")) {
-      console.error("[api/auth/session] GET - Unexpected session verification failure", error);
-    }
-    return new Response(JSON.stringify({ uid: null, claims: null }), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
+  const { uid, claims } = await resolveSessionFromCookie(
+    cookies.get("session")?.value,
+    "api/auth/session",
+  );
+  return new Response(JSON.stringify({ uid, claims }), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 };

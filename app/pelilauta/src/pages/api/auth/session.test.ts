@@ -1,6 +1,6 @@
 import * as firebaseServer from "@pelilauta/firebase/server";
-import type { APIContext } from "astro";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { cookiesWithValue, makeApiContext } from "./_testContext";
 import { DELETE, GET, POST } from "./session";
 
 vi.mock("@pelilauta/firebase/server", () => ({
@@ -13,32 +13,6 @@ vi.mock("@pelilauta/firebase/server", () => ({
   }),
 }));
 
-type MockCookies = {
-  get?: ReturnType<typeof vi.fn>;
-  set?: ReturnType<typeof vi.fn>;
-  delete?: ReturnType<typeof vi.fn>;
-};
-
-function makeContext(opts: { cookies?: MockCookies; body?: unknown; bodyRejects?: unknown } = {}): {
-  ctx: APIContext;
-  cookies: MockCookies;
-  request: { json: ReturnType<typeof vi.fn> };
-} {
-  const request = {
-    json: vi.fn(() =>
-      opts.bodyRejects !== undefined
-        ? Promise.reject(opts.bodyRejects)
-        : Promise.resolve(opts.body ?? {}),
-    ),
-  };
-  const cookies = opts.cookies ?? {};
-  return {
-    ctx: { request, cookies } as unknown as APIContext,
-    cookies,
-    request,
-  };
-}
-
 afterEach(() => {
   vi.clearAllMocks();
 });
@@ -49,7 +23,7 @@ describe("/api/auth/session", () => {
   describe("POST (Scenario: Session cookie is set on login)", () => {
     it("verifies the ID token, mints a 5-day cookie, and returns { uid }", async () => {
       const set = vi.fn();
-      const { ctx } = makeContext({
+      const { ctx } = makeApiContext({
         cookies: { set },
         body: { idToken: "valid-id-token" },
       });
@@ -84,7 +58,7 @@ describe("/api/auth/session", () => {
 
     it("returns 400 on missing idToken and does not touch cookies or firebase", async () => {
       const set = vi.fn();
-      const { ctx } = makeContext({ cookies: { set }, body: {} });
+      const { ctx } = makeApiContext({ cookies: { set }, body: {} });
 
       const response = await POST(ctx);
 
@@ -96,7 +70,7 @@ describe("/api/auth/session", () => {
 
     it("returns 400 on invalid JSON body", async () => {
       const set = vi.fn();
-      const { ctx } = makeContext({
+      const { ctx } = makeApiContext({
         cookies: { set },
         bodyRejects: new SyntaxError("bad json"),
       });
@@ -112,7 +86,7 @@ describe("/api/auth/session", () => {
 
     it("returns 401 when verifyIdToken rejects (revoked or expired)", async () => {
       const set = vi.fn();
-      const { ctx } = makeContext({
+      const { ctx } = makeApiContext({
         cookies: { set },
         body: { idToken: "revoked-token" },
       });
@@ -132,7 +106,7 @@ describe("/api/auth/session", () => {
 
     it("returns 500 and logs when createSessionCookie throws", async () => {
       const set = vi.fn();
-      const { ctx } = makeContext({
+      const { ctx } = makeApiContext({
         cookies: { set },
         body: { idToken: "valid-id-token" },
       });
@@ -159,7 +133,7 @@ describe("/api/auth/session", () => {
   describe("DELETE (Scenario: Session cookie is cleared on logout)", () => {
     it("clears the session cookie and returns 204", async () => {
       const del = vi.fn();
-      const { ctx } = makeContext({ cookies: { delete: del } });
+      const { ctx } = makeApiContext({ cookies: { delete: del } });
 
       const response = await DELETE(ctx);
 
@@ -170,8 +144,8 @@ describe("/api/auth/session", () => {
 
   describe("GET", () => {
     it("returns uid + custom claims on a valid cookie", async () => {
-      const { ctx } = makeContext({
-        cookies: { get: vi.fn(() => ({ value: "valid-cookie" })) },
+      const { ctx } = makeApiContext({
+        cookies: cookiesWithValue("valid-cookie"),
       });
 
       vi.mocked(firebaseServer.verifySessionCookie).mockResolvedValue({
@@ -189,8 +163,8 @@ describe("/api/auth/session", () => {
     });
 
     it("returns { uid: null, claims: null } when no cookie is present", async () => {
-      const { ctx } = makeContext({
-        cookies: { get: vi.fn(() => undefined) },
+      const { ctx } = makeApiContext({
+        cookies: cookiesWithValue(),
       });
 
       const response = await GET(ctx);
@@ -200,11 +174,22 @@ describe("/api/auth/session", () => {
       expect(body.uid).toBeNull();
       expect(body.claims).toBeNull();
       expect(firebaseServer.verifySessionCookie).not.toHaveBeenCalled();
+      expect(firebaseServer.extractCustomClaims).not.toHaveBeenCalled();
+    });
+
+    it("treats an empty-string cookie as absent", async () => {
+      const { ctx } = makeApiContext({ cookies: cookiesWithValue("") });
+
+      const response = await GET(ctx);
+      const body = await response.json();
+
+      expect(firebaseServer.verifySessionCookie).not.toHaveBeenCalled();
+      expect(body.uid).toBeNull();
     });
 
     it("downgrades to null identity without logging on auth/* errors", async () => {
-      const { ctx } = makeContext({
-        cookies: { get: vi.fn(() => ({ value: "invalid-cookie" })) },
+      const { ctx } = makeApiContext({
+        cookies: cookiesWithValue("invalid-cookie"),
       });
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -218,14 +203,15 @@ describe("/api/auth/session", () => {
       expect(response.status).toBe(200);
       expect(body.uid).toBeNull();
       expect(body.claims).toBeNull();
+      expect(firebaseServer.extractCustomClaims).not.toHaveBeenCalled();
       expect(errorSpy).not.toHaveBeenCalled();
 
       errorSpy.mockRestore();
     });
 
     it("logs unexpected infrastructure errors (non-auth/* code) while downgrading", async () => {
-      const { ctx } = makeContext({
-        cookies: { get: vi.fn(() => ({ value: "anything" })) },
+      const { ctx } = makeApiContext({
+        cookies: cookiesWithValue("anything"),
       });
       const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 

@@ -60,7 +60,8 @@ Use findings as additional review context, not as hard requirements.
 
 Analyze every changed file against **three lenses**:
 
-#### Lens 1: Spec Compliance
+#### Lens 1: Spec Compliance (Code & Document Health)
+- **Spec Consistency & Completeness:** Does the spec have internal contradictions (e.g. DoD vs Out of Scope)? Does every new test or behavior map to an *already explicitly written* Scenario in the spec? Code must never lead the spec.
 - Does the code satisfy the spec's Contract (Definition of Done, Scenarios)?
 - Does the code violate any Anti-Patterns documented in the spec?
 - Does the code break any Regression Guardrails?
@@ -74,7 +75,8 @@ Analyze every changed file against **three lenses**:
 - **Data Boundaries / Over-fetching:** Are raw external payloads (like opaque tokens or full database records) filtered before being assigned to host state/locals to prevent internal state leakage?
 - Are there performance anti-patterns (N+1 queries, unbounded loads, memory leaks)?
 - Is error handling appropriate? A `catch` block that gracefully degrades user state *must still log the error* (e.g., `console.error`). Discarding errors entirely masks infrastructure misconfigurations and is considered a "swallowed exception".
-- Are types used correctly across **both source and test files** (no `any`, no unsafe casts)?
+- **Typing Discipline:** Are types used correctly across both source and test files? The use of `any`, `never`, or incorrect type assertions (`as unknown as WrongType`) just to silence the compiler is prohibited.
+- **Code Duplication:** Does the diff introduce identical boilerplate, test fixtures, or route logic that already exists in sibling files? Flag duplicated patterns for hoisting to shared utilities to prevent silent drift.
 
 #### Lens 3: Correctness & Edge Cases
 - Are there logic errors, off-by-one bugs, or race conditions?
