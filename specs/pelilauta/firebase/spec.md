@@ -141,6 +141,28 @@ And getFirestore() returns a valid instance
 
 - **Vitest Unit Test:** `packages/firebase/src/client/index.test.ts`
 
+#### Scenario: verifyIdToken wraps firebase-admin with checkRevoked
+
+```gherkin
+Given a valid Firebase ID token
+When verifyIdToken(idToken, true) is called
+Then firebase-admin auth().verifyIdToken is invoked with checkRevoked=true
+And the decoded token (including uid and custom claims) is returned
+```
+
+- **Vitest Unit Test:** `packages/firebase/src/server/tokenToUid.test.ts`
+
+#### Scenario: verifyIdToken rejects an invalid or revoked token
+
+```gherkin
+Given an expired, revoked, or malformed ID token
+When verifyIdToken is called
+Then the underlying firebase-admin error is surfaced to the caller
+And no partial / unverified token payload is returned
+```
+
+- **Vitest Unit Test:** `packages/firebase/src/server/tokenToUid.test.ts`
+
 #### Scenario: createSessionCookie wraps firebase-admin
 
 ```gherkin

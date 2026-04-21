@@ -8,9 +8,9 @@
 export { getApp, getAuth, getDb } from "./app";
 
 export { extractCustomClaims } from "./claims";
-
 export {
   createSessionCookie,
   type SessionCookieOptions,
   verifySessionCookie,
 } from "./sessionCookie";
+export { verifyIdToken } from "./tokenToUid";

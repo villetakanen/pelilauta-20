@@ -22,6 +22,7 @@ Create a brief plan before modifying code:
 ## Step 3: Implement
 Execute the changes:
 - Modify source files.
+- **Spec-Driven Tests:** Tests MUST directly map to scenarios, contracts, and guardrails defined in the spec. Do not write tests that merely codify the current implementation (e.g. asserting structural side-effects of your code rather than the spec's Required outputs).
 - Add or update unit tests (colocated `.test.ts`).
 - Add or update E2E tests (`app/*/e2e/`).
 - Ensure all Design System components are Svelte 5 and 100% SSR-compatible.

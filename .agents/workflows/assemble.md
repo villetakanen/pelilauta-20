@@ -33,8 +33,8 @@ Implement the task following the **[/dev](file:///.agents/workflows/dev.md)** wo
 ### Step 3: Critic Cycle
 Perform an adversarial review of the changes using the **[/adversarial-review](file:///.agents/workflows/adversarial-review.md)** workflow:
 1. **Context:** Run `git diff` and `git diff --cached` using your terminal tools to capture the exact raw code changes. **Do NOT merely use a summary.** The Critic must analyze the actual code.
-2. **Execution:** Evaluate the code changes locally within your own context. Do not spawn a subagent for this.
-3. **Verdict:** Capture the verdict (PASS, PASS WITH NOTES, or FAIL).
+2. **Mandatory Output:** Before deciding the verdict, you **MUST** explicitly generate the structured finding report defined in the `adversarial-review` workflow (listing Violations, Notes, and Gaps) within your internal reasoning, scratchpad, or directly in the chat output. You cannot rubber-stamp a PASS without doing the step-by-step Lens checks explicitly.
+3. **Verdict:** Determine the final verdict (PASS, PASS WITH NOTES, or FAIL) based on those exact explicit findings.
 
 ### Step 4: Decision Gate
 Based on the Critic's verdict:
