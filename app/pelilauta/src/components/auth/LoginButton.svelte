@@ -2,6 +2,7 @@
 import CnIcon from "@cyan/components/CnIcon.svelte";
 import { GoogleAuthProvider, getAuth, signInWithPopup } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";
+import { sanitizeNext } from "@pelilauta/utils/sanitizeNext";
 
 // Error-code mapping per specs/pelilauta/auth/spec.md §Architecture.
 const ERROR_MESSAGES: Record<string, string> = {
@@ -10,15 +11,6 @@ const ERROR_MESSAGES: Record<string, string> = {
   "auth/network-request-failed": "Network error. Please check your connection.",
 };
 const FALLBACK_ERROR = "Login failed. Please try again.";
-
-// Defense in depth per spec §Regression Guardrails. Page-level validation in
-// login.astro is primary; this rejects anything that isn't a same-origin
-// relative path and falls back to "/".
-function sanitizeNext(candidate: string): string {
-  if (!candidate.startsWith("/")) return "/";
-  if (candidate.startsWith("//") || candidate.startsWith("/\\")) return "/";
-  return candidate;
-}
 
 const provider = new GoogleAuthProvider();
 

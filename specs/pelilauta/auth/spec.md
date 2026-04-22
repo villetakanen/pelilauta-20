@@ -22,7 +22,7 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
       - `auth/popup-blocked` → "Popup was blocked by the browser."
       - `auth/network-request-failed` → "Network error. Please check your connection."
       - Fallback (any other error, including POST failure) → "Login failed. Please try again."
-    - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` before redirect, falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense.
+    - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` before redirect, falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense. Both call the shared `sanitizeNext` utility from `src/utils/sanitizeNext.ts`.
   - `components/auth/LogoutAction.svelte` (or equivalent) — small CSR island mounted wherever the authenticated chrome exposes "Sign out". Calls `logout()` from the session module; full-page-reload fan-out is session's responsibility.
 
 - **API contracts consumed** (owned by [session/](../session/spec.md)):
@@ -46,6 +46,7 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 - **Additional identity providers.** Only Google sign-in is in scope for the Login MVP. Email/password, GitHub, Apple, and anonymous-upgrade flows are deferred — each will get its own scenario extension when prioritised.
 - **Session recovery UX (expired cookie during an in-flight action).** Session's `authedFetch` handles the 401 → refresh → retry path silently. Cases where token repair fails mid-action produce a forced logout; there is no "please sign in again to continue this action" modal in MVP.
 - **Password reset, account deletion, email verification.** Not applicable to Google-only sign-in at this stage; will be specced alongside any future email/password provider.
+- **DS primitives.** `login.astro` temporarily uses a local `<style>` block with a `/* DEFERRED */` marker comment; escalate to a cyan DS hero primitive (tracked in `specs/cyan-ds/components/cn-hero/spec.md`, pending) before shipping to prod.
 
 ### Anti-Patterns
 
@@ -92,7 +93,20 @@ When the server processes the request
 Then the response is a 302 to "/threads"
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/pages/login.test.ts`
+- **Playwright E2E Test:** `app/pelilauta/e2e/auth-login-page.spec.ts`
+
+#### Scenario: sanitizeNext enforces same-origin relative paths
+
+```gherkin
+Given a candidate next redirect parameter
+When the candidate is sanitized
+Then null/undefined/empty string becomes "/"
+And absolute URLs (http://, https://) become "/"
+And protocol-relative URLs (//) become "/"
+And safe same-origin relative paths pass through unchanged
+```
+
+- **Vitest Unit Test:** `packages/utils/src/sanitizeNext.test.ts`
 
 #### Scenario: LoginButton triggers popup and posts ID token on success
 
@@ -179,7 +193,7 @@ When an authenticated visitor hits the page
 Then the redirect target is "/" (the unsafe next is discarded)
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/pages/login.test.ts`
+- **Playwright E2E Test:** `app/pelilauta/e2e/auth-login-page.spec.ts`
 
 #### Scenario: Sign-out from authenticated chrome
 

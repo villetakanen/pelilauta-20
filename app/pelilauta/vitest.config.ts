@@ -5,6 +5,7 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   plugins: [svelte(), svelteTesting()],
+  root: import.meta.dirname,
   resolve: {
     alias: {
       "@cyan": path.resolve(import.meta.dirname, "../../packages/cyan/src"),

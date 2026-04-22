@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./log": "./src/log.ts"
+    "./log": "./src/log.ts",
+    "./sanitizeNext": "./src/sanitizeNext.ts"
   },
   "scripts": {
     "test": "vitest run"

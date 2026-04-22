@@ -7,8 +7,8 @@ description: "Dev-Critic loop: implement, review, fix — repeat until clean"
 The Assemble workflow orchestrates a **Dev -> Critic** feedback loop, driving a task from implementation to a clean, verified state.
 
 > [!IMPORTANT]
-> **Sub-Agent Model Policy:** Per user preference, all sub-agent operations should prefer **Gemini 3 Flash** for speed and efficiency, unless high-reasoning (Pro models) is explicitly required.
-> **DO NOT** use `browser_subagent` or other sandboxed tools to perform the Critic Cycle. Sandbox agents lack terminal/file access to the workspace repository and cannot perform code review. The primary agent MUST perform the Critic review directly.
+> **Sub-Agent Context Isolation:** To guarantee an adversarial, unbiased review, the Critic Cycle MUST be executed by spawning a fresh, memory-less sub-agent via the system's CLI.
+> **DO NOT** perform the critic checks yourself in the same chat window. You must delegate to a newly spawned CLI sub-agent via the terminal (`gemini -p "... prompt ..." -m "gemini-3.0-flash" --yolo`) so it is blind to your implementation struggles and workarounds. Preferred model for sub-agents is **Gemini 3 Flash**.
 
 ## Goal
 
@@ -31,10 +31,11 @@ Implement the task following the **[/dev](file:///.agents/workflows/dev.md)** wo
 5. **Summary:** Capture a summary of changes made for the Critic, explicitly calling out the updated spec files.
 
 ### Step 3: Critic Cycle
-Perform an adversarial review of the changes using the **[/adversarial-review](file:///.agents/workflows/adversarial-review.md)** workflow:
-1. **Context:** Run `git diff` and `git diff --cached` using your terminal tools to capture the exact raw code changes. **Do NOT merely use a summary.** The Critic must analyze the actual code.
-2. **Mandatory Output:** Before deciding the verdict, you **MUST** explicitly generate the structured finding report defined in the `adversarial-review` workflow (listing Violations, Notes, and Gaps) within your internal reasoning, scratchpad, or directly in the chat output. You cannot rubber-stamp a PASS without doing the step-by-step Lens checks explicitly.
-3. **Verdict:** Determine the final verdict (PASS, PASS WITH NOTES, or FAIL) based on those exact explicit findings.
+Perform an adversarial review of the changes by spawning a fresh sub-agent to run the **[/adversarial-review](file:///.agents/workflows/adversarial-review.md)** workflow.
+1. **Spawn Critic:** Use terminal execution tools to spawn a head-less CLI sub-agent with an empty context. 
+   - Execute: `gemini -p "Perform an adversarial review of the uncommitted workspace changes following the /adversarial-review workflow." -m "gemini-3.0-flash" --yolo`
+2. **Isolation:** The CLI sub-agent will run the tests, inspect the diffs, and generate a finding report without being influenced by the dev-cycle reasoning.
+3. **Verdict Parsing:** Read the standard output of the command. Extract the structured findings and the final verdict (PASS, PASS WITH NOTES, or FAIL) declared by the CLI sub-agent.
 
 ### Step 4: Decision Gate
 Based on the Critic's verdict:
