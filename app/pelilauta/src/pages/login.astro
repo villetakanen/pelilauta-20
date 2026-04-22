@@ -1,4 +1,6 @@
 ---
+import { sanitizeNext } from "@pelilauta/utils/sanitizeNext";
+import LoginButton from "../components/auth/LoginButton.svelte";
 /**
  * /login — Anonymous-only SSR page.
  *
@@ -8,9 +10,7 @@
  *     store, no Firestore client.
  *   - `next` is validated as same-origin relative before any redirect.
  */
-import Page from "@cyan/layouts/Page.astro";
-import { sanitizeNext } from "@pelilauta/utils/sanitizeNext";
-import LoginButton from "../components/auth/LoginButton.svelte";
+import Page from "../layouts/Page.astro";
 
 const next = sanitizeNext(Astro.url.searchParams.get("next"));
 

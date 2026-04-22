@@ -12,6 +12,7 @@ import {
   browserLocalPersistence,
   getAuth as clientGetAuth,
   GoogleAuthProvider,
+  onAuthStateChanged,
   setPersistence,
   signInWithPopup,
 } from "firebase/auth";
@@ -51,4 +52,4 @@ function applyLocalhostPersistence(auth: Auth): void {
   });
 }
 
-export { GoogleAuthProvider, signInWithPopup };
+export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup };

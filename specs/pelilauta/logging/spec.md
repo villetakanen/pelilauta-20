@@ -20,6 +20,7 @@ Thin structured-logging wrappers over `console.*` that add emoji-prefixed log le
   - `logError(...args: unknown[])` — logs to `console.error`. Always active regardless of environment. Unwraps `ZodError` (recurses on `.issues`). Duck-types errors with a `.code` property (e.g. `FirebaseError`) to log code + message.
   - `logWarn(...args: unknown[])` — logs to `console.warn`. Silent in production unless verbose logging is enabled.
   - `logDebug(...args: unknown[])` — logs to `console.debug`. Silent in production unless verbose logging is enabled.
+  - **Call-site prefixing:** callers concatenate the site identifier into the first string argument — e.g. `logError("[AuthHandler] reconciliation failed", error)`. Separate-argument prefixes (`logError("[AuthHandler]", "message", error)`) are discouraged: downstream aggregators filter on the first arg, and the split form breaks the filter.
 - **Log level gating:**
   - **Production default:** only `logError` produces output. `logWarn` and `logDebug` are no-ops.
   - **Verbose mode:** when `import.meta.env.PUBLIC_LOG_VERBOSE === 'true'`, all three levels produce output. Set via `.env` per environment — e.g. `.env.development` enables it, production `.env` omits it.

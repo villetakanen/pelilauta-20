@@ -15,7 +15,7 @@ Shared Firebase infrastructure within the pnpm workspace, providing initializati
 - **Location:** `packages/firebase/` (workspace package, not independently published)
 - **Exports:**
   - `server/` — firebase-admin initialization, `getFirestore()`, `verifyIdToken()`, admin helpers. Used by Astro frontmatter and API routes for SSR data fetching.
-  - `client/` — firebase/app + firebase/firestore client SDK, `getFirestore()`, `getAuth()`. Used by Svelte components for authenticated writes, `onSnapshot()` real-time listeners, and client-side auth flows. Also re-exports `GoogleAuthProvider` and `signInWithPopup` from `firebase/auth` for auth UX islands (see `specs/pelilauta/auth/spec.md`).
+  - `client/` — firebase/app + firebase/firestore client SDK, `getFirestore()`, `getAuth()`. Used by Svelte components for authenticated writes, `onSnapshot()` real-time listeners, and client-side auth flows. Also re-exports `GoogleAuthProvider`, `signInWithPopup`, and `onAuthStateChanged` from `firebase/auth` for auth UX islands and the `AuthHandler` reconciliation loop (see `specs/pelilauta/auth/spec.md` and `specs/pelilauta/session/spec.md`).
   - `config` — project config (env-backed: `PUBLIC_*` for client, `SECRET_*` for admin)
 
 #### Module Structure
@@ -29,7 +29,7 @@ packages/firebase/
       tokenToUid.ts      → verifyIdToken from Bearer header
       sessionCookie.ts   → createSessionCookie / verifySessionCookie wrappers
     client/
-      index.ts          → initializeApp (firebase/app), getFirestore, getAuth; re-exports GoogleAuthProvider & signInWithPopup
+      index.ts          → initializeApp (firebase/app), getFirestore, getAuth; re-exports GoogleAuthProvider, signInWithPopup, onAuthStateChanged
       toFirestoreEntry.ts → serverTimestamp() conversion for writes
     config.ts            → env var mapping (PUBLIC_projectId, etc.)
 ```
@@ -110,6 +110,7 @@ having to satisfy accessor-level clauses that depend on domain packages.
 - [ ] Server entry exports `verifySessionCookie(cookie, checkRevoked?)` (from `src/server/sessionCookie.ts`), wrapping `firebase-admin` `auth().verifySessionCookie`
 - [ ] Client entry exports the Firestore timestamp conversion helper (`src/client/toFirestoreEntry.ts`)
 - [ ] Client entry re-exports `GoogleAuthProvider` and `signInWithPopup` from `firebase/auth` for use by auth UX islands.
+- [ ] Client entry re-exports `onAuthStateChanged` from `firebase/auth` for use by `AuthHandler`.
 - [ ] Vitest scenarios below are implemented and green
 
 ### Regression Guardrails

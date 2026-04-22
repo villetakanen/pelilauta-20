@@ -17,6 +17,7 @@ The session boundary exists once; every other feature composes against it.
 
 - **Host components** (`app/pelilauta/src/`):
   - `middleware.ts` — SSR-side cookie verification. Populates `Astro.locals.uid` and `Astro.locals.sessionState`. Does **not** gate page access.
+  - `layouts/Page.astro` — app-level wrapper around `@cyan/layouts/Page.astro` that conditionally mounts `AuthHandler` when `Astro.locals.uid` is non-null. Load-bearing for the "anonymous surfaces ship zero CSR for auth" guardrail; pages MUST import this layout, not the cyan one directly.
   - `stores/session.ts` — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence.
   - `components/auth/AuthHandler.svelte` — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
   - `utils/authedFetch.ts` — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
@@ -41,6 +42,7 @@ The session boundary exists once; every other feature composes against it.
 
 - **Constraints:**
   - **Anonymous surfaces ship zero CSR for auth.** If `Astro.locals.uid` is null at SSR time, no session store, no `AuthHandler`, no Firebase client SDK bundle is mounted. This is load-bearing for SEO performance and non-negotiable.
+  - **Pages MUST import `app/pelilauta/src/layouts/Page.astro`, not `@cyan/layouts/Page.astro` directly.** The app layout gates the `AuthHandler` mount on `Astro.locals.uid`; importing the DS layout skips the gate and is a regression of the zero-CSR-for-anonymous guardrail above.
   - **Session cookie is never readable by client JS.** `httpOnly: true` is a regression guardrail. The client reconstructs session knowledge exclusively via `onAuthStateChanged` + `getIdToken()`.
   - **Writes default to API routes.** The authorization model for writes lives in TypeScript inside Astro API routes, not Firestore security rules. Rules express read access; `allow write: if false` is the default, with narrow named carve-outs documented per feature.
   - **No Firebase Cloud Functions.** Server-side logic lives in Astro API routes. See project memory; this is a hard constraint.
@@ -375,15 +377,65 @@ And the returned promise rejects with AuthedFetchError
 
 - **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
 
-#### Scenario: AuthHandler reconciles a stale client session
+#### Scenario: AuthHandler seeds the session store from SSR props on mount
+
+```gherkin
+Given SSR determined the user is active and passed ssrUid + ssrProfile as props
+When AuthHandler mounts
+Then uid, profile, and sessionState atoms are populated synchronously
+And sessionState equals "active"
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+
+#### Scenario: AuthHandler stays quiet when the client session matches SSR
+
+```gherkin
+Given AuthHandler is mounted with ssrUid
+When onAuthStateChanged fires with a user whose uid equals ssrUid
+Then no fetch to /api/auth/status is issued
+And no reload occurs
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+
+#### Scenario: AuthHandler reconciles a stale client session with a live currentUser
 
 ```gherkin
 Given SSR determined the user is active (valid cookie)
-But the client-side Firebase SDK has no current user on mount
-When AuthHandler runs its reconciliation routine
-Then it calls GET "/api/auth/status"
-And if the server reports loggedIn=true, it forces a client token refresh
-And the session store transitions to "active" once reconciliation succeeds
+And auth.currentUser has the same uid as ssrUid but onAuthStateChanged fires with a stale/null snapshot
+And GET /api/auth/status reports loggedIn=true with the matching uid
+When reconciliation runs
+Then user.getIdToken(true) is called to force-refresh the local SDK
+And no reload occurs
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+
+#### Scenario: AuthHandler logs out when the server oracle reports loggedIn=false
+
+```gherkin
+Given AuthHandler is mounted
+And onAuthStateChanged fires with a user that differs from ssrUid (or null)
+And GET /api/auth/status responds with loggedIn=false
+When reconciliation runs
+Then DELETE /api/auth/session is called
+And auth.signOut() is invoked
+And the session store is cleared via logout()
+And window.location.reload() is called
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+
+#### Scenario: AuthHandler logs out when the client has no user and cannot recover
+
+```gherkin
+Given AuthHandler is mounted
+And onAuthStateChanged fires with null
+And GET /api/auth/status reports loggedIn=true with the matching uid
+But auth.currentUser is also null (no token to refresh)
+When reconciliation runs
+Then the authoritative logout path runs (cookie DELETE, signOut, reload)
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`

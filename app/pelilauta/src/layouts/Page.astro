@@ -1,0 +1,36 @@
+---
+import CyanPage from "@cyan/layouts/Page.astro";
+import AuthHandler from "../components/auth/AuthHandler.svelte";
+
+interface Props {
+  title: string;
+  appTitle?: string;
+  shortTitle?: string;
+  layout?: "view" | "sidebar" | "editor" | "modal";
+  trayLabel?: string;
+  backHref?: string;
+  noun?: string;
+  asPageHeading?: boolean;
+}
+
+const { uid } = Astro.locals;
+const props = Astro.props;
+---
+
+<CyanPage {...props}>
+  <slot name="app-background-poster" slot="app-background-poster" />
+  <slot name="tray" slot="tray" />
+  <slot name="actions" slot="actions" />
+  
+  <slot />
+
+  {
+    uid && (
+      <AuthHandler
+        client:load
+        ssrUid={uid}
+        ssrProfile={null /* deferred per specs/pelilauta/session/spec.md §Out of Scope */}
+      />
+    )
+  }
+</CyanPage>
