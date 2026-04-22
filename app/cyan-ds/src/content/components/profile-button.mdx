@@ -1,0 +1,65 @@
+---
+title: ProfileButton
+description: An auth-aware navigation button placed in the AppBar trailing-action slot.
+status: stable
+---
+
+import ProfileButton from "@cyan/components/ProfileButton.svelte";
+
+The `ProfileButton` is the single entry point for identity navigation in all Cyan apps. It switches between a login prompt, a loading skeleton, and an authenticated avatar based on session state.
+
+## Overview
+
+It is typically placed in the `AppBar`'s trailing-action slot and reacts to the user's authentication state.
+
+## State Demo
+
+### Loading
+
+<div style="display: flex; gap: 1rem; align-items: center; padding: 1rem; background: var(--cn-surface-1);">
+  <ProfileButton loading={true} />
+</div>
+
+```svelte
+<ProfileButton loading={true} />
+```
+
+### Authenticated
+
+<div style="display: flex; gap: 1rem; align-items: center; padding: 1rem; background: var(--cn-surface-1);">
+  <ProfileButton nick="CyanUser" photoURL="https://i.pravatar.cc/150?u=5" />
+  <ProfileButton nick="Admin" />
+</div>
+
+```svelte
+<ProfileButton nick="CyanUser" photoURL="https://example.com/avatar.jpg" />
+```
+
+### Anonymous
+
+<div style="display: flex; gap: 1rem; align-items: center; padding: 1rem; background: var(--cn-surface-1);">
+  <ProfileButton />
+</div>
+
+```svelte
+<ProfileButton />
+```
+
+## Props Table
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `loading` | `boolean` | `false` | Session is rehydrating. |
+| `nick` | `string` | `undefined` | Authenticated user's display name. |
+| `photoURL` | `string` | `undefined` | Authenticated user's avatar image URL. |
+| `loginHref` | `string` | `"/login"` | Anonymous login destination. |
+| `settingsHref` | `string` | `"/settings"` | Authenticated settings destination. |
+
+## CSS Token Reference
+
+- `--cn-grid`
+- `--cn-line`
+- `--cn-link`
+- `--cn-hover`
+- `--cn-surface-1`
+- `--cn-surface-2`

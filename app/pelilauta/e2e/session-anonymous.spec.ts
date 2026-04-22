@@ -5,23 +5,24 @@ import { expect, test } from "@playwright/test";
  *
  * Spec: specs/pelilauta/session/spec.md §Testing Scenarios
  *   "Anonymous page ships no Firebase client bundle"
+ * and §Regression Guardrails — "Anonymous surfaces ship zero CSR for auth"
+ * (no session store, no AuthHandler, no AuthChrome, no Firebase client SDK).
  *
- * TODO: implement the bundle-watcher. Intercept network requests during an
- * anonymous navigation to `/` and assert no `firebase/app`, `firebase/auth`,
- * or `firebase/firestore` chunk is fetched, and no AuthHandler island marker
- * is present in the DOM. This guardrail is load-bearing for SEO/perf.
+ * Still skipped pending a stable dev-server harness. When unskipped, the
+ * watcher asserts none of the forbidden chunks load during an anonymous nav.
  */
 test.skip("Anonymous page ships no Firebase client bundle", async ({ page }) => {
-  await page.goto("/");
-  const firebaseRequests: string[] = [];
+  const forbidden: string[] = [];
   page.on("request", (req) => {
     const url = req.url();
-    if (/firebase\/(app|auth|firestore)/.test(url)) {
-      firebaseRequests.push(url);
-    }
+    if (/firebase\/(app|auth|firestore)/.test(url)) forbidden.push(url);
+    if (/stores\/session|AuthChrome|AuthHandler/.test(url)) forbidden.push(url);
   });
+
+  await page.goto("/");
   await page.waitForLoadState("networkidle");
-  expect(firebaseRequests).toEqual([]);
+
+  expect(forbidden).toEqual([]);
   const handlerMarker = await page.locator("[data-auth-handler]").count();
   expect(handlerMarker).toBe(0);
 });

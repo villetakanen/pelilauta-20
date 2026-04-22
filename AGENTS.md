@@ -71,4 +71,8 @@ If you encounter `--cyan-*` or `--color-*` in existing code, flag it as a migrat
 
 ## Apps never override the DS
 
-App pages and app components MUST NOT use inline `style="..."` attributes or page-local `<style>` blocks to define layout, typography, or theming. Missing layout or typography patterns are DS bugs — escalate to `packages/cyan/` and spec a new primitive, do not paper over at the app layer. The sole exception: a feature's spec §Out of Scope may explicitly defer a DS escalation with a tracker link and a `/* DEFERRED */` marker comment; such deferrals are tech debt, not precedent.
+App pages and app components MUST NOT use inline `style="..."` attributes or page-local `<style>` blocks to define layout, typography, or theming. Missing layout or typography patterns are DS bugs — escalate to `packages/cyan/` and spec a new primitive, do not paper over at the app layer.
+
+**Exception (docs site):** `app/cyan-ds/**` MAY use inline styles on demo-swatch wrappers, because demonstrating primitives in varied contexts is the docs site's purpose. Production MDX content (prose, tables, copy) still follows the ban.
+
+**Exception (deferred tech debt):** a feature's spec §Out of Scope may explicitly defer a DS escalation with a tracker link and a `/* DEFERRED */` marker comment; such deferrals are tech debt, not precedent.

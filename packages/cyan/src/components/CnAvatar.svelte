@@ -1,8 +1,8 @@
----
+<script lang="ts">
 import CnIcon from "./CnIcon.svelte";
 
 /**
- * CnAvatar.astro
+ * CnAvatar.svelte
  * A circular avatar primitive that renders an image, initials, or a generic placeholder.
  * Deterministic background colors are derived from the 'nick' prop using OKLCH.
  */
@@ -12,7 +12,7 @@ interface Props {
   size?: "small" | "medium";
 }
 
-const { src, nick, size = "medium" } = Astro.props;
+let { src, nick, size = "medium" }: Props = $props();
 
 /**
  * Deterministic Hash for Background Color (sum of char codes % 100)
@@ -25,45 +25,61 @@ function getNickHash(name: string): number {
   return hash % 100;
 }
 
-const initials = nick ? nick.slice(0, 2).toUpperCase() : "";
-const hash = nick ? getNickHash(nick) : null;
+let initials = $derived(nick ? nick.slice(0, 2).toUpperCase() : "");
+let hash = $derived(nick ? getNickHash(nick) : null);
 
 // Background Color logic: color-mix(in oklch, surface-30, surface-60 {hash}%)
-const backgroundColor =
+let backgroundColor = $derived(
   hash !== null
     ? `color-mix(in oklch, var(--chroma-surface-30), var(--chroma-surface-60) ${hash}%)`
-    : "var(--cn-surface-2)";
+    : "var(--cn-surface-2)",
+);
 
-const avatarSize = size === "small" ? "calc(var(--cn-line) * 1.5)" : "calc(var(--cn-line) * 2)";
-const iconSize = size === "small" ? "small" : "medium";
----
+let avatarSize = $derived(
+  size === "small" ? "calc(var(--cn-line) * 1.5)" : "calc(var(--cn-line) * 2)",
+);
+let iconSize = $derived(size === "small" ? "small" : "medium");
+
+// Reactive image-load failure state. Reset whenever `src` changes so a new
+// URL gets a fresh attempt after a prior failure.
+let imageErrored = $state(false);
+$effect(() => {
+  if (src) imageErrored = false;
+});
+
+let showImage = $derived(!!src && !imageErrored);
+</script>
 
 <div
-  class:list={["cn-avatar", `cn-avatar--${size}`]}
-  style={`--avatar-bg: ${backgroundColor}; --avatar-size: ${avatarSize};`}
+  class="cn-avatar cn-avatar--{size}"
+  style="--avatar-bg: {backgroundColor}; --avatar-size: {avatarSize};"
   role="img"
   aria-label={nick ? `${nick}'s avatar` : "User avatar"}
   data-nick={nick}
   data-size={size}
 >
-  {src && (
-    <img 
-      src={src} 
+  {#if showImage}
+    <img
+      {src}
       alt=""
       aria-hidden="true"
-      loading="lazy" 
+      loading="lazy"
       decoding="async"
       class="cn-avatar__image"
-      onerror="this.style.display='none'; this.nextElementSibling ? this.nextElementSibling.style.display='flex' : null;"
+      onerror={() => (imageErrored = true)}
     />
-  )}
-  
-  <div class="cn-avatar__fallback" aria-hidden="true" style={src ? "display: none;" : "display: flex;"}>
-    {nick ? (
+  {/if}
+
+  <div
+    class="cn-avatar__fallback"
+    aria-hidden="true"
+    style={showImage ? "display: none;" : "display: flex;"}
+  >
+    {#if nick}
       <span class="cn-avatar__initials">{initials}</span>
-    ) : (
+    {:else}
       <CnIcon noun="avatar" size={iconSize} />
-    )}
+    {/if}
   </div>
 </div>
 
