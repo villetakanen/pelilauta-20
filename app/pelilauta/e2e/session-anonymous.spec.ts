@@ -8,10 +8,14 @@ import { expect, test } from "@playwright/test";
  * and §Regression Guardrails — "Anonymous surfaces ship zero CSR for auth"
  * (no session store, no AuthHandler, no AuthChrome, no Firebase client SDK).
  *
- * Still skipped pending a stable dev-server harness. When unskipped, the
- * watcher asserts none of the forbidden chunks load during an anonymous nav.
+ * Two complementary assertions:
+ *   1. Network — no request URL matches a forbidden chunk (firebase SDK,
+ *      session store, or auth CSR components).
+ *   2. DOM — no `<astro-island>` element references an auth CSR component.
+ *      `AuthHandler` is headless (no visible UI), so the island wrapper is
+ *      the only reliable signal it was mounted.
  */
-test.skip("Anonymous page ships no Firebase client bundle", async ({ page }) => {
+test("Anonymous page ships no Firebase client bundle", async ({ page }) => {
   const forbidden: string[] = [];
   page.on("request", (req) => {
     const url = req.url();
@@ -23,6 +27,7 @@ test.skip("Anonymous page ships no Firebase client bundle", async ({ page }) => 
   await page.waitForLoadState("networkidle");
 
   expect(forbidden).toEqual([]);
-  const handlerMarker = await page.locator("[data-auth-handler]").count();
-  expect(handlerMarker).toBe(0);
+
+  const authIslandCount = await page.locator('astro-island[component-url*="Auth"]').count();
+  expect(authIslandCount).toBe(0);
 });

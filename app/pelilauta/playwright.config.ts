@@ -5,7 +5,9 @@ export default defineConfig({
   webServer: {
     command: "pnpm dev",
     port: 4321,
-    reuseExistingServer: false,
+    // Reuse a running dev server locally (so devs can keep `pnpm dev` open
+    // alongside `pnpm test:e2e`); CI always starts a fresh one.
+    reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
   use: {
