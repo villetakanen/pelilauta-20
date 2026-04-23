@@ -12,13 +12,7 @@
 import { getAuth, onAuthStateChanged } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";
 import { onMount } from "svelte";
-import {
-  logout as clearSessionStore,
-  profile,
-  type SessionProfile,
-  sessionState,
-  uid,
-} from "../../stores/session";
+import { fullLogout, profile, type SessionProfile, sessionState, uid } from "../../stores/session";
 
 interface Props {
   ssrUid: string;
@@ -26,23 +20,6 @@ interface Props {
 }
 
 let { ssrUid, ssrProfile }: Props = $props();
-
-/**
- * fullLogout — authoritative exit. Clears cookie, signs out, and reloads.
- * Load-bearing: the reload flips the next SSR paint to anonymous.
- */
-async function performLogout() {
-  try {
-    await fetch("/api/auth/session", { method: "DELETE" });
-    const auth = getAuth();
-    await auth.signOut();
-  } catch (e) {
-    logError("[AuthHandler] Error during logout flow", e);
-  } finally {
-    clearSessionStore();
-    window.location.reload();
-  }
-}
 
 /**
  * reconcile — checks the server's opinion of the session when the client
@@ -57,7 +34,7 @@ async function reconcile() {
 
     if (!loggedIn || serverUid !== ssrUid) {
       // Server no longer recognizes this session.
-      await performLogout();
+      await fullLogout();
       return;
     }
 
@@ -70,11 +47,11 @@ async function reconcile() {
       // No user at all even after server said we're logged in.
       // It's possible the SDK is still initializing, but onAuthStateChanged(null)
       // is our signal that it has already failed to find a local session.
-      await performLogout();
+      await fullLogout();
     }
   } catch (e) {
     logError("[AuthHandler] reconciliation failed", e);
-    await performLogout();
+    await fullLogout();
   }
 }
 

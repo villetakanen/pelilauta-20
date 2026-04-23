@@ -20,7 +20,9 @@ The session boundary exists once; every other feature composes against it.
   - `layouts/Page.astro` — app-level wrapper around `@cyan/layouts/Page.astro` that conditionally mounts `AuthHandler` and `AuthChrome` when `Astro.locals.uid` is non-null. On anonymous paints it renders a **static** `<ProfileButton />` (no `client:load`). Load-bearing for the "anonymous surfaces ship zero CSR for auth" guardrail; pages MUST import this layout, not the cyan one directly.
   - `components/auth/AuthChrome.svelte` — CSR island that renders `ProfileButton` in the `AppBar` actions slot. Reads (does not write) the session store; falls back to an SSR-seeded `ssrProfile` prop to prevent hydration flash between SSR paint and store hydration. Mounted by `layouts/Page.astro` ONLY when `Astro.locals.uid` is non-null. Anonymous pages render a static server-side `ProfileButton` directly (no `client:load`), not this island — see §Regression Guardrails.
   - `utils/projectProfile.ts` — pure helper that narrows untyped `claims` into a `SessionProfile`. Google OIDC `name`/`picture` fields only; non-Google providers are deferred per `../auth/spec.md` §Out of Scope.
-  - `stores/session.ts` — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence.
+  - `stores/session.ts` — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence. Exports two sanctioned mutators:
+    - `logout()` — clears atoms only. Used by `authedFetch` on recoverable drift (null `currentUser`, `getIdToken` failure, repeated 401).
+    - `fullLogout()` — authoritative exit: `DELETE /api/auth/session` → Firebase `signOut()` → clear atoms → `window.location.reload()`. Used by `AuthHandler` on any reconcile failure, and by `LogoutAction.svelte`. `fullLogout()` is the single entry point for any UI affordance that ends a session.
   - `components/auth/AuthHandler.svelte` — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
   - `utils/authedFetch.ts` — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
   - `pages/api/auth/session.ts` — `POST` (login: verify ID token, set cookie), `DELETE` (logout: clear cookie), `GET` (verify cookie, return `{ uid, claims }`).
@@ -82,9 +84,11 @@ The session boundary exists once; every other feature composes against it.
    - No silent failures, no multi-step repair loops.
 
 5. **Logout:**
-   - `DELETE /api/auth/session` clears the cookie.
-   - `auth.signOut()` clears Firebase client state.
-   - Full page reload to the current path (or `/` if the current path requires auth). The reload guarantees the next paint is anonymous-SSR with no CSR bundle mounted.
+   - UI affordances (e.g. `LogoutAction.svelte`) call `fullLogout()` from `stores/session.ts`. `AuthHandler` also calls `fullLogout()` when reconciliation determines the server no longer recognises the session.
+   - `fullLogout()` runs the fan-out in order: `DELETE /api/auth/session` clears the cookie, `auth.signOut()` clears Firebase client state, the session atoms are cleared via `logout()`, and `window.location.reload()` forces a full page reload.
+   - The reload guarantees the next paint is anonymous-SSR with no CSR bundle mounted.
+   - **Partial-failure contract:** If `DELETE /api/auth/session` throws or returns non-ok, `fullLogout()` sets `sessionState = 'error'` and returns WITHOUT calling `auth.signOut()`, `logout()`, or `window.location.reload()`. Atoms are preserved. Rationale: reloading while the server-side cookie is still valid would re-authenticate the user on the next SSR paint and make "Sign out" look silently broken. UI affordances observe `sessionState === 'error'` and surface a retry prompt.
+   - If `DELETE` succeeds but `auth.signOut()` throws, `fullLogout()` logs the failure and proceeds with `logout()` + reload. The cookieless reload paints anonymous regardless of local Firebase SDK state, so the residual client state is harmless.
 
 ### Out of Scope (deferred to future specs)
 
@@ -106,6 +110,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - **Custom-claim enforcement from middleware.** Onboarding / EULA redirects are a future concern (see deferred `specs/pelilauta/onboarding/spec.md`). Session spec surfaces claims on `Astro.locals`; policy consumes them.
 - **Divergent cookie verification.** `middleware.ts`, `/api/auth/session` GET, and `/api/auth/status` all resolve SSR identity from the `session` cookie. They MUST delegate to the single shared helper `app/pelilauta/src/utils/resolveSession.ts` (`resolveSessionFromCookie`), which encapsulates `verifySessionCookie(cookie, true)` → `extractCustomClaims` → log-before-degrade catch (only infra errors — non-`auth/*` codes — are logged; both error classes fall through to a `null` identity). Direct calls to `verifySessionCookie` from route handlers or middleware are a regression.
 - **Caller-supplied `Authorization` headers to `authedFetch`.** `authedFetch` owns the Bearer header; any `Authorization` value in the caller's `init.headers` is silently overwritten. Callers MUST NOT attempt to pre-set auth headers — use the `init` argument for other headers only.
+- **Value imports of `stores/session.ts` from anonymous surfaces.** The store transitively depends on `@pelilauta/firebase/client` (via `fullLogout`). Modules reachable from an anonymous page MUST NOT value-import from the session store — only `import type` is safe (erased at compile). A value import from an anonymous-reachable module is a bundle regression against "Anonymous surfaces ship zero CSR for auth".
 
 ## Contract
 
@@ -291,6 +296,33 @@ When logout() is invoked
 Then sessionState equals "initial"
 And uid is null
 And profile is null
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+
+#### Scenario: fullLogout halts on cookie DELETE failure
+
+```gherkin
+Given the session store holds an active uid and profile
+And DELETE /api/auth/session throws OR returns non-ok
+When fullLogout is invoked
+Then auth.signOut is NOT called
+And logout() is NOT called (uid and profile are preserved)
+And window.location.reload is NOT called
+And sessionState equals "error"
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+
+#### Scenario: fullLogout proceeds on signOut failure after cookie clear
+
+```gherkin
+Given DELETE /api/auth/session returns ok
+But auth.signOut rejects
+When fullLogout is invoked
+Then logError is called once with a "[fullLogout]" prefix
+And logout() is called (atoms are cleared)
+And window.location.reload is called exactly once
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`

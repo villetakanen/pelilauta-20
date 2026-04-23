@@ -23,7 +23,10 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
       - `auth/network-request-failed` → "Network error. Please check your connection."
       - Fallback (any other error, including POST failure) → "Login failed. Please try again."
     - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` before redirect, falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense. Both call the shared `sanitizeNext` utility from `src/utils/sanitizeNext.ts`.
-  - `components/auth/LogoutAction.svelte` (or equivalent) — small CSR island mounted wherever the authenticated chrome exposes "Sign out". Calls `logout()` from the session module; full-page-reload fan-out is session's responsibility.
+  - `components/auth/LogoutAction.svelte` — small CSR island that renders a "Sign out" button. On click it calls `fullLogout()` from `stores/session.ts` (the authoritative exit: cookie DELETE → Firebase `signOut()` → clear atoms → full page reload). Hosted by `pages/settings.astro` (see below); may be hosted elsewhere in authenticated chrome in the future.
+    - **Styling contract:** Uses the DS `cta` button class and DS tokens (`--cn-grid`, `--cn-color-error`, `--cn-font-size-text-small`). The component MAY define a local `<style>` block only for layout composition (stacking the button + error message) — matching `LoginButton`'s exception; it MUST NOT redefine button or typography styles.
+    - **Busy state:** While `fullLogout()` is in flight, the button is disabled and repeat clicks are coalesced (single invocation). On the happy path the component unmounts before the reload. On the partial-failure path (`sessionState === 'error'`, see [session/spec.md](../session/spec.md) §Authentication Flow step 5), the button re-enables and an inline `role="alert"` element surfaces a retry prompt.
+  - `pages/settings.astro` — authenticated-only SSR page. Anonymous visitors are redirected to `/login?next=/settings`. Hosts `LogoutAction` (MVP content); richer settings UI is out of scope for this spec. ProfileButton's authenticated state links here.
 
 - **API contracts consumed** (owned by [session/](../session/spec.md)):
   - `POST /api/auth/session` — converts a Firebase ID token into a session cookie.
@@ -46,7 +49,7 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 - **Additional identity providers.** Only Google sign-in is in scope for the Login MVP. Email/password, GitHub, Apple, and anonymous-upgrade flows are deferred — each will get its own scenario extension when prioritised.
 - **Session recovery UX (expired cookie during an in-flight action).** Session's `authedFetch` handles the 401 → refresh → retry path silently. Cases where token repair fails mid-action produce a forced logout; there is no "please sign in again to continue this action" modal in MVP.
 - **Password reset, account deletion, email verification.** Not applicable to Google-only sign-in at this stage; will be specced alongside any future email/password provider.
-- **DS primitives.** `login.astro` temporarily uses a local `<style>` block with a `/* DEFERRED */` marker comment; escalate to a cyan DS hero primitive (tracked in `specs/cyan-ds/components/cn-hero/spec.md`, pending) before shipping to prod.
+- **DS primitives.** `login.astro` and `settings.astro` temporarily use local `<style>` blocks with `/* DEFERRED */` marker comments. Both escalate to a cyan DS section/hero primitive (tracked in `specs/cyan-ds/components/cn-hero/spec.md`, pending) before shipping to prod. No new pages in this spec are permitted to use the escape hatch.
 
 ### Anti-Patterns
 
@@ -62,7 +65,7 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 - [ ] `/login` renders as an anonymous SSR page with no Firebase SDK bundle beyond the login button's own needs.
 - [ ] A valid `session` cookie on an incoming request to `/login` produces a `302` redirect to `next` (validated) or `/`.
 - [ ] `LoginButton` performs `signInWithPopup`, posts the resulting ID token to `/api/auth/session`, and triggers a full page reload on success.
-- [ ] Sign-out UI is present in authenticated chrome and calls into session's `logout()`.
+- [ ] Sign-out UI is present in authenticated chrome (`LogoutAction` hosted on `/settings`) and calls into session's `fullLogout()`.
 - [ ] Login-failure feedback is surfaced inline on `/login` (error message, button re-enabled).
 
 ### Regression Guardrails
@@ -195,12 +198,57 @@ Then the redirect target is "/" (the unsafe next is discarded)
 
 - **Playwright E2E Test:** `app/pelilauta/e2e/auth-login-page.spec.ts`
 
+#### Scenario: LogoutAction triggers fullLogout on click
+
+```gherkin
+Given a mounted LogoutAction
+When the user clicks the sign-out button
+Then session.fullLogout() is invoked exactly once
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LogoutAction.test.ts`
+
+#### Scenario: LogoutAction coalesces repeat clicks while logout is in flight
+
+```gherkin
+Given a mounted LogoutAction
+When the user clicks the sign-out button three times in rapid succession
+Then session.fullLogout() is invoked exactly once
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LogoutAction.test.ts`
+
+#### Scenario: LogoutAction surfaces the error state when sign-out fails
+
+```gherkin
+Given a mounted LogoutAction
+When the user clicks the sign-out button
+And session.fullLogout() transitions sessionState to "error"
+Then the button is re-enabled
+And an alert-role element displays "Sign-out failed. Please try again."
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LogoutAction.test.ts`
+
+#### Scenario: /settings redirects anonymous visitors to /login
+
+```gherkin
+Given an anonymous request to "/settings"
+When the page frontmatter runs
+Then the response is a 302 to "/login?next=/settings"
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/settings.test.ts`
+- **Playwright E2E Test:** `app/pelilauta/e2e/auth-settings-gated.spec.ts`
+
 #### Scenario: Sign-out from authenticated chrome
 
 ```gherkin
-Given a signed-in user on any authenticated page
+Given a signed-in user navigates to /settings
 When they activate the sign-out affordance
-Then session.logout() is invoked
+Then DELETE /api/auth/session is called
+  And firebase.auth().signOut() is invoked
+  And the browser performs a full page reload
   And the resulting paint is anonymous SSR (no Firebase client bundle)
 ```
 

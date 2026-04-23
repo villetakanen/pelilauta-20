@@ -1,0 +1,36 @@
+---
+import LogoutAction from "../components/auth/LogoutAction.svelte";
+/**
+ * /settings — Authenticated-only SSR page (MVP).
+ *
+ * Spec: specs/pelilauta/auth/spec.md §Host components → pages/settings.astro.
+ *   - Anonymous visitors are redirected to /login?next=/settings.
+ *   - Hosts LogoutAction. Richer settings UI is out of scope for this spec.
+ */
+import Page from "../layouts/Page.astro";
+import { redirectIfAnonymous } from "../utils/authenticatedPageGuard";
+
+const gate = redirectIfAnonymous(Astro.locals.uid, "/settings");
+if (gate) return Astro.redirect(gate.path, gate.status);
+---
+
+<Page title="Settings — Pelilauta" layout="view" noun="account">
+  <section class="settings-page">
+    <h1>Settings</h1>
+    <p>Sign out to return to the anonymous experience.</p>
+    <LogoutAction client:load />
+  </section>
+</Page>
+
+<style>
+  /* DEFERRED: escalate to cyan DS section primitive before shipping to prod.
+     Tracked in specs/cyan-ds/components/cn-hero/spec.md (reuse for structured
+     authenticated pages). See specs/pelilauta/auth/spec.md §Out of Scope. */
+  .settings-page {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--cn-grid) * 2);
+    padding: var(--cn-gap);
+    max-width: 60ch;
+  }
+</style>
