@@ -7,10 +7,12 @@
 
 import { expect, test } from "@playwright/test";
 
+// Heading is localised via t("threads:title"); default locale is `fi`
+// ("Keskustelut"), but match both so the test survives a locale flip.
 const threadsRegion = (page: import("@playwright/test").Page) =>
   page
     .locator("section.cn-content-triad div")
-    .filter({ has: page.getByRole("heading", { name: "Threads", level: 2 }) });
+    .filter({ has: page.getByRole("heading", { name: /Threads|Keskustelut/i, level: 2 }) });
 
 test.describe("TopThreadsStream", () => {
   test("renders at most 5 thread cards", async ({ page }) => {

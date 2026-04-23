@@ -4,7 +4,9 @@ test.describe("Front Page", () => {
   test("renders all three triad regions with at least 3 cards each", async ({ page }) => {
     await page.goto("/");
 
-    for (const heading of ["Threads", "Blog-roll", "Latest sites"]) {
+    // Threads heading is localised (fi default → "Keskustelut"); Blog-roll
+    // and Latest sites are hardcoded English in index.astro.
+    for (const heading of [/Threads|Keskustelut/i, /Blog-roll/i, /Latest sites/i]) {
       const section = page.locator("section.cn-content-triad").first();
       const region = section
         .locator("div")
