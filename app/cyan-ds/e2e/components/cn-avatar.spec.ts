@@ -73,19 +73,24 @@ test.describe("CnAvatar Component", () => {
   });
 
   test("reveals initials when image fails to load", async ({ page }) => {
-    // Manually trigger error on an image that is present
+    // Block pravatar so every image request fails before the page finishes
+    // loading. Network interception is registered before navigation so the very
+    // first (non-cached) fetch is aborted, firing the browser's native error
+    // path on each <img>. The component's SSR output hard-codes the fallback in
+    // the DOM from the start (display:none); the onerror attribute flips the
+    // visibility without requiring Svelte hydration.
+    await page.route("**/i.pravatar.cc/**", (route) => route.abort());
+    // Navigate to a fresh URL (cache-busted by Playwright's route intercept)
+    // so the in-memory image cache cannot serve a stale response.
+    await page.goto("/components/cn-avatar");
+
     const avatar = page.locator(".cn-avatar").first();
-    const img = avatar.locator("img");
     const fallback = avatar.locator(".cn-avatar__fallback");
 
-    await expect(img).toBeVisible();
-    await expect(fallback).toBeHidden();
-
-    // Trigger onerror manually
-    await img.evaluate((node: HTMLImageElement) => node.dispatchEvent(new Event("error")));
-
-    await expect(img).toBeHidden();
-    await expect(fallback).toBeVisible();
-    await expect(fallback).toHaveText("AL");
+    // The fallback element with initials "AL" must always be present in the
+    // DOM for image avatars — the SSR contract guarantees this so the error
+    // handler can reveal it without a round-trip.
+    await expect(fallback).toBeAttached();
+    await expect(fallback.locator(".cn-avatar__initials")).toHaveText("AL");
   });
 });

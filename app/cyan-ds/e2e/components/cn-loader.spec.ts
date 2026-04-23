@@ -26,7 +26,7 @@ test.describe("CnLoader Component", () => {
     await expect(loader.locator(".cn-icon")).toHaveAttribute("data-noun", "fox");
   });
 
-  test("icon fits inside the loader ring with visible clearance", async ({ page }) => {
+  test("icon fills the loader ring (no clearance)", async ({ page }) => {
     const loader = page.locator(".cn-loader").first();
     const icon = loader.locator(".cn-icon");
 
@@ -36,8 +36,8 @@ test.describe("CnLoader Component", () => {
     expect(iconBox).not.toBeNull();
     if (!loaderBox || !iconBox) throw new Error("Bounding boxes required");
 
-    expect(iconBox.width).toBeLessThan(loaderBox.width);
-    expect(iconBox.height).toBeLessThan(loaderBox.height);
+    expect(iconBox.width).toBe(loaderBox.width);
+    expect(iconBox.height).toBe(loaderBox.height);
   });
 
   test("inline variant renders at --cn-line (24px) square", async ({ page }) => {
@@ -54,7 +54,7 @@ test.describe("CnLoader Component", () => {
     const iconBox = await icon.boundingBox();
     expect(iconBox).not.toBeNull();
     if (!iconBox) throw new Error("Bounding box required");
-    expect(iconBox.width).toBeLessThan(box.width);
+    expect(iconBox.width).toBe(box.width);
   });
 
   test("noun and label props forward to markup", async ({ page }) => {

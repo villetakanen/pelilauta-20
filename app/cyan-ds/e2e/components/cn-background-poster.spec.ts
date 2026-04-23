@@ -34,16 +34,16 @@ test.describe("CnBackgroundPoster", () => {
     expect(filter === "none" || filter === "").toBeTruthy();
   });
 
-  test("light theme: image opacity 0.55 with sepia(50%)", async ({ page }) => {
+  test("light theme: image opacity 0.72 with no filter", async ({ page }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto("/components/cn-background-poster");
 
     const img = page.locator("#cn-background-poster img").first();
-    await expect(img).toHaveCSS("opacity", "0.55");
+    await expect(img).toHaveCSS("opacity", "0.72");
 
     const filter = await img.evaluate((el) => window.getComputedStyle(el).filter);
-    // sepia(50%) may normalize to sepia(0.5) or similar across browsers.
-    expect(filter).toMatch(/sepia/);
+    // Browsers serialize an unset filter as "none".
+    expect(filter === "none" || filter === "").toBeTruthy();
   });
 });
