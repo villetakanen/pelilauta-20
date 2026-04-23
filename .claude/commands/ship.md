@@ -36,8 +36,11 @@ Run in parallel:
 - `pnpm check` — Biome lint + format
 - `pnpm build` — Full build
 - `pnpm test` — Vitest unit tests
+- `pnpm test:e2e` — Playwright E2E tests
 
-All three must pass. On failure: report which gate failed with the error output and stop. Do not attempt to fix — that is the developer's job.
+All four must pass. On failure: report which gate failed with the error output and stop. Do not attempt to fix — that is the developer's job.
+
+**Pre-existing failures are NOT a pass.** If red tests predate this change (e.g. drift between test expectations and current code), stop and ask the user how to handle it: (a) fix the failing tests first, (b) skip/mark the known-broken test with a tracking note, or (c) explicitly ship-anyway with user confirmation. Never pick (c) without the user's explicit say-so in this turn.
 
 ### Step 3 — Spec Verification
 
