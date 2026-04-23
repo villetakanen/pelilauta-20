@@ -3,7 +3,7 @@ import type { App } from "firebase-admin/app";
 import { cert, getApps, initializeApp, type ServiceAccount } from "firebase-admin/app";
 import { type Auth, getAuth as adminGetAuth } from "firebase-admin/auth";
 import { getFirestore as adminGetFirestore, type Firestore } from "firebase-admin/firestore";
-import { buildServiceAccount, serverAppOptions } from "../config";
+import { buildServiceAccount, serverAppOptions } from "../config-server";
 
 let _app: App | undefined;
 

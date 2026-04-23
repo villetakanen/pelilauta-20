@@ -31,7 +31,8 @@ packages/firebase/
     client/
       index.ts          → initializeApp (firebase/app), getFirestore, getAuth; re-exports GoogleAuthProvider, signInWithRedirect, getRedirectResult, onAuthStateChanged
       toFirestoreEntry.ts → serverTimestamp() conversion for writes
-    config.ts            → env var mapping (PUBLIC_projectId, etc.)
+    config.ts            → client-safe env var mapping (PUBLIC_* accessors). MUST NOT reference process/fs/dotenv — imported by client bundle.
+    config-server.ts     → server-only env loading (dotenv) + buildServiceAccount/serverAppOptions. NEVER imported by client entry.
 ```
 
 - **Dependencies:**
@@ -74,6 +75,7 @@ below as authoritative; do not rename.
 | `SECRET_token_uri` | Server | Service account token URI |
 | `SECRET_auth_provider_x509_cert_url` | Server | Service account auth provider cert URL |
 | `SECRET_client_x509_cert_url` | Server | Service account client cert URL |
+| `SECRET_e2e_seed_secret` | Server | Test-only seed route secret — MUST be unset in prod. Dev-only E2E fixture authentication. See session spec §Test-only seed route. |
 
 A `.env.example` at the repo root documents the full set for local dev. The
 v17 dev Firebase project is the canonical dev target — no emulator.

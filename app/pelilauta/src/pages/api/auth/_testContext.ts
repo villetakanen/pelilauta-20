@@ -8,14 +8,23 @@ export type MockCookies = {
 };
 
 export function makeApiContext(
-  opts: { cookies?: MockCookies; body?: unknown; bodyRejects?: unknown } = {},
+  opts: {
+    cookies?: MockCookies;
+    body?: unknown;
+    bodyRejects?: unknown;
+    headers?: Record<string, string>;
+  } = {},
 ): { ctx: APIContext; cookies: MockCookies; request: { json: ReturnType<typeof vi.fn> } } {
+  const headerMap = new Map(Object.entries(opts.headers ?? {}));
   const request = {
     json: vi.fn(() =>
       opts.bodyRejects !== undefined
         ? Promise.reject(opts.bodyRejects)
         : Promise.resolve(opts.body ?? {}),
     ),
+    headers: {
+      get: vi.fn((key: string) => headerMap.get(key.toLowerCase()) ?? null),
+    },
   };
   const cookies = opts.cookies ?? {};
   return {

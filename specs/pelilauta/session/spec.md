@@ -27,6 +27,13 @@ The session boundary exists once; every other feature composes against it.
   - `utils/authedFetch.ts` — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
   - `pages/api/auth/session.ts` — `POST` (login: verify ID token, set cookie), `DELETE` (logout: clear cookie), `GET` (verify cookie, return `{ uid, claims }`).
   - `pages/api/auth/status.ts` — oracle endpoint. Verifies cookie and returns authoritative `{ loggedIn, uid, claims }`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope. Used by client to resolve stale-token races.
+  - `pages/api/test/seed-session.ts` — **dev-only** seed route for E2E fixtures. Accepts `{ uid, claims? }`, mints a Firebase custom token, exchanges it via the Identity Toolkit REST API for an ID token, and issues a real session cookie. Used by `app/pelilauta/e2e/fixtures/auth.ts` to plant authenticated sessions for Playwright tests.
+    - **Triple-layer defense** (fail-closed in this order):
+      1. `import.meta.env.DEV` must be true (production builds return 404 before any further logic).
+      2. `SECRET_e2e_seed_secret` env var must be set (returns 500 if missing — prevents accidental prod deployment of a dev build).
+      3. Request must carry `X-E2E-Seed-Secret` matching the env var (returns 401 otherwise).
+    - The route issues a *real* session cookie via the same `createSessionCookie` admin call as `/api/auth/session`. Middleware verifies planted cookies identically — no forgery, no verification bypass.
+    - The `SECRET_e2e_seed_secret` env var MUST be unset in production environments. Defense-in-depth: even if a dev build were accidentally deployed, the missing env var would fail Layer 2.
 
 - **Data models:**
   - `SessionState = 'initial' | 'loading' | 'active' | 'error'`
@@ -550,4 +557,27 @@ And the browser performs a full navigation (not a client-side route change)
 And the subsequent paint contains no Firebase client bundle
 ```
 
-- **Playwright E2E Test:** `app/pelilauta/e2e/session-logout.spec.ts`
+- **Playwright E2E Test:** `app/pelilauta/e2e/auth-logout.spec.ts`
+
+#### Scenario: Test-only seed route is closed in production builds
+
+```gherkin
+Given a production Astro build (import.meta.env.DEV === false)
+When POST /api/test/seed-session is called with any payload
+Then the response is 404 before any env var or body parsing occurs
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/api/test/seed-session.test.ts`
+
+#### Scenario: Seeded session enables authenticated E2E flows
+
+```gherkin
+Given a Playwright test using the loginAs fixture with { uid: "e2e-test-user-1" }
+When the fixture plants the session cookie returned by /api/test/seed-session
+And the page navigates to "/"
+Then Astro.locals.uid equals "e2e-test-user-1"
+And the AuthHandler island is mounted
+And the ProfileButton links to /settings
+```
+
+- **Playwright E2E Test:** `app/pelilauta/e2e/auth-login-flow.spec.ts`, `app/pelilauta/e2e/session-authenticated.spec.ts`, `app/pelilauta/e2e/auth-logout.spec.ts`
