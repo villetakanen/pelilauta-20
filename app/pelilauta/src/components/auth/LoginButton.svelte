@@ -32,27 +32,36 @@ onMount(async () => {
   // If a previous click wrote NEXT_KEY, we are very likely returning from OAuth —
   // render the completing state immediately to avoid flashing the CTA button
   // and to close the click-during-mount race window.
-  if (sessionStorage.getItem(NEXT_KEY) !== null) {
+  const initialNextKey = sessionStorage.getItem(NEXT_KEY);
+  if (initialNextKey !== null) {
     completing = true;
   }
 
   const auth = getAuth();
   try {
+    // Fallback pattern: getRedirectResult can return null on Chromium even
+    // when the redirect actually succeeded (Firebase SDK quirk with storage
+    // partitioning). It still processes the incoming OAuth response as a
+    // side effect — `auth.currentUser` becomes populated. So if we initiated
+    // a redirect (sessionStorage has our key) and a user is now present,
+    // proceed with the handshake regardless of getRedirectResult's nullity.
     const result = await getRedirectResult(auth);
+    const user = result?.user ?? (initialNextKey !== null ? auth.currentUser : null);
     // Snapshot and clear the key unconditionally — the spec's "Either outcome
-    // clears the sessionStorage key" clause covers both branches below.
+    // clears the sessionStorage key" clause covers all branches below.
     const stored = sessionStorage.getItem(NEXT_KEY) ?? "/";
     sessionStorage.removeItem(NEXT_KEY);
 
-    if (result !== null) {
-      const idToken = await result.user.getIdToken();
+    if (user !== null) {
+      const idToken = await user.getIdToken();
       const response = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
       if (response.ok) {
-        window.location.assign(sanitizeNext(stored));
+        const target = sanitizeNext(stored);
+        window.location.assign(target);
       } else {
         error = FALLBACK_ERROR;
         completing = false;
@@ -73,7 +82,8 @@ onMount(async () => {
 async function handleLogin() {
   loading = true;
   error = null;
-  sessionStorage.setItem(NEXT_KEY, sanitizeNext(next));
+  const sanitized = sanitizeNext(next);
+  sessionStorage.setItem(NEXT_KEY, sanitized);
 
   try {
     const auth = getAuth();

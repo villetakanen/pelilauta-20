@@ -27,6 +27,12 @@ describe("LoginButton.svelte", () => {
     vi.stubGlobal("fetch", vi.fn());
     vi.stubGlobal("location", { ...window.location, assign: vi.fn() });
 
+    // Mock Auth instance with a currentUser field — the component consults
+    // auth.currentUser as a fallback when getRedirectResult returns null.
+    vi.mocked(firebaseClient.getAuth).mockReturnValue({ currentUser: null } as ReturnType<
+      typeof firebaseClient.getAuth
+    >);
+
     // Default: first visit — no redirect result pending
     vi.mocked(firebaseClient.getRedirectResult).mockResolvedValue(null);
   });
@@ -157,6 +163,34 @@ describe("LoginButton.svelte", () => {
     resolveGetResult!(null);
     await waitFor(() => expect(sessionStorage.getItem(NEXT_KEY)).toBeNull());
     await waitFor(() => expect(screen.getByRole("button")).toBeInTheDocument());
+  });
+
+  it("Scenario: LoginButton completes handshake via auth.currentUser when getRedirectResult returns null", async () => {
+    // Guards against a regression where the mount-phase handshake breaks on
+    // Chromium browsers. Firebase's getRedirectResult sometimes returns null
+    // even though it successfully processed the incoming OAuth response as a
+    // side effect — auth.currentUser is populated, but the return value is
+    // null. When sessionStorage says we initiated a redirect, auth.currentUser
+    // is the authoritative source.
+    sessionStorage.setItem(NEXT_KEY, "/threads");
+    vi.mocked(firebaseClient.getRedirectResult).mockResolvedValue(null);
+    vi.mocked(firebaseClient.getAuth).mockReturnValue({
+      currentUser: mockUser,
+    } as unknown as ReturnType<typeof firebaseClient.getAuth>);
+    vi.mocked(fetch as Mock).mockResolvedValue({ ok: true });
+
+    render(LoginButton);
+
+    await waitFor(() => expect(mockUser.getIdToken).toHaveBeenCalled());
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/auth/session",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ idToken: mockIdToken }),
+      }),
+    );
+    await waitFor(() => expect(window.location.assign).toHaveBeenCalledWith("/threads"));
+    expect(sessionStorage.getItem(NEXT_KEY)).toBeNull();
   });
 
   it("Scenario: LoginButton discards unsafe next values at both edges", async () => {

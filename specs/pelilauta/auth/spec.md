@@ -17,7 +17,54 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
   - `pages/login.astro` — SSR-rendered anonymous-only landing page. Simple centered layout with a call-to-action and the login button island. If the request already carries a valid `session` cookie, middleware+page responds with a `302` to `next` (or `/`).
   - `components/auth/LoginButton.svelte` — CSR island that drives a **full-page redirect** sign-in (not popup). This button is the only CSR that `login.astro` ships. Two phases:
     1. **Click phase (outbound):** snapshot `sanitizeNext(next)` into `sessionStorage` under key `pelilauta.auth.next`, then call `signInWithRedirect(auth, GoogleAuthProvider)`. Control leaves the app — Google's OAuth page takes over.
-    2. **Mount phase (return):** on mount, the component calls `getRedirectResult(auth)`. If it resolves with a non-null `UserCredential`, the component enters a "completing sign-in..." state, calls `user.getIdToken()`, `POST`s it to `/api/auth/session`, then triggers a full page reload to the `sessionStorage`-restored `next` (or `/`). If it resolves with `null`, the component renders the standard sign-in call-to-action. Either outcome clears the `sessionStorage` key.
+    2. **Mount phase (return):** on mount, the component awaits `getRedirectResult(auth)`. The user source for the handshake is `result.user ?? auth.currentUser` (scoped: `currentUser` is only consulted when sessionStorage indicates we initiated a redirect). This fallback is load-bearing — on Chromium with storage partitioning, Firebase's `getRedirectResult` can return `null` even though its side effects successfully populated `auth.currentUser`. If a user is resolved from either source, the component enters a "completing sign-in..." state, calls `user.getIdToken()`, `POST`s it to `/api/auth/session`, then triggers a full page reload to the `sessionStorage`-restored `next` (or `/`). If neither source yields a user, the component renders the standard sign-in call-to-action. All paths clear the `sessionStorage` key.
+
+    **Happy-path sequence:**
+
+    ```mermaid
+    sequenceDiagram
+      actor User
+      participant LoginBtn as LoginButton.svelte
+      participant Browser
+      participant Google as Google OAuth
+      participant API as POST /api/auth/session
+      participant Admin as firebase-admin
+
+      User->>LoginBtn: click "Sign in with Google"
+      LoginBtn->>Browser: sessionStorage[pelilauta.auth.next] = sanitizeNext(next)
+      LoginBtn->>Browser: signInWithRedirect(auth, GoogleAuthProvider)
+      Browser->>Google: navigate to OAuth
+      Google-->>Browser: redirect back to /login
+      Note over Browser: fresh page load — LoginButton.onMount fires
+
+      LoginBtn->>LoginBtn: sessionStorage has NEXT_KEY → completing = true
+      LoginBtn->>Browser: getRedirectResult(auth)
+      Note over Browser: Firebase processes OAuth response as a side effect;<br/>auth.currentUser is populated regardless of return value
+      Browser-->>LoginBtn: UserCredential or null
+
+      alt getRedirectResult returned non-null
+        LoginBtn->>LoginBtn: user = result.user
+      else getRedirectResult returned null (Chromium quirk)
+        LoginBtn->>LoginBtn: user = auth.currentUser (fallback)
+      end
+
+      LoginBtn->>Browser: user.getIdToken()
+      LoginBtn->>API: POST { idToken }
+      API->>Admin: verifyIdToken + createSessionCookie
+      Admin-->>API: sessionCookie
+      API-->>LoginBtn: 200 + Set-Cookie: session=...
+      LoginBtn->>Browser: window.location.assign(sanitizeNext(stored))
+      Note over Browser: full page reload carries the session cookie
+      Browser->>Browser: middleware reads cookie → Astro.locals.uid
+      Note over Browser: authenticated SSR chrome renders
+    ```
+
+    **State locations during the round-trip:**
+
+    - `sessionStorage["pelilauta.auth.next"]` — our destination hint. Written on click; read once on return, then cleared unconditionally.
+    - Firebase redirect state — stored internally in the client SDK's chosen persistence (Firebase default: IndexedDB). Must not be displaced mid-flight — an earlier implementation that forced `setPersistence(browserLocalPersistence)` unawaited on every `getAuth()` call created a race that caused `getRedirectResult` to lose state; that override has been removed in favour of the SDK default.
+    - `session` cookie — HttpOnly, `Secure`, `SameSite=Lax`. Set by `/api/auth/session` POST; read by middleware on subsequent SSR requests.
+
     - **Why redirect over popup:** popup flows break in iOS Safari, in-app webviews (Instagram, Facebook, LinkedIn browsers), and under popup blockers — unacceptable for a community platform. Redirect works universally at the cost of one extra page load. Matches v17's historical behaviour.
     - **Anonymous-SSR impact:** on return from OAuth, the page paints as anonymous SSR first (no cookie yet) while the mount-phase handshake runs. The brief "completing sign-in..." state before the reload is the accepted tradeoff.
     - **Styling contract:** Uses the DS `cta` button class and DS tokens (`--cn-grid`, `--cn-color-error`, `--cn-font-size-text-small`). The component MAY define a local `<style>` block only for layout composition (flex stacking of the button + error message); it MUST NOT redefine button, icon, or typography styles — those are DS concerns.
