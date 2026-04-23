@@ -41,7 +41,7 @@ The session boundary exists once; every other feature composes against it.
 
 - **Dependencies:**
   - [`@pelilauta/firebase/server`](../firebase/spec.md) — `verifyIdToken`, `createSessionCookie`, `verifySessionCookie`, admin Firestore for claim reads in the oracle.
-  - [`@pelilauta/firebase/client`](../firebase/spec.md) — `getAuth()`, `onAuthStateChanged`, `signInWithPopup`, `user.getIdToken(force)`.
+  - [`@pelilauta/firebase/client`](../firebase/spec.md) — `getAuth()`, `onAuthStateChanged`, `signInWithRedirect`, `getRedirectResult`, `user.getIdToken(force)`.
   - Consumed by: [`auth/`](../auth/spec.md) (login flow), [`ProfileButton`](../../cyan-ds/components/profile-button/spec.md) (reads `uid` + `profile` via app-layer props), every future write-capable feature (via `authedFetch`).
 
 - **Constraints:**
@@ -55,7 +55,8 @@ The session boundary exists once; every other feature composes against it.
 ### Authentication Flow
 
 1. **Login** (see [`auth/spec.md`](../auth/spec.md) for UX):
-   - Client completes Firebase popup → receives `User`.
+   - Client calls `signInWithRedirect(auth, GoogleAuthProvider)`; browser leaves the app for Google's OAuth page.
+   - On return, the LoginButton island's mount handler calls `getRedirectResult(auth)` → receives `UserCredential`.
    - Client calls `user.getIdToken()` → `POST /api/auth/session` with the token.
    - Server `verifyIdToken(token)`, then `createSessionCookie(token, { expiresIn: 5d })`, sets the cookie on the response.
    - Client triggers a **full page reload** to the target route. This is deliberate — the reload flips the page from anonymous-SSR to authenticated-SSR, mounting `AuthHandler` and the session store only from this point forward.

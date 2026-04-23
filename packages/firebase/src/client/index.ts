@@ -12,9 +12,10 @@ import {
   browserLocalPersistence,
   getAuth as clientGetAuth,
   GoogleAuthProvider,
+  getRedirectResult,
   onAuthStateChanged,
   setPersistence,
-  signInWithPopup,
+  signInWithRedirect,
 } from "firebase/auth";
 import { getFirestore as clientGetFirestore, type Firestore } from "firebase/firestore";
 import { publicConfig } from "../config";
@@ -52,4 +53,4 @@ function applyLocalhostPersistence(auth: Auth): void {
   });
 }
 
-export { GoogleAuthProvider, onAuthStateChanged, signInWithPopup };
+export { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithRedirect };

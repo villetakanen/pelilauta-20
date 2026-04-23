@@ -99,12 +99,31 @@ Specs: [`session`](../specs/pelilauta/session/spec.md),
 - **Files:** `app/pelilauta/e2e/session-anonymous.spec.ts`.
 - **Deps:** 2, 10.
 
-## 13. E2E: login + logout roundtrip
+## 13. Firebase client: swap popup re-exports for redirect
 
-- **What:** Playwright flow — visit `/login`, sign in with a seeded test user, verify authenticated chrome appears after reload, sign out, verify anonymous paint returns.
-- **Files:** `app/pelilauta/e2e/auth-login-flow.spec.ts`, `app/pelilauta/e2e/auth-logout.spec.ts`, `app/pelilauta/e2e/session-authenticated.spec.ts`.
-- **Deps:** 2, 3, 7, 8, 9, 10, 11.
-- **Needs:** a seeded E2E test account in the dev Firebase project.
+- **What:** Replace `signInWithPopup` re-export in `packages/firebase/src/client/index.ts` with `signInWithRedirect` + `getRedirectResult` from `firebase/auth`. Keep `GoogleAuthProvider` and `onAuthStateChanged`.
+- **Why:** Popup-based sign-in is unreliable on iOS Safari and in-app webviews — critical MVP gap found during login-flow review (2026-04-23). v17 used `signInWithRedirect`. See auth spec §Anti-Patterns and §Architecture.
+- **Files:** `packages/firebase/src/client/index.ts`. No new test — the client index is a thin re-export surface; coverage comes via LoginButton's unit test (item 14) exercising the mocked exports.
+- **Deps:** none.
+- **Unblocks:** 14.
+
+## 14. Pivot LoginButton to signInWithRedirect flow
+
+- **What:** Refactor `LoginButton.svelte` to the two-phase redirect flow specified in `specs/pelilauta/auth/spec.md`:
+  - **Click phase:** `sanitizeNext(next)` → write to `sessionStorage["pelilauta.auth.next"]` → `signInWithRedirect(auth, GoogleAuthProvider)`.
+  - **Mount phase:** `getRedirectResult(auth)` on mount; on non-null result show "completing sign-in…" state, `getIdToken()` → POST `/api/auth/session` → full reload to restored+re-sanitized `next`; on rejection surface curated error and render the CTA button; always clear the `sessionStorage` key before exiting either branch.
+  - Update the inline error-code map: drop `auth/popup-closed-by-user` and `auth/popup-blocked`; add `auth/account-exists-with-different-credential`; keep `auth/network-request-failed` and the generic fallback.
+- **Files:** `app/pelilauta/src/components/auth/LoginButton.svelte`, `app/pelilauta/src/components/auth/LoginButton.test.ts`.
+- **Tests:** rewrite the existing five scenarios to match the redirect flow per `auth/spec.md` §Testing Scenarios (click-snapshots-next, completes-handshake-on-return, redirect-errors-inline, server-POST-errors-inline, unsafe-next-discarded-at-both-edges).
+- **Deps:** 13.
+- **Unblocks:** 15.
+
+## 15. E2E: login + logout roundtrip
+
+- **What:** Playwright flow — visit `/login`, sign in with a seeded test user, verify authenticated chrome appears after reload, sign out, verify anonymous paint returns. Also land the shared auth fixture that plants a valid `session` cookie so `auth-logout.spec.ts` can be unskipped.
+- **Files:** `app/pelilauta/e2e/auth-login-flow.spec.ts`, `app/pelilauta/e2e/auth-logout.spec.ts` (unskip), `app/pelilauta/e2e/session-authenticated.spec.ts`, plus a shared fixture (likely `app/pelilauta/e2e/fixtures/auth.ts`).
+- **Deps:** 2, 3, 8, 9, 10, 11, 14.
+- **Needs:** a seeded E2E test account in the dev Firebase project. Redirect-flow E2E may require Playwright context configuration for the OAuth redirect to a headless test IdP or a bypass harness — evaluate when the task starts.
 
 ---
 

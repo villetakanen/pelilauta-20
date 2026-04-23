@@ -15,14 +15,17 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 
 - **Host components** (`app/pelilauta/src/`):
   - `pages/login.astro` — SSR-rendered anonymous-only landing page. Simple centered layout with a call-to-action and the login button island. If the request already carries a valid `session` cookie, middleware+page responds with a `302` to `next` (or `/`).
-  - `components/auth/LoginButton.svelte` — CSR island that triggers `signInWithPopup(auth, GoogleAuthProvider)`, then `POST /api/auth/session` with the resulting ID token, then triggers a full page reload to `next` (or `/`). This button is the only CSR that `login.astro` ships.
+  - `components/auth/LoginButton.svelte` — CSR island that drives a **full-page redirect** sign-in (not popup). This button is the only CSR that `login.astro` ships. Two phases:
+    1. **Click phase (outbound):** snapshot `sanitizeNext(next)` into `sessionStorage` under key `pelilauta.auth.next`, then call `signInWithRedirect(auth, GoogleAuthProvider)`. Control leaves the app — Google's OAuth page takes over.
+    2. **Mount phase (return):** on mount, the component calls `getRedirectResult(auth)`. If it resolves with a non-null `UserCredential`, the component enters a "completing sign-in..." state, calls `user.getIdToken()`, `POST`s it to `/api/auth/session`, then triggers a full page reload to the `sessionStorage`-restored `next` (or `/`). If it resolves with `null`, the component renders the standard sign-in call-to-action. Either outcome clears the `sessionStorage` key.
+    - **Why redirect over popup:** popup flows break in iOS Safari, in-app webviews (Instagram, Facebook, LinkedIn browsers), and under popup blockers — unacceptable for a community platform. Redirect works universally at the cost of one extra page load. Matches v17's historical behaviour.
+    - **Anonymous-SSR impact:** on return from OAuth, the page paints as anonymous SSR first (no cookie yet) while the mount-phase handshake runs. The brief "completing sign-in..." state before the reload is the accepted tradeoff.
     - **Styling contract:** Uses the DS `cta` button class and DS tokens (`--cn-grid`, `--cn-color-error`, `--cn-font-size-text-small`). The component MAY define a local `<style>` block only for layout composition (flex stacking of the button + error message); it MUST NOT redefine button, icon, or typography styles — those are DS concerns.
-    - **Error-code mapping:** Firebase popup errors are mapped to curated user-facing messages before display. The mapping table lives inline in the component:
-      - `auth/popup-closed-by-user` → "Sign-in popup was closed. Please try again."
-      - `auth/popup-blocked` → "Popup was blocked by the browser."
+    - **Error-code mapping:** Firebase redirect errors (surfaced by `getRedirectResult`) are mapped to curated user-facing messages before display. The mapping table lives inline in the component:
       - `auth/network-request-failed` → "Network error. Please check your connection."
+      - `auth/account-exists-with-different-credential` → "An account already exists with the same email using a different sign-in method."
       - Fallback (any other error, including POST failure) → "Login failed. Please try again."
-    - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` before redirect, falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense. Both call the shared `sanitizeNext` utility from `src/utils/sanitizeNext.ts`.
+    - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` both before writing to `sessionStorage` (outbound) and after reading back (return), falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense. All three call sites use the shared `sanitizeNext` utility from `packages/utils/src/sanitizeNext.ts`.
   - `components/auth/LogoutAction.svelte` — small CSR island that renders a "Sign out" button. On click it calls `fullLogout()` from `stores/session.ts` (the authoritative exit: cookie DELETE → Firebase `signOut()` → clear atoms → full page reload). Hosted by `pages/settings.astro` (see below); may be hosted elsewhere in authenticated chrome in the future.
     - **Styling contract:** Uses the DS `cta` button class and DS tokens (`--cn-grid`, `--cn-color-error`, `--cn-font-size-text-small`). The component MAY define a local `<style>` block only for layout composition (stacking the button + error message) — matching `LoginButton`'s exception; it MUST NOT redefine button or typography styles.
     - **Busy state:** While `fullLogout()` is in flight, the button is disabled and repeat clicks are coalesced (single invocation). On the happy path the component unmounts before the reload. On the partial-failure path (`sessionState === 'error'`, see [session/spec.md](../session/spec.md) §Authentication Flow step 5), the button re-enables and an inline `role="alert"` element surfaces a retry prompt.
@@ -33,15 +36,16 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
   - `DELETE /api/auth/session` — clears the session cookie.
 
 - **Dependencies:**
-  - [`@pelilauta/firebase/client`](../firebase/spec.md) — `getAuth()`, `GoogleAuthProvider`, `signInWithPopup`.
+  - [`@pelilauta/firebase/client`](../firebase/spec.md) — `getAuth()`, `GoogleAuthProvider`, `signInWithRedirect`, `getRedirectResult`.
   - [`session/`](../session/spec.md) — all state, cookie, and token plumbing.
   - [`ProfileButton`](../../cyan-ds/components/profile-button/spec.md) — the AppBar-slot button that points anonymous users here.
 
 - **Constraints:**
   - `/login` is SSR-anonymous-only. Authenticated visitors are redirected away, not shown the page.
   - `LoginButton` is the only CSR island on `/login`. No `AuthHandler`, no session store, no Firebase Firestore client is bundled into the login page — it is an auth endpoint, not an authenticated surface.
+  - Sign-in uses `signInWithRedirect` + `getRedirectResult`, never `signInWithPopup`. Popup flows break on iOS Safari and in-app webviews; redirect is the only universally reliable path.
   - After a successful login, navigation is a **full page reload** (not `router.push`). This is load-bearing: the reload is what flips the destination page from anonymous-SSR to authenticated-SSR, paid for by the newly-set cookie.
-  - The `next` parameter is whitelisted to same-origin relative paths (no open-redirect vector).
+  - The `next` parameter is whitelisted to same-origin relative paths (no open-redirect vector), both at page-level validation and at every point the component reads it (prop, `sessionStorage` restore).
 
 ### Out of Scope (deferred to future specs)
 
@@ -54,6 +58,8 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 ### Anti-Patterns
 
 - **Rendering `/login` as an authenticated shell.** The page must stay anonymous; otherwise it boots the session store and `AuthHandler` for a user who has no session yet, defeating the SEO/CSR split.
+- **Using `signInWithPopup` for primary sign-in.** Popup flows are blocked by iOS Safari ITP, in-app webviews (Instagram, Facebook, LinkedIn browsers), and browser popup-blockers. Community-platform traffic is mobile-heavy — popup is not viable. Use `signInWithRedirect` + `getRedirectResult`.
+- **Passing `next` through redirect via URL query only.** The return URL after OAuth is not guaranteed to preserve custom query params across providers and custom auth domains. Snapshot to `sessionStorage` before calling `signInWithRedirect`; restore on mount.
 - **Using `router.push` after login instead of full reload.** Without the reload, the destination page was already SSRed as anonymous and would not pick up the new cookie until the next navigation — creating a brittle half-hydrated state.
 - **Returning the ID token to the client as a response body.** The token came *from* the client; there is no reason to echo it. Response bodies contain `{ uid }` at most.
 - **Embedding logout logic here.** `logout()` lives in session; this spec only describes where the "sign out" affordance appears in the UI.
@@ -64,9 +70,10 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 
 - [ ] `/login` renders as an anonymous SSR page with no Firebase SDK bundle beyond the login button's own needs.
 - [ ] A valid `session` cookie on an incoming request to `/login` produces a `302` redirect to `next` (validated) or `/`.
-- [ ] `LoginButton` performs `signInWithPopup`, posts the resulting ID token to `/api/auth/session`, and triggers a full page reload on success.
+- [ ] `LoginButton` performs `signInWithRedirect` on click, snapshotting `next` to `sessionStorage` under key `pelilauta.auth.next` before leaving the page.
+- [ ] On mount, `LoginButton` calls `getRedirectResult`, and on a non-null result posts the ID token to `/api/auth/session` and triggers a full page reload to the restored (and re-sanitized) `next`.
 - [ ] Sign-out UI is present in authenticated chrome (`LogoutAction` hosted on `/settings`) and calls into session's `fullLogout()`.
-- [ ] Login-failure feedback is surfaced inline on `/login` (error message, button re-enabled).
+- [ ] Login-failure feedback is surfaced inline on `/login` (error message, button re-enabled, `sessionStorage` key cleared).
 
 ### Regression Guardrails
 
@@ -111,64 +118,98 @@ And safe same-origin relative paths pass through unchanged
 
 - **Vitest Unit Test:** `packages/utils/src/sanitizeNext.test.ts`
 
-#### Scenario: LoginButton triggers popup and posts ID token on success
+#### Scenario: LoginButton click snapshots next and calls signInWithRedirect
 
 ```gherkin
 Given a mounted LoginButton with next="/threads"
-And signInWithPopup resolves with a Firebase user
-And POST /api/auth/session returns ok
+And getRedirectResult resolves with null (first visit)
 When the user clicks the button
-Then signInWithPopup is called with GoogleAuthProvider
-And user.getIdToken() is called
+Then sessionStorage["pelilauta.auth.next"] is set to "/threads"
+And signInWithRedirect is called with GoogleAuthProvider
+And no POST to /api/auth/session occurs on this phase
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+
+#### Scenario: LoginButton completes handshake on return from redirect
+
+```gherkin
+Given sessionStorage["pelilauta.auth.next"] is "/threads"
+And getRedirectResult resolves with a non-null Firebase UserCredential
+And POST /api/auth/session returns ok
+When the component mounts
+Then user.getIdToken() is called
 And fetch posts the ID token to "/api/auth/session"
 And window.location.assign is called with "/threads"
+And sessionStorage["pelilauta.auth.next"] is cleared
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
 
-#### Scenario: LoginButton surfaces popup errors inline
+#### Scenario: LoginButton surfaces redirect errors inline on return
 
 ```gherkin
-Given signInWithPopup rejects (popup dismissed, blocked, or network)
-When the user clicks the button
+Given getRedirectResult rejects (network, account-exists, or unknown code)
+When the component mounts
 Then an alert-role element displays a curated user-facing message
-And the button is re-enabled
+And the click-to-sign-in button is rendered (not a loading state)
 And no navigation occurs
+And sessionStorage["pelilauta.auth.next"] is cleared
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
 
-#### Scenario: LoginButton surfaces server-POST errors inline
+#### Scenario: LoginButton surfaces server-POST errors inline on return
 
 ```gherkin
-Given signInWithPopup resolves successfully
+Given getRedirectResult resolves with a non-null Firebase UserCredential
 But POST /api/auth/session returns not-ok
-When the user clicks the button
+When the component mounts
 Then an alert-role element displays "Login failed. Please try again."
-And the button is re-enabled
+And the click-to-sign-in button is rendered
 And no navigation occurs
+And sessionStorage["pelilauta.auth.next"] is cleared
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
 
-#### Scenario: LoginButton discards unsafe next values
+#### Scenario: LoginButton clears stale NEXT_KEY even when getRedirectResult is null
+
+```gherkin
+Given sessionStorage["pelilauta.auth.next"] is set from an aborted prior flow
+And getRedirectResult resolves with null
+When the component mounts
+Then sessionStorage["pelilauta.auth.next"] is cleared
+And the click-to-sign-in button is rendered
+And no navigation or fetch occurs
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+
+#### Scenario: LoginButton discards unsafe next values at both edges
 
 ```gherkin
 Given a LoginButton is rendered with next="http://evil.example.com"
-And the login flow succeeds
 When the user clicks the button
-Then window.location.assign is called with "/" (the unsafe next is discarded)
+Then sessionStorage["pelilauta.auth.next"] is set to "/" (unsafe discarded outbound)
+
+Given sessionStorage["pelilauta.auth.next"] is "javascript:alert(1)" (tampered)
+And getRedirectResult resolves with a UserCredential
+And POST /api/auth/session returns ok
+When the component mounts
+Then window.location.assign is called with "/" (unsafe discarded on return)
 ```
 
 - **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
 
-#### Scenario: Successful Google login
+#### Scenario: Successful Google login (redirect round-trip)
 
 ```gherkin
 Given an anonymous user on "/login?next=/"
 When they click the Google login button
-  And complete the popup flow successfully
-Then POST /api/auth/session is called with the Firebase ID token
+  And are redirected to Google and return with a successful auth
+Then getRedirectResult resolves with a Firebase UserCredential on return
+  And POST /api/auth/session is called with the Firebase ID token
   And the response sets a valid session cookie
   And the browser performs a full navigation to "/"
   And the destination page renders the authenticated chrome
@@ -179,10 +220,10 @@ Then POST /api/auth/session is called with the Firebase ID token
 #### Scenario: Login failure is surfaced inline
 
 ```gherkin
-Given an anonymous user on "/login"
-When the Google popup is dismissed or fails
+Given an anonymous user returns to "/login" with a failed redirect result
+When the component mounts and getRedirectResult rejects
 Then an error message is shown on the page
-  And the login button is re-enabled
+  And the click-to-sign-in button is rendered
   And no navigation occurs
 ```
 
