@@ -49,20 +49,13 @@ packages/firebase/
 
 #### Environment Variables
 
-Env var names are inherited verbatim from pelilauta-17 so that the same dev/prod
-Firebase projects can be reused across versions without re-provisioning secrets.
-They intentionally do **not** follow a `PUBLIC_FIREBASE_*` / `SECRET_FIREBASE_*`
-convention — the v17 contract predates that style and changing it would force
-re-provisioning in Netlify and every contributor's local `.env`. Treat the list
-below as authoritative; do not rename.
+Env var names are inherited from pelilauta-17 to preserve Firebase project reuse across versions, with **one deliberate divergence**: v17 mislabeled several public-valued fields with the `SECRET_` prefix (`SECRET_auth_uri`, `SECRET_token_uri`, `SECRET_auth_provider_x509_cert_url`, and `SECRET_universe_domain`). v20 corrects these to `PUBLIC_` because in v20 the `SECRET_` prefix is a **strict sensitivity classification**, not a naming artifact: any `SECRET_*` value surfacing in the published build output is a build failure, enforced by Netlify's secrets scanner. Mislabeling a public URL as `SECRET_` would either force a false-positive bypass (weakening the scanner's guarantee) or fail the build for a non-leak.
 
-**The `SECRET_` prefix is NOT a sensitivity statement — it is a v17 naming
-artifact.** Several `SECRET_*` vars below hold public values (Google endpoint
-URLs like `https://accounts.google.com/o/oauth2/auth`). The genuinely sensitive
-fields are `SECRET_private_key`, `SECRET_private_key_id`, `SECRET_client_email`,
-`SECRET_client_id`, and `SECRET_e2e_seed_secret`. The public-valued `SECRET_*`
-vars may be listed in Netlify's `SECRETS_SCAN_OMIT_KEYS` to prevent
-scanner false positives; this is documented in `specs/netlify/spec.md`.
+**Classification rule:**
+- `PUBLIC_*` — value is safe to inline into the client bundle. Read via `import.meta.env.PUBLIC_*`.
+- `SECRET_*` — value MUST NOT appear in any published artifact (client bundle, SSR function source, static assets). Read via `process.env.SECRET_*` only, which stays dynamic at build time. Compromise here is a deploy failure, not a runtime concern.
+
+`SECRET_client_x509_cert_url` retains the `SECRET_` prefix because its value contains the service-account email — the same identifier as `SECRET_client_email`. Classification matches the underlying identity it exposes.
 
 | Variable | Context | Purpose |
 |---|---|---|
@@ -74,15 +67,15 @@ scanner false positives; this is documented in `specs/netlify/spec.md`.
 | `PUBLIC_appId` | Client | Firebase app ID |
 | `PUBLIC_measurementId` | Client | Analytics measurement ID (optional) |
 | `PUBLIC_databaseURL` | Both | Realtime Database URL |
-| `PUBLIC_universe_domain` | Server | Service-account universe domain — public identifier (`googleapis.com` for default Google Cloud universe), not a credential. Carries `PUBLIC_` prefix per v17 verbatim convention. |
-| `SECRET_private_key_id` | Server | Service account private key ID |
-| `SECRET_private_key` | Server | Service account private key |
-| `SECRET_client_email` | Server | Service account email |
-| `SECRET_client_id` | Server | Service account client ID |
-| `SECRET_auth_uri` | Server | Service account auth URI — **public Google endpoint** (`https://accounts.google.com/o/oauth2/auth`). Carries `SECRET_` prefix per v17 verbatim convention, not because the value is sensitive. |
-| `SECRET_token_uri` | Server | Service account token URI — **public Google endpoint** (`https://oauth2.googleapis.com/token`). `SECRET_` prefix by v17 verbatim convention. |
-| `SECRET_auth_provider_x509_cert_url` | Server | Service account auth provider cert URL — **public Google cert endpoint** (`https://www.googleapis.com/oauth2/v1/certs`). `SECRET_` prefix by v17 verbatim convention. |
-| `SECRET_client_x509_cert_url` | Server | Service account client cert URL — **public Google cert endpoint** containing the service-account email; semi-public (the email is identifying but not a credential). `SECRET_` prefix by v17 verbatim convention. |
+| `PUBLIC_universe_domain` | Server | Service-account universe domain — invariant public value (`googleapis.com` for default Google Cloud universe). v20 correction of v17's `SECRET_` mislabeling. |
+| `PUBLIC_auth_uri` | Server | Service-account auth URI — invariant public Google endpoint (`https://accounts.google.com/o/oauth2/auth`). v20 correction of v17's `SECRET_` mislabeling. |
+| `PUBLIC_token_uri` | Server | Service-account token URI — invariant public Google endpoint (`https://oauth2.googleapis.com/token`). v20 correction of v17's `SECRET_` mislabeling. |
+| `PUBLIC_auth_provider_x509_cert_url` | Server | Service-account auth provider cert URL — invariant public Google cert endpoint (`https://www.googleapis.com/oauth2/v1/certs`). v20 correction of v17's `SECRET_` mislabeling. |
+| `SECRET_private_key_id` | Server | Service account private key ID. |
+| `SECRET_private_key` | Server | Service account private key. |
+| `SECRET_client_email` | Server | Service account email — identifies the service account, semi-sensitive. |
+| `SECRET_client_id` | Server | Service account client ID. |
+| `SECRET_client_x509_cert_url` | Server | Service-account client cert URL — contains the service-account email; classified `SECRET_` to match `SECRET_client_email`. |
 | `SECRET_e2e_seed_secret` | Server | Test-only seed route secret — MUST be unset in prod. Dev-only E2E fixture authentication. See session spec §Test-only seed route. |
 
 A `.env.example` at the repo root documents the full set for local dev. The
@@ -125,9 +118,10 @@ having to satisfy accessor-level clauses that depend on domain packages.
 
 ### Regression Guardrails
 
-- Importing `@firebase/server` in a client bundle must fail at build time (or produce a clear error)
-- `initializeApp` must not throw on repeated calls
-- Environment variable names must match the `PUBLIC_` / `SECRET_` convention for Astro
+- Importing `@firebase/server` in a client bundle must fail at build time (or produce a clear error).
+- `initializeApp` must not throw on repeated calls.
+- Environment variable names must match the `PUBLIC_` / `SECRET_` convention for Astro.
+- **Any `SECRET_*` env-var value appearing in the published build output (client bundle, SSR function source, static assets) MUST fail the Netlify deploy.** Enforced by Netlify's secrets scanner. `SECRETS_SCAN_OMIT_KEYS` in any `netlify.toml` MAY list `PUBLIC_*` vars (Netlify sometimes flags them by UI convention) but MUST NOT list any `SECRET_*` var — doing so removes the enforcement this guardrail depends on.
 
 ### Testing Scenarios
 

@@ -97,23 +97,25 @@ PUBLIC_storageBucket=
 PUBLIC_messagingSenderId=
 PUBLIC_appId=
 PUBLIC_measurementId=
+
+# Service-account fields with public values (invariant Google endpoints / identifiers)
 PUBLIC_universe_domain=
+PUBLIC_auth_uri=
+PUBLIC_token_uri=
+PUBLIC_auth_provider_x509_cert_url=
 
 # Firebase Admin SDK service account — server-side only
 SECRET_private_key_id=
 SECRET_private_key=
 SECRET_client_email=
 SECRET_client_id=
-SECRET_auth_uri=
-SECRET_token_uri=
-SECRET_auth_provider_x509_cert_url=
 SECRET_client_x509_cert_url=
 
 # E2E test fixture secret — dev-only, MUST be unset in production
 SECRET_e2e_seed_secret=dev-only-not-a-real-secret
 ```
 
-The four `SECRET_auth_*_uri` / `SECRET_*_x509_cert_url` vars carry the `SECRET_` prefix by v17 convention but hold public Google endpoint URLs. The genuinely sensitive fields are `SECRET_private_key`, `SECRET_private_key_id`, `SECRET_client_email`, and `SECRET_client_id`.
+**SECRET_ is a strict sensitivity classification in v20** — any `SECRET_*` value appearing in the published client bundle fails the Netlify secrets scan. v17's original naming mislabeled several public-valued vars as `SECRET_`; v20 corrects this (`auth_uri`, `token_uri`, `auth_provider_x509_cert_url`, `universe_domain` → `PUBLIC_`). `client_x509_cert_url` stays `SECRET_` because its value contains the service-account email (same identifier as `SECRET_client_email`).
 
 ## Core Features
 

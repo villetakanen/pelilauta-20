@@ -18,14 +18,13 @@ loadDotenv({ path: ".env.development" });
 
 // Required SECRET_ env vars for the service account. Read from process.env
 // so they are NEVER inlined into client bundles via Vite's import.meta.env.
+// SECRET_ is a strict sensitivity classification — any SECRET_ value
+// appearing in the published build output fails the Netlify secrets scan.
 const SECRET_KEYS = [
   "SECRET_private_key_id",
   "SECRET_private_key",
   "SECRET_client_email",
   "SECRET_client_id",
-  "SECRET_auth_uri",
-  "SECRET_token_uri",
-  "SECRET_auth_provider_x509_cert_url",
   "SECRET_client_x509_cert_url",
 ] as const;
 
@@ -45,9 +44,13 @@ export function buildServiceAccount() {
     private_key: process.env.SECRET_private_key,
     client_email: process.env.SECRET_client_email,
     client_id: process.env.SECRET_client_id,
-    auth_uri: process.env.SECRET_auth_uri,
-    token_uri: process.env.SECRET_token_uri,
-    auth_provider_x509_cert_url: process.env.SECRET_auth_provider_x509_cert_url,
+    // auth_uri / token_uri / auth_provider_x509_cert_url are invariant public
+    // Google endpoints — PUBLIC_ per v20 correction of v17's mislabeling.
+    auth_uri: import.meta.env.PUBLIC_auth_uri,
+    token_uri: import.meta.env.PUBLIC_token_uri,
+    auth_provider_x509_cert_url: import.meta.env.PUBLIC_auth_provider_x509_cert_url,
+    // client_x509_cert_url stays SECRET_ — contains the service-account email
+    // (same identifier as client_email, which is also SECRET_).
     client_x509_cert_url: process.env.SECRET_client_x509_cert_url,
     universe_domain: import.meta.env.PUBLIC_universe_domain,
   };
