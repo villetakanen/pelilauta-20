@@ -12,6 +12,7 @@ vi.mock("@pelilauta/firebase/client", () => ({
 
 vi.mock("@pelilauta/utils/log", () => ({
   logError: vi.fn(),
+  logDebug: vi.fn(),
 }));
 
 const NEXT_KEY = "pelilauta.auth.next";
