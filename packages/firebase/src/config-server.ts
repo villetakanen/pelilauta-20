@@ -37,14 +37,34 @@ export function buildServiceAccount() {
     );
   }
 
+  // Netlify / dotenv store multi-line values with literal \n escapes
+  // (two chars: backslash + n). firebase-admin's cert() expects actual
+  // newline characters in the PEM; convert before passing.
+  const rawKey = process.env.SECRET_private_key;
+  const privateKey = rawKey?.replace(/\\n/g, "\n");
+
+  // Diagnostic: safe to log boundary chars (they are the PEM header/footer,
+  // not the key material). Helps distinguish env-value shape issues from
+  // parse-logic issues. Remove after the first successful auth flow.
+  console.log(
+    "[buildServiceAccount] private_key diagnostic",
+    JSON.stringify({
+      rawLength: rawKey?.length,
+      cookedLength: privateKey?.length,
+      rawHead: rawKey?.slice(0, 32),
+      cookedHead: privateKey?.slice(0, 32),
+      rawTail: rawKey?.slice(-32),
+      cookedTail: privateKey?.slice(-32),
+      hasEscapedNewline: rawKey?.includes("\\n"),
+      hasRealNewline: rawKey?.includes("\n"),
+    }),
+  );
+
   return {
     type: "service_account",
     project_id: import.meta.env.PUBLIC_projectId,
     private_key_id: process.env.SECRET_private_key_id,
-    // Netlify / dotenv store multi-line values with literal \n escapes
-    // (two chars: backslash + n). firebase-admin's cert() expects actual
-    // newline characters in the PEM; convert before passing.
-    private_key: process.env.SECRET_private_key?.replace(/\\n/g, "\n"),
+    private_key: privateKey,
     client_email: process.env.SECRET_client_email,
     client_id: process.env.SECRET_client_id,
     // auth_uri / token_uri / auth_provider_x509_cert_url are invariant public
