@@ -46,7 +46,11 @@ packages/firebase/
 - Server exports must never import client SDK modules (and vice versa)
 - Package uses conditional exports (`"exports"` field in package.json) or separate entry points so bundlers tree-shake correctly
 - No top-level side effects — `initializeApp` is lazy (called once, memoized)
-- **`firebase-admin` MUST stay external in the SSR bundle.** The consuming app (`app/pelilauta/astro.config.mjs`) marks `firebase-admin` and its subpath entries (`firebase-admin/app`, `firebase-admin/auth`, `firebase-admin/firestore`) in `vite.ssr.external`. Rationale: firebase-admin's transitive dependency `@grpc/grpc-js` is CommonJS and reads `__dirname` at runtime to locate native proto files. Bundling it into an ESM chunk produces `__dirname=undefined` in ESM scope, which crashes the first Firestore call at runtime in Netlify Functions with `ReferenceError: __dirname is not defined in ES module scope`. Keeping firebase-admin external means Node's runtime `require()` resolves it from `node_modules`, where the CommonJS pattern works as intended.
+- **`firebase-admin` MUST stay external in the SSR bundle.** Three coupled pieces keep this working on Netlify Functions:
+  1. `app/pelilauta/astro.config.mjs` marks `firebase-admin` + subpath entries (`firebase-admin/app`, `firebase-admin/auth`, `firebase-admin/firestore`) in `vite.ssr.external`. Keeps the package out of the Vite SSR chunk, avoiding the `ReferenceError: __dirname is not defined in ES module scope` crash from grpc-js's CommonJS `__dirname` read.
+  2. `app/pelilauta/netlify.toml` `[functions.ssr] external_node_modules = ["firebase-admin"]` tells Netlify's function bundler to deploy firebase-admin alongside the function so `require('firebase-admin')` resolves at runtime.
+  3. `.npmrc` sets `shamefully-hoist=true`. pnpm's default isolated `node_modules/` layout (symlinks into `.pnpm/`) isn't followed reliably by Netlify's zip-it-and-ship-it bundler; hoisting public deps to the top-level `node_modules/` gives zisi an npm-flat structure it can resolve. The `.pnpm/` content-addressable store is preserved — this just adds public-hoisted copies.
+  Removing any one layer breaks the deploy — either at build time (Vite crash), at cold start (package-not-found), or at first Firestore call (dirname crash). All three are load-bearing.
 
 #### Environment Variables
 
