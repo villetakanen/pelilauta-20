@@ -1,0 +1,51 @@
+---
+import { sanitizeNext } from "@pelilauta/utils/sanitizeNext";
+import LoginButton from "../components/auth/LoginButton.svelte";
+/**
+ * /login — Anonymous-only SSR page.
+ *
+ * Spec: specs/pelilauta/auth/spec.md §Architecture
+ *   - Authenticated visitors are redirected away (302 to `next` or `/`).
+ *   - LoginButton is the ONLY CSR island shipped — no AuthHandler, no session
+ *     store, no Firestore client.
+ *   - `next` is validated as same-origin relative before any redirect.
+ */
+import Page from "../layouts/Page.astro";
+
+const next = sanitizeNext(Astro.url.searchParams.get("next"));
+
+if (Astro.locals.uid) {
+  return Astro.redirect(next, 302);
+}
+---
+
+<Page title="Sign in — Pelilauta" layout="view" noun="account">
+  <section class="login-page-hero">
+    <h1>Sign in to Pelilauta</h1>
+    <p class="login-page-lead">
+      Join the community — share, discover, and discuss tabletop RPG campaigns.
+    </p>
+    <LoginButton client:load next={next} />
+  </section>
+</Page>
+
+<style>
+  /* DEFERRED: escalate to cyan DS hero primitive before shipping to prod.
+     Tracked in specs/cyan-ds/components/cn-hero/spec.md. See also
+     specs/pelilauta/auth/spec.md §Out of Scope. */
+  .login-page-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(var(--cn-grid) * 3);
+    min-height: 60dvh;
+    text-align: center;
+    padding: var(--cn-gap);
+  }
+  .login-page-lead {
+    color: var(--cn-text-low);
+    max-width: 40ch;
+    margin: 0;
+  }
+</style>

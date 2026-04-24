@@ -1,0 +1,8 @@
+hr {
+  display: block;
+  width: 100%;
+  height: 1px;
+  margin: var(--cn-line) 0;
+  border: none;
+  background-color: var(--cn-border);
+}

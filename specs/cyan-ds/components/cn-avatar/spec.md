@@ -8,7 +8,7 @@
 A circular avatar primitive used across the platform wherever a user's visual identity is shown: AppBar profile button, thread cards, comment attribution, member lists. Renders an image, initials fallback, or generic icon placeholder — in that priority order.
 
 ### Architecture
-- **Component:** `packages/cyan/src/components/CnAvatar.astro` (SSR/CSS — pure visual, no client-side JS).
+- **Component:** `packages/cyan/src/components/CnAvatar.svelte` (Svelte 5 leaf — no user-facing interactivity; one `onerror` handler flips the image → fallback via reactive state).
 - **Props:**
   - `src?: string` — Image URL. Lazy-loaded. Falls back on error.
   - `nick?: string` — Username. Used for initials (first 2 chars, uppercased) and deterministic background color.

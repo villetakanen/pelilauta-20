@@ -9,6 +9,8 @@ interface Props {
   layout?: "view" | "sidebar" | "editor" | "modal";
   trayLabel?: string;
   backHref?: string;
+  noun?: string;
+  asPageHeading?: boolean;
 }
 
 const {
@@ -18,6 +20,8 @@ const {
   layout = "view",
   trayLabel = "Menu",
   backHref = "/",
+  noun,
+  asPageHeading = false,
 } = Astro.props;
 ---
 
@@ -29,18 +33,24 @@ const {
     <title>{title}</title>
   </head>
   <body class={`layout-${layout}`}>
-    {layout === 'sidebar' && (
-      <Tray>
-        <slot name="tray" />
-      </Tray>
-    )}
-    
+    <slot name="app-background-poster" />
+
+    {
+      layout === "sidebar" && (
+        <Tray>
+          <slot name="tray" />
+        </Tray>
+      )
+    }
+
     <header class="cn-app-header">
-      <AppBar 
-        title={appTitle} 
-        shortTitle={shortTitle} 
-        mode={layout === 'modal' ? 'modal' : ''} 
+      <AppBar
+        noun={noun}
+        title={appTitle}
+        shortTitle={shortTitle}
+        mode={layout === "modal" ? "modal" : ""}
         backHref={backHref}
+        asPageHeading={asPageHeading}
       >
         <slot name="actions" />
       </AppBar>
@@ -54,15 +64,25 @@ const {
 
 <style is:global>
   @import "@cyan/tokens/index.css";
+  @import "../core/index.css";
   @import "../utilities/index.css";
   @import "@cyan/fonts/fonts.css";
   @import "./content-grid.css";
+  @import "./card-grid.css";
+  @import "../components/index.css";
 
   *,
   *::before,
   *::after {
     box-sizing: border-box;
     margin: 0;
+  }
+
+  /* Astro hydration wrapper — transparent to layout so it never interposes
+     a box between an element and its semantic child (e.g. an icon inside
+     a flex button). Safe: Astro uses the custom element only as a JS hook. */
+  astro-island {
+    display: contents;
   }
 
   body {
@@ -101,8 +121,8 @@ const {
 
   /* --- Layout: Sidebar --- */
   .layout-sidebar {
-    /* 
-      By default (Mobile), Tray is width 0 (overlay mode) and header/main span the full width. 
+    /*
+      By default (Mobile), Tray is width 0 (overlay mode) and header/main span the full width.
       When Tray expands (Tablet/Desktop), its width changes and it pushes the rest of the grid.
     */
     grid-template-columns: max-content 1fr;
@@ -129,11 +149,11 @@ const {
   /* When tray is expanded, tablet mode uses absolute overlay, so main shouldn't be pushed on tablet.
      But desktop uses 'relative' pushing drawer, which max-content handles correctly!
      However, we need to ensure mobile doesn't offset padding improperly. */
-  
+
   /* --- Layout: Editor --- */
   .layout-editor {
     /* lock scrolling */
-    overflow: hidden; 
+    overflow: hidden;
   }
   .layout-editor .cn-app-main {
     padding: 0; /* Fully flush rendering to edges */

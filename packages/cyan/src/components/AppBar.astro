@@ -1,5 +1,5 @@
 ---
-import Icon from "./Icon.astro";
+import { default as CnIcon } from "./CnIcon.svelte";
 
 interface Props {
   noun?: string;
@@ -7,33 +7,47 @@ interface Props {
   shortTitle?: string;
   mode?: "sticky" | "modal" | "";
   backHref?: string;
+  asPageHeading?: boolean;
 }
 
-const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.props;
+const {
+  noun,
+  title,
+  shortTitle,
+  mode = "",
+  backHref = "/",
+  asPageHeading = false,
+}: Props = Astro.props;
+
+const TitleTag: "h1" | "h3" = asPageHeading ? "h1" : "h3";
 ---
 
-<header class:list={['cn-app-bar', mode]} data-mode={mode}>
+<header class:list={["cn-app-bar", mode]} data-mode={mode}>
   <div class="container">
-    {mode === 'modal' ? (
-      <a href={backHref} class="back-button" aria-label="Back">
-        <Icon noun="arrow-left" size="small" />
-      </a>
-    ) : noun ? (
-      <div class="noun-icon">
-        <Icon noun={noun} size="small" />
-      </div>
-    ) : null}
-    
-    <h3 class="title">
+    {
+      mode === "modal" ? (
+        <a href={backHref} class="back-button" aria-label="Back">
+          <CnIcon noun="arrow-left" size="medium" />
+        </a>
+      ) : noun ? (
+        <div class="noun-icon">
+          <CnIcon noun={noun} size="medium" />
+        </div>
+      ) : null
+    }
+
+    <TitleTag class="title">
       <span class="full-title">{title}</span>
       {shortTitle && <span class="short-title">{shortTitle}</span>}
-    </h3>
+    </TitleTag>
 
-    {mode !== 'modal' && (
-      <div class="actions">
-        <slot />
-      </div>
-    )}
+    {
+      mode !== "modal" && (
+        <div class="actions">
+          <slot />
+        </div>
+      )
+    }
   </div>
 </header>
 
@@ -45,7 +59,9 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
     background-color: var(--cn-app-bar-background);
     color: var(--cn-app-bar-color);
     z-index: var(--cn-z-app-bar, 100);
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      background-color 0.3s ease,
+      box-shadow 0.3s ease;
     border-radius: var(--cn-app-bar-border-radius, 0);
   }
 
@@ -167,7 +183,7 @@ const { noun, title, shortTitle, mode = "", backHref = "/" }: Props = Astro.prop
   }
 
   .back-button::before {
-    content: '';
+    content: "";
     position: absolute;
     height: 100%;
     width: 100%;

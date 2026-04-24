@@ -1,25 +1,57 @@
 ---
+import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
 import CnCard from "@cyan/components/CnCard.svelte";
-import AppShell from "@cyan/layouts/AppShell.astro";
+import heroImg from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
+import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
+import Page from "../layouts/Page.astro";
 ---
 
-<AppShell title="Pelilauta">
-  <h1>Pelilauta 20</h1>
-  <p>RPG community platform.</p>
+<Page title="Pelilauta 20" layout="view" noun="fox" asPageHeading>
+  <CnBackgroundPoster slot="app-background-poster" src={heroImg.src} />
 
-  <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--cn-gap, 1rem); margin-top: 2rem;">
-    <CnCard 
-      title="Sample Session" 
-      href="/sessions/1" 
-      description="A mystery in the fog surrounding the ancient ruins of Pelilauta." 
-      notify
-    />
-    <CnCard 
-      title="Character Sheet" 
-      noun="prophet" 
-      description="Update your stats and equipment before the next adventure." 
-    />
-  </div>
+  <section class="cn-content-triad">
+    <TopThreadsStream />
 
-  <button class="button primary" style="margin-top: 2rem;">Get started</button>
-</AppShell>
+    <div>
+      <h2>Blog-roll</h2>
+      <div class="cn-card-grid">
+        <CnCard
+          title="Why West Marches Works"
+          href="/blog/why-west-marches-works"
+          description="A syndicated post from roleplayingtips.com on emergent storytelling in open-world campaigns."
+        />
+        <CnCard
+          title="Designing Encounter Balance"
+          href="/blog/designing-encounter-balance"
+          description="From theangrygm.com — a hard look at CR math and why it falls apart in actual play."
+        />
+        <CnCard
+          title="Session Zero Checklist 2026"
+          href="/blog/session-zero-checklist"
+          description="Refreshed starter kit from dmsguild-community for kicking off a new campaign without rework."
+        />
+      </div>
+    </div>
+
+    <div>
+      <h2>Latest sites</h2>
+      <div class="cn-card-grid">
+        <CnCard
+          title="Ebon Vale Chronicles"
+          href="/sites/ebon-vale"
+          description="A Forgotten Realms homebrew wiki updated this week with three new factions."
+        />
+        <CnCard
+          title="Kiven Aavat"
+          href="/sites/kiven-aavat"
+          description="Finnish-language Mothership campaign site with ship schematics and crew manifests."
+        />
+        <CnCard
+          title="The Spire Campaign"
+          href="/sites/the-spire"
+          description="Session logs and NPC dossiers for an ongoing Spire: The City Must Fall campaign."
+        />
+      </div>
+    </div>
+  </section>
+</Page>

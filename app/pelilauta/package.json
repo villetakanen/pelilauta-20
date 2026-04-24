@@ -5,20 +5,31 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview",
+    "preview": "astro preview --port 4321",
     "test": "vitest run --passWithNoTests",
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "astro": "^5.7.0",
-    "@astrojs/svelte": "^7.0.0",
-    "svelte": "^5.0.0",
+    "@astrojs/netlify": "^7.0.6",
+    "@astrojs/svelte": "^8.0.4",
+    "@myrrys/proprietary": "workspace:*",
+    "@pelilauta/firebase": "workspace:*",
+    "@pelilauta/i18n": "workspace:*",
+    "@pelilauta/threads": "workspace:*",
+    "@pelilauta/utils": "workspace:*",
+    "astro": "^6.1.5",
     "firebase": "^11.0.0",
     "nanostores": "^0.11.0",
+    "svelte": "^5.0.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
-    "vitest": "^3.1.0",
-    "@playwright/test": "^1.50.0"
+    "@playwright/test": "^1.50.0",
+    "@sveltejs/vite-plugin-svelte": "^5.1.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/svelte": "^5.3.1",
+    "dotenv": "^17.0.0",
+    "jsdom": "^29.0.1",
+    "vitest": "^3.1.0"
   }
 }

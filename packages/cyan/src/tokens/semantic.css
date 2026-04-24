@@ -27,14 +27,22 @@
   --cn-link-active: light-dark(var(--chroma-primary-30), var(--chroma-surface-70));
 
   /* Buttons & Interactive */
-  --cn-button: light-dark(var(--chroma-surface-50), var(--chroma-surface-20));
-  --cn-button-light: light-dark(var(--chroma-primary-60), var(--chroma-primary-95));
+  --cn-button: light-dark(var(--chroma-surface-50), var(--chroma-surface-40));
+  --cn-button-light: light-dark(var(--chroma-primary-50), var(--chroma-primary-50));
   --cn-button-accent: light-dark(var(--chroma-primary-20), var(--chroma-primary-70));
   --cn-button-cta: light-dark(var(--chroma-error-40), var(--chroma-error-40));
+  --cn-on-button: light-dark(var(--chroma-surface-100), var(--chroma-surface-100));
+  --cn-on-button-cta: light-dark(var(--chroma-surface-100), var(--chroma-surface-100));
   --cn-hover: light-dark(
     color-mix(in oklch, var(--chroma-surface-50), transparent 90%),
     color-mix(in oklch, var(--chroma-surface-50), transparent 80%)
   );
+  --cn-active: light-dark(
+    color-mix(in oklch, var(--chroma-surface-50), transparent 80%),
+    color-mix(in oklch, var(--chroma-surface-50), transparent 70%)
+  );
+  --cn-duration-ui: 0.22s;
+  --cn-easing-ui: ease-in-out;
   --cn-focus-ring: light-dark(var(--chroma-primary-60), var(--chroma-primary-40));
 
   /* Borders */
@@ -60,6 +68,7 @@
   --cn-shadow-color: light-dark(var(--chroma-surface-30), var(--chroma-surface-0));
   --cn-shadow-elevation-2: calc(var(--cn-grid) * 0.25) calc(var(--cn-grid) * 0.25) var(--cn-grid)
     var(--cn-shadow-color);
+  --cn-shadow-button-hover: var(--cn-shadow-elevation-2);
   --cn-shadow-elevation-3: calc(var(--cn-grid) * 0.5) calc(var(--cn-grid) * 0.5)
     calc(var(--cn-grid) * 2) var(--cn-shadow-color);
   --cn-shadow-elevation-4: calc(var(--cn-grid) * 0.75) calc(var(--cn-grid) * 0.75)

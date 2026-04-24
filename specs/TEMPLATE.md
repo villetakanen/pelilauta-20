@@ -18,14 +18,12 @@ stylebook_url: [https://...]
 - **Data Models:** [Schemas, types — reference file paths, don't duplicate code]
 - **API Contracts:** [Endpoints, events, public interfaces]
 - **Dependencies:** [What this depends on / what depends on this]
+- **Constraints:** [Security, compliance, or architectural boundaries stated positively as facts. E.g. "Tray toggle uses pure CSS — no JS." Only include constraints not already captured above.]
 
 ### Book Page
 [Provide details about the component's book/story-nook page if it belongs to the Design System]
 - **Target path:** [e.g. `app/cyan-ds/src/content/principles/...` or `app/cyan-ds/src/content/components/...`]
 - **Structure:** [Outline the standalone demos, inline layout demos, and prop tables]
-
-### Anti-Patterns
-- [What agents must avoid when working on this feature, with rationale]
 
 ## Contract
 

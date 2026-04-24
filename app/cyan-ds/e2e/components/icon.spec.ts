@@ -38,7 +38,7 @@ test.describe("CnIcon", () => {
     const box = await icon.boundingBox();
     expect(box).not.toBeNull();
     // Width and height should match (square, 1:1 aspect ratio)
-    expect(Math.abs(box!.width - box!.height)).toBeLessThan(2);
+    expect(Math.abs(box?.width - box?.height)).toBeLessThan(2);
   });
 
   test("Tier 1 gallery renders community icons", async ({ page }) => {

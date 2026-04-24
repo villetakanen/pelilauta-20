@@ -41,6 +41,48 @@ The base text scale used for `p`, `li`, `blockquote`, and other prose elements.
 - **Root Scale:** Anchored to a 16px base (standard browser default), resulting in a 17px (`1.0625rem`) legibility baseline.
 - **Monospace Text:** `--cn-font-family-mono`, size: `--cn-font-size-mono`.
 
+### UI Scale
+
+The small-scale text tier used inside UI affordances — button labels, tags,
+metadata lines, section eyebrows, and inline code. These are visually
+distinct from prose: tighter in size, often in a different weight or case,
+and always used in chrome rather than long-form reading.
+
+Reversed from [`cyan-design-system-4/packages/cyan-css/src/tokens/typography.css`](https://github.com/villetakanen/cyan-design-system-4/blob/main/packages/cyan-css/src/tokens/typography.css).
+
+**Naming:** each UI role owns a namespaced triple
+(`size` / `line-height` / `letter-spacing`) plus an optional `weight` when
+the role deviates from `--cn-font-weight-text`. The role, not a generic
+`ui` bucket, is the token discriminator.
+
+| Role       | Size token                    | Default       | Line-height token                    | Default | Letter-spacing token                  | Weight token                    |
+|------------|-------------------------------|---------------|--------------------------------------|---------|---------------------------------------|---------------------------------|
+| text-small | `--cn-font-size-text-small`   | `0.9375rem` (15px) | `--cn-line-height-text-small`   | `1.5rem` (24px) | `--cn-letter-spacing-text-small` | inherits `--cn-font-weight-text` |
+| caption    | `--cn-font-size-caption`      | `0.8125rem` (13px) | `--cn-line-height-caption`      | `1rem` (16px)   | `--cn-letter-spacing-caption`    | inherits `--cn-font-weight-text` |
+| overline   | `--cn-font-size-overline`     | `0.6875rem` (11px) | `--cn-line-height-overline`     | `1rem` (16px)   | `--cn-letter-spacing-overline`   | `--cn-font-weight-medium`        |
+| button     | `--cn-font-size-button`       | `0.9375rem` (15px, alias of `--cn-font-size-text-small`) | `--cn-line-height-button` | `1.5` (unitless, ≈ 22px cap) | `--cn-letter-spacing-button`    | `--cn-font-weight-button` (500) |
+| mono       | `--cn-font-size-mono`         | `0.875rem` (14px)  | `--cn-line-height-mono`         | `1.5rem` (24px) | `--cn-letter-spacing-mono`       | `--cn-font-weight-mono` (400)   |
+
+**Role semantics:**
+
+- **text-small** — body-adjacent text that must sit in a tight space
+  (dense lists, secondary descriptions). Same line-height as prose so it
+  mixes on the grid.
+- **caption** — metadata (timestamps, authors, counts). Never used for
+  primary reading.
+- **overline** — short UPPERCASE labels above a section or card.
+  Authors apply `text-transform: uppercase` at the selector level; the
+  token family does not bake case in.
+- **button** — labels inside `<button>` / `a.button` / any UI action.
+  The weight is `500`, one step heavier than prose, for tap-target
+  legibility.
+- **mono** — inline `<code>`, `<kbd>`, and `<pre>`. Uses
+  `--cn-font-family-mono`.
+
+**Utility classes:** `.text-small`, `.text-caption`, `.text-overline`
+mirror the token triples so authors can apply the UI scale to non-semantic
+tags, matching the existing `.text-h1..h5` pattern.
+
 ---
 
 ## Semantic Behavioral Contracts
@@ -87,6 +129,10 @@ Applications can apply typographical styles to non-semantic tags or override def
 - [ ] Line heights are unitless for correct inheritance.
 - [ ] Global `h1-h4` tags are anchored to their respective scale tokens.
 - [ ] Mobile down-scaling logic (H1->H2) is implemented for all headings.
+- [ ] UI Scale tokens (`text-small`, `caption`, `overline`, `button`, `mono`) are defined on `:root`.
+- [ ] `--cn-font-weight-button` is defined (value `500`) and `--cn-font-size-button` aliases `--cn-font-size-text-small`.
+- [ ] Utility classes `.text-small`, `.text-caption`, `.text-overline` render the UI Scale tokens correctly.
+- [ ] No `--cn-*-ui` token names appear anywhere in the codebase (the role name *is* the discriminator).
 
 ### Testing Scenarios
 
@@ -103,6 +149,33 @@ Applications can apply typographical styles to non-semantic tags or override def
   Given an <article> containing an <h2> as its first child
   When the article is rendered
   Then the <h2> must have exactly 0px margin-top
+```
+- **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/typography.spec.ts`
+
+#### Scenario: UI Scale Tokens Resolve
+```gherkin
+  Given the DS stylesheet is loaded on `:root`
+  When computed styles are read for the custom properties
+    --cn-font-size-text-small,
+    --cn-font-size-caption,
+    --cn-font-size-overline,
+    --cn-font-size-button,
+    --cn-font-size-mono,
+    --cn-font-weight-button
+  Then each resolves to a non-empty rem value (sizes) or numeric weight
+  And --cn-font-size-button equals --cn-font-size-text-small
+  And --cn-font-weight-button equals 500
+```
+- **Vitest Unit Test:** `packages/cyan/src/tokens/typography.test.ts`
+- **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/typography.spec.ts`
+
+#### Scenario: Overline Utility Applies Role Triple
+```gherkin
+  Given a <span class="text-overline"> element
+  When it is rendered
+  Then its computed font-size matches --cn-font-size-overline
+  And its line-height matches --cn-line-height-overline
+  And its letter-spacing matches --cn-letter-spacing-overline
 ```
 - **Playwright E2E Test:** `app/cyan-ds/e2e/tokens/typography.spec.ts`
 

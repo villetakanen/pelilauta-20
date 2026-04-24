@@ -1,0 +1,120 @@
+---
+title: Buttons
+description: Atomic styling for raw button and anchor elements.
+icon: fox
+order: 1
+status: stable
+---
+
+import ThemeSplit from "@cyan/components/living-style-books/ThemeSplit.astro";
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import CnLoader from "@cyan/components/cn-loader/CnLoader.svelte";
+
+# Buttons
+
+Pelilauta styles raw `<button>` and `<a class="button">` elements directly. This ensures that any button is accessible and visually consistent even before JavaScript hydrates.
+
+## Blueprint
+
+<ThemeSplit>
+  <div>
+    <div>
+      <button><CnIcon noun="fox" /><span>Label</span></button>
+      <button class="cta"><CnIcon noun="check" /><label>CTA</label></button>
+      <button class="text">Text button</button>
+    </div>
+    <div>
+      <button disabled><CnIcon noun="lock" /> Disabled</button>
+      <button disabled><CnLoader /><span>Loading...</span></button>
+      <button disabled><CnLoader /></button>
+    </div>
+    <div class="secondary p-2 border-radius-large">
+      <p class="text-caption">Secondary Context</p>
+      <div class="row gap-1">
+        <button>Default</button>
+        <button class="cta">CTA</button>
+        <button class="text">Text</button>
+      </div>
+    </div>
+  </div>
+</ThemeSplit>
+
+## Usage
+
+### Stretch
+
+Buttons stretch to fill their container's width if placed in a flex or grid cell with `align-items: stretch` (default).
+
+<div class="p-1 border-radius-large">
+  <button>Full Width Button</button>
+</div>
+
+### Icon Sizing
+
+Icons inside buttons are automatically forced to `--cn-icon-size-small`, regardless of what size is passed to the component.
+
+<div class="stack gap-2">
+  <div class="row gap-2">
+    <p>Outside:</p>
+    <CnIcon noun="fox" size="xsmall" />
+    <CnIcon noun="fox" size="small" />
+    <CnIcon noun="fox" size="medium" />
+  </div>
+  <div class="row gap-2">
+    <p>Inside:</p>
+    <button><CnIcon noun="fox" size="xsmall" /></button>
+    <button><CnIcon noun="fox" size="small" /></button>
+    <button><CnIcon noun="fox" size="medium" /></button>
+  </div>
+</div>
+
+## Variants
+
+### Icon-only
+A button with only an icon becomes a circular pill.
+
+<div class="row gap-1">
+  <button><CnIcon noun="fox" /></button>
+  <button class="cta"><CnIcon noun="fox" /></button>
+</div>
+
+### Standard
+The default button for most actions.
+
+<div class="row gap-1">
+  <button>Save Changes</button>
+  <button><CnIcon noun="save" /> Save Changes</button>
+</div>
+
+### CTA (.cta)
+Use sparingly for the primary action on a page.
+
+<button class="cta">Get Started</button>
+
+### Text (.text)
+Low-prominence actions.
+
+<button class="text">Cancel</button>
+
+### Links
+Any anchor tag can be styled as a button by adding the `.button` class.
+
+<div class="row gap-1">
+  <a href="#" class="button">Link as Button</a>
+  <a href="#" class="button cta">CTA Link</a>
+</div>
+
+## Tokens
+
+| Token | Role |
+|-------|------|
+| `--cn-button` | Base surface gradient stop (end) |
+| `--cn-button-light` | Base surface gradient stop (start) |
+| `--cn-button-cta` | CTA surface gradient stop (start) |
+| `--cn-on-button` | Default foreground color |
+| `--cn-on-button-cta` | CTA foreground color |
+| `--cn-hover` | Interaction overlay (10-20% opacity) |
+| `--cn-active` | Interaction overlay (20-30% opacity) |
+| `--cn-button-size` | Geometric height (38px) |
+| `--cn-button-physical-size` | Grid-aligned footprint (56px) |
+| `--cn-icon-size-small` | Forced icon size inside buttons (24px) |

@@ -14,6 +14,11 @@
   --cn-font-size-h3: 2.12rem; /* ~34px */
   --cn-font-size-h4: 1.5rem; /* 24px */
   --cn-font-size-text: 1.0625rem; /* 17px */
+  --cn-font-size-text-small: 0.9375rem; /* 15px */
+  --cn-font-size-button: var(--cn-font-size-text-small);
+  --cn-font-weight-button: var(--cn-font-weight-medium);
+  --cn-line-height-button: 1.5;
+  --cn-letter-spacing-button: 0.05em;
 
   /* Line Heights (Augmented Fourth / 8px Grid aligned) */
   --cn-line-height-h1: 1.294; /* 88px */

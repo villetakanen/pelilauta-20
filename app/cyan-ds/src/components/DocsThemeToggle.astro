@@ -1,0 +1,60 @@
+---
+/**
+ * DocsThemeToggle — docs-site-only light/dark toggle.
+ *
+ * Flips `color-scheme` on `<html>` between `"light"` and `"dark"`,
+ * overriding the OS preference for the current tab. Every `light-dark()`
+ * token in the DS picks up the override automatically, so one property
+ * flip re-themes the entire page without further wiring. Browser chrome
+ * (scrollbars, form controls) follows the root `color-scheme`, which is
+ * why the toggle targets `<html>` rather than `<body>`.
+ *
+ * Lives in the Book layout's AppBar actions slot. NOT a DS primitive —
+ * consumer apps should not import this.
+ *
+ * See specs/cyan-ds/components/docs-theme-toggle/spec.md.
+ */
+---
+
+<button
+  type="button"
+  class="cn-ds-theme-toggle"
+  aria-label="Toggle light and dark theme"
+>
+  <span class="cn-icon" aria-hidden="true">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+      <path
+        d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"
+        fill="currentColor"
+      />
+    </svg>
+  </span>
+</button>
+
+<style>
+  .cn-ds-theme-toggle .cn-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cn-ds-theme-toggle .cn-icon svg {
+    width: 100%;
+    height: 100%;
+  }
+</style>
+
+<script>
+  document
+    .querySelectorAll<HTMLButtonElement>(".cn-ds-theme-toggle")
+    .forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const html = document.documentElement;
+        const current =
+          html.style.colorScheme ||
+          (window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light");
+        html.style.colorScheme = current === "dark" ? "light" : "dark";
+      });
+    });
+</script>

@@ -1,0 +1,15 @@
+/* packages/cyan/src/components/cn-loader/cn-loader.css
+ *
+ * Auto-centres <span class="cn-loader"> inside common container
+ * shells. For CnCard, the actions slot is the canonical host for a
+ * loader — it renders as <nav class="actions"> (a direct child of
+ * <article class="cn-card">), whereas the default children land in
+ * <div class="card-info"> where this rule does not apply.
+ */
+
+section > .cn-loader,
+article > .cn-loader,
+article.cn-card > nav.actions > .cn-loader {
+  display: block;
+  margin: var(--cn-line) auto;
+}

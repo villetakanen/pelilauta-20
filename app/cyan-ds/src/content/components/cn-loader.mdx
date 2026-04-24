@@ -1,0 +1,87 @@
+---
+title: CnLoader
+description: The design system's canonical loading indicator combining motion and context.
+status: stable
+---
+
+import CnLoader from "@cyan/components/cn-loader/CnLoader.svelte";
+import CnCard from "@cyan/components/CnCard.svelte";
+import ThemeSplit from "@cyan/components/living-style-books/ThemeSplit.astro";
+
+## Overview
+
+`CnLoader` communicates asynchronous progress. It combines a spinning dual-ring border (motion signal — "something is happening") with a static centred icon (context signal — "this is what is loading"). Consumers use it as a Svelte component (`<CnLoader />`); there is no `<cn-loader>` custom element tag.
+
+## Usage
+
+```svelte
+<script>
+  import CnLoader from "@cyan/components/cn-loader/CnLoader.svelte";
+</script>
+
+<CnLoader />
+<CnLoader inline />
+<CnLoader noun="cat" label="Loading feline data…" />
+```
+
+## Dual-theme demo
+
+The default loader occupies a block; the `inline` variant fits on a text line (`--cn-line`, 24px).
+
+<ThemeSplit>
+  <CnLoader />
+  <p><CnLoader inline /> Inline loader beside text</p>
+</ThemeSplit>
+
+## Accessibility & context
+
+The loader forwards `noun` to the inner icon and uses `role="status"` with a configurable `label` that assistive technology announces.
+
+<CnLoader noun="cat" label="Loading feline data…" />
+
+## Inside buttons
+
+A disabled button with `<CnLoader inline />` is the canonical loading state. Buttons are bare `<button>` elements — styling comes from the DS button stylesheet (see the cn-button spec).
+
+<button>
+  <CnLoader inline />
+  Loading…
+</button>
+
+<button>
+  <CnLoader inline />
+</button>
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `noun` | `string` | `"fox"` | Icon noun forwarded to the nested `CnIcon`. |
+| `inline` | `boolean` | `false` | When `true`, the loader renders at `--cn-line` (24px) for use in buttons or inline flows. |
+| `label` | `string` | `"Loading"` | ARIA label announced via `role="status"`. |
+
+## Container behaviours
+
+The loader is auto-centred (vertical margin `--cn-line`, horizontal `auto`) when placed as a direct child of `<section>`, `<article>`, or inside the `actions` snippet of a `<CnCard>`.
+
+### Inside a section
+
+<section>
+  <CnLoader />
+</section>
+
+### Inside a CnCard (actions slot)
+
+Place the loader in the card's `actions` snippet — it renders as a direct child of `<article class="cn-card">` via `<nav class="actions">`, which is the host that the auto-centre rule targets. Placing it in the default children position lands it inside `<div class="card-info">`, where the rule does not apply.
+
+<CnCard title="Card with loader">
+  <CnLoader slot="actions" />
+</CnCard>
+
+## Tokens
+
+| Token | Default value | Description |
+|---|---|---|
+| `--cn-loader-size` | `calc(var(--cn-line) * 3)` (72px) | Default square dimension. |
+| `--cn-loader-line-width` | `calc(var(--cn-grid) / 2)` (4px) | Thickness of the spinning ring. |
+| `--cn-loader-color` | `light-dark(var(--chroma-primary-60), var(--chroma-surface-60))` | Colour of ring and icon. |

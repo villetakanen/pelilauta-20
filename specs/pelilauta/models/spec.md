@@ -14,7 +14,7 @@ Base Zod schemas shared across multiple Pelilauta sub-apps (threads, pages, hand
 
 - **Package:** `packages/models/`
 - **Exports:**
-  - `EntrySchema` — base Firestore document: `key`, `flowTime`, `createdAt`, `updatedAt`, `owners[]`
+  - `EntrySchema` — base Firestore document: `key`, `flowTime`, `createdAt`, `updatedAt`, `owners[]`, `locale`
   - `ContentEntrySchema` — extends Entry: `public`, `sticky`, `tags[]`, `markdownContent`, `owners[]`, `author`
   - `Entry`, `ContentEntry` types (inferred from Zod)
   - `toDate()` helper — normalizes Firestore Timestamps, ISO strings, and epoch numbers to `Date`
@@ -29,6 +29,7 @@ EntrySchema
   createdAt: Date (optional, coerced)
   updatedAt: Date (optional, coerced)
   owners: string[] (uid array, default [])
+  locale: string (content language, default 'fi')
 
 ContentEntrySchema extends EntrySchema
   public: boolean (optional)
@@ -74,6 +75,7 @@ ContentEntrySchema extends EntrySchema
 - `ContentEntrySchema` must always extend `EntrySchema` — breaking this breaks every domain
 - `owners` default must be `[]`, not undefined — downstream code relies on array methods
 - `flowTime` must coerce to number — Firestore may return it as string in edge cases
+- `locale` is the **content** language of the entry (used by content components for `<article lang>`), not the viewer's UX language. The schema does NOT enumerate accepted values — UI surfaces constrain the picker, the schema does not.
 
 ### Testing Scenarios
 
@@ -83,6 +85,17 @@ ContentEntrySchema extends EntrySchema
 Given an object with only a key field
 When parsed through EntrySchema
 Then it succeeds with defaults for flowTime (0) and owners ([])
+```
+
+- **Vitest Unit Test:** `packages/models/src/schemas/Entry.test.ts`
+
+#### Scenario: EntrySchema defaults locale to "fi"
+
+```gherkin
+Given an object with no locale field
+When parsed through EntrySchema
+Then result.locale equals "fi"
+And an explicitly set locale (e.g. "en", "sv") is preserved verbatim
 ```
 
 - **Vitest Unit Test:** `packages/models/src/schemas/Entry.test.ts`
@@ -103,6 +116,16 @@ Then all Entry defaults are present alongside content fields
 Given a Firestore Timestamp-shaped object with seconds and nanoseconds
 When passed to toDate()
 Then a valid Date is returned
+```
+
+- **Vitest Unit Test:** `packages/models/src/utils/toDate.test.ts`
+
+#### Scenario: toDate normalizes invalid inputs
+
+```gherkin
+Given an invalid ISO string, unrecognized object, or null/undefined
+When passed to toDate()
+Then Date(0) (epoch) is returned to ensure stability
 ```
 
 - **Vitest Unit Test:** `packages/models/src/utils/toDate.test.ts`

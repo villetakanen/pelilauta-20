@@ -1,0 +1,32 @@
+---
+title: Dividers
+description: Atomic styling for the <hr> element.
+order: 2
+status: stable
+---
+
+import ThemeSplit from "@cyan/components/living-style-books/ThemeSplit.astro";
+
+# Dividers
+
+Pelilauta styles raw `<hr>` elements directly. The result is a thin,
+grid-aligned horizontal rule — the single "subtle semantic separation"
+primitive for structural and editorial content. No component wrapper,
+no class; consumers write `<hr />` and the DS styles it.
+
+## Blueprint
+
+<ThemeSplit>
+  <div>
+    <p>Content above the divider.</p>
+    <hr />
+    <p>Content below the divider.</p>
+  </div>
+</ThemeSplit>
+
+## Tokens
+
+| Token | Role |
+|-------|------|
+| `--cn-border` | Line colour (theme-aware via `light-dark()`) |
+| `--cn-line` | Top & bottom margin — grid-aligned vertical rhythm (24px at the default grid) |

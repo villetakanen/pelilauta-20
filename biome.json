@@ -20,7 +20,8 @@
       "!**/dist",
       "!**/.astro",
       "!**/playwright-report",
-      "!**/.tmp"
+      "!**/.tmp",
+      "!**/.netlify"
     ]
   },
   "overrides": [
@@ -35,6 +36,30 @@
           "correctness": {
             "noUnusedVariables": "off",
             "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/*.svelte"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedImports": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["packages/cyan/src/**/*.css"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noDescendingSpecificity": "off"
+          },
+          "complexity": {
+            "noImportantStyles": "off"
           }
         }
       }

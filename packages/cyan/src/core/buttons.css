@@ -1,0 +1,137 @@
+button,
+a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--cn-grid);
+  height: var(--cn-button-size);
+  padding: 0 var(--cn-gap);
+  /* Centered on the grid row */
+  margin-top: calc((var(--cn-button-physical-size) - var(--cn-button-size)) / 2);
+  margin-bottom: calc((var(--cn-button-physical-size) - var(--cn-button-size)) / 2);
+
+  border: none;
+  border-radius: calc(var(--cn-button-size) / 2);
+  cursor: pointer;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
+  vertical-align: middle;
+
+  /* Motion & Shadow */
+  transition:
+    box-shadow var(--cn-duration-ui) var(--cn-easing-ui),
+    opacity var(--cn-duration-ui) var(--cn-easing-ui);
+
+  /* Typography */
+  font-family: inherit;
+  font-size: var(--cn-font-size-button);
+  font-weight: var(--cn-font-weight-button);
+  letter-spacing: var(--cn-letter-spacing-button);
+  line-height: var(--cn-line-height-button);
+  white-space: nowrap;
+
+  /* Defaults (Surface & Foreground) */
+  background-image: linear-gradient(in oklab 137deg, var(--cn-button-light), var(--cn-button));
+  color: var(--cn-on-button);
+}
+
+/* Variant: CTA */
+button.cta,
+a.button.cta {
+  background-image: linear-gradient(in oklab 137deg, var(--cn-button-cta), var(--cn-button));
+  color: var(--cn-on-button-cta);
+}
+
+/* Variant: Text */
+button.text,
+a.button.text {
+  background-image: none;
+  background-color: color-mix(in oklab, var(--cn-button) 33%, transparent);
+  color: var(--cn-on-surface);
+  box-shadow: none;
+}
+
+/* Secondary Ancestor context */
+.secondary button:not(.cta):not(.text),
+.secondary a.button:not(.cta):not(.text) {
+  background-image: linear-gradient(
+    in oklab 137deg,
+    light-dark(var(--chroma-primary-40), var(--chroma-primary-80)),
+    light-dark(var(--chroma-primary-60), var(--chroma-primary-95))
+  );
+}
+
+/* Overlay wash for hover/active */
+button::after,
+a.button::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-color: transparent;
+  transition: background-color var(--cn-duration-ui) var(--cn-easing-ui);
+}
+
+button:hover::after,
+a.button:hover::after {
+  background-color: var(--cn-hover);
+}
+
+button:active::after,
+a.button:active::after {
+  background-color: var(--cn-active);
+}
+
+button:hover,
+a.button:hover {
+  box-shadow: var(--cn-shadow-button-hover);
+}
+
+/* Disabled state */
+button:disabled,
+button[disabled],
+a.button[disabled],
+button.disabled,
+a.button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* Focus handling */
+button:focus-visible,
+a.button:focus-visible {
+  outline: 2px solid var(--cn-focus-ring);
+  outline-offset: 2px;
+}
+
+/* --- Internal Layout --- */
+
+/* Force small icons inside buttons */
+button .cn-icon,
+a.button .cn-icon,
+button .cn-loader,
+a.button .cn-loader {
+  --icon-dim: var(--cn-icon-size-small) !important;
+  width: var(--cn-icon-size-small) !important;
+  height: var(--cn-icon-size-small) !important;
+  flex-shrink: 0;
+}
+
+/* Icon-only circularity */
+button:has(.cn-icon:only-child),
+a.button:has(.cn-icon:only-child),
+button:has(.cn-loader:only-child),
+a.button:has(.cn-loader:only-child) {
+  width: var(--cn-button-size);
+  padding: 0;
+}
+
+/* Alignment hooks for loader/label */
+button .cn-loader:first-child:not(:only-child),
+a.button .cn-loader:first-child:not(:only-child),
+button .cn-icon:first-child:not(:only-child),
+a.button .cn-icon:first-child:not(:only-child) {
+  margin-left: calc(-1 * var(--cn-grid));
+}

@@ -60,24 +60,34 @@ Use findings as additional review context, not as hard requirements.
 
 Analyze every changed file against **three lenses**:
 
-#### Lens 1: Spec Compliance
+#### Lens 1: Spec Compliance (Code & Document Health)
+- **Spec Consistency & Completeness:** Does the spec have internal contradictions (e.g. DoD vs Out of Scope)? Does every new test or behavior map to an *already explicitly written* Scenario in the spec? Code must never lead the spec.
+- **Diff Integrity:** Did the commit accidentally delete, orphan, or corrupt adjacent, unrelated scenarios, rules, or test mappings in the spec?
+- **Formatting Consistency:** Do additions to the spec strictly match the existing formatting of the document (e.g., using standard fenced Gherkin ` ```gherkin ` blocks instead of reverting to ad-hoc dashed lists)?
 - Does the code satisfy the spec's Contract (Definition of Done, Scenarios)?
+- **Mutation Authority:** Does the code introduce new state mutators, endpoints, or public exports that the spec does not explicitly authorize? Unsanctioned mutators are violations.
 - Does the code violate any Anti-Patterns documented in the spec?
 - Does the code break any Regression Guardrails?
 - Are there behavioral divergences from what the spec describes?
+- **Negative Assertions:** Do the tests explicitly assert that forbidden behaviors (e.g., Regression Guardrails) *do not* occur? (e.g., `expect(mock).not.toHaveBeenCalled()`).
+- **Mock Contracts:** If the spec defines specific positional arguments or options shapes for external API calls, do the tests explicitly lock those parameters using `toHaveBeenCalledWith(...)`?
 
 #### Lens 2: Constitutional / Architectural
 - Does the code follow Astro SSR/CSS vs Svelte 5 CSR progressive enhancement architectural constraints defined in `AGENTS.md`?
 - Are there security issues (injection, XSS, exposed secrets, auth bypasses)?
+- **Data Boundaries / Over-fetching:** Are raw external payloads (like opaque tokens or full database records) filtered before being assigned to host state/locals to prevent internal state leakage?
+- **Test Orphan Prevention:** Does every new test cover an *explicitly defined* scenario in the spec? Tests verifying structural code internals or side-effects without a mapping scenario must be flagged.
 - Are there performance anti-patterns (N+1 queries, unbounded loads, memory leaks)?
-- Is error handling appropriate (no silent failures, no swallowed exceptions)?
-- Are types used correctly (no `any`, no unsafe casts)?
+- Is error handling appropriate? A `catch` block that gracefully degrades user state *must still log the error* (e.g., `console.error`). Discarding errors entirely masks infrastructure misconfigurations and is considered a "swallowed exception".
+- **Typing Discipline:** Are types used correctly across both source and test files? The use of `any`, `never`, or incorrect type assertions (`as unknown as WrongType`) just to silence the compiler is prohibited.
+- **Code Duplication:** Does the diff introduce identical boilerplate, test fixtures, or route logic that already exists in sibling files? Flag duplicated patterns for hoisting to shared utilities to prevent silent drift.
 
 #### Lens 3: Correctness & Edge Cases
 - Are there logic errors, off-by-one bugs, or race conditions?
 - Are edge cases handled (empty inputs, null/undefined, boundary values)?
 - Are there dead code paths or unreachable branches?
 - Could this break existing functionality (regression risk)?
+- **Intent Verification:** Do inline comments accurately reflect the reasoning established in the spec, rather than inventing orthogonal justifications?
 
 ### 5. Produce the verdict
 

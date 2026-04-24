@@ -1,0 +1,17 @@
+/**
+ * Card Grid — responsive auto-fill card layout.
+ * Follows spec: specs/cyan-ds/layouts/card-grid/spec.md
+ *
+ * Uses intrinsic sizing (auto-fill + minmax) — no container queries or
+ * media queries. The browser fills 2–3 columns when the parent is wide
+ * enough, and collapses to 1 column when it isn't.
+ *
+ * Column floor is the phi-family "small" value (67ch / 2.618 ≈ 26ch),
+ * consistent with triad/golden secondary column sizing.
+ */
+
+.cn-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(67ch / 2.618), 1fr));
+  gap: var(--cn-gap);
+}

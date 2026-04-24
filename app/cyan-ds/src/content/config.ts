@@ -6,11 +6,20 @@ const bookSchema = z.object({
   icon: z.string().optional(),
   order: z.number().optional(),
   status: z.enum(["stable", "alpha", "draft"]).default("stable"),
+  /**
+   * When true, Book.astro does NOT wrap the MDX slot in a prose <article> cage.
+   * The MDX author owns its own content-grid shells. Use for pages that need
+   * main-wide layout demos (e.g. Golden / Triad). See specs/cyan-ds/living-style-books/spec.md.
+   */
+  multipart: z.boolean().optional().default(false),
+  /** URL of a decorative background image that Book.astro forwards to the CnBackgroundPoster slot. */
+  poster: z.string().optional(),
 });
 
 export const collections = {
   principles: defineCollection({ type: "content", schema: bookSchema }),
   styles: defineCollection({ type: "content", schema: bookSchema }),
+  core: defineCollection({ type: "content", schema: bookSchema }),
   components: defineCollection({ type: "content", schema: bookSchema }),
   addons: defineCollection({ type: "content", schema: bookSchema }),
 };

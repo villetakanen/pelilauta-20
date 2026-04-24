@@ -9,7 +9,6 @@ test.describe("Tray and Rail Components", () => {
     await page.setViewportSize({ width: 375, height: 667 });
 
     const drawer = page.locator(".cn-drawer");
-    const toggle = page.locator("#cn-tray-toggle");
 
     // Check initial state (off-screen)
     await expect(drawer).not.toBeInViewport();
@@ -65,7 +64,6 @@ test.describe("Tray and Rail Components", () => {
     await page.setViewportSize({ width: 700, height: 800 });
 
     const drawer = page.locator(".cn-drawer");
-    const toggle = page.locator("#cn-tray-toggle");
 
     // Toggle open
     await page.click('label[for="cn-tray-toggle"]');

@@ -2,10 +2,10 @@
 import { type CollectionEntry, getCollection, render } from "astro:content";
 import BookLayout from "../layouts/Book.astro";
 
-type DocCategory = "principles" | "styles" | "components" | "addons";
+type DocCategory = "principles" | "styles" | "core" | "components" | "addons";
 
 export async function getStaticPaths() {
-  const collections: DocCategory[] = ["principles", "styles", "components", "addons"];
+  const collections: DocCategory[] = ["principles", "styles", "core", "components", "addons"];
 
   const allEntries = await Promise.all(
     collections.map(async (name) => {

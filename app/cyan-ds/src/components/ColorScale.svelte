@@ -12,8 +12,8 @@ let isGrayscale = false;
 
 function getLuminance(label) {
   if (label === undefined) return 1;
-  const L = typeof label === "number" ? label / 100 : parseInt(String(label)) / 100;
-  if (isNaN(L)) return 1;
+  const L = typeof label === "number" ? label / 100 : parseInt(String(label), 10) / 100;
+  if (Number.isNaN(L)) return 1;
   return ((L + 0.16) / 1.16) ** 3;
 }
 

@@ -1,0 +1,52 @@
+---
+import ProfileButton from "@cyan/components/ProfileButton.svelte";
+import CyanPage from "@cyan/layouts/Page.astro";
+import AuthChrome from "../components/auth/AuthChrome.svelte";
+import AuthHandler from "../components/auth/AuthHandler.svelte";
+import { projectProfileFromClaims } from "../utils/projectProfile";
+
+interface Props {
+  title: string;
+  appTitle?: string;
+  shortTitle?: string;
+  layout?: "view" | "sidebar" | "editor" | "modal";
+  trayLabel?: string;
+  backHref?: string;
+  noun?: string;
+  asPageHeading?: boolean;
+}
+
+const { uid, claims } = Astro.locals;
+const props = Astro.props;
+
+// Synthesize a profile projection when the SSR identity is resolved; see
+// specs/pelilauta/session/spec.md §Data models.
+const profile = uid && claims ? projectProfileFromClaims(claims) : null;
+---
+
+<CyanPage {...props}>
+  <slot name="app-background-poster" slot="app-background-poster" />
+  <slot name="tray" slot="tray" />
+  <Fragment slot="actions">
+    <slot name="actions" />
+    {
+      uid && profile ? (
+        <AuthChrome client:load ssrProfile={profile} />
+      ) : (
+        <ProfileButton />
+      )
+    }
+  </Fragment>
+
+  <slot />
+
+  {
+    uid && (
+      <AuthHandler
+        client:load
+        ssrUid={uid}
+        ssrProfile={profile}
+      />
+    )
+  }
+</CyanPage>

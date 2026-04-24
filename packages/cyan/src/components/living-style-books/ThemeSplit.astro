@@ -1,0 +1,62 @@
+---
+/**
+ * ThemeSplit.astro
+ *
+ * Living-style-book helper that renders its default slot twice: once in
+ * a light-mode pane and once in a dark-mode pane. Authors drop a single
+ * demo body inside; reviewers see both themes side-by-side without
+ * toggling OS or browser theme.
+ *
+ * Spec: specs/cyan-ds/living-style-books/theme-split/spec.md
+ */
+
+// Render the slot once to HTML, then emit it twice via set:html.
+// Using <slot /> twice re-renders the same JSX vnodes, which breaks
+// Svelte 5 SSR children in MDX (hasTriedRenderComponentSymbol gets
+// set on the first pass and the second pass falls through to a
+// bare function call with no $$renderer argument).
+const html = await Astro.slots.render("default");
+---
+
+<div class="cn-theme-split">
+  <div class="cn-theme-split-pane cn-theme-split-pane-light">
+    <p class="text-caption">Light</p>
+    <div set:html={html} />
+  </div>
+  <div class="cn-theme-split-pane cn-theme-split-pane-dark">
+    <p class="text-caption">Dark</p>
+    <div set:html={html} />
+  </div>
+</div>
+
+<style>
+  .cn-theme-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--cn-gap);
+    border: 1px solid var(--cn-border);
+    border-radius: var(--cn-border-radius-large);
+    padding: var(--cn-gap);
+    background: var(--cn-surface);
+  }
+
+  .cn-theme-split-pane {
+    padding: var(--cn-gap);
+    border-radius: var(--cn-border-radius-medium);
+    background: var(--cn-surface);
+    color: var(--cn-on-surface);
+  }
+
+  .cn-theme-split-pane-light {
+    color-scheme: light;
+  }
+
+  .cn-theme-split-pane-dark {
+    color-scheme: dark;
+  }
+
+  .cn-theme-split-pane .text-caption {
+    color: var(--cn-on-surface-secondary);
+    margin: 0 0 var(--cn-gap) 0;
+  }
+</style>

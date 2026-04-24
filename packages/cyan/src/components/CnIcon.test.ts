@@ -8,7 +8,7 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
     // fox is a community icon — must contain shape elements from the SVG file
-    expect(svg!.children.length).toBeGreaterThan(0);
+    expect(svg?.children.length).toBeGreaterThan(0);
   });
 
   it("prioritizes T1 over T2 for 'mekanismi' (exists in both)", () => {
@@ -16,7 +16,7 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
     // Community mekanismi has fill-opacity attributes (branded depth icon)
-    const depthPaths = svg!.querySelectorAll("[fill-opacity]");
+    const depthPaths = svg?.querySelectorAll("[fill-opacity]");
     expect(depthPaths.length).toBeGreaterThan(0);
   });
 
@@ -24,10 +24,10 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     const { container } = render(CnIcon, { props: { noun: "xyz-nonexistent-1234" } });
     const span = container.querySelector('.cn-icon[data-noun="xyz-nonexistent-1234"]');
     expect(span).not.toBeNull();
-    const svg = span!.querySelector("svg");
+    const svg = span?.querySelector("svg");
     expect(svg).not.toBeNull();
     // Missing glyph must render at least one path with currentColor
-    const paths = svg!.querySelectorAll("path");
+    const paths = svg?.querySelectorAll("path");
     expect(paths.length).toBeGreaterThan(0);
     expect(paths[0].getAttribute("fill")).toBe("currentColor");
   });
@@ -36,7 +36,7 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     const { container } = render(CnIcon, { props: { noun: "adventurer" } });
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
-    expect(svg!.querySelector("path")).not.toBeNull();
+    expect(svg?.querySelector("path")).not.toBeNull();
   });
 
   it("renders T3 fallback for fallback-only nouns ('menu')", () => {
@@ -44,7 +44,7 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     const svg = container.querySelector("svg");
     expect(svg).not.toBeNull();
     // Fallback icons use viewBox 0 0 24 24
-    expect(svg!.getAttribute("viewBox")).toBe("0 0 24 24");
+    expect(svg?.getAttribute("viewBox")).toBe("0 0 24 24");
   });
 });
 
@@ -79,6 +79,6 @@ describe("CnIcon Rendering", () => {
   it("sets svg aria-hidden='true'", () => {
     const { container } = render(CnIcon, { props: { noun: "fox" } });
     const svg = container.querySelector("svg");
-    expect(svg!.getAttribute("aria-hidden")).toBe("true");
+    expect(svg?.getAttribute("aria-hidden")).toBe("true");
   });
 });
