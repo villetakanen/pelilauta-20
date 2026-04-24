@@ -12,6 +12,19 @@
 [functions.ssr]
   external_node_modules = ["firebase-admin"]
 
+# Proxy Firebase Auth handler through the Netlify origin so the OAuth
+# redirect round-trip stays first-party. Without this, browsers block the
+# cross-site iframe handshake from <project>.firebaseapp.com back to our
+# app origin (Chrome's storage partitioning treats netlify.app and
+# firebaseapp.com as separate sites). PUBLIC_authDomain must be set to
+# this Netlify site's hostname for the pattern to work.
+# Reference: https://firebase.google.com/docs/auth/web/redirect-best-practices
+[[redirects]]
+  from = "/__/auth/*"
+  to = "https://skaldbase.firebaseapp.com/__/auth/:splat"
+  status = 200
+  force = true
+
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
