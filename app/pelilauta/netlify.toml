@@ -6,6 +6,14 @@
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
   # Firebase client config is intentionally public (shipped in the browser bundle).
-  # Exclude these keys from Netlify's secrets scanner so the build doesn't fail
-  # if they get flagged as "secret" in the Netlify UI.
+  # Exclude these keys from Netlify's strict-prefix secrets scanner so the build
+  # doesn't fail if they get flagged as "secret" in the Netlify UI.
   SECRETS_SCAN_OMIT_KEYS = "PUBLIC_apiKey,PUBLIC_authDomain,PUBLIC_projectId,PUBLIC_storageBucket,PUBLIC_messagingSenderId,PUBLIC_appId,PUBLIC_measurementId,PUBLIC_databaseURL"
+  # Disable Netlify's pattern-based "smart detection" scanning. It flags
+  # PUBLIC_apiKey's value (pattern: "AIza..." — Google API key) as a likely
+  # secret, but Firebase Web API keys are public by design (per Google's own
+  # docs — access control is via Firebase Security Rules + App Check, not
+  # key secrecy). Strict-prefix SECRET_* scanning still runs and enforces
+  # the v20 classification invariant; see specs/pelilauta/firebase/spec.md
+  # §Regression Guardrails.
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
