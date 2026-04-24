@@ -46,6 +46,7 @@ packages/firebase/
 - Server exports must never import client SDK modules (and vice versa)
 - Package uses conditional exports (`"exports"` field in package.json) or separate entry points so bundlers tree-shake correctly
 - No top-level side effects — `initializeApp` is lazy (called once, memoized)
+- **`firebase-admin` MUST stay external in the SSR bundle.** The consuming app (`app/pelilauta/astro.config.mjs`) marks `firebase-admin` and its subpath entries (`firebase-admin/app`, `firebase-admin/auth`, `firebase-admin/firestore`) in `vite.ssr.external`. Rationale: firebase-admin's transitive dependency `@grpc/grpc-js` is CommonJS and reads `__dirname` at runtime to locate native proto files. Bundling it into an ESM chunk produces `__dirname=undefined` in ESM scope, which crashes the first Firestore call at runtime in Netlify Functions with `ReferenceError: __dirname is not defined in ES module scope`. Keeping firebase-admin external means Node's runtime `require()` resolves it from `node_modules`, where the CommonJS pattern works as intended.
 
 #### Environment Variables
 
