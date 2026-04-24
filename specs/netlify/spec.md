@@ -21,10 +21,10 @@ Pelilauta-20 deploys two Astro apps to two separate Netlify sites: the main app 
 - **Build pipeline:**
   - `pnpm install` runs from the workspace root (pnpm walks up to find `pnpm-workspace.yaml`).
   - Build command is `pnpm --filter <app-name> build`, where `<app-name>` matches the app's `package.json` `name` field (`pelilauta` or `cyan-ds`).
-  - Publish directory is `dist` (relative to the app's base directory).
-  - `@astrojs/netlify` adapter emits the SSR function to `.netlify/functions-internal/` inside the app dir; Netlify auto-detects it.
+  - Publish directory is the **full path from the repo root** — `app/pelilauta/dist` or `app/cyan-ds/dist`. Netlify's `packagePath` (set from dashboard Base directory) controls where commands run and where `netlify.toml` is read from, but `publish` paths are resolved relative to the repo root.
+  - `@astrojs/netlify` adapter emits the SSR function to `.netlify/functions-internal/` inside the app dir; Netlify auto-detects it regardless of `publish`.
 - **Runtime environment:**
-  - `NODE_VERSION = "20"` — pinned. Astro 6 + Vite 7 expect Node 20+.
+  - `NODE_VERSION = "22"` — pinned. Astro 6.1+ requires `>=22.12.0`.
   - `PNPM_VERSION = "10"` — pinned to match local toolchain.
 - **Environment variables (Firebase):** the full set of `PUBLIC_*` and `SECRET_*` vars listed in `specs/pelilauta/firebase/spec.md` §Environment Variables MUST be set on every Netlify site that hosts an app reading from Firebase. The DS site (`app/cyan-ds`) does not currently read Firestore, so it does not need the `SECRET_*` set; this may change if future DS pages embed live data.
 - **Authorized domains in Firebase Auth:** every Netlify deploy URL (production and any branch deploys exposing the login flow) must be listed in the target Firebase project's **Authentication → Settings → Authorized domains**. Without this entry, `signInWithRedirect` rejects with `auth/unauthorized-domain`. The `PUBLIC_authDomain` env var must reference a Firebase project that has the deploy URL in this list.
@@ -37,7 +37,7 @@ Pelilauta-20 deploys two Astro apps to two separate Netlify sites: the main app 
 
 ### Definition of Done
 
-- [ ] `app/pelilauta/netlify.toml` exists with `[build] command = "pnpm --filter pelilauta build"`, `publish = "dist"`, and `[build.environment] NODE_VERSION = "20"`, `PNPM_VERSION = "10"`.
+- [ ] `app/pelilauta/netlify.toml` exists with `[build] command = "pnpm --filter pelilauta build"`, `publish = "app/pelilauta/dist"`, and `[build.environment] NODE_VERSION = "22"`, `PNPM_VERSION = "10"`.
 - [ ] The pelilauta Netlify site has Base directory set to `app/pelilauta` in the dashboard.
 - [ ] All `PUBLIC_*` Firebase env vars from `specs/pelilauta/firebase/spec.md` §Environment Variables are set on the pelilauta Netlify site.
 - [ ] All `SECRET_*` Firebase service-account env vars from the same spec are set on the pelilauta Netlify site.
@@ -45,7 +45,7 @@ Pelilauta-20 deploys two Astro apps to two separate Netlify sites: the main app 
 - [ ] The pelilauta Netlify deploy URL (and any branch-preview URLs that need login) is listed under Firebase Auth → Authorized domains in the target Firebase project.
 - [ ] `pnpm --filter pelilauta build` exits 0 from the Netlify build environment (Node 20, pnpm 10), producing a publishable `dist/` and SSR function.
 - [ ] A real Google sign-in completes against the deployed site: click → Google OAuth → return → authenticated SSR chrome → logout returns to anonymous paint.
-- [ ] `app/cyan-ds/netlify.toml` exists with `[build] command = "pnpm --filter cyan-ds build"`, `publish = "dist"`, and matching `NODE_VERSION` / `PNPM_VERSION` pins.
+- [ ] `app/cyan-ds/netlify.toml` exists with `[build] command = "pnpm --filter cyan-ds build"`, `publish = "app/cyan-ds/dist"`, and matching `NODE_VERSION` / `PNPM_VERSION` pins.
 - [ ] The DS Netlify site has Base directory set to `app/cyan-ds` in the dashboard (to be provisioned as `pelilauta-cyan-ds-next.netlify.app`).
 
 ### Regression Guardrails

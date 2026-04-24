@@ -1,7 +1,7 @@
 [build]
   command = "pnpm --filter pelilauta build"
-  publish = "dist"
+  publish = "app/pelilauta/dist"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
   PNPM_VERSION = "10"
