@@ -2,6 +2,16 @@
   command = "pnpm --filter pelilauta build"
   publish = "app/pelilauta/dist"
 
+# Tell Netlify's function bundler to deploy firebase-admin as an external
+# node module (not bundle it with esbuild). firebase-admin's transitive
+# @grpc/grpc-js dep is CommonJS and relies on __dirname, which breaks when
+# bundled into ESM. Vite already excludes it from the SSR chunk via
+# astro.config.mjs vite.ssr.external; this block ensures the package files
+# ship with the function so Node's require() can resolve it at runtime.
+# See specs/pelilauta/firebase/spec.md §SSR Safety.
+[functions.ssr]
+  external_node_modules = ["firebase-admin"]
+
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10"

@@ -23,6 +23,7 @@ Pelilauta-20 deploys two Astro apps to two separate Netlify sites: the main app 
   - Build command is `pnpm --filter <app-name> build`, where `<app-name>` matches the app's `package.json` `name` field (`pelilauta` or `cyan-ds`).
   - Publish directory is the **full path from the repo root** — `app/pelilauta/dist` or `app/cyan-ds/dist`. Netlify's `packagePath` (set from dashboard Base directory) controls where commands run and where `netlify.toml` is read from, but `publish` paths are resolved relative to the repo root.
   - `@astrojs/netlify` adapter emits the SSR function to `.netlify/functions-internal/` inside the app dir; Netlify auto-detects it regardless of `publish`.
+- **External Node modules in the SSR function:** `app/pelilauta/netlify.toml` declares `[functions.ssr] external_node_modules = ["firebase-admin"]`. This pairs with `vite.ssr.external` in `app/pelilauta/astro.config.mjs`: Vite keeps firebase-admin out of the SSR chunk (to avoid the `__dirname` ESM crash from grpc-js), and Netlify's function bundler then ships the package files alongside the function so `require('firebase-admin')` resolves at runtime. Both sides are load-bearing — removing either reintroduces either the bundling crash (drop Vite external) or a `Cannot find package 'firebase-admin'` runtime error (drop the Netlify `external_node_modules`). See `specs/pelilauta/firebase/spec.md` §SSR Safety.
 - **Runtime environment:**
   - `NODE_VERSION = "22"` — pinned. Astro 6.1+ requires `>=22.12.0`.
   - `PNPM_VERSION = "10"` — pinned to match local toolchain.
