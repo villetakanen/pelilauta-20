@@ -41,7 +41,10 @@ export function buildServiceAccount() {
     type: "service_account",
     project_id: import.meta.env.PUBLIC_projectId,
     private_key_id: process.env.SECRET_private_key_id,
-    private_key: process.env.SECRET_private_key,
+    // Netlify / dotenv store multi-line values with literal \n escapes
+    // (two chars: backslash + n). firebase-admin's cert() expects actual
+    // newline characters in the PEM; convert before passing.
+    private_key: process.env.SECRET_private_key?.replace(/\\n/g, "\n"),
     client_email: process.env.SECRET_client_email,
     client_id: process.env.SECRET_client_id,
     // auth_uri / token_uri / auth_provider_x509_cert_url are invariant public
