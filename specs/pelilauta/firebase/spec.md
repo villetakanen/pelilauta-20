@@ -56,6 +56,14 @@ convention — the v17 contract predates that style and changing it would force
 re-provisioning in Netlify and every contributor's local `.env`. Treat the list
 below as authoritative; do not rename.
 
+**The `SECRET_` prefix is NOT a sensitivity statement — it is a v17 naming
+artifact.** Several `SECRET_*` vars below hold public values (Google endpoint
+URLs like `https://accounts.google.com/o/oauth2/auth`). The genuinely sensitive
+fields are `SECRET_private_key`, `SECRET_private_key_id`, `SECRET_client_email`,
+`SECRET_client_id`, and `SECRET_e2e_seed_secret`. The public-valued `SECRET_*`
+vars may be listed in Netlify's `SECRETS_SCAN_OMIT_KEYS` to prevent
+scanner false positives; this is documented in `specs/netlify/spec.md`.
+
 | Variable | Context | Purpose |
 |---|---|---|
 | `PUBLIC_apiKey` | Client | Firebase Web API key |
@@ -71,10 +79,10 @@ below as authoritative; do not rename.
 | `SECRET_private_key` | Server | Service account private key |
 | `SECRET_client_email` | Server | Service account email |
 | `SECRET_client_id` | Server | Service account client ID |
-| `SECRET_auth_uri` | Server | Service account auth URI |
-| `SECRET_token_uri` | Server | Service account token URI |
-| `SECRET_auth_provider_x509_cert_url` | Server | Service account auth provider cert URL |
-| `SECRET_client_x509_cert_url` | Server | Service account client cert URL |
+| `SECRET_auth_uri` | Server | Service account auth URI — **public Google endpoint** (`https://accounts.google.com/o/oauth2/auth`). Carries `SECRET_` prefix per v17 verbatim convention, not because the value is sensitive. |
+| `SECRET_token_uri` | Server | Service account token URI — **public Google endpoint** (`https://oauth2.googleapis.com/token`). `SECRET_` prefix by v17 verbatim convention. |
+| `SECRET_auth_provider_x509_cert_url` | Server | Service account auth provider cert URL — **public Google cert endpoint** (`https://www.googleapis.com/oauth2/v1/certs`). `SECRET_` prefix by v17 verbatim convention. |
+| `SECRET_client_x509_cert_url` | Server | Service account client cert URL — **public Google cert endpoint** containing the service-account email; semi-public (the email is identifying but not a credential). `SECRET_` prefix by v17 verbatim convention. |
 | `SECRET_e2e_seed_secret` | Server | Test-only seed route secret — MUST be unset in prod. Dev-only E2E fixture authentication. See session spec §Test-only seed route. |
 
 A `.env.example` at the repo root documents the full set for local dev. The

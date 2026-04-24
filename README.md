@@ -85,20 +85,35 @@ pnpm check        # Lint and format (Biome)
 
 ## Environment Variables
 
-Create a `.env` in `app/pelilauta/` with Firebase configuration:
+Create a `.env.development` at the repo root (loaded by `@pelilauta/firebase/config-server` via dotenv). Env var names are inherited verbatim from pelilauta-17 so the same Firebase projects can be reused without re-provisioning. See `specs/pelilauta/firebase/spec.md` §Environment Variables for the authoritative list and the `.env.example` file for a copy-paste template.
 
 ```env
-PUBLIC_apiKey=your_firebase_api_key
-PUBLIC_authDomain=your_project.firebaseapp.com
-PUBLIC_databaseURL=https://your_project.firebaseio.com
-PUBLIC_projectId=your_firebase_project_id
-PUBLIC_storageBucket=your_project.appspot.com
-PUBLIC_messagingSenderId=your_messaging_sender_id
-PUBLIC_appId=your_firebase_app_id
-PUBLIC_measurementId=your_measurement_id
-PUBLIC_APP_NAME=Pelilauta 20
-FIREBASE_ADMIN_KEY=your_firebase_admin_service_account_json
+# Firebase client config — safe to expose in the browser bundle
+PUBLIC_apiKey=
+PUBLIC_authDomain=
+PUBLIC_databaseURL=
+PUBLIC_projectId=
+PUBLIC_storageBucket=
+PUBLIC_messagingSenderId=
+PUBLIC_appId=
+PUBLIC_measurementId=
+PUBLIC_universe_domain=
+
+# Firebase Admin SDK service account — server-side only
+SECRET_private_key_id=
+SECRET_private_key=
+SECRET_client_email=
+SECRET_client_id=
+SECRET_auth_uri=
+SECRET_token_uri=
+SECRET_auth_provider_x509_cert_url=
+SECRET_client_x509_cert_url=
+
+# E2E test fixture secret — dev-only, MUST be unset in production
+SECRET_e2e_seed_secret=dev-only-not-a-real-secret
 ```
+
+The four `SECRET_auth_*_uri` / `SECRET_*_x509_cert_url` vars carry the `SECRET_` prefix by v17 convention but hold public Google endpoint URLs. The genuinely sensitive fields are `SECRET_private_key`, `SECRET_private_key_id`, `SECRET_client_email`, and `SECRET_client_id`.
 
 ## Core Features
 
