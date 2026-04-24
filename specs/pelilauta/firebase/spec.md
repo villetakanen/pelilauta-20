@@ -66,7 +66,7 @@ below as authoritative; do not rename.
 | `PUBLIC_appId` | Client | Firebase app ID |
 | `PUBLIC_measurementId` | Client | Analytics measurement ID (optional) |
 | `PUBLIC_databaseURL` | Both | Realtime Database URL |
-| `SECRET_universe_domain` | Server | Service-account universe domain |
+| `PUBLIC_universe_domain` | Server | Service-account universe domain — public identifier (`googleapis.com` for default Google Cloud universe), not a credential. Carries `PUBLIC_` prefix per v17 verbatim convention. |
 | `SECRET_private_key_id` | Server | Service account private key ID |
 | `SECRET_private_key` | Server | Service account private key |
 | `SECRET_client_email` | Server | Service account email |

@@ -27,7 +27,6 @@ const SECRET_KEYS = [
   "SECRET_token_uri",
   "SECRET_auth_provider_x509_cert_url",
   "SECRET_client_x509_cert_url",
-  "SECRET_universe_domain",
 ] as const;
 
 export function buildServiceAccount() {
@@ -50,7 +49,7 @@ export function buildServiceAccount() {
     token_uri: process.env.SECRET_token_uri,
     auth_provider_x509_cert_url: process.env.SECRET_auth_provider_x509_cert_url,
     client_x509_cert_url: process.env.SECRET_client_x509_cert_url,
-    universe_domain: process.env.SECRET_universe_domain,
+    universe_domain: import.meta.env.PUBLIC_universe_domain,
   };
 }
 
