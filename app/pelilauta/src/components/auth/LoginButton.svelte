@@ -6,7 +6,7 @@ import {
   getRedirectResult,
   signInWithRedirect,
 } from "@pelilauta/firebase/client";
-import { logDebug, logError } from "@pelilauta/utils/log";
+import { logError } from "@pelilauta/utils/log";
 import { sanitizeNext } from "@pelilauta/utils/sanitizeNext";
 import { onMount } from "svelte";
 
@@ -33,7 +33,6 @@ onMount(async () => {
   // render the completing state immediately to avoid flashing the CTA button
   // and to close the click-during-mount race window.
   const initialNextKey = sessionStorage.getItem(NEXT_KEY);
-  logDebug("[LoginButton] onMount entry", { initialNextKey });
   if (initialNextKey !== null) {
     completing = true;
   }
@@ -47,11 +46,6 @@ onMount(async () => {
     // a redirect (sessionStorage has our key) and a user is now present,
     // proceed with the handshake regardless of getRedirectResult's nullity.
     const result = await getRedirectResult(auth);
-    logDebug("[LoginButton] getRedirectResult settled", {
-      resultIsNull: result === null,
-      resultUserUid: result?.user?.uid ?? null,
-      currentUserUid: auth.currentUser?.uid ?? null,
-    });
     const user = result?.user ?? (initialNextKey !== null ? auth.currentUser : null);
     // Snapshot and clear the key unconditionally — the spec's "Either outcome
     // clears the sessionStorage key" clause covers all branches below.
@@ -60,27 +54,19 @@ onMount(async () => {
 
     if (user !== null) {
       const idToken = await user.getIdToken();
-      logDebug("[LoginButton] POSTing id token", { idTokenLength: idToken.length });
       const response = await fetch("/api/auth/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-      logDebug("[LoginButton] /api/auth/session response", {
-        status: response.status,
-        ok: response.ok,
-      });
       if (response.ok) {
-        const target = sanitizeNext(stored);
-        logDebug("[LoginButton] navigating to", { target });
-        window.location.assign(target);
+        window.location.assign(sanitizeNext(stored));
       } else {
         error = FALLBACK_ERROR;
         completing = false;
       }
     } else {
       // Fresh visit (or stale key with no pending redirect) — drop to CTA.
-      logDebug("[LoginButton] no user resolved, rendering CTA");
       completing = false;
     }
   } catch (e) {
@@ -95,9 +81,7 @@ onMount(async () => {
 async function handleLogin() {
   loading = true;
   error = null;
-  const sanitized = sanitizeNext(next);
-  sessionStorage.setItem(NEXT_KEY, sanitized);
-  logDebug("[LoginButton] click: calling signInWithRedirect", { next: sanitized });
+  sessionStorage.setItem(NEXT_KEY, sanitizeNext(next));
 
   try {
     const auth = getAuth();
