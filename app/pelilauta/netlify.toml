@@ -5,3 +5,7 @@
 [build.environment]
   NODE_VERSION = "22"
   PNPM_VERSION = "10"
+  # Firebase client config is intentionally public (shipped in the browser bundle).
+  # Exclude these keys from Netlify's secrets scanner so the build doesn't fail
+  # if they get flagged as "secret" in the Netlify UI.
+  SECRETS_SCAN_OMIT_KEYS = "PUBLIC_apiKey,PUBLIC_authDomain,PUBLIC_projectId,PUBLIC_storageBucket,PUBLIC_messagingSenderId,PUBLIC_appId,PUBLIC_measurementId,PUBLIC_databaseURL"
