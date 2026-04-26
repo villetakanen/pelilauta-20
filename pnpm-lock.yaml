@@ -113,6 +113,31 @@ importers:
         specifier: ^3.1.0
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
 
+  packages/auth:
+    dependencies:
+      '@pelilauta/firebase':
+        specifier: workspace:*
+        version: link:../firebase
+      '@pelilauta/utils':
+        specifier: workspace:*
+        version: link:../utils
+    devDependencies:
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^5.1.1
+        version: 5.1.1(svelte@5.55.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.3))
+      '@testing-library/svelte':
+        specifier: ^5.3.1
+        version: 5.3.1(svelte@5.55.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.3))(vitest@3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3))
+      jsdom:
+        specifier: ^29.0.1
+        version: 29.0.1
+      svelte:
+        specifier: ^5.55.3
+        version: 5.55.3
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
+
   packages/cyan:
     dependencies:
       lato-font:
