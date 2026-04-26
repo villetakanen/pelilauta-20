@@ -13,10 +13,10 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
 
   it("prioritizes T1 over T2 for 'mekanismi' (exists in both)", () => {
     const { container } = render(CnIcon, { props: { noun: "mekanismi" } });
-    const svg = container.querySelector("svg");
+    const svg = container.querySelector("svg")!;
     expect(svg).not.toBeNull();
     // Community mekanismi has fill-opacity attributes (branded depth icon)
-    const depthPaths = svg?.querySelectorAll("[fill-opacity]");
+    const depthPaths = svg.querySelectorAll("[fill-opacity]");
     expect(depthPaths.length).toBeGreaterThan(0);
   });
 
@@ -24,10 +24,10 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     const { container } = render(CnIcon, { props: { noun: "xyz-nonexistent-1234" } });
     const span = container.querySelector('.cn-icon[data-noun="xyz-nonexistent-1234"]');
     expect(span).not.toBeNull();
-    const svg = span?.querySelector("svg");
+    const svg = span!.querySelector("svg")!;
     expect(svg).not.toBeNull();
     // Missing glyph must render at least one path with currentColor
-    const paths = svg?.querySelectorAll("path");
+    const paths = svg.querySelectorAll("path");
     expect(paths.length).toBeGreaterThan(0);
     expect(paths[0].getAttribute("fill")).toBe("currentColor");
   });

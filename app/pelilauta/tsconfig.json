@@ -2,8 +2,7 @@
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
     "paths": {
-      "@cyan/*": ["../../packages/cyan/src/*"],
-      "@shell/*": ["../../packages/shell/src/*"]
+      "@cyan/*": ["../../packages/cyan/src/*"]
     }
   }
 }

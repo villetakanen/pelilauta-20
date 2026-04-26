@@ -15,6 +15,9 @@ MESSAGE=$1
 echo "🔍 Running lints..."
 pnpm check
 
+echo "⌨️ Checking types..."
+pnpm check:types
+
 echo "🏗 Building apps..."
 pnpm build
 

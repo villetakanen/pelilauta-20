@@ -10,6 +10,7 @@
     "test": "pnpm --filter '*' test",
     "test:e2e": "pnpm --filter './app/*' test:e2e",
     "check": "biome check --write .",
+    "check:types": "tsc --noEmit",
     "gen:icons": "node --experimental-strip-types scripts/generate-icon-registry.ts",
     "check:icons": "node --experimental-strip-types scripts/generate-icon-registry.ts --check",
     "seed:e2e": "node --experimental-strip-types packages/firebase/scripts/seed-e2e.ts",
