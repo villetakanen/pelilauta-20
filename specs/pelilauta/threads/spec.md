@@ -234,6 +234,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `ChannelSchema.parse(raw)` is ported from v17 with `category` default removed; other coalescings (`description`, `icon`, `flowTime`) preserved via `.default(...)`
 - [ ] `createThread(source?, key?)` factory exported from `schemas/ThreadSchema.ts` — returns a fully-populated `Thread` with defaults filled in (blank titles, empty owners sentinel, current timestamps). Does NOT write to Firestore.
 - [ ] `getThreads(limit, { order, public })` returns `Thread[]` with documented defaults (`order='flowTime'`, `public=true`)
+- [ ] `getThread(key)` returns the parsed `Thread` for an existing doc, `undefined` for a missing doc, and propagates Firestore + Zod errors to the caller
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
@@ -316,6 +317,51 @@ Then 10 threads are returned sorted by createdAt descending
 ```
 
 - **Vitest Unit Test:** `packages/threads/src/api/getThreads.test.ts`
+
+#### Scenario: getThread returns a parsed Thread for an existing doc
+
+```gherkin
+Given the stream collection contains a document at stream/{key}
+When getThread(key) is called
+Then a Thread parsed through ThreadSchema is returned
+And the Thread's key matches the requested key
+And legacy field normalisation (e.g. topic → channel) is applied via ThreadSchema preprocessing
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: getThread returns undefined for a missing doc
+
+```gherkin
+Given the stream collection has no document at stream/{key}
+When getThread(key) is called
+Then undefined is returned
+And no parse is attempted
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: getThread propagates Firestore errors
+
+```gherkin
+Given a Firestore network or permission failure on stream/{key}
+When getThread(key) is called
+Then the underlying error propagates to the caller
+And no fallback value is substituted
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: getThread propagates Zod parse failures on malformed docs
+
+```gherkin
+Given a Firestore document at stream/{key} that violates ThreadSchema
+When getThread(key) is called
+Then the ZodError propagates to the caller
+And undefined is not returned
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
 
 #### Scenario: getChannels reads the meta/threads topics array
 
