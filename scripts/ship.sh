@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
+# Human convenience: verify, commit-all, push.
+# AGENTS: do NOT use this — stage files explicitly via the chat loop.
+# See AGENTS.md → ## Quality gates.
 
-# Exit immediately if any command fails
 set -e
 
-# Check if commit message was provided
 if [ -z "$1" ]; then
     echo "❌ Error: Commit message is required."
     echo "Usage: pnpm ship \"your commit message\""
@@ -12,24 +13,11 @@ fi
 
 MESSAGE=$1
 
-echo "🔍 Running lints..."
-pnpm check
+bash "$(dirname "$0")/verify.sh"
 
-echo "⌨️ Checking types..."
-pnpm check:types
-
-echo "🏗 Building apps..."
-pnpm build
-
-echo "🧪 Running unit tests..."
-pnpm test
-
-echo "🎭 Running E2E tests..."
-pnpm test:e2e
-
-echo "🚀 Everything green! Shipping..."
+echo "🚀 All green — shipping..."
 git add .
 git commit -m "$MESSAGE"
 git push
 
-echo "✅ Shipped successfully!"
+echo "✅ Shipped."
