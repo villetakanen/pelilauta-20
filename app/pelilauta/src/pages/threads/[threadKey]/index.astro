@@ -1,0 +1,50 @@
+---
+// Thread detail page — read-only, anonymous-friendly, pure SSR.
+// No client: directives, no Firestore listeners, no auth gate.
+// See specs/pelilauta/threads/spec.md Stage-2 DoD.
+
+import { ThreadDetail } from "@pelilauta/threads/components";
+import type { Thread } from "@pelilauta/threads/server";
+import { getThread } from "@pelilauta/threads/server";
+import { logError } from "@pelilauta/utils/log";
+import { markdownToHTML } from "@pelilauta/utils/markdownToHTML";
+import { t } from "../../../i18n";
+import Page from "../../../layouts/Page.astro";
+
+const { threadKey } = Astro.params;
+
+if (!threadKey) {
+  Astro.response.status = 404;
+}
+
+let thread: Thread | undefined;
+let bodyHtml = "";
+let error = false;
+
+if (threadKey) {
+  try {
+    thread = await getThread(threadKey);
+    if (thread) {
+      // Markdown rendering happens upstream in the frontmatter — SSR Data Flow rule.
+      bodyHtml = await markdownToHTML(thread.markdownContent ?? "");
+    } else {
+      Astro.response.status = 404;
+    }
+  } catch (e) {
+    logError("ThreadDetailPage", e);
+    error = true;
+  }
+}
+
+const title = thread
+  ? `${thread.title} — Pelilauta`
+  : error
+    ? "Pelilauta"
+    : "Not found — Pelilauta";
+---
+
+<Page title={title} layout="view">
+  {error && <p>{t("pelilauta:error.fetch")}</p>}
+  {!error && !thread && <p>{t("pelilauta:error.notFound")}</p>}
+  {!error && thread && <ThreadDetail thread={thread} bodyHtml={bodyHtml} />}
+</Page>
