@@ -2,7 +2,7 @@ import { defineCollection, z } from "astro:content";
 
 const bookSchema = z.object({
   title: z.string(),
-  description: z.string().optional(),
+  description: z.string(),
   icon: z.string().optional(),
   order: z.number().optional(),
   status: z.enum(["stable", "alpha", "draft"]).default("stable"),

@@ -15,6 +15,7 @@
 | Test (e2e) | `pnpm test:e2e` | `package.json` |
 | Check (lint/format) | `pnpm check` | `package.json`, `biome.json` |
 | Check (types) | `pnpm check:types` | `package.json`, `tsconfig.json` |
+| Check (Astro) | `pnpm astro:check` | `package.json`, `astro.config.mjs` |
 | Verify (full gate chain) | `pnpm verify` | `scripts/verify.sh` |
 | Ship (human convenience) | `pnpm ship "msg"` | `scripts/ship.sh` |
 
@@ -26,6 +27,7 @@ A change is shippable only when every package or app it touches is clean across 
 |---|---|---|
 | Lint / format | `pnpm check` | zero warnings on any modified package |
 | Type check | `pnpm check:types` | clean |
+| Astro check | `pnpm astro:check` | clean |
 | Build | `pnpm build` | clean |
 | Unit tests | `pnpm test` | all green |
 | E2E | `pnpm test:e2e` | all green before `/ship` |

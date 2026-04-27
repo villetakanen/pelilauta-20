@@ -48,6 +48,8 @@ The goal is parity with the v17 `BaseHead.astro` SEO surface so search snippets,
 
 - **API Contracts:** see §Head metadata contract and §AEO & Structured Data below for the exact tag set, fallback rules, and conditional emissions.
 
+- **Descriptor / head-order orthogonality:** SEO branch logic (image cascade, JSON-LD `@graph` wrapping, editor canonical shortening, modal forcing `noSharing`) lives in a pure helper `packages/cyan/src/layouts/seoHead.ts` (`buildSeoHead`) that returns a structured `SeoHeadOutput` descriptor. AppShell.astro consumes the descriptor and decides the *order* of `<meta>`, `<link>`, `<title>`, and `<script type="application/ld+json">` inside `<head>` — independently of the descriptor's field order. This separation lets `<head>` loading-order optimizations (charset/viewport in the first 1024 bytes, `<title>` early, preconnect hints, JSON-LD last, etc.) evolve in the template without touching the helper, and lets the helper's branch coverage be asserted directly on a structured object via Vitest. Future maintainers MUST NOT collapse the helper into a string-emitter or merge its decision logic into the template — that loses the property and the test surface.
+
 - **Dependencies:**
   - `@pelilauta/i18n` — for `app:meta.title` / `app:meta.description` defaults (host-owned strings; AppShell receives them as props or a default-resolution helper).
   - `@pelilauta/utils/markdownToPlainText` — converts `markdownContent` to a plain-text meta-description string. Specced at [`specs/pelilauta/markdown/markdown-to-plain-text/spec.md`](../../../pelilauta/markdown/markdown-to-plain-text/spec.md). Hosts call it with `maxLength=160` for the SEO description path.
@@ -100,6 +102,7 @@ AppShell renders a single `<script type="application/ld+json">` block when `json
 - **Single object:** rendered verbatim inside the script block as the JSON serialization of the supplied object.
 - **Multiple objects (array):** wrapped in a Schema.org `@graph` document — `{"@context":"https://schema.org","@graph":[...]}` — within a single `<script>` block. This is broader-compatible than emitting a bare JSON array (some validators reject) or emitting one block per object (multiplies parsing cost). Hosts that need a different `@context` per object compose them upstream into a single `@graph`.
 - **Validation:** AppShell does not validate the schema; the host is responsible for correct Schema.org syntax. See §Constraints regarding typed builders.
+- **HTML-script-body safety:** JSON-LD output escapes every `<` as `<` before injection into the `<script type="application/ld+json">` body. This closes the `</script>`/`<!--`/`-->` breakout class for any caller-supplied string field (thread titles, author names, breadcrumb labels) without requiring per-field sanitization upstream. The escape is invariant under `JSON.parse` — `<` decodes back to `<` identically — so Schema.org consumers (Google, Bing, validators) see the original payload. This is a serialization-boundary safety property, not "post-processing of caller content"; future refactors MUST preserve it.
 
 #### Breadcrumbs
 

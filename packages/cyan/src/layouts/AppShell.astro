@@ -1,9 +1,11 @@
 ---
 import AppBar from "../components/AppBar.astro";
 import Tray from "../components/Tray.astro";
+import { buildSeoHead } from "./seoHead.js";
 
 interface Props {
   title: string;
+  description: string;
   appTitle?: string;
   shortTitle?: string;
   layout?: "view" | "sidebar" | "editor" | "modal";
@@ -11,10 +13,18 @@ interface Props {
   backHref?: string;
   noun?: string;
   asPageHeading?: boolean;
+  image?: string;
+  defaultImage?: string;
+  siteName?: string;
+  noSharing?: boolean;
+  ogType?: "website" | "article";
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+  breadcrumbs?: Array<{ label: string; href: string }>;
 }
 
 const {
   title,
+  description,
   appTitle = title,
   shortTitle,
   layout = "view",
@@ -22,7 +32,29 @@ const {
   backHref = "/",
   noun,
   asPageHeading = false,
+  image,
+  defaultImage,
+  siteName,
+  noSharing,
+  ogType,
+  jsonLd,
+  breadcrumbs,
 } = Astro.props;
+
+const seo = buildSeoHead({
+  title,
+  description,
+  image,
+  defaultImage,
+  siteName,
+  noSharing,
+  ogType,
+  jsonLd,
+  breadcrumbs,
+  layout,
+  url: Astro.url,
+  generator: Astro.generator,
+});
 ---
 
 <!doctype html>
@@ -30,7 +62,36 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
+    <title>{seo.title}</title>
+    <link rel="canonical" href={seo.canonicalHref} />
+    <meta name="description" content={seo.description} />
+    {seo.generator && <meta name="generator" content={seo.generator} />}
+    {seo.robotsNoindex && <meta name="robots" content="noindex, nofollow" />}
+    {
+      seo.socialEmissionsAllowed && (
+        <>
+          <meta property="og:title" content={seo.ogTitle} />
+          <meta property="og:description" content={seo.ogDescription} />
+          {seo.ogImage && <meta property="og:image" content={seo.ogImage} />}
+          <meta property="og:url" content={seo.ogUrl} />
+          <meta property="og:type" content={seo.ogType} />
+          {seo.ogSiteName && (
+            <meta property="og:site_name" content={seo.ogSiteName} />
+          )}
+          <meta name="twitter:card" content={seo.twitterCard} />
+          <meta name="twitter:title" content={seo.twitterTitle} />
+          <meta name="twitter:description" content={seo.twitterDescription} />
+          {seo.twitterImage && (
+            <meta name="twitter:image" content={seo.twitterImage} />
+          )}
+        </>
+      )
+    }
+    {
+      seo.jsonLdScript && (
+        <script type="application/ld+json" set:html={seo.jsonLdScript} />
+      )
+    }
   </head>
   <body class={`layout-${layout}`}>
     <slot name="app-background-poster" />

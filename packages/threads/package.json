@@ -16,6 +16,7 @@
     "@pelilauta/firebase": "workspace:*",
     "@pelilauta/i18n": "workspace:*",
     "@pelilauta/models": "workspace:*",
+    "@pelilauta/utils": "workspace:*",
     "zod": "^3.24.0"
   },
   "devDependencies": {

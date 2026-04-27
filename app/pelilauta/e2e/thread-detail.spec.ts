@@ -61,6 +61,44 @@ test.describe("Thread Detail", () => {
     expect(hasRenderedContent).toBeGreaterThan(0);
   });
 
+  test("renders <meta name=description> derived from thread markdown", async ({ page }) => {
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0) test.skip(count === 0, "No threads in dev database");
+
+    // Find first /threads/ link
+    let threadLink: import("@playwright/test").Locator | null = null;
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        threadLink = link;
+        break;
+      }
+    }
+    if (!threadLink) {
+      test.skip(true, "No /threads/ link found");
+      return;
+    }
+
+    await threadLink.click();
+    await expect(page).toHaveURL(/\/threads\/[^/]+/);
+
+    const description = await page
+      .locator('head > meta[name="description"]')
+      .getAttribute("content");
+    expect(description).toBeTruthy();
+    const desc = description ?? "";
+    expect(desc.length).toBeLessThanOrEqual(160);
+    // No markdown syntax characters
+    expect(desc).not.toMatch(/[#*_[\]`]/);
+    // No HTML tags
+    expect(desc).not.toMatch(/<[^>]+>/);
+  });
+
   test("missing thread key returns 404", async ({ page }) => {
     const randomSuffix = Date.now();
     const response = await page.goto(`/threads/this-thread-does-not-exist-${randomSuffix}`);

@@ -10,6 +10,9 @@ pnpm check
 echo "⌨️  Type check..."
 pnpm check:types
 
+echo "🔮 Astro check..."
+pnpm astro:check
+
 echo "🏗  Build..."
 pnpm build
 

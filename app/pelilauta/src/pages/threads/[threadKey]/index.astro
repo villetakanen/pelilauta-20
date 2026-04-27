@@ -8,6 +8,7 @@ import type { Thread } from "@pelilauta/threads/server";
 import { getThread } from "@pelilauta/threads/server";
 import { logError } from "@pelilauta/utils/log";
 import { markdownToHTML } from "@pelilauta/utils/markdownToHTML";
+import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
 import { t } from "../../../i18n";
 import Page from "../../../layouts/Page.astro";
 
@@ -41,9 +42,15 @@ const title = thread
   : error
     ? "Pelilauta"
     : "Not found — Pelilauta";
+
+const description = thread
+  ? markdownToPlainText(thread.markdownContent ?? "", 160) || thread.title
+  : error
+    ? "Virhe ladattaessa keskustelua."
+    : "Keskustelua ei löytynyt.";
 ---
 
-<Page title={title} layout="view">
+<Page title={title} description={description} layout="view" ogType="article">
   {error && <p>{t("pelilauta:error.fetch")}</p>}
   {!error && !thread && <p>{t("pelilauta:error.notFound")}</p>}
   {!error && thread && <ThreadDetail thread={thread} bodyHtml={bodyHtml} />}
