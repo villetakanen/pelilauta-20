@@ -58,6 +58,10 @@ The component stays small and synchronous; the page owns the awaits.
 
 Authenticated CSR islands (editors, real-time `onSnapshot` listeners, write actions) run after hydration and are inherently client-side. Async work there is expected — but it is a *different* class of code, lives under each package's `client/` entry, and runs only behind an authenticated session, so the anonymous-SSR contract from `AGENTS.md` is preserved.
 
+## Text conventions
+
+- **Ellipsis: Unicode `…` (U+2026), universally.** Truncation, elision, and "more to come" markers in any generated text — UI snippets, SEO `<meta name="description">`, notification bodies, RSS `description`, plain-text and HTML projections of markdown — use the single Unicode horizontal ellipsis character, not three ASCII dots `...`. One glyph, one code point, semantically a punctuation mark, consistent across surfaces. Helpers that produce truncated strings (e.g. `packages/utils/src/markdownToPlainText.ts`) emit `…` and callers that prefer ASCII override at the call site rather than at the helper.
+
 ## Records
 
 ### Architecture Decision Records (ADR)
