@@ -239,6 +239,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
 - [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card` with a plain-text snippet (max 220 characters, truncated with ellipsis at word boundary)
+- [ ] `ThreadDetail.svelte` renders a read-only thread (title, channel link, anonymous-aware byline, cover image, body) given `{ thread, bodyHtml }`. Markdown rendering happens upstream in the page's Astro frontmatter — the component is synchronous and SSR-pure. `ThreadDetail` deliberately uses bare semantic HTML (`<article>/<h1>/<p>/<img>/<section>`) rather than composing DS primitives: Cyan has no detail-shell primitive yet (`CnArticle`/`CnReadingPane` not yet specced), so the AGENTS.md "compose DS primitives underneath" rule is satisfied vacuously. When/if such a primitive lands in `specs/cyan-ds/`, `ThreadDetail` migrates to it.
 - [ ] `server/` entry still has zero client SDK imports now that it carries real content
 - [ ] Vitest scenarios below that reference schemas, read accessors, `ThreadCard`, and i18n pass
 - [ ] `passWithNoTests` removed from `vitest.config.ts`
@@ -362,6 +363,23 @@ And undefined is not returned
 ```
 
 - **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: ThreadDetail renders a read-only thread
+
+```gherkin
+Given a Thread and pre-rendered bodyHtml
+When ThreadDetail is rendered
+Then an h1 holds the title
+And a channel link points to /channels/{slug}
+And the lang attribute on the article reflects thread.locale
+And the bodyHtml is rendered via {@html ...} (HTML tags survive)
+And the byline reads "anonymous" when author is "-" or missing
+And the byline reads the uid otherwise
+And the cover image prefers thread.poster over thread.images[0].url
+And no cover image renders when neither is present
+```
+
+- **Vitest Unit Test:** `packages/threads/src/components/ThreadDetail.test.ts`
 
 #### Scenario: getChannels reads the meta/threads topics array
 

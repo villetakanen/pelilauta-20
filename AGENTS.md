@@ -84,6 +84,8 @@ v20 is a code refresh, not a schema redo. Firestore document shapes, collection 
 
 ## UI Architecture (Modern SSR + Progressive Svelte)
 
+> Canonical record: [`ARCHITECTURE.md`](ARCHITECTURE.md). The points below are the agent-facing summary; consult `ARCHITECTURE.md` for the full component model, SSR data-flow rules, and ADR index.
+
 - **Astro (`.astro`)**: Reserved for structural components, shells, layouts, and page-level data fetching (e.g., `AppShell`, `AppBar`, `Tray`). Tray toggle must remain pure CSS — no client-side JavaScript.
 - **Svelte 5 (`.svelte`)**: **Default for Design System components** (Cards, Tags, Buttons, Icons). This ensures compatibility across both static Astro pages and interactive Svelte collections (sortable grids, filters).
 - **Core Constraints (ADR-001)**:
@@ -91,6 +93,7 @@ v20 is a code refresh, not a schema redo. Firestore document shapes, collection 
   - **100% Progressive**: Design-system level visuals and layout MUST work without client-side JavaScript. JS is strictly for "high-fidelity" progressive enhancements.
   - **Lazy Upgrade**: Existing Astro components remain in Astro until a requirement (like insertion into a Svelte list) necessitates an upgrade.
   - **Decision rule**: If a component will ever appear inside a Svelte-managed collection (list, grid, filter), it must be Svelte. If it wraps a `<body>`, owns a page-level `<nav>`, or defines the HTML shell, it stays Astro.
+- **SSR data flow** (see `ARCHITECTURE.md` §SSR Data Flow): Async work, schema parsing, markdown rendering, and other data prep happen **upstream** of Svelte components — in Astro frontmatter or SSR TS modules. Svelte components receive prepared data as props and render synchronously. No `{#await}` for SSR data, no `markdownToHTML(...)` in templates, no Firestore reads inside components. Reasons: caching, SSR purity (Svelte 5's `{#await}` renders its pending branch on the server), testability, host reuse.
 
 ## Server architecture
 
