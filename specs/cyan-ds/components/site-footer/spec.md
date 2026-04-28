@@ -25,6 +25,9 @@ The Site Footer is a structural AppShell region that closes the main viewport wi
 - **Dependencies:**
   - `--cn-*` tokens for surface, text, gap, and typography scale.
   - `--cn-z-*` for stacking against `--cn-z-tray` (footer must not overlay the tray drawer on mobile).
+- **Consumers:**
+  - [`specs/cyan-ds/living-style-books/footer/spec.md`](../../living-style-books/footer/spec.md) — docs site footer.
+  - [`specs/pelilauta/footer/spec.md`](../../../pelilauta/footer/spec.md) — host app footer.
 - **Constraints:**
   - Visible iff `AppShell` `layout` is `view`, `sidebar`, or `editor`. In `layout="modal"`, the footer is not rendered into the DOM.
   - 100% SSR-compatible — no `window`/`document` access, no Svelte islands. The component renders identically with JS disabled.

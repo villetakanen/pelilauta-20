@@ -27,6 +27,7 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
   - [`auth/`](auth/spec.md) — login/logout UX and `/login` page.
   - [`auth-package/`](auth-package/spec.md) — `@pelilauta/auth` workspace package: shell, sub-exports, dependency direction, staged extraction DoD.
   - [`firebase/`](firebase/spec.md) — Firebase workspace + auth.
+  - [`footer/`](footer/spec.md) — site-wide app footer composed into the AppShell `footer` slot.
   - [`front-page/`](front-page/spec.md) — landing page composition.
   - [`i18n/`](i18n/spec.md) — translation engine and host composition.
   - [`migrations/`](migrations/spec.md) — data migrations from prior versions.
