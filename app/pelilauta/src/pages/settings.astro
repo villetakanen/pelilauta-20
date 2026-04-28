@@ -14,7 +14,7 @@ const gate = redirectIfAnonymous(Astro.locals.uid, "/settings");
 if (gate) return Astro.redirect(gate.path, gate.status);
 ---
 
-<Page title="Settings — Pelilauta" layout="view" noun="account">
+<Page title="Settings — Pelilauta" description="Käyttäjäasetukset." layout="view" noun="account" noSharing>
   <section class="settings-page">
     <h1>Settings</h1>
     <p>Sign out to return to the anonymous experience.</p>

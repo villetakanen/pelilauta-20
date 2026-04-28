@@ -146,7 +146,7 @@ describe("LoginButton.svelte", () => {
 
   it("Scenario: LoginButton renders completing state on mount when NEXT_KEY is present", async () => {
     sessionStorage.setItem(NEXT_KEY, "/threads");
-    let resolveGetResult: (v: null) => void;
+    let resolveGetResult: ((v: null) => void) | undefined;
     const pending = new Promise<null>((resolve) => {
       resolveGetResult = resolve;
     });
@@ -161,7 +161,7 @@ describe("LoginButton.svelte", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
 
     // Resolving null drops to the CTA and clears the stale key.
-    resolveGetResult!(null);
+    resolveGetResult?.(null);
     await waitFor(() => expect(sessionStorage.getItem(NEXT_KEY)).toBeNull());
     await waitFor(() => expect(screen.getByRole("button")).toBeInTheDocument());
   });

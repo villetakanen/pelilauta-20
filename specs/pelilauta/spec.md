@@ -17,12 +17,15 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
   - [`packages/threads`](threads/spec.md) — Discussions vertical.
   - `packages/sites` — Game-site vertical (campaign pages, libraries, character sheets). _Spec TBD._
   - Future verticals follow the same shape.
-- **Shared infrastructure packages:**
+- **Shared infrastructure packages** (listed bottom-up by dependency stack):
   - [`packages/models`](models/spec.md) — Zod schemas + TS types shared across packages.
+  - [`packages/firebase`](firebase/spec.md) — Firebase initialization, env-backed config, server (admin) and client SDK accessors, `firebase/auth` re-exports.
   - `packages/i18n` — translation engine consumed by the host. See [`i18n/spec.md`](i18n/spec.md).
+  - [`packages/auth`](auth-package/spec.md) — CSR auth machinery: session store, `authedFetch`, login/logout UX islands, and `AuthHandler`. Behavioral contracts live in [`auth/`](auth/spec.md) and [`session/`](session/spec.md).
   - [`packages/cyan`](../cyan-ds/spec.md) — design system, including `AppShell`. DS components do **not** carry locale-bound strings; they accept text via props/slots from the host.
 - **Sub-specs:**
   - [`auth/`](auth/spec.md) — login/logout UX and `/login` page.
+  - [`auth-package/`](auth-package/spec.md) — `@pelilauta/auth` workspace package: shell, sub-exports, dependency direction, staged extraction DoD.
   - [`firebase/`](firebase/spec.md) — Firebase workspace + auth.
   - [`front-page/`](front-page/spec.md) — landing page composition.
   - [`i18n/`](i18n/spec.md) — translation engine and host composition.

@@ -1,0 +1,24 @@
+{
+  "name": "@pelilauta/auth",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./server": "./src/server/index.ts",
+    "./client": "./src/client/index.ts",
+    "./components": "./src/components/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@pelilauta/firebase": "workspace:*",
+    "@pelilauta/utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.1.1",
+    "@testing-library/svelte": "^5.3.1",
+    "jsdom": "^29.0.1",
+    "svelte": "^5.55.3",
+    "vitest": "^3.2.4"
+  }
+}

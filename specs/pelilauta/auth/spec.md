@@ -1,5 +1,8 @@
 ---
 feature: Authentication (Login UX)
+status: stable
+maturity: verified
+last_major_review: 2026-04-25
 parent_spec: ../spec.md
 ---
 
@@ -10,6 +13,8 @@ parent_spec: ../spec.md
 ### Context
 
 This spec covers the **login/logout user journey** — the `/login` page, the Google-auth button, and the handshake that hands control to the [Session](../session/spec.md) layer. Session mechanics (cookie lifecycle, SSR identity, token repair, `AuthHandler`, `authedFetch`) live in the session spec. This spec owns only the UX surfaces the user interacts with and the narrow wiring that converts a successful Firebase popup into a persisted session.
+
+> See also: [`../auth-package/spec.md`](../auth-package/spec.md) for the `@pelilauta/auth` package shell, sub-exports, and the file paths the components below resolve to after extraction.
 
 ### Architecture
 

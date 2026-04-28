@@ -5,6 +5,7 @@
 // (non-admin) module.
 
 export { clearChannelsCache, getChannels } from "../api/getChannels";
+export { getThread } from "../api/getThread";
 export { getThreads } from "../api/getThreads";
 export * from "../schemas/ChannelSchema";
 export * from "../schemas/ReplySchema";

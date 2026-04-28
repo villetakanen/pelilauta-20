@@ -1,5 +1,8 @@
 ---
 feature: [Feature Name]
+status: [draft | alpha | stable | deprecated]
+maturity: [design | implementation | verified]
+last_major_review: 2026-04-25
 # [Optional] Link to the parent specification if this is a sub-feature
 parent_spec: [Path to parent spec.md]
 # [Optional] URL to the Living Style Book (Required for Design System features)

@@ -1,5 +1,8 @@
 ---
 feature: Chroma Tonal Palettes
+status: stable
+maturity: verified
+last_major_review: 2026-04-25
 stylebook_url: https://localhost:4322/principles/color-system
 ---
 

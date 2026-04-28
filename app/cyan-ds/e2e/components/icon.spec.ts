@@ -37,8 +37,9 @@ test.describe("CnIcon", () => {
     const icon = page.locator('.cn-icon[data-noun="fox"]').first();
     const box = await icon.boundingBox();
     expect(box).not.toBeNull();
+    if (!box) throw new Error("Bounding box not found");
     // Width and height should match (square, 1:1 aspect ratio)
-    expect(Math.abs(box?.width - box?.height)).toBeLessThan(2);
+    expect(Math.abs(box.width - box.height)).toBeLessThan(2);
   });
 
   test("Tier 1 gallery renders community icons", async ({ page }) => {

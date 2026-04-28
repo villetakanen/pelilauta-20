@@ -17,7 +17,7 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     expect(svg).not.toBeNull();
     // Community mekanismi has fill-opacity attributes (branded depth icon)
     const depthPaths = svg?.querySelectorAll("[fill-opacity]");
-    expect(depthPaths.length).toBeGreaterThan(0);
+    expect(depthPaths?.length).toBeGreaterThan(0);
   });
 
   it("falls back to T3 missing glyph for unknown nouns", () => {
@@ -28,8 +28,8 @@ describe("CnIcon Resolution Priority (Tiered Contract)", () => {
     expect(svg).not.toBeNull();
     // Missing glyph must render at least one path with currentColor
     const paths = svg?.querySelectorAll("path");
-    expect(paths.length).toBeGreaterThan(0);
-    expect(paths[0].getAttribute("fill")).toBe("currentColor");
+    expect(paths?.length).toBeGreaterThan(0);
+    expect(paths?.[0]?.getAttribute("fill")).toBe("currentColor");
   });
 
   it("renders T2 (Managed) content for managed-only nouns", () => {

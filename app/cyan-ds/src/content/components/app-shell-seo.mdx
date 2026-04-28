@@ -1,0 +1,158 @@
+---
+title: AppShell — SEO Metadata
+description: How AppShell emits crawler and social-platform metadata, and how host pages supply it.
+order: 2
+status: draft
+---
+
+`AppShell` (`packages/cyan/src/layouts/AppShell.astro`) owns the entire `<head>` SEO/AEO surface for every page in the workspace — `<title>`, canonical URL, description, Open Graph, Twitter Card, and Schema.org JSON-LD. Host pages supply per-page values through the layout chain; AppShell renders them deterministically with no fallbacks or i18n of its own. The full contract is defined in [`specs/cyan-ds/layouts/seo/spec.md`](../../../../specs/cyan-ds/layouts/seo/spec.md).
+
+## Prop Reference
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `title` | `string` | Yes | — | Populates `<title>`, `og:title`, and `twitter:title`. |
+| `description` | `string` | Yes | — | Populates `<meta name="description">`, `og:description`, and `twitter:description`. Required at the AppShell boundary; hosts MUST supply it. |
+| `image` | `string` | No | — | Per-page `og:image` / `twitter:image`. Absolute URL preferred; relative URLs are origin-prepended. |
+| `defaultImage` | `string` | No | — | Host-supplied brand fallback used when `image` is absent. Same absolute-URL convention applies. |
+| `siteName` | `string` | No | — | Populates `og:site_name`. Omitted entirely when absent — AppShell holds no site identity. |
+| `noSharing` | `boolean` | No | `false` | When `true`, emits `<meta name="robots" content="noindex, nofollow">` and suppresses all OG, Twitter Card, and JSON-LD tags. |
+| `ogType` | `"website" \| "article"` | No | `"website"` | Populates `og:type`. Use `"article"` for thread and site-page content. |
+| `jsonLd` | `Record<string, unknown> \| Array<Record<string, unknown>>` | No | — | Schema.org JSON-LD object(s). A single object is emitted verbatim; an array is wrapped in `@graph`. Suppressed when `noSharing` is `true` or `layout` is `"editor"` or `"modal"`. |
+| `breadcrumbs` | `Array<{ label: string; href: string }>` | No | — | Emitted as a Schema.org `BreadcrumbList` inside the JSON-LD `<script>` block. UI rendering is the page template's responsibility. |
+| `layout` | `"view" \| "sidebar" \| "editor" \| "modal"` | No | `"view"` | Cross-couples SEO emission: `"editor"` shortens canonical to origin-only and suppresses OG, Twitter Card, and JSON-LD; `"modal"` forces `noSharing` semantics. |
+
+## Emitted `<head>` Examples
+
+The examples below show what AppShell emits inside `<head>` for each posture. Request origin is `https://pelilauta.example` throughout.
+
+### Posture A — Public page (full set)
+
+Props: `title="Why West Marches Works"`, `description="An exploration of asynchronous, drop-in tabletop campaigns."`, `image="https://pelilauta.example/uploads/wm-hero.jpg"`, `siteName="Pelilauta"`, `ogType="article"`, `jsonLd={{ "@context": "https://schema.org", "@type": "Article", "headline": "Why West Marches Works" }}`.
+
+```html
+<title>Why West Marches Works</title>
+<link rel="canonical" href="https://pelilauta.example/threads/why-west-marches-works" />
+<meta name="description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta name="generator" content="Astro v5.x" />
+<meta property="og:title" content="Why West Marches Works" />
+<meta property="og:description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta property="og:image" content="https://pelilauta.example/uploads/wm-hero.jpg" />
+<meta property="og:url" content="https://pelilauta.example/threads/why-west-marches-works" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Pelilauta" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Why West Marches Works" />
+<meta name="twitter:description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta name="twitter:image" content="https://pelilauta.example/uploads/wm-hero.jpg" />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Why West Marches Works"}</script>
+```
+
+### Posture B — Public page with `defaultImage` fallback
+
+Props: same as A but `image` removed, `defaultImage="/brand/og-default.jpg"` (relative). Demonstrates relative-URL origin-prepending and the `image ?? defaultImage` cascade.
+
+```html
+<title>Why West Marches Works</title>
+<link rel="canonical" href="https://pelilauta.example/threads/why-west-marches-works" />
+<meta name="description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta name="generator" content="Astro v5.x" />
+<meta property="og:title" content="Why West Marches Works" />
+<meta property="og:description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta property="og:image" content="https://pelilauta.example/brand/og-default.jpg" />
+<meta property="og:url" content="https://pelilauta.example/threads/why-west-marches-works" />
+<meta property="og:type" content="article" />
+<meta property="og:site_name" content="Pelilauta" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Why West Marches Works" />
+<meta name="twitter:description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta name="twitter:image" content="https://pelilauta.example/brand/og-default.jpg" />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Why West Marches Works"}</script>
+```
+
+### Posture C — Public page without `siteName`
+
+Props: same as A but `siteName` omitted. `og:site_name` is absent — AppShell holds no site identity and never substitutes a default.
+
+```html
+<title>Why West Marches Works</title>
+<link rel="canonical" href="https://pelilauta.example/threads/why-west-marches-works" />
+<meta name="description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta name="generator" content="Astro v5.x" />
+<meta property="og:title" content="Why West Marches Works" />
+<meta property="og:description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta property="og:image" content="https://pelilauta.example/uploads/wm-hero.jpg" />
+<meta property="og:url" content="https://pelilauta.example/threads/why-west-marches-works" />
+<meta property="og:type" content="article" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Why West Marches Works" />
+<meta name="twitter:description" content="An exploration of asynchronous, drop-in tabletop campaigns." />
+<meta name="twitter:image" content="https://pelilauta.example/uploads/wm-hero.jpg" />
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"Article","headline":"Why West Marches Works"}</script>
+```
+
+### Posture D — `noSharing=true`
+
+Props: `title="Admin Dashboard"`, `description="Internal admin surface."`, `jsonLd={{ "@type": "Article" }}`, `noSharing={true}`. All OG, Twitter Card, and JSON-LD tags are suppressed — including `jsonLd` despite it being passed. `<title>`, canonical, and description are still emitted for browser tab and accessibility purposes.
+
+```html
+<title>Admin Dashboard</title>
+<link rel="canonical" href="https://pelilauta.example/admin" />
+<meta name="description" content="Internal admin surface." />
+<meta name="generator" content="Astro v5.x" />
+<meta name="robots" content="noindex, nofollow" />
+```
+
+### Posture E — `layout="editor"`
+
+Props: `title="Edit Thread"`, `description="Editor surface."`, `jsonLd={{ "@type": "Article" }}`, request URL `https://pelilauta.example/threads/abc/edit`, `layout="editor"`. Canonical is shortened to origin-only (`https://pelilauta.example/`) — the deliberate v17 anti-indexing pattern that prevents crawlers from indexing editor URLs even if they ignore the robots directive.
+
+```html
+<title>Edit Thread</title>
+<link rel="canonical" href="https://pelilauta.example/" />
+<meta name="description" content="Editor surface." />
+<meta name="generator" content="Astro v5.x" />
+<meta name="robots" content="noindex, nofollow" />
+```
+
+### Posture F — `layout="modal"`
+
+Props: `title="Confirm Deletion"`, `description="Confirm deletion modal."`, `jsonLd={{ "@type": "Article" }}`, `noSharing={false}`, `layout="modal"`. Modal layout forces `noSharing` semantics regardless of the caller's intent — `noSharing={false}` is overridden. OG, Twitter Card, and JSON-LD are absent.
+
+```html
+<title>Confirm Deletion</title>
+<link rel="canonical" href="https://pelilauta.example/threads/abc" />
+<meta name="description" content="Confirm deletion modal." />
+<meta name="generator" content="Astro v5.x" />
+<meta name="robots" content="noindex, nofollow" />
+```
+
+## `@graph` Example
+
+When both `jsonLd` (array) and `breadcrumbs` are supplied, AppShell merges them into a single `<script type="application/ld+json">` block using a Schema.org `@graph` wrapper.
+
+Props: `jsonLd={[{ "@type": "Article", "headline": "Why West Marches Works" }, { "@type": "Person", "name": "Ville" }]}`, `breadcrumbs={[{ label: "Home", href: "/" }, { label: "Threads", href: "/threads" }]}`.
+
+```html
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "Article", "headline": "Why West Marches Works" },
+    { "@type": "Person", "name": "Ville" },
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home",    "item": "https://pelilauta.example/" },
+        { "@type": "ListItem", "position": 2, "name": "Threads", "item": "https://pelilauta.example/threads" }
+      ]
+    }
+  ]
+}
+</script>
+```
+
+## Related
+
+- [`specs/pelilauta/markdown/markdown-to-plain-text/spec.md`](../../../../specs/pelilauta/markdown/markdown-to-plain-text/spec.md) — the `markdownToPlainText` helper hosts call (with `maxLength=160`) to derive a plain-text SEO `description` from markdown content.
+- [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md) §Text conventions — the ellipsis convention (`…`) used in truncated description snippets and UI copy.

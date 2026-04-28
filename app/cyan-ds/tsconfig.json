@@ -5,5 +5,13 @@
       "@cyan/*": ["../../packages/cyan/src/*"],
       "@shell/*": ["../../packages/shell/src/*"]
     }
-  }
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "e2e/**",
+    "dist/**",
+    "../../packages/**/*.test.ts",
+    "../../packages/**/*.spec.ts"
+  ]
 }

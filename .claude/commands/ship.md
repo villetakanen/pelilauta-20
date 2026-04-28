@@ -31,16 +31,11 @@ If there are no changes (clean working tree), stop and tell the user.
 
 ### Step 2 — Quality Gates
 
-Run in parallel:
+Run `pnpm verify` (a one-shot of `pnpm check`, `pnpm check:types`, `pnpm build`, `pnpm test`, `pnpm test:e2e` — see `scripts/verify.sh`).
 
-- `pnpm check` — Biome lint + format
-- `pnpm build` — Full build
-- `pnpm test` — Vitest unit tests
-- `pnpm test:e2e` — Playwright E2E tests
+All gates must pass per `AGENTS.md → ## Quality gates`, including warnings in any modified package. On failure: report which gate failed with the error output and stop. Do not attempt to fix — that is the developer's job.
 
-All four must pass. On failure: report which gate failed with the error output and stop. Do not attempt to fix — that is the developer's job.
-
-**Pre-existing failures are NOT a pass.** If red tests predate this change (e.g. drift between test expectations and current code), stop and ask the user how to handle it: (a) fix the failing tests first, (b) skip/mark the known-broken test with a tracking note, or (c) explicitly ship-anyway with user confirmation. Never pick (c) without the user's explicit say-so in this turn.
+"Pre-existing" is never a pass. If a gate is red, ask the user how to proceed: (a) fix it first, (b) mark the failing test with a tracking note, or (c) explicit ship-anyway with user confirmation. Never pick (c) without the user's explicit say-so in this turn.
 
 ### Step 3 — Spec Verification
 
@@ -65,7 +60,7 @@ For each relevant spec found:
 
 ### Step 4 — Stage & Commit
 
-1. Stage all relevant changed files with `git add` (specific files, not `-A`).
+1. Stage all relevant changed files with `git add` (specific files, not `.` or `-A`). Do NOT invoke `pnpm ship` from within this skill — that script is for human use and would `git add .` indiscriminately.
 2. Draft a commit message:
    - Use conventional commit format: `type(scope): description`
    - Scope should be the package/domain: `cyan`, `models`, `firebase`, `threads`, `pelilauta`, `ds`, `infra`

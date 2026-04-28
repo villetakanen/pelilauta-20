@@ -52,13 +52,12 @@ test.describe("ProfileButton", () => {
     const loadingBox = await loadingBtn.boundingBox();
     const authBox = await authBtn.boundingBox();
 
-    expect(loadingBox).not.toBeNull();
-    expect(authBox).not.toBeNull();
+    if (!loadingBox || !authBox) throw new Error("expected both buttons to have bounding boxes");
 
     // Should both be exactly 48x48
-    expect(loadingBox!.width).toBeCloseTo(48, 0);
-    expect(loadingBox!.height).toBeCloseTo(48, 0);
-    expect(authBox!.width).toBeCloseTo(48, 0);
-    expect(authBox!.height).toBeCloseTo(48, 0);
+    expect(loadingBox.width).toBeCloseTo(48, 0);
+    expect(loadingBox.height).toBeCloseTo(48, 0);
+    expect(authBox.width).toBeCloseTo(48, 0);
+    expect(authBox.height).toBeCloseTo(48, 0);
   });
 });
