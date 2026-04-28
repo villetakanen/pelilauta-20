@@ -19,6 +19,16 @@ By orchestrating these internally, down-stream applications can remain entirely 
 | `noun` | `string` | No | — | Forwarded to `<AppBar>` as the leading noun-icon glyph. |
 | `asPageHeading` | `boolean` | No | `false` | Forwarded to `<AppBar>`. When `true`, the AppBar title renders as `<h1>` instead of `<h3>` so the shell owns the page's single top-level heading. |
 
+## Slots
+
+| Slot | Purpose | Notes |
+|---|---|---|
+| (default) | Page content rendered inside `<main>`. | Required. |
+| `actions` | Trailing actions in the AppBar. | Forwarded to `<AppBar>`. |
+| `tray` | Tray contents (sidebar layout only). | Rendered iff `layout="sidebar"`. |
+| `app-background-poster` | Singleton decorative background. | See `CnBackgroundPoster`. |
+| `footer` | Footer content rendered inside [`<SiteFooter>`](../../components/site-footer/spec.md). | Rendered iff `layout !== "modal"`. |
+
 ## Layout Variants & Semantics
 
 1. **`layout="view"`**

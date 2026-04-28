@@ -19,6 +19,7 @@ This is the root specification for all UI components in the Cyan design system. 
   - `CnTag`: Taxonomy indicators.
   - `CnLoader`: Async progress indicator (dual-ring spinner + context icon). Consumed inside buttons and as a standalone block.
   - `CnBackgroundPoster`: Singleton decorative background image for landing / hub pages, mounted via the `app-background-poster` layout slot.
+  - [`SiteFooter`](./site-footer/spec.md): AppShell footer region. Renders a `<footer>` slotted by the application; suppressed in `layout="modal"`.
   - `DocsThemeToggle`: Docs-site-only helper button for flipping `color-scheme` between light and dark during design review. Not a DS primitive — lives in `app/cyan-ds/`.
 
   Interactive actions (`<button>` / `<a class="button">`) are **not**
