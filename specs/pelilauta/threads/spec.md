@@ -234,10 +234,13 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `ChannelSchema.parse(raw)` is ported from v17 with `category` default removed; other coalescings (`description`, `icon`, `flowTime`) preserved via `.default(...)`
 - [ ] `createThread(source?, key?)` factory exported from `schemas/ThreadSchema.ts` — returns a fully-populated `Thread` with defaults filled in (blank titles, empty owners sentinel, current timestamps). Does NOT write to Firestore.
 - [ ] `getThreads(limit, { order, public })` returns `Thread[]` with documented defaults (`order='flowTime'`, `public=true`)
+- [ ] `getThread(key)` returns the parsed `Thread` for an existing doc, `undefined` for a missing doc, and propagates Firestore + Zod errors to the caller
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
 - [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card` with a plain-text snippet (max 220 characters, truncated with ellipsis at word boundary)
+- [ ] `ThreadDetail.svelte` renders a read-only thread (title, channel link, anonymous-aware byline, cover image, body) given `{ thread, bodyHtml }`. Markdown rendering happens upstream in the page's Astro frontmatter — the component is synchronous and SSR-pure. `ThreadDetail` deliberately uses bare semantic HTML (`<article>/<h1>/<p>/<img>/<section>`) rather than composing DS primitives: Cyan has no detail-shell primitive yet (`CnArticle`/`CnReadingPane` not yet specced), so the AGENTS.md "compose DS primitives underneath" rule is satisfied vacuously. When/if such a primitive lands in `specs/cyan-ds/`, `ThreadDetail` migrates to it.
+- [ ] `app/pelilauta/src/pages/threads/[threadKey]/index.astro` wires the read-only detail page: SSR-only (no `client:` directives), calls `getThread(threadKey)` and `markdownToHTML(thread.markdownContent)` upstream of `<ThreadDetail>`, handles missing-thread → 404, isolates Firestore failures behind a `pelilauta:error.fetch` block (HTTP 200), and uses the host `<Page>` wrapper. Front-page `ThreadCard` links resolve to a real, non-404 page.
 - [ ] `server/` entry still has zero client SDK imports now that it carries real content
 - [ ] Vitest scenarios below that reference schemas, read accessors, `ThreadCard`, and i18n pass
 - [ ] `passWithNoTests` removed from `vitest.config.ts`
@@ -316,6 +319,103 @@ Then 10 threads are returned sorted by createdAt descending
 ```
 
 - **Vitest Unit Test:** `packages/threads/src/api/getThreads.test.ts`
+
+#### Scenario: getThread returns a parsed Thread for an existing doc
+
+```gherkin
+Given the stream collection contains a document at stream/{key}
+When getThread(key) is called
+Then a Thread parsed through ThreadSchema is returned
+And the Thread's key matches the requested key
+And legacy field normalisation (e.g. topic → channel) is applied via ThreadSchema preprocessing
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: getThread returns undefined for a missing doc
+
+```gherkin
+Given the stream collection has no document at stream/{key}
+When getThread(key) is called
+Then undefined is returned
+And no parse is attempted
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: getThread propagates Firestore errors
+
+```gherkin
+Given a Firestore network or permission failure on stream/{key}
+When getThread(key) is called
+Then the underlying error propagates to the caller
+And no fallback value is substituted
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: getThread propagates Zod parse failures on malformed docs
+
+```gherkin
+Given a Firestore document at stream/{key} that violates ThreadSchema
+When getThread(key) is called
+Then the ZodError propagates to the caller
+And undefined is not returned
+```
+
+- **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
+
+#### Scenario: ThreadDetail renders a read-only thread
+
+```gherkin
+Given a Thread and pre-rendered bodyHtml
+When ThreadDetail is rendered
+Then an h1 holds the title
+And a channel link points to /channels/{slug}
+And the lang attribute on the article reflects thread.locale
+And the bodyHtml is rendered via {@html ...} (HTML tags survive)
+And the byline reads "anonymous" when author is "-" or missing
+And the byline reads the uid otherwise
+And the cover image prefers thread.poster over thread.images[0].url
+And no cover image renders when neither is present
+```
+
+- **Vitest Unit Test:** `packages/threads/src/components/ThreadDetail.test.ts`
+
+#### Scenario: /threads/[threadKey] page renders an existing thread
+
+```gherkin
+Given a Firestore document at stream/{key}
+When an anonymous user GETs /threads/{key}
+Then the response status is 200
+And the page renders the thread title in an h1
+And the page renders the thread body (markdown rendered to HTML)
+And no client-side JavaScript bundle is required for the page to render
+```
+
+- **Playwright E2E:** `app/pelilauta/e2e/thread-detail.spec.ts`
+
+#### Scenario: /threads/[threadKey] returns 404 for a missing thread
+
+```gherkin
+Given no Firestore document at stream/{key}
+When an anonymous user GETs /threads/{key}
+Then the response status is 404
+```
+
+- **Playwright E2E:** `app/pelilauta/e2e/thread-detail.spec.ts`
+
+#### Scenario: /threads/[threadKey] isolates Firestore failures
+
+```gherkin
+Given getThread throws a Firestore network or permission error
+When an anonymous user GETs /threads/{key}
+Then the response status is 200
+And the page renders the pelilauta:error.fetch block
+And the error is logged via @pelilauta/utils/log
+```
+
+- **Manual / fault-injection:** mirrors the `TopThreadsStream.astro` error-isolation pattern; no E2E asserts on this path because it requires Firestore-fault injection.
 
 #### Scenario: getChannels reads the meta/threads topics array
 

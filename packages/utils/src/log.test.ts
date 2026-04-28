@@ -18,8 +18,9 @@ describe("logError", () => {
     } catch (e) {
       zodErr = e as z.ZodError;
     }
-    logError(zodErr!);
-    expect(console.error).toHaveBeenCalledWith("🦑", zodErr!.issues);
+    if (!zodErr) throw new Error("expected ZodError to be thrown");
+    logError(zodErr);
+    expect(console.error).toHaveBeenCalledWith("🦑", zodErr.issues);
   });
 
   it("formats errors with a .code property", async () => {

@@ -13,6 +13,8 @@ Session is the identity seam between three independent auth surfaces: the HTTP-o
 
 The session boundary exists once; every other feature composes against it.
 
+> See also: [`../auth-package/spec.md`](../auth-package/spec.md) for the `@pelilauta/auth` package shell. The `stores/session.ts` and `utils/authedFetch.ts` paths referenced below move into that package across stages 2–3 of the extraction; this spec's path references update piecewise in the same commits.
+
 ### Architecture
 
 - **Host components** (`app/pelilauta/src/`):

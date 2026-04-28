@@ -10,6 +10,7 @@ export const fi: NestedTranslation = {
   },
   error: {
     fetch: "Lataaminen epäonnistui",
+    notFound: "Sivua ei löytynyt",
   },
 };
 
@@ -19,5 +20,6 @@ export const en: NestedTranslation = {
   },
   error: {
     fetch: "Failed to load",
+    notFound: "Page not found",
   },
 };

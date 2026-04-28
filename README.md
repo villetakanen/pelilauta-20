@@ -6,7 +6,7 @@ A role-playing games community platform built with modern web technologies. Peli
 
 ## Monorepo Structure
 
-Monorepo layout for code organization and LLM/agent context engineering. Packages are linked via **Vite aliases**, not pnpm workspace protocol — no monorepo build tooling required.
+Monorepo layout for code organization and LLM/agent context engineering. Packages are linked via **pnpm workspaces** (`workspace:*`) and augmented by **Vite aliases** for development convenience.
 
 ```
 pelilauta-20/
@@ -27,22 +27,11 @@ pelilauta-20/
 ### Packages
 
 - **`packages/cyan`** — The Cyan design system: tokens, base styles, and shared UI components. Pure CSS/Svelte.
-- Additional packages for shared schemas, utilities, Firebase abstractions, etc. as needed.
+- Additional packages for shared schemas, utilities, Firebase abstractions, etc.
 
 ### Package Linking
 
-Packages are resolved at build time via Vite/Astro aliases, not workspace dependencies:
-
-```ts
-// vite.config / astro.config — alias example
-resolve: {
-  alias: {
-    '@cyan': path.resolve(__dirname, '../../packages/cyan/src'),
-  }
-}
-```
-
-This keeps each directory self-contained for LLM context while avoiding monorepo tooling complexity.
+Packages are resolved via pnpm workspaces. In development, we also use TypeScript path aliases (in root `tsconfig.json`) to allow seamless navigation and cross-package type checking without needing constant builds.
 
 ## Tech Stack
 
@@ -81,6 +70,7 @@ pnpm build        # Build both apps for production
 pnpm test         # Run unit tests (Vitest, all packages + apps)
 pnpm test:e2e     # Run e2e tests (Playwright, both apps)
 pnpm check        # Lint and format (Biome)
+pnpm check:types  # Type check across the whole workspace (tsc)
 ```
 
 ## Environment Variables

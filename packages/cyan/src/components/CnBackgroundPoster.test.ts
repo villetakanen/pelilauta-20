@@ -76,8 +76,8 @@ describe("CnBackgroundPoster — CSS contract", () => {
     // The default (non-media) #cn-background-poster img { … } block.
     // Light-mode filter: sepia(…) lives inside @media and is excluded by this match.
     const m = source.match(/#cn-background-poster img\s*\{([^}]*)\}/);
-    expect(m).not.toBeNull();
-    const defaultImgBlock = m![1];
+    if (!m) throw new Error("expected #cn-background-poster img rule");
+    const defaultImgBlock = m[1];
     expect(defaultImgBlock).toMatch(/opacity:\s*0\.72/);
     expect(defaultImgBlock).not.toMatch(/\bfilter:/);
   });
@@ -114,8 +114,8 @@ describe("CnBackgroundPoster — CSS contract", () => {
     // The outer .cn-tray wrapper is transparent by default; only the drawer
     // (which actually paints the rail surface on wide screens) needs a rule.
     const m = source.match(/body:has\(#cn-background-poster\)\s+\.cn-drawer\s*\{([^}]*)\}/);
-    expect(m).not.toBeNull();
-    const block = m![1];
+    if (!m) throw new Error("expected .cn-drawer wash rule");
+    const block = m[1];
     expect(block).toMatch(/background-color:/);
     expect(block).toMatch(/color-mix\(in oklab/);
     expect(block).toMatch(/var\(--cn-surface\)/);
@@ -126,8 +126,8 @@ describe("CnBackgroundPoster — CSS contract", () => {
     const m = source.match(
       /body:has\(#cn-background-poster\)\s*\.cn-app-bar,\s*body:has\(#cn-background-poster\)\s*\.cn-tray\s*\{([^}]*)\}/,
     );
-    expect(m).not.toBeNull();
-    const block = m![1];
+    if (!m) throw new Error("expected halo rule");
+    const block = m[1];
     expect(block).toMatch(/text-shadow:/);
     expect(block).toMatch(/color-mix\(in oklab/);
   });

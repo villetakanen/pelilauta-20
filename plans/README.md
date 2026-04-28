@@ -37,3 +37,8 @@ re-scope into a spec/issue).
 
 Specs (`specs/`) and `CLAUDE.md` are authority. Plans are a scratchpad.
 When a plan and a spec disagree, the spec wins.
+
+## Active Plans
+
+- [Thread Detail View Implementation Plan](thread-detail-view.md) — 5-step plan to implement the thread detail page, markdown rendering, and replies.
+- [DS Spec Clearing Plan](ds-spec-clearing.md) — Roadmap for aligning the Design System implementation with the new specification standards.

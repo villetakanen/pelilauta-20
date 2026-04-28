@@ -18,7 +18,7 @@ describe("/api/test/seed-session", () => {
 
   describe("Layer 1: production guard", () => {
     it("returns 404 in production mode without touching env vars or firebase", async () => {
-      vi.stubEnv("DEV", false as unknown as string);
+      vi.stubEnv("DEV", false);
       const set = vi.fn();
       const { ctx } = makeApiContext({ cookies: { set }, body: { uid: "e2e-test-user-1" } });
 
@@ -32,7 +32,7 @@ describe("/api/test/seed-session", () => {
 
   describe("Layer 2: env var presence guard", () => {
     it("returns 500 when SECRET_e2e_seed_secret is not set", async () => {
-      vi.stubEnv("DEV", true as unknown as string);
+      vi.stubEnv("DEV", true);
       // Ensure the secret is absent
       vi.stubEnv("SECRET_e2e_seed_secret", "");
       const set = vi.fn();
@@ -54,7 +54,7 @@ describe("/api/test/seed-session", () => {
 
   describe("Layer 3: header match guard", () => {
     it("returns 401 when x-e2e-seed-secret header does not match", async () => {
-      vi.stubEnv("DEV", true as unknown as string);
+      vi.stubEnv("DEV", true);
       vi.stubEnv("SECRET_e2e_seed_secret", "correct-secret");
       const set = vi.fn();
       const { ctx } = makeApiContext({
@@ -73,7 +73,7 @@ describe("/api/test/seed-session", () => {
 
   describe("Happy path", () => {
     beforeEach(() => {
-      vi.stubEnv("DEV", true as unknown as string);
+      vi.stubEnv("DEV", true);
       vi.stubEnv("SECRET_e2e_seed_secret", "correct-secret");
       vi.stubEnv("PUBLIC_apiKey", "test-api-key");
     });
