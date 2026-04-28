@@ -11,7 +11,7 @@ parent_spec: specs/pelilauta/spec.md
 ## Blueprint
 
 ### Context
-In v17, Pelilauta uses a shared application footer to provide release visibility, community outbound links, optional page-level credits, and a live active-user preview. This footer is part of the page shell experience and appears across both standard and tray layouts.
+In v17, Pelilauta uses a shared application footer to provide release visibility, community outbound links, and a live active-user preview. In v20, shared layout composition also provides default background-image credits while allowing individual pages to override credits via slot content. This footer is part of the page shell experience and appears across both standard and tray layouts.
 
 ### Architecture
 - **Components:** `.tmp/pelilauta-17/src/components/server/app/AppFooter.astro`, `.tmp/pelilauta-17/src/components/server/app/ActiveUsersWidget.astro`, `.tmp/pelilauta-17/src/layouts/Page.astro`, `.tmp/pelilauta-17/src/layouts/PageWithTray.astro`.
@@ -31,12 +31,13 @@ Application footer is domain composition, not a DS style-book primitive.
 - [ ] Footer appears in Pelilauta page shells that use AppShell/Page composition.
 - [ ] Footer always shows app identity and release-note version link.
 - [ ] Active-user block is optional and fails closed (hidden on fetch/parse error).
-- [ ] Pelilauta provides footer-body content (link columns) and may provide background-image credits via credits slot on non-modal pages.
+- [ ] Pelilauta provides footer-body content (link columns) and default background-image credits through the shared page layout on non-modal pages.
+- [ ] Individual pages may override default credits by supplying `app-footer-credits` slot content.
 
 ### Regression Guardrails
 - Footer fetch errors MUST NOT break page render.
 - Active-user list MUST cap rendered users to 11 entries.
-- Footer credits content MUST remain host-page provided, not hardcoded in the footer component.
+- Footer credits content MUST remain host-layout or host-page provided, never hardcoded in the DS footer component.
 - Modal pages MUST NOT render the app footer; footer content is supplied only to non-modal shell renders.
 
 ### Testing Scenarios
@@ -65,9 +66,14 @@ And the rest of the footer remains visible
 
 #### Scenario: Page-provided credits render through slot
 ```gherkin
+Given a page shell provides default app-footer-credits content
+When the page renders
+Then the footer displays the default credits block in the designated credits area
+
 Given a page provides app-footer-credits content
 When the page renders
-Then the footer displays that credits block in the designated credits area
+Then the footer displays the page-provided credits block in the designated credits area
+And the shared default credits block is not rendered for that page
 ```
 - **Vitest Unit Test:** `app/pelilauta/src/layouts/page-shell.test.ts`
 - **Playwright E2E Test:** `app/pelilauta/e2e/footer.spec.ts`

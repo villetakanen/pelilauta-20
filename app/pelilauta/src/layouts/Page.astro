@@ -4,6 +4,7 @@ import CyanPage from "@cyan/layouts/Page.astro";
 import brandImage from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
 import AuthChrome from "../components/auth/AuthChrome.svelte";
 import AuthHandler from "../components/auth/AuthHandler.svelte";
+import AppFooter from "../components/footer/AppFooter.astro";
 import { projectProfileFromClaims } from "../utils/projectProfile";
 
 interface Props {
@@ -40,6 +41,20 @@ const profile = uid && claims ? projectProfileFromClaims(claims) : null;
 <CyanPage defaultImage={defaultImage} siteName={siteName} {...rest}>
   <slot name="app-background-poster" slot="app-background-poster" />
   <slot name="tray" slot="tray" />
+  <Fragment slot="footer-body">
+    <slot name="footer-body">
+      <AppFooter />
+    </slot>
+  </Fragment>
+  <Fragment slot="app-footer-credits">
+    <slot name="app-footer-credits">
+      <p>
+        Background image © Juno Viinikka (
+        <a href="https://linktr.ee/junowski">junowski</a>
+        )
+      </p>
+    </slot>
+  </Fragment>
   <Fragment slot="actions">
     <slot name="actions" />
     {

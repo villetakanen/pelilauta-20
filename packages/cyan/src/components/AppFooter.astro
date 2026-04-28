@@ -1,0 +1,37 @@
+---
+const hasBody = Astro.slots.has("footer-body");
+const hasCredits = Astro.slots.has("app-footer-credits");
+---
+
+<footer class="cn-app-footer" aria-label="Site footer">
+  {
+    hasBody && (
+      <div class="cn-app-footer-body">
+        <slot name="footer-body" />
+      </div>
+    )
+  }
+  {
+    hasCredits && (
+      <div class="cn-app-footer-credits text-caption">
+        <slot name="app-footer-credits" />
+      </div>
+    )
+  }
+</footer>
+
+<style>
+  .cn-app-footer {
+    border-top: 1px solid var(--cn-border);
+    margin-top: calc(var(--cn-grid) * 4);
+    padding: calc(var(--cn-grid) * 2) var(--cn-gap) calc(var(--cn-grid) * 3);
+  }
+
+  .cn-app-footer-body {
+    margin-bottom: var(--cn-grid);
+  }
+
+  .cn-app-footer-credits {
+    opacity: 0.72;
+  }
+</style>
