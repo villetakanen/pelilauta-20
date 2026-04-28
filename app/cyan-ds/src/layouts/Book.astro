@@ -24,7 +24,7 @@ import DocsTray from "../components/DocsTray.astro";
 interface Props {
   frontmatter: {
     title: string;
-    description?: string;
+    description: string;
     multipart?: boolean;
     poster?: string;
   };
@@ -39,7 +39,7 @@ const formattedCategory = currentCategory.charAt(0).toUpperCase() + currentCateg
 const appTitle = formattedCategory ? `Cyan / ${formattedCategory}` : "Cyan Design System";
 ---
 
-<Page title={title} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
+<Page title={title} description={description} appTitle={appTitle} shortTitle="Cyan" layout="sidebar">
   {poster && <CnBackgroundPoster slot="app-background-poster" src={poster} />}
   <DocsTray slot="tray" />
   <DocsThemeToggle slot="actions" />

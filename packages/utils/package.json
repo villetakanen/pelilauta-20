@@ -5,6 +5,7 @@
   "exports": {
     "./log": "./src/log.ts",
     "./markdownToHTML": "./src/markdownToHTML.ts",
+    "./markdownToPlainText": "./src/markdownToPlainText.ts",
     "./sanitizeNext": "./src/sanitizeNext.ts"
   },
   "scripts": {

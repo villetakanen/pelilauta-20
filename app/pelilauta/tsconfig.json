@@ -4,5 +4,13 @@
     "paths": {
       "@cyan/*": ["../../packages/cyan/src/*"]
     }
-  }
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "e2e/**",
+    "dist/**",
+    "../../packages/**/*.test.ts",
+    "../../packages/**/*.spec.ts"
+  ]
 }

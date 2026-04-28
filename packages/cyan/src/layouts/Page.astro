@@ -3,6 +3,7 @@ import AppShell from "./AppShell.astro";
 
 interface Props {
   title: string;
+  description: string;
   appTitle?: string;
   shortTitle?: string;
   layout?: "view" | "sidebar" | "editor" | "modal";
@@ -10,10 +11,18 @@ interface Props {
   backHref?: string;
   noun?: string;
   asPageHeading?: boolean;
+  image?: string;
+  defaultImage?: string;
+  siteName?: string;
+  noSharing?: boolean;
+  ogType?: "website" | "article";
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+  breadcrumbs?: Array<{ label: string; href: string }>;
 }
 
 const {
   title,
+  description,
   appTitle,
   shortTitle,
   layout = "sidebar",
@@ -21,11 +30,19 @@ const {
   backHref,
   noun,
   asPageHeading,
+  image,
+  defaultImage,
+  siteName,
+  noSharing,
+  ogType,
+  jsonLd,
+  breadcrumbs,
 } = Astro.props;
 ---
 
 <AppShell
   title={title}
+  description={description}
   appTitle={appTitle}
   shortTitle={shortTitle}
   layout={layout}
@@ -33,6 +50,13 @@ const {
   backHref={backHref}
   noun={noun}
   asPageHeading={asPageHeading}
+  image={image}
+  defaultImage={defaultImage}
+  siteName={siteName}
+  noSharing={noSharing}
+  ogType={ogType}
+  jsonLd={jsonLd}
+  breadcrumbs={breadcrumbs}
 >
   <slot name="app-background-poster" slot="app-background-poster" />
   <slot name="tray" slot="tray" />
