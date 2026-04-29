@@ -73,7 +73,7 @@ plans/            — Transient scratch: multi-session implementation plans,
 - `specs/pelilauta/**` — contracts for `app/pelilauta/`
 
 **Spec Formatting:**
-All specs MUST follow the structure outlined in `specs/TEMPLATE.md`. Importantly, specs must define automated test mappings (Vitest unit tests & Playwright E2E tests) to ensure deterministic feedback loops for agents acting on them.
+All specs MUST follow the structure outlined in `specs/TEMPLATE.md`. Specs describe **intent** — contracts, scenarios, regression guardrails — and stay silent on which tool verifies them. Each Gherkin scenario MUST be covered by at least one **verification artifact** (test, lint rule, build check, anything deterministic that runs in a gate); the artifact declares upward via a `Verifies:` tag. See `specs/VERIFICATION.md` for the convention and registry. Run `pnpm spec:coverage` to print the inverse map; it fails on orphan tags. Legacy specs using the old `**Vitest Unit Test:**` / `**Playwright E2E Test:**` slots are grandfathered — migrate when you next touch them.
 
 ## Data contracts
 

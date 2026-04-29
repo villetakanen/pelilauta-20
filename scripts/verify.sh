@@ -22,4 +22,7 @@ pnpm test
 echo "🎭 E2E tests..."
 pnpm test:e2e
 
+echo "🗺  Spec coverage (orphan tag check)..."
+pnpm spec:coverage
+
 echo "✅ All gates green."

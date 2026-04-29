@@ -37,7 +37,8 @@ stylebook_url: [https://...]
 - [Critical invariant that must never break]
 
 ### Testing Scenarios
-All features with behavioral contracts must have corresponding automated tests mapped to their Gherkin scenarios.
+
+Specs describe intent. Verification — which test, lint rule, or build check enforces a scenario — lives in code, not in this spec. Each Gherkin scenario below MUST be covered by at least one verification artifact that declares upward via a `Verifies:` tag (see `specs/VERIFICATION.md`). Don't name paths or tools here; the implementer picks them, the artifact declares the link, and `pnpm spec:coverage` builds the inverse map.
 
 #### Scenario: [Name]
 ```gherkin
@@ -45,5 +46,3 @@ Given [Precondition]
 When [Action]
 Then [Expected outcome]
 ```
-- **Vitest Unit Test:** [Provide the filepath for the colocated `.test.ts` file that covers the isolated functional logic]
-- **Playwright E2E Test:** [Provide the filepath for the E2E test in `<app>/e2e/` that covers this browser scenario]

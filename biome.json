@@ -68,6 +68,34 @@
       "includes": ["packages/pelilauta-icons/src/index.ts", "packages/myrrys-proprietary/index.ts"],
       "formatter": { "enabled": false },
       "linter": { "enabled": false }
+    },
+    {
+      "includes": ["packages/auth/src/server/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "firebase/*",
+                      "@pelilauta/firebase/client",
+                      "@pelilauta/firebase/client/**",
+                      "@pelilauta/auth/client",
+                      "@pelilauta/auth/client/**",
+                      "nanostores",
+                      "nanostores/**"
+                    ],
+                    "message": "Server-side modules under packages/auth/src/server/ must not import client SDKs, the auth ./client barrel, or nanostores. See specs/pelilauta/auth-package/spec.md §SSR Safety."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
