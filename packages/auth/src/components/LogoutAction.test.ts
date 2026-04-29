@@ -62,7 +62,7 @@ describe("LogoutAction.svelte", () => {
     await fireEvent.click(button);
 
     const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent(/sign-out failed/i);
-    expect(button).not.toBeDisabled();
+    expect(alert.textContent?.toLowerCase()).toContain("sign-out failed");
+    expect(button.hasAttribute("disabled")).toBe(false);
   });
 });

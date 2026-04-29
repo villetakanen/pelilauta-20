@@ -20,7 +20,7 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
 
 - **Host components** (`app/pelilauta/src/`):
   - `pages/login.astro` — SSR-rendered anonymous-only landing page. Simple centered layout with a call-to-action and the login button island. If the request already carries a valid `session` cookie, middleware+page responds with a `302` to `next` (or `/`).
-  - `components/auth/LoginButton.svelte` — CSR island that drives a **full-page redirect** sign-in (not popup). This button is the only CSR that `login.astro` ships. Two phases:
+  - `@pelilauta/auth/components` → `LoginButton` (`packages/auth/src/components/LoginButton.svelte`) — CSR island that drives a **full-page redirect** sign-in (not popup). This button is the only CSR that `login.astro` ships. Two phases:
     1. **Click phase (outbound):** snapshot `sanitizeNext(next)` into `sessionStorage` under key `pelilauta.auth.next`, then call `signInWithRedirect(auth, GoogleAuthProvider)`. Control leaves the app — Google's OAuth page takes over.
     2. **Mount phase (return):** on mount, the component awaits `getRedirectResult(auth)`. The user source for the handshake is `result.user ?? auth.currentUser` (scoped: `currentUser` is only consulted when sessionStorage indicates we initiated a redirect). This fallback is load-bearing — on Chromium with storage partitioning, Firebase's `getRedirectResult` can return `null` even though its side effects successfully populated `auth.currentUser`. If a user is resolved from either source, the component enters a "completing sign-in..." state, calls `user.getIdToken()`, `POST`s it to `/api/auth/session`, then triggers a full page reload to the `sessionStorage`-restored `next` (or `/`). If neither source yields a user, the component renders the standard sign-in call-to-action. All paths clear the `sessionStorage` key.
 
@@ -78,7 +78,7 @@ This spec covers the **login/logout user journey** — the `/login` page, the Go
       - `auth/account-exists-with-different-credential` → "An account already exists with the same email using a different sign-in method."
       - Fallback (any other error, including POST failure) → "Login failed. Please try again."
     - **`next` sanitization:** Defense in depth. The component calls `sanitizeNext(next)` both before writing to `sessionStorage` (outbound) and after reading back (return), falling back to `/` for any value that is not a same-origin relative path. Page-level validation in `login.astro` remains the primary defense. All three call sites use the shared `sanitizeNext` utility from `packages/utils/src/sanitizeNext.ts`.
-  - `components/auth/LogoutAction.svelte` — small CSR island that renders a "Sign out" button. On click it calls `fullLogout()` from `stores/session.ts` (the authoritative exit: cookie DELETE → Firebase `signOut()` → clear atoms → full page reload). Hosted by `pages/settings.astro` (see below); may be hosted elsewhere in authenticated chrome in the future.
+  - `@pelilauta/auth/components` → `LogoutAction` (`packages/auth/src/components/LogoutAction.svelte`) — small CSR island that renders a "Sign out" button. On click it calls `fullLogout()` from `stores/session.ts` (the authoritative exit: cookie DELETE → Firebase `signOut()` → clear atoms → full page reload). Hosted by `pages/settings.astro` (see below); may be hosted elsewhere in authenticated chrome in the future.
     - **Styling contract:** Uses the DS `cta` button class and DS tokens (`--cn-grid`, `--cn-color-error`, `--cn-font-size-text-small`). The component MAY define a local `<style>` block only for layout composition (stacking the button + error message) — matching `LoginButton`'s exception; it MUST NOT redefine button or typography styles.
     - **Busy state:** While `fullLogout()` is in flight, the button is disabled and repeat clicks are coalesced (single invocation). On the happy path the component unmounts before the reload. On the partial-failure path (`sessionState === 'error'`, see [session/spec.md](../session/spec.md) §Authentication Flow step 5), the button re-enables and an inline `role="alert"` element surfaces a retry prompt.
   - `pages/settings.astro` — authenticated-only SSR page. Anonymous visitors are redirected to `/login?next=/settings`. Hosts `LogoutAction` (MVP content); richer settings UI is out of scope for this spec. ProfileButton's authenticated state links here.
@@ -181,7 +181,7 @@ And signInWithRedirect is called with GoogleAuthProvider
 And no POST to /api/auth/session occurs on this phase
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LoginButton.test.ts`
 
 #### Scenario: LoginButton completes handshake on return from redirect
 
@@ -196,7 +196,7 @@ And window.location.assign is called with "/threads"
 And sessionStorage["pelilauta.auth.next"] is cleared
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LoginButton.test.ts`
 
 #### Scenario: LoginButton surfaces redirect errors inline on return
 
@@ -209,7 +209,7 @@ And no navigation occurs
 And sessionStorage["pelilauta.auth.next"] is cleared
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LoginButton.test.ts`
 
 #### Scenario: LoginButton surfaces server-POST errors inline on return
 
@@ -223,7 +223,7 @@ And no navigation occurs
 And sessionStorage["pelilauta.auth.next"] is cleared
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LoginButton.test.ts`
 
 #### Scenario: LoginButton clears stale NEXT_KEY even when getRedirectResult is null
 
@@ -236,7 +236,7 @@ And the click-to-sign-in button is rendered
 And no navigation or fetch occurs
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LoginButton.test.ts`
 
 #### Scenario: LoginButton discards unsafe next values at both edges
 
@@ -252,7 +252,7 @@ When the component mounts
 Then window.location.assign is called with "/" (unsafe discarded on return)
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LoginButton.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LoginButton.test.ts`
 
 #### Scenario: Successful Google login (redirect round-trip)
 
@@ -299,7 +299,7 @@ When the user clicks the sign-out button
 Then session.fullLogout() is invoked exactly once
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LogoutAction.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LogoutAction.test.ts`
 
 #### Scenario: LogoutAction coalesces repeat clicks while logout is in flight
 
@@ -309,7 +309,7 @@ When the user clicks the sign-out button three times in rapid succession
 Then session.fullLogout() is invoked exactly once
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LogoutAction.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LogoutAction.test.ts`
 
 #### Scenario: LogoutAction surfaces the error state when sign-out fails
 
@@ -321,7 +321,7 @@ Then the button is re-enabled
 And an alert-role element displays "Sign-out failed. Please try again."
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/LogoutAction.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/LogoutAction.test.ts`
 
 #### Scenario: /settings redirects anonymous visitors to /login
 

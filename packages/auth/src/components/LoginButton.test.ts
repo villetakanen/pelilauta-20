@@ -53,6 +53,7 @@ describe("LoginButton.svelte", () => {
 
     // Wait for onMount getRedirectResult(null) to settle so button is enabled
     await waitFor(() => expect(firebaseClient.getRedirectResult).toHaveBeenCalled());
+    await waitFor(() => expect(sessionStorage.getItem(NEXT_KEY)).toBeNull());
 
     await fireEvent.click(screen.getByRole("button"));
 
@@ -106,8 +107,8 @@ describe("LoginButton.svelte", () => {
 
       const { unmount } = render(LoginButton);
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(message);
-      expect(screen.getByRole("button")).not.toBeDisabled();
+      expect((await screen.findByRole("alert")).textContent).toBe(message);
+      expect(screen.getByRole("button").hasAttribute("disabled")).toBe(false);
       expect(window.location.assign).not.toHaveBeenCalled();
       expect(sessionStorage.getItem(NEXT_KEY)).toBeNull();
 
@@ -126,8 +127,8 @@ describe("LoginButton.svelte", () => {
 
     render(LoginButton);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("Login failed. Please try again.");
-    expect(screen.getByRole("button")).not.toBeDisabled();
+    expect((await screen.findByRole("alert")).textContent).toBe("Login failed. Please try again.");
+    expect(screen.getByRole("button").hasAttribute("disabled")).toBe(false);
     expect(window.location.assign).not.toHaveBeenCalled();
     expect(sessionStorage.getItem(NEXT_KEY)).toBeNull();
   });
@@ -139,7 +140,7 @@ describe("LoginButton.svelte", () => {
     render(LoginButton);
 
     await waitFor(() => expect(firebaseClient.getRedirectResult).toHaveBeenCalled());
-    expect(sessionStorage.getItem(NEXT_KEY)).toBeNull();
+    await waitFor(() => expect(sessionStorage.getItem(NEXT_KEY)).toBeNull());
     expect(window.location.assign).not.toHaveBeenCalled();
     expect(fetch).not.toHaveBeenCalled();
   });
@@ -157,13 +158,13 @@ describe("LoginButton.svelte", () => {
     render(LoginButton);
 
     // Before getRedirectResult resolves, the completing state is visible and the CTA is not.
-    expect(await screen.findByRole("status")).toHaveTextContent("Completing sign-in...");
-    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect((await screen.findByRole("status")).textContent).toBe("Completing sign-in...");
+    expect(screen.queryByRole("button")).toBeNull();
 
     // Resolving null drops to the CTA and clears the stale key.
     resolveGetResult?.(null);
     await waitFor(() => expect(sessionStorage.getItem(NEXT_KEY)).toBeNull());
-    await waitFor(() => expect(screen.getByRole("button")).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByRole("button")).not.toBeNull());
   });
 
   it("Scenario: LoginButton completes handshake via auth.currentUser when getRedirectResult returns null", async () => {
@@ -201,6 +202,7 @@ describe("LoginButton.svelte", () => {
 
     render(LoginButton, { next: "http://evil.example.com" });
     await waitFor(() => expect(firebaseClient.getRedirectResult).toHaveBeenCalled());
+    await waitFor(() => expect(sessionStorage.getItem(NEXT_KEY)).toBeNull());
 
     await fireEvent.click(screen.getByRole("button"));
 
