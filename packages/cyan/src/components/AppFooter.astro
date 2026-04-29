@@ -13,8 +13,10 @@ const hasCredits = Astro.slots.has("app-footer-credits");
   }
   {
     hasCredits && (
-      <div class="cn-app-footer-credits text-caption">
-        <slot name="app-footer-credits" />
+      <div class="cn-app-footer-credits text-caption cn-content-prose">
+        <div>
+          <slot name="app-footer-credits" />
+        </div>
       </div>
     )
   }
@@ -24,7 +26,8 @@ const hasCredits = Astro.slots.has("app-footer-credits");
   .cn-app-footer {
     border-top: 1px solid var(--cn-border);
     margin-top: calc(var(--cn-grid) * 4);
-    padding: calc(var(--cn-grid) * 2) var(--cn-gap) calc(var(--cn-grid) * 3);
+    padding: calc(var(--cn-grid) * 2) 0 calc(var(--cn-grid) * 3);
+    container-type: inline-size;
   }
 
   .cn-app-footer-body {

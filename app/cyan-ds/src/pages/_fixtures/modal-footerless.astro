@@ -1,0 +1,17 @@
+---
+import Page from "@cyan/layouts/Page.astro";
+---
+
+<Page title="Modal Footerless Fixture" description="Fixture page for modal footer omission checks." layout="modal">
+  <Fragment slot="footer-body">
+    <p>fixture footer body should stay hidden in modal</p>
+  </Fragment>
+  <Fragment slot="app-footer-credits">
+    <p>fixture credits should stay hidden in modal</p>
+  </Fragment>
+
+  <section>
+    <h1>Modal Fixture</h1>
+    <p>This page verifies modal layout omits shell footer.</p>
+  </section>
+</Page>
