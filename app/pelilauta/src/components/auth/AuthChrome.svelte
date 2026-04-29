@@ -1,7 +1,6 @@
 <script lang="ts">
 import ProfileButton from "@cyan/components/ProfileButton.svelte";
-import type { SessionProfile } from "../../stores/session";
-import { profile, sessionState } from "../../stores/session";
+import { profile, type SessionProfile, sessionState } from "@pelilauta/auth/client";
 
 interface Props {
   ssrProfile: SessionProfile | null;

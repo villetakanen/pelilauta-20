@@ -1,11 +1,11 @@
+import * as sessionStore from "@pelilauta/auth/client";
 import { cleanup, fireEvent, render, screen } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import * as sessionStore from "../../stores/session";
 import LogoutAction from "./LogoutAction.svelte";
 
-vi.mock("../../stores/session", async () => {
+vi.mock("@pelilauta/auth/client", async () => {
   const actual =
-    await vi.importActual<typeof import("../../stores/session")>("../../stores/session");
+    await vi.importActual<typeof import("@pelilauta/auth/client")>("@pelilauta/auth/client");
   return {
     ...actual,
     fullLogout: vi.fn().mockResolvedValue(undefined),

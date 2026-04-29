@@ -1,6 +1,6 @@
 <script lang="ts">
+import { fullLogout, sessionState } from "@pelilauta/auth/client";
 import { onMount } from "svelte";
-import { fullLogout, sessionState } from "../../stores/session";
 
 let busy = $state(false);
 let errored = $state(false);

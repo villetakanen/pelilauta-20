@@ -2,8 +2,8 @@ import { getAuth } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";
 import type { Auth } from "firebase/auth";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
-import { logout } from "../stores/session";
 import { AuthedFetchError, authedFetch } from "./authedFetch";
+import { logout } from "./session";
 
 vi.mock("@pelilauta/firebase/client", () => ({
   getAuth: vi.fn(),
@@ -13,7 +13,7 @@ vi.mock("@pelilauta/utils/log", () => ({
   logError: vi.fn(),
 }));
 
-vi.mock("../stores/session", () => ({
+vi.mock("./session", () => ({
   logout: vi.fn(),
 }));
 

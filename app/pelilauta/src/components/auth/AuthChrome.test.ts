@@ -1,6 +1,6 @@
+import { logout, profile, sessionState } from "@pelilauta/auth/client";
 import { cleanup, render } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { logout, profile, sessionState } from "../../stores/session";
 import AuthChrome from "./AuthChrome.svelte";
 
 describe("AuthChrome.svelte", () => {

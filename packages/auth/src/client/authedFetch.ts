@@ -1,6 +1,6 @@
 import { getAuth } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";
-import { logout } from "../stores/session";
+import { logout } from "./session";
 
 export class AuthedFetchError extends Error {
   constructor(message: string) {
@@ -18,7 +18,7 @@ export class AuthedFetchError extends Error {
  * second 401 ends the session. Any path that degrades the session store
  * (null currentUser, getIdToken failure, repeated 401) calls `logout()` +
  * rejects with `AuthedFetchError`. Callers MUST NOT pre-set the
- * Authorization header — it is owned by this function and will be
+ * Authorization header - it is owned by this function and will be
  * overwritten.
  */
 export async function authedFetch(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {

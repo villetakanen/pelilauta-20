@@ -27,12 +27,12 @@ export const uid = atom<string | null>(null);
 export const profile = atom<SessionProfile | null>(null);
 
 /**
- * Clears the local session atoms. Store-level reset only — does NOT touch
+ * Clears the local session atoms. Store-level reset only - does NOT touch
  * the server cookie or the Firebase client. Used by `authedFetch` and
  * `AuthHandler` on recoverable drift. For user-initiated sign-out or
  * authoritative failure, use `fullLogout()` instead.
  *
- * Spec: `specs/pelilauta/session/spec.md` §Host components → stores/session.ts.
+ * Spec: `specs/pelilauta/session/spec.md` §Host components -> @pelilauta/auth/client/session.ts.
  */
 export function logout() {
   sessionState.set("initial");
@@ -53,7 +53,7 @@ export function logout() {
  * sessionState flips to "error" and the function returns WITHOUT signing out
  * of Firebase, clearing atoms, or reloading. Reloading with a still-valid
  * cookie would re-authenticate the user and make "Sign out" look silently
- * broken. If DELETE succeeds but signOut throws, we proceed anyway — the
+ * broken. If DELETE succeeds but signOut throws, we proceed anyway - the
  * cookieless reload paints anonymous regardless of local SDK state.
  */
 export async function fullLogout(): Promise<void> {

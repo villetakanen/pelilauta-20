@@ -9,10 +9,16 @@
  *   - Triggers full-page logout if client/server state diverges irreconcilably.
  */
 
+import {
+  fullLogout,
+  profile,
+  type SessionProfile,
+  sessionState,
+  uid,
+} from "@pelilauta/auth/client";
 import { getAuth, onAuthStateChanged } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";
 import { onMount } from "svelte";
-import { fullLogout, profile, type SessionProfile, sessionState, uid } from "../../stores/session";
 
 interface Props {
   ssrUid: string;

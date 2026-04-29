@@ -84,7 +84,7 @@ describe("fullLogout", () => {
     vi.unstubAllGlobals();
   });
 
-  it("runs the full exit fan-out: DELETE → signOut → clear atoms → reload", async () => {
+  it("runs the full exit fan-out: DELETE -> signOut -> clear atoms -> reload", async () => {
     await fullLogout();
 
     expect(fetch).toHaveBeenCalledWith(
@@ -104,7 +104,7 @@ describe("fullLogout", () => {
     await fullLogout();
 
     expect(mockSignOut).not.toHaveBeenCalled();
-    // Atoms preserved — the user is still authenticated on the server.
+    // Atoms preserved - the user is still authenticated on the server.
     expect(uid.get()).toBe("u");
     expect(profile.get()).toEqual({ nick: "N" });
     expect(sessionState.get()).toBe("error");

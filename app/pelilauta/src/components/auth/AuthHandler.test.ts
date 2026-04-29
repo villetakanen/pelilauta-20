@@ -1,8 +1,8 @@
+import { profile, sessionState, uid } from "@pelilauta/auth/client";
 import * as firebaseClient from "@pelilauta/firebase/client";
 import { cleanup, render, waitFor } from "@testing-library/svelte";
 import type { Auth, User } from "firebase/auth";
 import { afterEach, beforeEach, describe, expect, it, type Mock, vi } from "vitest";
-import { profile, sessionState, uid } from "../../stores/session";
 import AuthHandler from "./AuthHandler.svelte";
 
 vi.mock("@pelilauta/firebase/client", () => ({

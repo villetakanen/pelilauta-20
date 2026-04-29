@@ -13,7 +13,7 @@ Session is the identity seam between three independent auth surfaces: the HTTP-o
 
 The session boundary exists once; every other feature composes against it.
 
-> See also: [`../auth-package/spec.md`](../auth-package/spec.md) for the `@pelilauta/auth` package shell. The `stores/session.ts` and `utils/authedFetch.ts` paths referenced below move into that package across stages 2–3 of the extraction; this spec's path references update piecewise in the same commits.
+> See also: [`../auth-package/spec.md`](../auth-package/spec.md) for the `@pelilauta/auth` package shell. Session CSR primitives live in `@pelilauta/auth/client`.
 
 ### Architecture
 
@@ -22,11 +22,11 @@ The session boundary exists once; every other feature composes against it.
   - `layouts/Page.astro` — app-level wrapper around `@cyan/layouts/Page.astro` that conditionally mounts `AuthHandler` and `AuthChrome` when `Astro.locals.uid` is non-null. On anonymous paints it renders a **static** `<ProfileButton />` (no `client:load`). Load-bearing for the "anonymous surfaces ship zero CSR for auth" guardrail; pages MUST import this layout, not the cyan one directly.
   - `components/auth/AuthChrome.svelte` — CSR island that renders `ProfileButton` in the `AppBar` actions slot. Reads (does not write) the session store; falls back to an SSR-seeded `ssrProfile` prop to prevent hydration flash between SSR paint and store hydration. Mounted by `layouts/Page.astro` ONLY when `Astro.locals.uid` is non-null. Anonymous pages render a static server-side `ProfileButton` directly (no `client:load`), not this island — see §Regression Guardrails.
   - `@pelilauta/auth/server` (`packages/auth/src/server/projectProfile.ts`) — pure helper that narrows untyped `claims` into a `SessionProfile`. Google OIDC `name`/`picture` fields only; non-Google providers are deferred per `../auth/spec.md` §Out of Scope.
-  - `stores/session.ts` — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence. Exports two sanctioned mutators:
+  - `@pelilauta/auth/client` (`packages/auth/src/client/session.ts`) — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence. Exports two sanctioned mutators:
     - `logout()` — clears atoms only. Used by `authedFetch` on recoverable drift (null `currentUser`, `getIdToken` failure, repeated 401).
     - `fullLogout()` — authoritative exit: `DELETE /api/auth/session` → Firebase `signOut()` → clear atoms → `window.location.reload()`. Used by `AuthHandler` on any reconcile failure, and by `LogoutAction.svelte`. `fullLogout()` is the single entry point for any UI affordance that ends a session.
   - `components/auth/AuthHandler.svelte` — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
-  - `utils/authedFetch.ts` — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
+  - `@pelilauta/auth/client` (`packages/auth/src/client/authedFetch.ts`) — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
   - `pages/api/auth/session.ts` — `POST` (login: verify ID token, set cookie), `DELETE` (logout: clear cookie), `GET` (verify cookie, return `{ uid, claims }`).
   - `pages/api/auth/status.ts` — oracle endpoint. Verifies cookie and returns authoritative `{ loggedIn, uid, claims }`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope. Used by client to resolve stale-token races.
   - `pages/api/test/seed-session.ts` — **dev-only** seed route for E2E fixtures. Accepts `{ uid, claims? }`, mints a Firebase custom token, exchanges it via the Identity Toolkit REST API for an ID token, and issues a real session cookie. Used by `app/pelilauta/e2e/fixtures/auth.ts` to plant authenticated sessions for Playwright tests.
@@ -94,7 +94,7 @@ The session boundary exists once; every other feature composes against it.
    - No silent failures, no multi-step repair loops.
 
 5. **Logout:**
-   - UI affordances (e.g. `LogoutAction.svelte`) call `fullLogout()` from `stores/session.ts`. `AuthHandler` also calls `fullLogout()` when reconciliation determines the server no longer recognises the session.
+   - UI affordances (e.g. `LogoutAction.svelte`) call `fullLogout()` from `@pelilauta/auth/client`. `AuthHandler` also calls `fullLogout()` when reconciliation determines the server no longer recognises the session.
    - `fullLogout()` runs the fan-out in order: `DELETE /api/auth/session` clears the cookie, `auth.signOut()` clears Firebase client state, the session atoms are cleared via `logout()`, and `window.location.reload()` forces a full page reload.
    - The reload guarantees the next paint is anonymous-SSR with no CSR bundle mounted.
    - **Partial-failure contract:** If `DELETE /api/auth/session` throws or returns non-ok, `fullLogout()` sets `sessionState = 'error'` and returns WITHOUT calling `auth.signOut()`, `logout()`, or `window.location.reload()`. Atoms are preserved. Rationale: reloading while the server-side cookie is still valid would re-authenticate the user on the next SSR paint and make "Sign out" look silently broken. UI affordances observe `sessionState === 'error'` and surface a retry prompt.
@@ -120,7 +120,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - **Custom-claim enforcement from middleware.** Onboarding / EULA redirects are a future concern (see deferred `specs/pelilauta/onboarding/spec.md`). Session spec surfaces claims on `Astro.locals`; policy consumes them.
 - **Divergent cookie verification.** `middleware.ts`, `/api/auth/session` GET, and `/api/auth/status` all resolve SSR identity from the `session` cookie. They MUST delegate to the single shared helper `app/pelilauta/src/utils/resolveSession.ts` (`resolveSessionFromCookie`), which encapsulates `verifySessionCookie(cookie, true)` → `extractCustomClaims` → log-before-degrade catch (only infra errors — non-`auth/*` codes — are logged; both error classes fall through to a `null` identity). Direct calls to `verifySessionCookie` from route handlers or middleware are a regression.
 - **Caller-supplied `Authorization` headers to `authedFetch`.** `authedFetch` owns the Bearer header; any `Authorization` value in the caller's `init.headers` is silently overwritten. Callers MUST NOT attempt to pre-set auth headers — use the `init` argument for other headers only.
-- **Value imports of `stores/session.ts` from anonymous surfaces.** The store transitively depends on `@pelilauta/firebase/client` (via `fullLogout`). Modules reachable from an anonymous page MUST NOT value-import from the session store — only `import type` is safe (erased at compile). A value import from an anonymous-reachable module is a bundle regression against "Anonymous surfaces ship zero CSR for auth".
+- **Value imports of `@pelilauta/auth/client` from anonymous surfaces.** The session store transitively depends on `@pelilauta/firebase/client` (via `fullLogout`). Modules reachable from an anonymous page MUST NOT value-import from this client entrypoint — only `import type` is safe (erased at compile). A value import from an anonymous-reachable module is a bundle regression against "Anonymous surfaces ship zero CSR for auth".
 
 ## Contract
 
@@ -128,7 +128,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 
 - [ ] `middleware.ts` reads the `session` cookie, verifies it via `@pelilauta/firebase/server`, and populates `Astro.locals.uid` and `Astro.locals.claims`.
 - [ ] Middleware never issues a redirect based on session state.
-- [ ] `stores/session.ts` exposes `sessionState`, `uid`, and `profile` atoms, with no `localStorage` persistence.
+- [ ] `@pelilauta/auth/client` exposes `sessionState`, `uid`, and `profile` atoms, with no `localStorage` persistence.
 - [ ] `AuthHandler.svelte` mounts only when `Astro.locals.uid` is non-null at SSR render time.
 - [ ] `authedFetch` attaches the Bearer token, retries 401 responses once with a forced token refresh, and invokes `logout()` (with a `[authedFetch]` `logError` from `@pelilauta/utils/log`) on any of: null `currentUser` at entry, `getIdToken()` failure (initial or refresh), or repeated 401. Transport-level `fetch()` errors propagate unchanged.
 - [ ] `/api/auth/session` supports `POST` (cookie set from ID token), `DELETE` (cookie cleared), and `GET` (verify cookie, return uid + claims).
@@ -142,7 +142,7 @@ The following concerns intentionally live outside this spec. They are flagged he
 - **Cookie and Bearer are independent.** API routes must never check the session cookie for authorization. If an API route's security depends on the cookie being present, the route is broken.
 - **Anonymous = no Firebase client bundle.** A regression where an anonymous page boots the Firebase client SDK is a SEO/perf regression and must fail CI.
 - **Token repair has exactly one retry.** Nested or recursive repair attempts are forbidden.
-- **Session store is CSR-only.** Importing `stores/session.ts` from an `.astro` frontmatter or from the server entry of a shared package is a structural bug.
+- **Session store is CSR-only.** Importing `@pelilauta/auth/client` from an `.astro` frontmatter or from the server entry of a shared package is a structural bug.
 - **`Astro.locals.sessionState` is authoritative for SSR paint decisions.** Pages and layouts branch on this value, not on client-side store reads, to decide which shell to render.
 
 ### Testing Scenarios
@@ -284,7 +284,7 @@ And uid is null
 And profile is null
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/session.test.ts`
 
 #### Scenario: Session store transitions through the documented lifecycle
 
@@ -296,7 +296,7 @@ And uid holds the authenticated user's uid
 And profile holds the populated projection
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/session.test.ts`
 
 #### Scenario: logout() clears all session atoms
 
@@ -308,7 +308,7 @@ And uid is null
 And profile is null
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/session.test.ts`
 
 #### Scenario: fullLogout halts on cookie DELETE failure
 
@@ -322,7 +322,7 @@ And window.location.reload is NOT called
 And sessionState equals "error"
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/session.test.ts`
 
 #### Scenario: fullLogout proceeds on signOut failure after cookie clear
 
@@ -335,7 +335,7 @@ And logout() is called (atoms are cleared)
 And window.location.reload is called exactly once
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/stores/session.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/session.test.ts`
 
 #### Scenario: authedFetch attaches the Bearer token on the happy path
 
@@ -350,7 +350,7 @@ And logout() is NOT invoked
 And logError is NOT called
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/authedFetch.test.ts`
 
 #### Scenario: authedFetch rejects and logs out when currentUser is null at entry
 
@@ -363,7 +363,7 @@ And logError is called once with a "[authedFetch]" prefix
 And the returned promise rejects with AuthedFetchError
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/authedFetch.test.ts`
 
 #### Scenario: authedFetch retries once on 401
 
@@ -377,7 +377,7 @@ And the second request carries the refreshed token
 And the caller receives the 200 response
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/authedFetch.test.ts`
 
 #### Scenario: authedFetch gives up after one repair attempt
 
@@ -391,7 +391,7 @@ And logError is called once with a "[authedFetch]" prefix
 And the returned promise rejects with a clear authentication error
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/authedFetch.test.ts`
 
 #### Scenario: authedFetch rejects and logs out when the initial getIdToken throws
 
@@ -405,7 +405,7 @@ And logError is called once with a "[authedFetch]" prefix
 And the returned promise rejects with AuthedFetchError
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/authedFetch.test.ts`
 
 #### Scenario: authedFetch rejects and logs out when the refresh getIdToken throws
 
@@ -419,7 +419,7 @@ And logError is called once with a "[authedFetch]" prefix
 And the returned promise rejects with AuthedFetchError
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/authedFetch.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/client/authedFetch.test.ts`
 
 #### Scenario: projectProfileFromClaims extracts nick and avatarURL from Google OIDC claims
 
