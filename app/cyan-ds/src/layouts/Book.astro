@@ -20,6 +20,7 @@ import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
 import Page from "@cyan/layouts/Page.astro";
 import DocsThemeToggle from "../components/DocsThemeToggle.astro";
 import DocsTray from "../components/DocsTray.astro";
+import DocsAppFooter from "../components/footer/DocsAppFooter.astro";
 
 interface Props {
   frontmatter: {
@@ -43,6 +44,16 @@ const appTitle = formattedCategory ? `Cyan / ${formattedCategory}` : "Cyan Desig
   {poster && <CnBackgroundPoster slot="app-background-poster" src={poster} />}
   <DocsTray slot="tray" />
   <DocsThemeToggle slot="actions" />
+  <Fragment slot="footer-body">
+    <slot name="footer-body">
+      <DocsAppFooter />
+    </slot>
+  </Fragment>
+  <Fragment slot="app-footer-credits">
+    <slot name="app-footer-credits">
+      <p>Cyan Design System documentation for Pelilauta workspace.</p>
+    </slot>
+  </Fragment>
 
   {
     multipart ? (

@@ -15,11 +15,15 @@ describe("Page Layout — Contract", () => {
     expect(defaultLayout).toBe("sidebar");
   });
 
-  it("exposes a tray slot and a default slot", () => {
-    // Contract: Page forwards `tray` and `actions` named slots to AppShell,
+  it("exposes tray, actions, footer and default slots", () => {
+    // Contract: Page forwards `tray`, `actions`, `footer-body`, and
+    // `app-footer-credits` named slots to AppShell,
     // and renders the default slot directly inside <main class="cn-app-main">.
-    const exposedSlots = ["tray", "actions", "default"];
+    const exposedSlots = ["tray", "actions", "footer-body", "app-footer-credits", "default"];
     expect(exposedSlots).toContain("tray");
+    expect(exposedSlots).toContain("actions");
+    expect(exposedSlots).toContain("footer-body");
+    expect(exposedSlots).toContain("app-footer-credits");
     expect(exposedSlots).toContain("default");
   });
 

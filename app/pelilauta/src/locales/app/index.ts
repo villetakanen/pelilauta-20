@@ -8,6 +8,18 @@ export const fi: NestedTranslation = {
   action: {
     showMore: "Näytä lisää",
   },
+  footer: {
+    feed: {
+      title: "Syotteet",
+    },
+    links: {
+      title: "Roolipelit verkossa",
+    },
+    product: {
+      name: "Pelilauta 20",
+      title: "Pelilauta",
+    },
+  },
   error: {
     fetch: "Lataaminen epäonnistui",
     notFound: "Sivua ei löytynyt",
@@ -17,6 +29,18 @@ export const fi: NestedTranslation = {
 export const en: NestedTranslation = {
   action: {
     showMore: "Show more",
+  },
+  footer: {
+    feed: {
+      title: "Feeds",
+    },
+    links: {
+      title: "RPG online",
+    },
+    product: {
+      name: "Pelilauta 20",
+      title: "Pelilauta",
+    },
   },
   error: {
     fetch: "Failed to load",

@@ -1,0 +1,34 @@
+---
+title: Docs Footer Composition
+description: How the docs host injects footer body and credits into AppShell without forking DS shell internals.
+order: 11
+status: draft
+---
+
+The Cyan docs app composes footer content through the `Page -> AppShell` slot contract. The shell owns structure (`<footer>` semantics and placement); the host app owns content.
+
+## Slot Wiring
+
+`app/cyan-ds/src/layouts/Book.astro` injects two named slots:
+
+- `footer-body` — docs navigation columns (`DocsAppFooter`)
+- `app-footer-credits` — docs-specific attribution copy
+
+Because this goes through `Page` and `AppShell`, docs do not fork shell internals and keep the same behavior as other hosts.
+
+## Why This Lives In The Host
+
+- AppShell is domain-neutral and has no locale/content ownership.
+- Docs links are host-level information architecture, not DS primitives.
+- Modal shell posture stays footerless automatically (`layout="modal"` omits footer region).
+
+## Content Boundary
+
+Docs footer content is intentionally docs-centric (principles, components, workspace references). It does not reuse Pelilauta production community link sets.
+
+## Contract
+
+Canonical contract and scenarios:
+
+- `specs/cyan-ds/layouts/app-shell-footer/spec.md`
+- `specs/cyan-ds/components/docs-app-footer/spec.md`

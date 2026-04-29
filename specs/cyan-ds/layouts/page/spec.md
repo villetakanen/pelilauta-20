@@ -40,6 +40,9 @@ Historically pages reached directly into `AppShell`, causing each app to reinven
 | Name | Purpose |
 |---|---|
 | `tray` | Forwarded to `AppShell`'s `tray` slot. Apps populate with their site-specific navigation component (e.g. `DocsTray` in cyan-ds). |
+| `actions` | Forwarded to `AppShell`'s `actions` slot for host-owned header actions. |
+| `footer-body` | Forwarded to `AppShell`'s `footer-body` slot for host-owned footer composition in non-modal layouts. |
+| `app-footer-credits` | Forwarded to `AppShell`'s `app-footer-credits` slot for optional host-provided credits in non-modal layouts. |
 | *(default)* | Rendered as the direct content of `<main class="cn-app-main">`. The page author is responsible for its own content-grid shells (`.cn-content-prose`, `.cn-content-golden`, `.cn-content-triad`). |
 
 ### Anti-Patterns
@@ -54,7 +57,7 @@ Historically pages reached directly into `AppShell`, causing each app to reinven
 ### Definition of Done
 
 - [ ] `packages/cyan/src/layouts/Page.astro` exists and forwards all shell props to `AppShell`.
-- [ ] Page exposes a `tray` named slot and a default slot.
+- [ ] Page exposes `tray`, `actions`, `footer-body`, `app-footer-credits`, and default slots.
 - [ ] Page renders zero additional wrapper markup around the default slot (no `<article>`, no `<div>`, no `<section>`).
 - [ ] Page does not render any H1, page header, or description block.
 - [ ] `app/pelilauta/src/pages/index.astro` composes on `Page` (not `AppShell` directly).
@@ -80,6 +83,18 @@ Then AppShell is instantiated
 
 - **Vitest Unit Test:** `packages/cyan/src/layouts/page.test.ts`
 - **Playwright E2E Test:** covered indirectly by `app/pelilauta/e2e/front-page.spec.ts` (front page uses Page)
+
+#### Scenario: Page forwards actions and footer slots to AppShell
+
+```gherkin
+Given a page that uses the Page layout with actions, footer-body, and app-footer-credits slots
+When the page is rendered
+Then AppShell receives actions slot content in its header actions region
+  And AppShell receives footer-body slot content in its footer region
+  And AppShell receives app-footer-credits slot content in its credits region
+```
+
+- **Vitest Unit Test:** `packages/cyan/src/layouts/page.test.ts`
 
 #### Scenario: Page does not wrap content in an article or own an H1
 

@@ -1,0 +1,73 @@
+---
+title: App Footer Component
+description: Structural shell footer region with host-injected body and optional credits.
+order: 2
+status: draft
+multipart: true
+---
+
+import AppFooter from "@cyan/components/AppFooter.astro";
+
+<section class="cn-content-prose">
+  `AppFooter` is the shell-level footer primitive rendered by `AppShell` in non-modal layouts when host apps provide footer slots. It is structure-only: hosts own content, the DS owns semantics and layout tokens.
+
+  ## Contract Surface
+
+  - **`footer-body` slot**: primary footer content (columns, link groups, summaries)
+  - **`app-footer-credits` slot**: optional attribution/credits line
+
+  If credits are omitted, the component does not render an empty placeholder block.
+
+  ## Live Example — Body + Credits
+</section>
+
+<AppFooter>
+  <div slot="footer-body" class="cn-content-triad">
+    <section>
+      <h4>Documentation</h4>
+      <p>Design-system navigation and references.</p>
+    </section>
+    <section>
+      <h4>Composition</h4>
+      <p>Host apps inject content through AppShell slots.</p>
+    </section>
+    <section>
+      <h4>Status</h4>
+      <p>SSR-first, progressive by default.</p>
+    </section>
+  </div>
+  <p slot="app-footer-credits">Cyan DS footer credits example.</p>
+</AppFooter>
+
+<section class="cn-content-prose">
+  ## Live Example — Body Only
+</section>
+
+<AppFooter>
+  <div slot="footer-body" class="cn-content-prose">
+    <h4>Without Credits</h4>
+    <p>The credits region is omitted when not provided.</p>
+  </div>
+</AppFooter>
+
+<section class="cn-content-prose">
+  ## Styling Tokens
+
+  `AppFooter` styling is provided by DS classes and tokens in `packages/cyan/src/components/AppFooter.astro`:
+
+  - `--cn-border`
+  - `--cn-grid`
+  - `--cn-gap`
+
+  Key classes:
+
+  - `.cn-app-footer`
+  - `.cn-app-footer-body`
+  - `.cn-app-footer-credits`
+
+  ## Related
+
+  - `specs/cyan-ds/layouts/app-shell-footer/spec.md`
+  - `specs/cyan-ds/components/docs-app-footer/spec.md`
+  - `app/cyan-ds/src/content/principles/layout-composition/docs-footer.mdx`
+</section>

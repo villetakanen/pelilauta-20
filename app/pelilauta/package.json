@@ -1,5 +1,6 @@
 {
   "name": "pelilauta",
+  "version": "20.0.0-alpha.4",
   "private": true,
   "type": "module",
   "scripts": {

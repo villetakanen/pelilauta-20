@@ -1,0 +1,30 @@
+---
+import packageJson from "../../../package.json";
+import { t } from "../../i18n";
+
+const { version } = packageJson;
+---
+
+<div class="cn-content-triad">
+  <section>
+    <h4>{t("app:footer.product.title")}</h4>
+    <p>
+      {t("app:footer.product.name")}<br />
+      <a href="/docs/80-release-notes">v{version}</a>
+    </p>
+  </section>
+
+  <section>
+    <h4>{t("app:footer.links.title")}</h4>
+    <ul>
+      <li><a href="https://myrrys.com">Myrrys</a></li>
+      <li><a href="https://roolipelitiedotus.fi/">Roolipelitiedotus</a></li>
+      <li><a href="https://discord.gg/c5bAGzNKZz">Roolipelifoorumi Discord</a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h4>{t("app:footer.feed.title")}</h4>
+    <p><a href="/rss/threads.xml">RSS</a></p>
+  </section>
+</div>
