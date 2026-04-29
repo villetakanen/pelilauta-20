@@ -17,7 +17,7 @@ stylebook_url: [https://...]
 [Why does this feature exist? What problem does it solve? 1-3 sentences.]
 
 ### Architecture
-- **Components:** [Key files/modules with paths. Default to Svelte 5 for DS components; Astro for structural layouts. All must be 100% SSR-compatible per ADR-001.]
+- **Components:** [Key files/modules with paths. Default to Svelte 5 for DS components; Astro for structural layouts. All must be 100% SSR-compatible per ADR-001. During active reverse-spec ports, temporary upstream source pointers (for example under `.tmp/`) are allowed if clearly marked as migration references.]
 - **Data Models:** [Schemas, types — reference file paths, don't duplicate code]
 - **API Contracts:** [Endpoints, events, public interfaces]
 - **Dependencies:** [What this depends on / what depends on this]

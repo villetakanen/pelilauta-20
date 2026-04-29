@@ -58,6 +58,19 @@ The component stays small and synchronous; the page owns the awaits.
 
 Authenticated CSR islands (editors, real-time `onSnapshot` listeners, write actions) run after hydration and are inherently client-side. Async work there is expected — but it is a *different* class of code, lives under each package's `client/` entry, and runs only behind an authenticated session, so the anonymous-SSR contract from `AGENTS.md` is preserved.
 
+## Package boundaries
+
+**Packages exist for cognitive boundaries, not for distribution.** The pnpm workspace is sized so that humans and AI agents can hold one package's working set in mind (or in context) at a time. Boundaries serve maintainability and explicit dependency direction; they do not serve reuse, redistribution, or multi-host stubbing.
+
+Practical consequences:
+
+- **Routes stay in the host.** API route handlers (`app/pelilauta/src/pages/api/**`) own the HTTP shell — status codes, ETag, cache headers, `Cache-Control` directives. The host imports schemas and accessors from the relevant package; the package never ships a route handler. Specs document what API routes exist, so reuse-via-stub-and-export solves a problem nobody has.
+- **No multi-host stubs.** Pelilauta has effectively one host (`app/pelilauta`). Patterns that exist only to share code across hosts — re-export shims, framework-agnostic adapters, "package as redistributable unit" — are not worth their cost.
+- **Cross-package refactors are cheap.** Because there is no `workspace:*` consumer outside this repo, and no published version, moving symbols between packages is a normal operation, not a breaking change. Don't design abstractions to insulate packages from each other's churn.
+- **Default to the host until pressure justifies a split.** "Could this go in a package?" is a weaker question than "does it help to put this in a package?" Splits are justified by domain coherence, dependency-direction enforcement, or working-set size — not by speculative reuse.
+
+This complements the ban on framing packages as independently versionable: that rule says what packages are *not* (a release boundary); the rule above says what they *are* (a cognitive boundary).
+
 ## Text conventions
 
 - **Ellipsis: Unicode `…` (U+2026), universally.** Truncation, elision, and "more to come" markers in any generated text — UI snippets, SEO `<meta name="description">`, notification bodies, RSS `description`, plain-text and HTML projections of markdown — use the single Unicode horizontal ellipsis character, not three ASCII dots `...`. One glyph, one code point, semantically a punctuation mark, consistent across surfaces. Helpers that produce truncated strings (e.g. `packages/utils/src/markdownToPlainText.ts`) emit `…` and callers that prefer ASCII override at the call site rather than at the helper.

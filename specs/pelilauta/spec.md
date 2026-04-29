@@ -15,6 +15,8 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
 - **Host app:** `app/pelilauta/` — Astro pages, layouts, the i18n composition seam, the auth/session boundary, and any "core" cross-cutting wiring not large enough to warrant a package.
 - **Feature packages** (workspace modules, not independently published — they share a single release cycle; boundaries exist for code organization and explicit dependency direction, not for distribution). Each ships its own `./i18n` sub-export:
   - [`packages/threads`](threads/spec.md) — Discussions vertical.
+  - [`packages/profiles`](profiles/spec.md) — Public-identity vertical: schema, accessors, and the `ProfileLink` SSR primitive used everywhere a uid is cited. Profile ≠ account; account state lives in `@pelilauta/auth`.
+  - [`packages/channels`](channels/spec.md) — Channels meta-list (the `/channels` directory page). Code lives inside `packages/threads/`; the spec is top-level because the directory is a bespoke navigation surface with its own contract.
   - `packages/sites` — Game-site vertical (campaign pages, libraries, character sheets). _Spec TBD._
   - Future verticals follow the same shape.
 - **Shared infrastructure packages** (listed bottom-up by dependency stack):
@@ -26,12 +28,14 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
 - **Sub-specs:**
   - [`auth/`](auth/spec.md) — login/logout UX and `/login` page.
   - [`auth-package/`](auth-package/spec.md) — `@pelilauta/auth` workspace package: shell, sub-exports, dependency direction, staged extraction DoD.
+  - [`channels/`](channels/spec.md) — `/channels` meta-list page (blocked on profiles MF Stage 1).
   - [`firebase/`](firebase/spec.md) — Firebase workspace + auth.
   - [`front-page/`](front-page/spec.md) — landing page composition.
   - [`i18n/`](i18n/spec.md) — translation engine and host composition.
   - [`migrations/`](migrations/spec.md) — data migrations from prior versions.
   - [`models/`](models/spec.md) — shared schemas.
   - [`preferences/`](preferences/spec.md) — user preference store.
+  - [`profiles/`](profiles/spec.md) — public-identity vertical: schema, accessors, `ProfileLink` SSR primitive.
   - [`session/`](session/spec.md) — session cookie, SSR identity, token repair, store.
   - [`threads/`](threads/spec.md) — discussions vertical.
 - **Constraints:**
