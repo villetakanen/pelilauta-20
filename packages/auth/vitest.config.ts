@@ -7,6 +7,9 @@ export default defineConfig({
   envPrefix: ["PUBLIC_", "SECRET_"],
   envDir: resolve(__dirname, "../.."),
   resolve: {
+    alias: {
+      "@cyan": resolve(__dirname, "../cyan/src"),
+    },
     conditions: ["browser"],
   },
   test: {

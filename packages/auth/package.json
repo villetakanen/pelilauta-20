@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@pelilauta/cyan": "workspace:*",
     "@pelilauta/firebase": "workspace:*",
     "@pelilauta/utils": "workspace:*"
   },

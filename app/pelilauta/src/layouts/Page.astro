@@ -2,9 +2,8 @@
 import ProfileButton from "@cyan/components/ProfileButton.svelte";
 import CyanPage from "@cyan/layouts/Page.astro";
 import brandImage from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
+import { AuthChrome, AuthHandler } from "@pelilauta/auth/components";
 import { projectProfileFromClaims } from "@pelilauta/auth/server";
-import AuthChrome from "../components/auth/AuthChrome.svelte";
-import AuthHandler from "../components/auth/AuthHandler.svelte";
 import AppFooter from "../components/footer/AppFooter.astro";
 
 interface Props {

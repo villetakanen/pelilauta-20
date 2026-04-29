@@ -118,6 +118,9 @@ importers:
 
   packages/auth:
     dependencies:
+      '@pelilauta/cyan':
+        specifier: workspace:*
+        version: link:../cyan
       '@pelilauta/firebase':
         specifier: workspace:*
         version: link:../firebase

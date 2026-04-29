@@ -21,7 +21,11 @@ test("Scenario: Seeded user sees authenticated chrome on front page", async ({ s
   const html = (await response?.text()) ?? "";
 
   // AuthHandler island markup is rendered by SSR when Astro.locals.uid is set.
-  expect(html).toMatch(/astro-island[^>]*component-url="[^"]*AuthHandler/);
+  // When imported from a barrel, component-url may point at index.ts while
+  // component-export carries the actual component id.
+  expect(html).toMatch(
+    /astro-island[^>]*(component-url="[^"]*AuthHandler|component-export="AuthHandler")/,
+  );
 
   // ProfileButton links to /settings in authenticated state.
   expect(html).toMatch(/href="\/settings"/);

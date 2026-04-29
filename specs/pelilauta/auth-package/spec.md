@@ -61,6 +61,7 @@ The host owns composition, routing, and the SSR/server-endpoint surfaces:
 
 - `@pelilauta/firebase` — `getAuth()` + `firebase/auth` re-exports (`GoogleAuthProvider`, `signInWithRedirect`, `getRedirectResult`, `onAuthStateChanged`) consumed by `./client` and `./components`.
 - `@pelilauta/utils` — `logError`, `logDebug`.
+- `@pelilauta/cyan` — `ProfileButton` consumed by `./components` (`AuthChrome`). Required for the `./components` sub-export only; `./server` and `./client` do not pull cyan. Mirrors the composition pattern used by `packages/threads`.
 - `nanostores` — atoms in `./client`.
 - `svelte` — `./components`.
 
@@ -94,7 +95,7 @@ DoD is split across five ship stages corresponding to GitHub issues #20–#24 of
 - [x] All three sub-exports declared in `package.json`: `./server`, `./client`, `./components`. Empty barrels permitted at this stage.
 - [x] `src/{server,client,components}/index.ts` exist with a one-line comment naming the sub-export's intent.
 - [x] Workspace dependencies declared: `@pelilauta/firebase`, `@pelilauta/utils`. Dev deps sufficient for `vitest run` against Svelte components (`svelte`, `@sveltejs/vite-plugin-svelte`, `@testing-library/svelte`, `jsdom`, `vitest`).
-- [x] `vitest.config.ts` mirrors the `envPrefix` / `envDir` / browser-conditions convention used by `packages/threads/vitest.config.ts`. `passWithNoTests: true` until content lands. The `@cyan` alias is dropped — `@pelilauta/auth` has no design-system import surface in any future stage.
+- [x] `vitest.config.ts` mirrors `packages/threads/vitest.config.ts` for `envPrefix`, `envDir`, browser conditions, and the `@cyan` alias. The `@cyan` alias is required by Stage 4's `AuthChrome` (composes `ProfileButton`); `./client`-only consumers never reach the alias because vitest scopes per-package. `passWithNoTests: true` until content lands.
 - [x] No file outside `packages/auth/` imports from `@pelilauta/auth/*` yet.
 - [x] `pnpm check` and `pnpm test` green.
 

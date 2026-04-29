@@ -25,7 +25,12 @@ test("Scenario: Authenticated SSR mounts AuthHandler and ProfileButton", async (
   const html = (await response?.text()) ?? "";
 
   // Exactly one AuthHandler island in the SSR output.
-  const matches = html.match(/astro-island[^>]*component-url="[^"]*AuthHandler/g) ?? [];
+  // When imported from a barrel, component-url may point at index.ts while
+  // component-export carries the actual component id.
+  const matches =
+    html.match(
+      /astro-island[^>]*(component-url="[^"]*AuthHandler|component-export="AuthHandler")/g,
+    ) ?? [];
   expect(matches.length).toBe(1);
 
   // ProfileButton renders as an <a href="/settings"> in the authenticated shell.

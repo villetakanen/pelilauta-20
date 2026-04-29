@@ -20,12 +20,12 @@ The session boundary exists once; every other feature composes against it.
 - **Host components** (`app/pelilauta/src/`):
   - `middleware.ts` — SSR-side cookie verification. Populates `Astro.locals.uid` and `Astro.locals.sessionState`. Does **not** gate page access.
   - `layouts/Page.astro` — app-level wrapper around `@cyan/layouts/Page.astro` that conditionally mounts `AuthHandler` and `AuthChrome` when `Astro.locals.uid` is non-null. On anonymous paints it renders a **static** `<ProfileButton />` (no `client:load`). Load-bearing for the "anonymous surfaces ship zero CSR for auth" guardrail; pages MUST import this layout, not the cyan one directly.
-  - `components/auth/AuthChrome.svelte` — CSR island that renders `ProfileButton` in the `AppBar` actions slot. Reads (does not write) the session store; falls back to an SSR-seeded `ssrProfile` prop to prevent hydration flash between SSR paint and store hydration. Mounted by `layouts/Page.astro` ONLY when `Astro.locals.uid` is non-null. Anonymous pages render a static server-side `ProfileButton` directly (no `client:load`), not this island — see §Regression Guardrails.
+  - `@pelilauta/auth/components` (`packages/auth/src/components/AuthChrome.svelte`) — CSR island that renders `ProfileButton` in the `AppBar` actions slot. Reads (does not write) the session store; falls back to an SSR-seeded `ssrProfile` prop to prevent hydration flash between SSR paint and store hydration. Mounted by `layouts/Page.astro` ONLY when `Astro.locals.uid` is non-null. Anonymous pages render a static server-side `ProfileButton` directly (no `client:load`), not this island — see §Regression Guardrails.
   - `@pelilauta/auth/server` (`packages/auth/src/server/projectProfile.ts`) — pure helper that narrows untyped `claims` into a `SessionProfile`. Google OIDC `name`/`picture` fields only; non-Google providers are deferred per `../auth/spec.md` §Out of Scope.
   - `@pelilauta/auth/client` (`packages/auth/src/client/session.ts`) — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence. Exports two sanctioned mutators:
     - `logout()` — clears atoms only. Used by `authedFetch` on recoverable drift (null `currentUser`, `getIdToken` failure, repeated 401).
     - `fullLogout()` — authoritative exit: `DELETE /api/auth/session` → Firebase `signOut()` → clear atoms → `window.location.reload()`. Used by `AuthHandler` on any reconcile failure, and by `LogoutAction.svelte`. `fullLogout()` is the single entry point for any UI affordance that ends a session.
-  - `components/auth/AuthHandler.svelte` — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
+  - `@pelilauta/auth/components` (`packages/auth/src/components/AuthHandler.svelte`) — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
   - `@pelilauta/auth/client` (`packages/auth/src/client/authedFetch.ts`) — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
   - `pages/api/auth/session.ts` — `POST` (login: verify ID token, set cookie), `DELETE` (logout: clear cookie), `GET` (verify cookie, return `{ uid, claims }`).
   - `pages/api/auth/status.ts` — oracle endpoint. Verifies cookie and returns authoritative `{ loggedIn, uid, claims }`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope. Used by client to resolve stale-token races.
@@ -451,7 +451,7 @@ When AuthChrome renders
 Then ProfileButton receives nick="Live" and photoURL="https://x/2.png"
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthChrome.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthChrome.test.ts`
 
 #### Scenario: AuthChrome surfaces the loading sessionState to ProfileButton
 
@@ -461,7 +461,7 @@ When AuthChrome renders
 Then ProfileButton receives loading={true}
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthChrome.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthChrome.test.ts`
 
 #### Scenario: AuthHandler seeds the session store from SSR props on mount
 
@@ -472,7 +472,7 @@ Then uid, profile, and sessionState atoms are populated synchronously
 And sessionState equals "active"
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthHandler.test.ts`
 
 #### Scenario: AuthHandler stays quiet when the client session matches SSR
 
@@ -483,7 +483,7 @@ Then no fetch to /api/auth/status is issued
 And no reload occurs
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthHandler.test.ts`
 
 #### Scenario: AuthHandler reconciles a stale client session with a live currentUser
 
@@ -496,7 +496,7 @@ Then user.getIdToken(true) is called to force-refresh the local SDK
 And no reload occurs
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthHandler.test.ts`
 
 #### Scenario: AuthHandler logs out when the server oracle reports loggedIn=false
 
@@ -511,7 +511,7 @@ And the session store is cleared via logout()
 And window.location.reload() is called
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthHandler.test.ts`
 
 #### Scenario: AuthHandler logs out when the client has no user and cannot recover
 
@@ -524,7 +524,7 @@ When reconciliation runs
 Then the authoritative logout path runs (cookie DELETE, signOut, reload)
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/components/auth/AuthHandler.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/components/AuthHandler.test.ts`
 
 #### Scenario: Anonymous page ships no Firebase client bundle
 

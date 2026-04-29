@@ -87,7 +87,7 @@ describe("AuthHandler.svelte", () => {
         expect.objectContaining({ cache: "no-store" }),
       ),
     );
-    expect(mockUser.getIdToken).toHaveBeenCalledWith(true);
+    await waitFor(() => expect(mockUser.getIdToken).toHaveBeenCalledWith(true));
     expect(window.location.reload).not.toHaveBeenCalled();
   });
 
