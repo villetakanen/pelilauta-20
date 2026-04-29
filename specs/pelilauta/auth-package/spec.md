@@ -102,12 +102,12 @@ DoD is split across five ship stages corresponding to GitHub issues #20–#24 of
 
 #### Stage 2 — Move pure helpers (issue #21)
 
-- [ ] `app/pelilauta/src/utils/projectProfile.ts` is moved to `packages/auth/src/server/projectProfile.ts`, including its colocated test.
-- [ ] `SessionProfile` and `SessionState` types are moved to `packages/auth/src/server/types.ts` and re-exported from `app/pelilauta/src/stores/session.ts` so the host's existing imports continue to resolve.
-- [ ] `./server` barrel exports `projectProfileFromClaims`, `SessionProfile`, `SessionState`.
-- [ ] `app/pelilauta/src/layouts/Page.astro` (and any other host module that referenced `utils/projectProfile`) imports from `@pelilauta/auth/server`.
-- [ ] `packages/auth/src/server/` has zero `firebase/client` imports.
-- [ ] `app/pelilauta/src/utils/projectProfile.ts` is deleted.
+- [x] `app/pelilauta/src/utils/projectProfile.ts` is moved to `packages/auth/src/server/projectProfile.ts`, including its colocated test.
+- [x] `SessionProfile` and `SessionState` types are moved to `packages/auth/src/server/types.ts` and re-exported from `app/pelilauta/src/stores/session.ts` so the host's existing imports continue to resolve.
+- [x] `./server` barrel exports `projectProfileFromClaims`, `SessionProfile`, `SessionState`.
+- [x] `app/pelilauta/src/layouts/Page.astro` (and any other host module that referenced `utils/projectProfile`) imports from `@pelilauta/auth/server`.
+- [x] `packages/auth/src/server/` has zero `firebase/client` imports.
+- [x] `app/pelilauta/src/utils/projectProfile.ts` is deleted.
 
 #### Stage 3 — Move CSR core (issue #22)
 

@@ -1,4 +1,4 @@
-import type { SessionProfile } from "../stores/session";
+import type { SessionProfile } from "./types";
 
 /**
  * Synthesizes a minimal SessionProfile from a verified ID-token's custom

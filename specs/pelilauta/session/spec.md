@@ -21,7 +21,7 @@ The session boundary exists once; every other feature composes against it.
   - `middleware.ts` — SSR-side cookie verification. Populates `Astro.locals.uid` and `Astro.locals.sessionState`. Does **not** gate page access.
   - `layouts/Page.astro` — app-level wrapper around `@cyan/layouts/Page.astro` that conditionally mounts `AuthHandler` and `AuthChrome` when `Astro.locals.uid` is non-null. On anonymous paints it renders a **static** `<ProfileButton />` (no `client:load`). Load-bearing for the "anonymous surfaces ship zero CSR for auth" guardrail; pages MUST import this layout, not the cyan one directly.
   - `components/auth/AuthChrome.svelte` — CSR island that renders `ProfileButton` in the `AppBar` actions slot. Reads (does not write) the session store; falls back to an SSR-seeded `ssrProfile` prop to prevent hydration flash between SSR paint and store hydration. Mounted by `layouts/Page.astro` ONLY when `Astro.locals.uid` is non-null. Anonymous pages render a static server-side `ProfileButton` directly (no `client:load`), not this island — see §Regression Guardrails.
-  - `utils/projectProfile.ts` — pure helper that narrows untyped `claims` into a `SessionProfile`. Google OIDC `name`/`picture` fields only; non-Google providers are deferred per `../auth/spec.md` §Out of Scope.
+  - `@pelilauta/auth/server` (`packages/auth/src/server/projectProfile.ts`) — pure helper that narrows untyped `claims` into a `SessionProfile`. Google OIDC `name`/`picture` fields only; non-Google providers are deferred per `../auth/spec.md` §Out of Scope.
   - `stores/session.ts` — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence. Exports two sanctioned mutators:
     - `logout()` — clears atoms only. Used by `authedFetch` on recoverable drift (null `currentUser`, `getIdToken` failure, repeated 401).
     - `fullLogout()` — authoritative exit: `DELETE /api/auth/session` → Firebase `signOut()` → clear atoms → `window.location.reload()`. Used by `AuthHandler` on any reconcile failure, and by `LogoutAction.svelte`. `fullLogout()` is the single entry point for any UI affordance that ends a session.
@@ -40,7 +40,7 @@ The session boundary exists once; every other feature composes against it.
 - **Data models:**
   - `SessionState = 'initial' | 'loading' | 'active' | 'error'`
   - `SessionContext = { uid: string; claims: Record<string, unknown> } | null` — the value populated on `Astro.locals` by middleware. `claims` contains **custom claims only**; reserved firebase-admin fields (`iss`, `aud`, `iat`, `exp`, `auth_time`, `user_id`, `sub`, `email`, `email_verified`, `firebase`, `uid`) are stripped before assignment via `extractCustomClaims` so pages may forward `locals.claims` to client-rendered HTML without leaking token metadata.
-  - `profile` shape: minimal public-facing projection (`nick`, `avatarURL`) consumed by `ProfileButton`. Synthesized from the Google-OIDC `name` and `picture` claims via `utils/projectProfile.ts` at SSR time. Server-side Firestore enrichment (display-name overrides, bio, etc.) is deferred to `specs/pelilauta/onboarding/spec.md`. Full `Profile` schema lives in its own feature spec; session only surfaces the fields consumed by chrome.
+  - `profile` shape: minimal public-facing projection (`nick`, `avatarURL`) consumed by `ProfileButton`. Synthesized from the Google-OIDC `name` and `picture` claims via `@pelilauta/auth/server` (`packages/auth/src/server/projectProfile.ts`) at SSR time. Server-side Firestore enrichment (display-name overrides, bio, etc.) is deferred to `specs/pelilauta/onboarding/spec.md`. Full `Profile` schema lives in its own feature spec; session only surfaces the fields consumed by chrome.
 
 - **API contracts:**
   - **Cookie** (SSR identity): name `session`, `httpOnly: true`, `secure: true`, `sameSite: 'Lax'`, `path: '/'`, `maxAge: 5 days`. Set via `firebase-admin` `createSessionCookie(idToken, { expiresIn })`. Verified via `verifySessionCookie(cookie, /* checkRevoked */ true)`.
@@ -429,7 +429,7 @@ When projectProfileFromClaims is called
 Then the result is { nick: "Alice", avatarURL: "https://x/a.png" }
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/projectProfile.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/server/projectProfile.test.ts`
 
 #### Scenario: projectProfileFromClaims falls back safely on malformed claims
 
@@ -440,7 +440,7 @@ Then nick defaults to "User"
 And avatarURL is undefined
 ```
 
-- **Vitest Unit Test:** `app/pelilauta/src/utils/projectProfile.test.ts`
+- **Vitest Unit Test:** `packages/auth/src/server/projectProfile.test.ts`
 
 #### Scenario: AuthChrome prefers the hydrated store over the SSR seed
 

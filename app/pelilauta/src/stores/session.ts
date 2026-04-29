@@ -1,13 +1,9 @@
+import type { SessionProfile, SessionState } from "@pelilauta/auth/server";
 import { getAuth } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";
 import { atom } from "nanostores";
 
-export type SessionState = "initial" | "loading" | "active" | "error";
-
-export interface SessionProfile {
-  nick: string;
-  avatarURL?: string;
-}
+export type { SessionProfile, SessionState };
 
 /**
  * sessionState atom: tracked lifecycle of the session.
