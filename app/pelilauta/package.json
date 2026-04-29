@@ -16,6 +16,7 @@
     "@myrrys/proprietary": "workspace:*",
     "@pelilauta/firebase": "workspace:*",
     "@pelilauta/i18n": "workspace:*",
+    "@pelilauta/profiles": "workspace:*",
     "@pelilauta/threads": "workspace:*",
     "@pelilauta/utils": "workspace:*",
     "astro": "^6.1.5",
