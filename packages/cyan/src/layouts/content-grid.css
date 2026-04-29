@@ -34,7 +34,12 @@
 .cn-app-main > article > *,
 .cn-content-grid > *,
 .cn-content-prose > *,
-.cn-content-triad > * {
+.cn-content-triad > *,
+.cn-app-main > section > astro-island > *,
+.cn-app-main > article > astro-island > *,
+.cn-content-grid > astro-island > *,
+.cn-content-prose > astro-island > *,
+.cn-content-triad > astro-island > * {
   grid-column: 2;
 }
 
