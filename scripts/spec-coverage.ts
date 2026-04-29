@@ -7,7 +7,7 @@
  * Run: pnpm spec:coverage
  */
 
-import { readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { extname, join, relative, resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "..");
