@@ -67,15 +67,4 @@ export const ProfileSchema = z.preprocess(
   }),
 );
 
-export const ProfileSummarySchema = z.preprocess(
-  normalizeProfile,
-  z.object({
-    key: z.string(),
-    nick: z.string(),
-    avatarURL: z.string().optional(),
-    username: z.string(),
-  }),
-);
-
 export type Profile = z.infer<typeof ProfileSchema>;
-export type ProfileSummary = z.infer<typeof ProfileSummarySchema>;

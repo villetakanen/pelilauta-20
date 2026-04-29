@@ -58,24 +58,27 @@ describe("ThreadDetail", () => {
     expect(strong).not.toBeNull();
   });
 
-  it("shows anonymous byline when author is the '-' sentinel", () => {
+  it("shows anonymous byline when owners[0] is the '-' sentinel", () => {
     const { container } = render(ThreadDetail, {
-      props: { thread: makeThread({ author: "-" }), bodyHtml: "<p>Body</p>" },
+      props: { thread: makeThread({ owners: ["-"], author: "-" }), bodyHtml: "<p>Body</p>" },
     });
     expect(container.textContent).toContain("anonymous");
   });
 
-  it("shows anonymous byline when author is missing", () => {
+  it("shows anonymous byline when owners is empty", () => {
     const { container } = render(ThreadDetail, {
-      // biome-ignore lint/suspicious/noExplicitAny: testing missing-author edge case
-      props: { thread: makeThread({ author: undefined as any }), bodyHtml: "<p>Body</p>" },
+      // biome-ignore lint/suspicious/noExplicitAny: testing missing-owners edge case
+      props: { thread: makeThread({ owners: [] as any }), bodyHtml: "<p>Body</p>" },
     });
     expect(container.textContent).toContain("anonymous");
   });
 
-  it("shows the uid when author is a real value", () => {
+  it("shows the uid when owners[0] is a real value", () => {
     const { container } = render(ThreadDetail, {
-      props: { thread: makeThread({ author: "user1" }), bodyHtml: "<p>Body</p>" },
+      props: {
+        thread: makeThread({ owners: ["user1"], author: "user1" }),
+        bodyHtml: "<p>Body</p>",
+      },
     });
     expect(container.textContent).toContain("user1");
     expect(container.textContent).not.toContain("anonymous");

@@ -127,7 +127,7 @@ function collectRegistryEntries(): Tag[] {
 }
 
 function key(specPath: string, name: string): string {
-  return `${specPath} §${name}`;
+  return `${specPath} §${normalize(name)}`;
 }
 
 const scenarios = collectScenarios();

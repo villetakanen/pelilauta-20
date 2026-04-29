@@ -1,1 +1,1 @@
-export { default as ProfileLink } from "./ProfileLink.astro";
+export { default as ProfileLink } from "./ProfileLink.svelte";

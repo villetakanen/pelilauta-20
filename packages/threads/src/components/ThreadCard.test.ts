@@ -1,9 +1,13 @@
 // ThreadCard component tests — specs/pelilauta/threads/spec.md
+// Verifies: specs/pelilauta/threads/spec.md §ThreadCard composes ProfileLink for the author byline
 
-import { render, screen } from "@testing-library/svelte";
-import { describe, expect, it } from "vitest";
+import type { Profile } from "@pelilauta/profiles/server";
+import { cleanup, render, screen } from "@testing-library/svelte";
+import { afterEach, describe, expect, it } from "vitest";
 import type { Thread } from "../schemas/ThreadSchema";
 import ThreadCard from "./ThreadCard.svelte";
+
+afterEach(cleanup);
 
 function makeThread(overrides: Partial<Thread> = {}): Thread {
   return {
@@ -52,13 +56,13 @@ describe("ThreadCard", () => {
     expect(screen.getByText(/Some bold text/)).toBeTruthy();
   });
 
-  it("renders only the channel link paragraph when markdownContent is empty", () => {
+  it("omits the snippet paragraph when markdownContent is empty", () => {
     const { container } = render(ThreadCard, {
       props: { thread: makeThread({ markdownContent: "" }) },
     });
     const paragraphs = container.querySelectorAll("p");
-    // Only the channel link paragraph, no snippet paragraph
-    expect(paragraphs.length).toBe(1);
+    // Channel link + byline paragraphs only, no snippet paragraph
+    expect(paragraphs.length).toBe(2);
     expect(paragraphs[0]?.querySelector("a")).toBeTruthy();
   });
 
@@ -106,5 +110,33 @@ describe("ThreadCard", () => {
     });
     const img = container.querySelector("img");
     expect(img).toBeNull();
+  });
+
+  it("composes ProfileLink as a profile anchor when authorProfile is given", () => {
+    const authorProfile: Profile = { key: "uid-a", nick: "Ada", username: "ada" };
+    render(ThreadCard, {
+      props: {
+        thread: makeThread({ author: "uid-a", owners: ["uid-a"] }),
+        authorProfile,
+        anonymousLabel: "Anonymous",
+      },
+    });
+
+    const bylineLink = screen.getByRole("link", { name: "Ada" });
+    expect(bylineLink.getAttribute("href")).toBe("/profiles/uid-a");
+  });
+
+  it("composes ProfileLink as the anonymous fallback when authorProfile is null", () => {
+    const { container } = render(ThreadCard, {
+      props: {
+        thread: makeThread({ author: "-", owners: ["-"] }),
+        authorProfile: null,
+        anonymousLabel: "Anonymous",
+      },
+    });
+
+    expect(screen.getByText("Anonymous")).toBeTruthy();
+    const profileLinks = container.querySelectorAll('a[href^="/profiles/"]');
+    expect(profileLinks.length).toBe(0);
   });
 });

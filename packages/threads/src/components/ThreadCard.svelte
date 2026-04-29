@@ -1,14 +1,20 @@
 <script lang="ts">
 import CnCard from "@cyan/components/CnCard.svelte";
+import { ProfileLink } from "@pelilauta/profiles/components";
+import type { Profile } from "@pelilauta/profiles/server";
 import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
 import type { Thread } from "../schemas/ThreadSchema";
 
 let {
   thread,
   noun,
+  authorProfile = null,
+  anonymousLabel = "Anonymous",
 }: {
   thread: Thread;
   noun?: string;
+  authorProfile?: Profile | null;
+  anonymousLabel?: string;
 } = $props();
 
 const posterUrl = $derived(
@@ -36,5 +42,6 @@ const channelSlug = $derived(thread.channel.toLowerCase().replace(/\s+/g, "-"));
     {#if snippet}
       <p>{snippet}</p>
     {/if}
+    <p><ProfileLink profile={authorProfile} {anonymousLabel} /></p>
   </CnCard>
 </div>

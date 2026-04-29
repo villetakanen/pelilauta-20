@@ -8,6 +8,9 @@
 //   2. Writes 5 thread documents with known keys
 //   3. Writes the `meta/threads` document with a `topics` array containing
 //      the channels referenced by the seed threads
+//   4. Upserts profile documents for the two seed thread author uids so
+//      ProfileLink resolves to real nicks instead of the anonymous fallback.
+//      Does NOT clear the `profiles` collection — real user profiles coexist.
 //
 // The data is copied verbatim from production snapshots to exercise real-world
 // edge cases: legacy `topic` field, malformed `author` arrays, HTML `content`
@@ -172,6 +175,21 @@ const SEED_THREADS: Record<string, Record<string, unknown>> = {
 };
 
 // ---------------------------------------------------------------------------
+// Profile seed — author profiles for the seed thread authors
+// ---------------------------------------------------------------------------
+
+const SEED_PROFILES: Record<string, Record<string, unknown>> = {
+  YN8dQz3H8OMsb0L4jImAlROPQpo1: {
+    nick: "Petri",
+    username: "petri",
+  },
+  OsqlmotvuGco7FuG0adVp4fk5TW2: {
+    nick: "Mikko",
+    username: "mikko",
+  },
+};
+
+// ---------------------------------------------------------------------------
 // Channel seed — meta/threads document with topics array
 // ---------------------------------------------------------------------------
 
@@ -238,6 +256,14 @@ async function main() {
   // 3. Write channel directory
   await db.doc("meta/threads").set({ topics: SEED_CHANNELS }, { merge: true });
   console.log(`  Wrote ${SEED_CHANNELS.length} channels to 'meta/threads'`);
+
+  // 4. Upsert seed profiles (does not clear the collection — real users coexist)
+  const profileBatch = db.batch();
+  for (const [uid, data] of Object.entries(SEED_PROFILES)) {
+    profileBatch.set(db.collection("profiles").doc(uid), data, { merge: true });
+  }
+  await profileBatch.commit();
+  console.log(`  Upserted ${Object.keys(SEED_PROFILES).length} profiles to 'profiles'`);
 
   console.log("\nDone. Seed data ready for E2E tests.");
   process.exit(0);

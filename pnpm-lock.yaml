@@ -225,13 +225,16 @@ importers:
       '@pelilauta/utils':
         specifier: workspace:*
         version: link:../utils
-      nanostores:
-        specifier: ^0.11.0
-        version: 0.11.4
       zod:
         specifier: ^3.24.0
         version: 3.25.76
     devDependencies:
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^5.1.1
+        version: 5.1.1(svelte@5.55.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.3))
+      svelte:
+        specifier: ^5.55.3
+        version: 5.55.3
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
@@ -250,6 +253,9 @@ importers:
       '@pelilauta/models':
         specifier: workspace:*
         version: link:../models
+      '@pelilauta/profiles':
+        specifier: workspace:*
+        version: link:../profiles
       '@pelilauta/utils':
         specifier: workspace:*
         version: link:../utils

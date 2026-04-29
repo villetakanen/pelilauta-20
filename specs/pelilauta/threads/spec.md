@@ -83,8 +83,10 @@ ThreadSchema extends ContentEntrySchema
   blueskyPostUri: string (optional, AT Protocol URI)
   blueskyPostCreatedAt: Date (optional)
   owners: string[] (min 1)
-  author: string (derived from owners[0])
+  author: string (derived from owners[0]) ← LEGACY FIELD, do not read
 ```
+
+> **`author` is a v17 legacy denormalization, not a read source.** The schema preserves the field for storage compatibility (and forces it to `owners[0]` on parse, so it stays consistent), but **consumers MUST read `owners[0]`** to identify the author. Reading `thread.author` invites bugs where stale or malformed legacy data (e.g. `[0]` array writes from old clients) bypasses normalization expectations downstream. The canonical uid for "who authored this thread" is always `thread.owners[0]`.
 
 ##### The `"-"` owner sentinel
 
@@ -195,6 +197,7 @@ The host (`app/pelilauta/src/i18n.ts`) imports from `@pelilauta/threads/i18n` an
 - `@pelilauta/firebase/server` — server-side Firestore reads for SSR _(spec name; physical path TBD per `specs/pelilauta/firebase/spec.md`)_
 - `@pelilauta/firebase/client` — client-side Firestore writes, listeners, auth _(spec name; physical path TBD)_
 - `@pelilauta/i18n` — used only for the `NestedTranslation` type by the `./i18n` sub-export
+- `@pelilauta/profiles` — `Profile` type from `./server` and `ProfileLink` Svelte component from `./components`, consumed by `ThreadCard` for the author byline. The threads package does not call `getProfile` itself — the resolved profile is passed in as a prop by the rendering page.
 - `zod` — schema validation
 
 ### Constraints
@@ -208,6 +211,8 @@ The host (`app/pelilauta/src/i18n.ts`) imports from `@pelilauta/threads/i18n` an
 - **Accessor parameter names mirror storage field names.** `getThreads({ public })` because storage uses `public`. No API-level renames that diverge from the on-disk shape.
 - **`./i18n` sub-export is locale strings only.** No runtime code, no side effects, no imports beyond the `NestedTranslation` type.
 - **Host owns the `threads` namespace assignment.** This package proposes the namespace name in this spec; the host's i18n composition seam decides where the strings hang.
+- **`ThreadCard` does not fetch profiles.** Author rendering composes `ProfileLink` from `@pelilauta/profiles/components` with a pre-resolved `authorProfile` prop. The rendering page (e.g. `TopThreadsStream`) is responsible for calling `getProfile(thread.owners[0])` upstream and passing the result in. `ThreadCard` MUST NOT inline a bare `<a>` / `<span>` for the byline — every author citation goes through `ProfileLink`.
+- **Consumers read `owners[0]`, never `author`.** The `author` field on `Thread` is a v17 legacy denormalization preserved for storage round-trip; reading it from product code is a regression, even though the schema currently keeps it consistent.
 
 ## Contract
 
@@ -238,7 +243,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
-- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card` with a plain-text snippet (max 220 characters, truncated with ellipsis at word boundary)
+- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card` with a plain-text snippet (max 220 characters, truncated with ellipsis at word boundary). The author byline composes `ProfileLink` from `@pelilauta/profiles/components`, with `authorProfile?: Profile | null` and `anonymousLabel: string` passed in from the rendering page. No bare `<a>` / `<span>` byline markup.
 - [ ] `ThreadDetail.svelte` renders a read-only thread (title, channel link, anonymous-aware byline, cover image, body) given `{ thread, bodyHtml }`. Markdown rendering happens upstream in the page's Astro frontmatter — the component is synchronous and SSR-pure. `ThreadDetail` deliberately uses bare semantic HTML (`<article>/<h1>/<p>/<img>/<section>`) rather than composing DS primitives: Cyan has no detail-shell primitive yet (`CnArticle`/`CnReadingPane` not yet specced), so the AGENTS.md "compose DS primitives underneath" rule is satisfied vacuously. When/if such a primitive lands in `specs/cyan-ds/`, `ThreadDetail` migrates to it.
 - [ ] `app/pelilauta/src/pages/threads/[threadKey]/index.astro` wires the read-only detail page: SSR-only (no `client:` directives), calls `getThread(threadKey)` and `markdownToHTML(thread.markdownContent)` upstream of `<ThreadDetail>`, handles missing-thread → 404, isolates Firestore failures behind a `pelilauta:error.fetch` block (HTTP 200), and uses the host `<Page>` wrapper. Front-page `ThreadCard` links resolve to a real, non-404 page.
 - [ ] `server/` entry still has zero client SDK imports now that it carries real content
@@ -365,6 +370,26 @@ And undefined is not returned
 
 - **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
 
+#### Scenario: ThreadCard composes ProfileLink for the author byline
+
+```gherkin
+Given a Thread with author "uid-a"
+And authorProfile = { key: "uid-a", nick: "Ada", username: "ada" }
+And anonymousLabel = "Anonymous"
+When ThreadCard is rendered
+Then the byline contains a ProfileLink that emits <a href="/profiles/uid-a">Ada</a>
+And no bare <a> or <span> byline markup is emitted directly by ThreadCard
+
+Given a Thread with author "-"
+And authorProfile = null
+And anonymousLabel = "Anonymous"
+When ThreadCard is rendered
+Then the byline contains a ProfileLink that emits <span>Anonymous</span>
+And no <a> element is emitted for the byline
+```
+
+- **Vitest Unit Test:** `packages/threads/src/components/ThreadCard.test.ts`
+
 #### Scenario: ThreadDetail renders a read-only thread
 
 ```gherkin
@@ -374,8 +399,8 @@ Then an h1 holds the title
 And a channel link points to /channels/{slug}
 And the lang attribute on the article reflects thread.locale
 And the bodyHtml is rendered via {@html ...} (HTML tags survive)
-And the byline reads "anonymous" when author is "-" or missing
-And the byline reads the uid otherwise
+And the byline reads "anonymous" when owners[0] is "-" or owners is empty
+And the byline reads owners[0] (the uid) otherwise
 And the cover image prefers thread.poster over thread.images[0].url
 And no cover image renders when neither is present
 ```

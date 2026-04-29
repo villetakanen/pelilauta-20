@@ -1,1 +1,0 @@
-export { getProfileAtom } from "./profileCache";

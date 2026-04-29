@@ -13,6 +13,12 @@ import { expect, loginAs, test } from "./fixtures/auth";
 test("Sign-out from /settings triggers DELETE + anonymous SSR paint", async ({ page }) => {
   await loginAs(page, { uid: "e2e-test-user-1" });
 
+  // AuthHandler's reconcile path can fire DELETE during hydration if the
+  // seeded server session has no matching Firebase client user; the explicit
+  // sign-out click is the second possible trigger. Either path satisfies the
+  // spec. To avoid a race against the reconcile-fires-before-waitForRequest
+  // window, capture every DELETE via a long-lived listener registered BEFORE
+  // any navigation, then poll the captured array.
   const deleteRequests: string[] = [];
   page.on("request", (req) => {
     if (req.method() === "DELETE" && req.url().endsWith("/api/auth/session")) {
@@ -22,20 +28,17 @@ test("Sign-out from /settings triggers DELETE + anonymous SSR paint", async ({ p
 
   await page.goto("/settings");
 
-  // Wait for the DELETE request to fire before asserting — click alone
-  // doesn't guarantee the async fullLogout fetch has completed. AuthHandler's
-  // reconcile path can also trigger a DELETE when the seeded server session
-  // has no matching Firebase client user; either path satisfies the spec
-  // (sign-out → DELETE → anonymous paint).
-  const deletePromise = page.waitForRequest(
-    (req) => req.method() === "DELETE" && req.url().endsWith("/api/auth/session"),
-    { timeout: 10000 },
-  );
-  await page.getByRole("button", { name: /sign out/i }).click();
-  await deletePromise;
-  await page.waitForLoadState("load");
+  // The button click is best-effort: if reconcile already fired DELETE during
+  // hydration (and the page is on its way to /login), the click target may be
+  // gone. Don't fail the test on that — we just want the DELETE to have
+  // happened, by either path.
+  await page
+    .getByRole("button", { name: /sign out/i })
+    .click({ timeout: 2000 })
+    .catch(() => {});
 
-  expect(deleteRequests.length).toBeGreaterThanOrEqual(1);
+  await expect.poll(() => deleteRequests.length, { timeout: 10000 }).toBeGreaterThanOrEqual(1);
+  await page.waitForLoadState("load");
 
   const firebaseChunks = await page.evaluate(() =>
     performance

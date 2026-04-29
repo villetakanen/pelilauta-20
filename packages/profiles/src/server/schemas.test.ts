@@ -1,3 +1,9 @@
+// Verifies: specs/pelilauta/profiles/spec.md §ProfileSchema parses a valid doc
+// Verifies: specs/pelilauta/profiles/spec.md §ProfileSchema falls back nick to "N.N." when missing
+// Verifies: specs/pelilauta/profiles/spec.md §ProfileSchema coalesces legacy photoURL into avatarURL
+// Verifies: specs/pelilauta/profiles/spec.md §ProfileSchema derives username from nick when missing
+// Verifies: specs/pelilauta/profiles/spec.md §ProfileSchema filters malformed link entries
+
 import { describe, expect, it } from "vitest";
 import { ProfileSchema } from "./schemas";
 

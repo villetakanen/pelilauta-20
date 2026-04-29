@@ -96,6 +96,32 @@
           }
         }
       }
+    },
+    {
+      "includes": ["packages/profiles/src/**/*.ts"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "firebase/*",
+                      "@pelilauta/firebase/client",
+                      "@pelilauta/firebase/client/**",
+                      "nanostores",
+                      "nanostores/**"
+                    ],
+                    "message": "The profiles package is SSR-only in v20. No client SDKs, no nanostores. See specs/pelilauta/profiles/spec.md §Constraints."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }
