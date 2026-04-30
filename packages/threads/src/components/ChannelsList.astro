@@ -1,0 +1,30 @@
+---
+// ChannelsList — categorisation component for the channel directory.
+//
+// Groups input channels by category and emits one <section> per distinct
+// category, with an <h2> heading. Channels with no category fall under the
+// literal "Pelilauta" bucket (NOT an i18n key — per spec §Constraints).
+// Category order is derived from first-appearance in the input array.
+//
+// See specs/pelilauta/channels/spec.md §Architecture §Channels-package components.
+
+import type { Channel } from "../schemas/ChannelSchema";
+import ChannelInfoRow from "./ChannelInfoRow.astro";
+import { groupChannels } from "./groupChannels";
+
+interface Props {
+  channels: Array<Channel & { threadCountLabel: string }>;
+}
+
+const { channels } = Astro.props;
+const groups = groupChannels(channels);
+---
+
+{groups.map((group) => (
+  <section>
+    <h2>{group.category}</h2>
+    {group.channels.map((channel) => (
+      <ChannelInfoRow channel={channel} />
+    ))}
+  </section>
+))}

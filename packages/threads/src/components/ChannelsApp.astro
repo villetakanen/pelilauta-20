@@ -1,0 +1,42 @@
+---
+// ChannelsApp — directory orchestrator for the channels listing.
+//
+// Owns data fetching: calls getChannels(), enriches with threadCountLabel via
+// the host-supplied formatThreadCount function, and renders the grouped list.
+// On failure, renders the host-supplied errorLabel and logs via logError.
+//
+// Props are host-supplied strings/functions so the package stays i18n-agnostic
+// (Option A from the critic review — package boundary is respected).
+//
+// See specs/pelilauta/channels/spec.md §Architecture §Channels-package components.
+
+import { logError } from "@pelilauta/utils/log";
+import type { Channel } from "../schemas/ChannelSchema";
+import { getChannels } from "../server/index";
+import ChannelsList from "./ChannelsList.astro";
+
+interface Props {
+  discussionsTitle: string;
+  errorLabel: string;
+  formatThreadCount: (count: number) => string;
+}
+
+const { discussionsTitle, errorLabel, formatThreadCount } = Astro.props;
+
+let channels: Array<Channel & { threadCountLabel: string }> = [];
+let fetchError = false;
+
+try {
+  const raw = await getChannels();
+  channels = raw.map((c) => ({
+    ...c,
+    threadCountLabel: formatThreadCount(c.threadCount),
+  }));
+} catch (err) {
+  logError("ChannelsApp", err);
+  fetchError = true;
+}
+---
+
+<h1 class="sr-only">{discussionsTitle}</h1>
+{fetchError ? <p>{errorLabel}</p> : <ChannelsList channels={channels} />}

@@ -1,0 +1,23 @@
+---
+// Channels directory page — anonymous-SSR, no client: directives.
+// Composition only: renders ChannelsApp with host-supplied labels and title.
+// See specs/pelilauta/channels/spec.md §Architecture §Route.
+
+import { ChannelsApp } from "@pelilauta/threads/components";
+import { t } from "../../i18n";
+import Page from "../../layouts/Page.astro";
+
+const title = t("seo:channels.title");
+const description = t("seo:channels.description");
+const discussionsTitle = t("threads:title");
+const errorLabel = t("pelilauta:error.fetch");
+const formatThreadCount = (count: number) => t("threads:channel.threadCount", { count });
+---
+
+<Page title={title} description={description} layout="view">
+  <ChannelsApp
+    discussionsTitle={discussionsTitle}
+    errorLabel={errorLabel}
+    formatThreadCount={formatThreadCount}
+  />
+</Page>

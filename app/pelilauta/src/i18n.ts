@@ -6,7 +6,7 @@
 
 import { createT, type Locales } from "@pelilauta/i18n";
 import { en as profilesEn, fi as profilesFi } from "@pelilauta/profiles/i18n";
-import { en as threadsEn, fi as threadsFi } from "@pelilauta/threads/i18n";
+import { seoEn, seoFi, en as threadsEn, fi as threadsFi } from "@pelilauta/threads/i18n";
 import { en as appEn, fi as appFi } from "./locales/app/index.js";
 
 const locales: Locales = {
@@ -15,12 +15,14 @@ const locales: Locales = {
     pelilauta: appFi,
     profiles: profilesFi,
     threads: threadsFi,
+    seo: seoFi,
   },
   en: {
     app: appEn,
     pelilauta: appEn,
     profiles: profilesEn,
     threads: threadsEn,
+    seo: seoEn,
   },
 };
 

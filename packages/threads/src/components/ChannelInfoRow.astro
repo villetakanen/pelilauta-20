@@ -1,0 +1,25 @@
+---
+// ChannelInfoRow — single channel row for the directory listing.
+//
+// Accepts a channel enriched with a pre-rendered threadCountLabel string so
+// the component stays host-agnostic (i18n resolution happens upstream in the
+// host frontmatter — per ARCHITECTURE.md SSR Data Flow rules).
+//
+// See specs/pelilauta/channels/spec.md §Architecture §Channels-package components.
+
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import type { Channel } from "../schemas/ChannelSchema";
+
+interface Props {
+  channel: Channel & { threadCountLabel: string };
+}
+
+const { channel } = Astro.props;
+---
+
+<article>
+  <CnIcon noun={channel.icon} />
+  <h3><a href={`/channels/${channel.slug}`}>{channel.name}</a></h3>
+  <p>{channel.description}</p>
+  <p>{channel.threadCountLabel}</p>
+</article>

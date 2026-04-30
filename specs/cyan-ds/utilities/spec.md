@@ -13,6 +13,7 @@ Utilities provide reusable CSS classes for layout, typography, and visual concep
 
 ### Sub-Specs
 - [Elevation](elevation/spec.md) — visual depth and surface z-axis grouping
+- [Visually Hidden](visually-hidden/spec.md) — `.sr-only` accessibility utility
 
 ## Contract
 
