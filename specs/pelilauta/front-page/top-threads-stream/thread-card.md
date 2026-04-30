@@ -20,54 +20,83 @@ parent_spec: ./spec.md
 `ThreadCard` is a domain component owned by the threads package
 (`packages/threads/src/components/ThreadCard.svelte`) and consumed exclusively
 by `TopThreadsStream`. It composes `CnCard` from the Cyan DS underneath and
-injects thread-specific content (title link, channel link, snippet, author
-byline). The byline is rendered through `ProfileLink` from the profiles
-package — the rendering page resolves profiles upstream and passes them in
-as props.
+renders thread-specific content (title link, channel link, snippet, cover,
+byline) from props. Per ARCHITECTURE.md SSR Data Flow, all data prep —
+markdown → plain-text snippet, cover-image fallback chain, channel → slug/icon
+resolution, profile resolution — happens upstream in the consumer's
+frontmatter; ThreadCard renders synchronously from the prepared values.
 
 ### Architecture
 
 - **Component:** `packages/threads/src/components/ThreadCard.svelte` (Svelte 5).
-- **Props:** `{ thread: Thread, authorProfile?: Profile | null, anonymousLabel: string }`.
+- **Props:**
+  ```ts
+  {
+    thread: Thread;            // for title, key, locale, channel display name
+    snippet?: string;          // pre-rendered plain-text body preview
+    coverUrl?: string;         // pre-resolved cover image URL
+    channelSlug: string;       // pre-resolved channel slug for the link href
+    channelIcon?: string;      // pre-resolved icon noun, omitted when unknown
+    authorProfile?: Profile | null;
+    anonymousLabel: string;    // required — no English default in code
+  }
+  ```
 - **DS dependencies:** `CnCard` (`@cyan/components`) — provides the structural
   shell (`elevation`, `border-radius`, typography), the optional cover image,
-  and the `actions` slot. ThreadCard *consumes* these; it does not define them.
-  Slot mechanics and visual primitives are CnCard's contract, owned in
-  `specs/cyan-ds/`.
+  the title `href` wrapping, and the `actions` slot. ThreadCard *consumes*
+  these; it does not define them. Slot mechanics and visual primitives are
+  CnCard's contract, owned in `specs/cyan-ds/`.
 - **Domain dependencies:** `ProfileLink` (`@pelilauta/profiles/components`),
   `Thread` and `Profile` types from their owning packages.
 - **Visual hierarchy:**
-  - **Header:** thread title (rendered as `<h4>` inside `.card-header`),
-    optionally with a channel icon when the channel slug resolves.
-  - **Body (`.card-info`):** channel link, plain-text snippet truncated to 220
-    characters at a word boundary with ellipsis, and the byline composed via
-    `ProfileLink`.
+  - **Root wrapper:** a `<div lang={thread.locale}>` stamps the per-card
+    content locale per the i18n spec's DOM lang attribution rule. The
+    surrounding stream container has no `lang` attribute and inherits from
+    `<html lang>`.
+  - **Header (CnCard):** thread title rendered as `<h4>` inside `.card-header`;
+    if the consumer supplied `channelIcon`, CnCard renders it next to the
+    title (or on the cover, if a cover is present).
+  - **Body (`.card-info`):** channel link (`<a href="/channels/{channelSlug}">`
+    around `thread.channel`), the snippet `<p>` if `snippet` is non-empty, and
+    the byline `<p>` composed via `ProfileLink`.
 - **Interactivity model:** the card is multi-link — the title and (optional)
-  cover image link to `/threads/{key}`; the channel name links to
-  `/channels/{slug}`; the byline links to `/profiles/{uid}` via `ProfileLink`.
-  The card root is passive; there is no card-as-button wrapper.
+  cover image link to `/threads/{thread.key}` via CnCard's `href`; the channel
+  name links to `/channels/{channelSlug}`; the byline links to
+  `/profiles/{uid}` via `ProfileLink`. The card root is passive; there is no
+  card-as-button wrapper.
+- **CnCard configuration:** `elevation={1}` is pinned. ThreadCard is the only
+  consumer of this elevation level for this surface; changing it would break
+  the stream's visual rhythm and is a regression.
 - **Constraints:**
-  - Snippet rendering happens upstream (the consumer resolves
-    `markdownToPlainText` and passes the truncated string in). The component
-    does not call markdown utilities itself.
-  - The component receives `authorProfile` as a resolved `Profile | null` —
-    profile resolution is the consumer's responsibility, not ThreadCard's.
-  - No `<style>` blocks, inline `style=""`, or app-local utility classes.
+  - **Render-from-props.** ThreadCard does not call `markdownToPlainText`,
+    does not derive `coverUrl` from `thread.poster`/`thread.images`, and does
+    not slugify `thread.channel`. All such derivations happen upstream in the
+    consumer's frontmatter and are passed as props. ARCHITECTURE.md SSR Data
+    Flow: prep upstream, render synchronously.
+  - **Profile resolution upstream.** The component receives `authorProfile` as
+    a resolved `Profile | null`; ThreadCard never imports or calls `getProfile`.
+  - **No `<style>` blocks, inline `style=""`, or app-local utility classes.**
     Visual concerns compose `CnCard` and other DS primitives.
 
 ## Contract
 
 ### Definition of Done
 
-- [ ] `ThreadCard.svelte` renders a thread as a card built on `CnCard` with a
-      plain-text snippet (max 220 characters, truncated with ellipsis at word
-      boundary).
+- [ ] `ThreadCard.svelte` renders a thread as a card built on `CnCard`,
+      reading title, key, locale, and channel display name from `thread`, and
+      receiving everything else as props.
+- [ ] The snippet, when non-empty, renders as a `<p>` between the channel link
+      and the byline. When `snippet` is empty or absent, the snippet `<p>` is
+      omitted (only the channel link and byline `<p>` remain).
 - [ ] The author byline composes `ProfileLink` from
       `@pelilauta/profiles/components`, with `authorProfile?: Profile | null`
       and `anonymousLabel: string` passed in from the rendering page.
       ThreadCard itself never emits a bare `<a>` or `<span>` for the byline.
-- [ ] The title and optional cover image link to `/threads/{key}`; the channel
-      name links to `/channels/{slug}`; the card root is not a link.
+- [ ] The title and optional cover image link to `/threads/{thread.key}`; the
+      channel name links to `/channels/{channelSlug}`; the card root is not a
+      link.
+- [ ] The card's outermost element carries `lang={thread.locale}` for DOM
+      content-locale stamping.
 
 ### Regression Guardrails
 
@@ -76,11 +105,15 @@ as props.
   interactivity contract.
 - The byline MUST go through `ProfileLink` for both the resolved-profile and
   anonymous cases. Bare `<a>` / `<span>` byline markup is a regression.
-- Profile resolution MUST happen upstream. ThreadCard MUST NOT import or call
-  `getProfile`. The component is profile-display, not profile-fetching.
+- ThreadCard MUST NOT import `getProfile`, `markdownToPlainText`, or any
+  derivation utility. All inputs are pre-resolved upstream; the component is
+  pure render-from-props.
 - The author uid is read by the upstream consumer from `thread.owners[0]`,
   never from the legacy `thread.author` field. ThreadCard's contract
   presupposes the consumer follows that rule.
+- `anonymousLabel` is a required prop with no in-component default.
+  Hard-coding an English fallback ("Anonymous") would emit untranslated text
+  in a Finnish-default app if a consumer forgot the prop.
 
 ### Testing Scenarios
 
@@ -144,3 +177,7 @@ And no <a> element is emitted for the byline
    v17 visual feature" lands in this spec only when the resolution is a
    ThreadCard consumption choice; if the resolution requires a new DS
    primitive, it escalates to `specs/cyan-ds/` instead.
+4. **Render-from-props boundary.** Any data derivation (markdown rendering,
+   image fallback chains, slug computation, profile lookups) lives in the
+   consumer's frontmatter, not in ThreadCard. This keeps the component
+   synchronous, SSR-pure, and unit-testable with primitive props.

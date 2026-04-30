@@ -29,36 +29,43 @@ function makeThread(overrides: Partial<Thread> = {}): Thread {
   };
 }
 
+const baseProps = {
+  channelSlug: "yleinen",
+  anonymousLabel: "Anonymous",
+};
+
 describe("ThreadCard", () => {
   it("renders the thread title", () => {
-    render(ThreadCard, { props: { thread: makeThread() } });
+    render(ThreadCard, { props: { thread: makeThread(), ...baseProps } });
     expect(screen.getByText("Test Thread")).toBeTruthy();
   });
 
   it("links to the thread detail page", () => {
-    render(ThreadCard, { props: { thread: makeThread({ key: "abc" }) } });
+    render(ThreadCard, {
+      props: { thread: makeThread({ key: "abc" }), ...baseProps },
+    });
     const links = screen.getAllByRole("link", { name: /Test Thread/ });
     expect(links.some((link) => link.getAttribute("href") === "/threads/abc")).toBe(true);
   });
 
   it("stamps lang attribute from thread.locale", () => {
     const { container } = render(ThreadCard, {
-      props: { thread: makeThread({ locale: "en" }) },
+      props: { thread: makeThread({ locale: "en" }), ...baseProps },
     });
     const wrapper = container.querySelector("[lang]");
     expect(wrapper?.getAttribute("lang")).toBe("en");
   });
 
-  it("renders a plain-text snippet from markdownContent", () => {
+  it("renders the snippet prop verbatim", () => {
     render(ThreadCard, {
-      props: { thread: makeThread({ markdownContent: "# Heading\n\nSome **bold** text" }) },
+      props: { thread: makeThread(), snippet: "Some bold text", ...baseProps },
     });
-    expect(screen.getByText(/Some bold text/)).toBeTruthy();
+    expect(screen.getByText("Some bold text")).toBeTruthy();
   });
 
-  it("omits the snippet paragraph when markdownContent is empty", () => {
+  it("omits the snippet paragraph when snippet is empty or absent", () => {
     const { container } = render(ThreadCard, {
-      props: { thread: makeThread({ markdownContent: "" }) },
+      props: { thread: makeThread(), snippet: "", ...baseProps },
     });
     const paragraphs = container.querySelectorAll("p");
     // Channel link + byline paragraphs only, no snippet paragraph
@@ -66,47 +73,33 @@ describe("ThreadCard", () => {
     expect(paragraphs[0]?.querySelector("a")).toBeTruthy();
   });
 
-  it("truncates long snippets with ellipsis", () => {
-    const longContent = "A ".repeat(200);
+  it("renders the channel link using the channelSlug prop", () => {
     render(ThreadCard, {
-      props: { thread: makeThread({ markdownContent: longContent }) },
-    });
-    const text = screen.getByText(/\u2026$/);
-    expect(text).toBeTruthy();
-  });
-
-  it("renders a channel link to /channels/{slug}", () => {
-    render(ThreadCard, {
-      props: { thread: makeThread({ channel: "Pelit" }) },
+      props: {
+        thread: makeThread({ channel: "Pelit" }),
+        channelSlug: "pelit",
+        anonymousLabel: "Anonymous",
+      },
     });
     const link = screen.getByRole("link", { name: "Pelit" });
     expect(link.getAttribute("href")).toBe("/channels/pelit");
   });
 
-  it("passes poster as cover to CnCard", () => {
+  it("passes coverUrl to CnCard as the cover image source", () => {
     const { container } = render(ThreadCard, {
-      props: { thread: makeThread({ poster: "https://example.com/poster.jpg" }) },
+      props: {
+        thread: makeThread(),
+        coverUrl: "https://example.com/poster.jpg",
+        ...baseProps,
+      },
     });
     const img = container.querySelector("img");
     expect(img?.getAttribute("src")).toBe("https://example.com/poster.jpg");
   });
 
-  it("falls back to first image when no poster", () => {
+  it("renders no cover image when coverUrl is undefined", () => {
     const { container } = render(ThreadCard, {
-      props: {
-        thread: makeThread({
-          poster: undefined,
-          images: [{ url: "https://example.com/img.jpg", alt: "test" }],
-        }),
-      },
-    });
-    const img = container.querySelector("img");
-    expect(img?.getAttribute("src")).toBe("https://example.com/img.jpg");
-  });
-
-  it("renders no cover image when neither poster nor images exist", () => {
-    const { container } = render(ThreadCard, {
-      props: { thread: makeThread({ poster: undefined, images: [] }) },
+      props: { thread: makeThread(), ...baseProps },
     });
     const img = container.querySelector("img");
     expect(img).toBeNull();
@@ -118,7 +111,7 @@ describe("ThreadCard", () => {
       props: {
         thread: makeThread({ author: "uid-a", owners: ["uid-a"] }),
         authorProfile,
-        anonymousLabel: "Anonymous",
+        ...baseProps,
       },
     });
 
@@ -131,7 +124,7 @@ describe("ThreadCard", () => {
       props: {
         thread: makeThread({ author: "-", owners: ["-"] }),
         authorProfile: null,
-        anonymousLabel: "Anonymous",
+        ...baseProps,
       },
     });
 

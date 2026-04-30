@@ -31,6 +31,13 @@ The Top Threads Stream is the medium (primary) region of the front-page triad. I
   - **Threads:** the most recent **5** public threads, sorted by `flowTime` descending.
   - **Channels:** the channel directory (slug → icon mapping). Cached at module/process level since the channel set changes rarely.
   - **Author profiles:** for each thread, the author profile is resolved via `getProfile(thread.owners[0])` from `@pelilauta/profiles/server`. **The author uid is read from `owners[0]`, not from `thread.author`** — `author` is a v17 legacy denormalization preserved by the schema for storage compatibility, but consumers MUST NOT read it. All resolutions are issued in parallel through `Promise.all` so the 5 reads happen concurrently. The `"-"` sentinel and missing-owner short-circuit to `null` inside `getProfile`; the resulting `Profile | null` is passed to `ThreadCard`'s `authorProfile` prop.
+  - **Per-card derived values:** for each thread, the frontmatter resolves the
+    plain-text snippet (`markdownToPlainText(thread.markdownContent, 220)`),
+    the cover URL (`thread.poster ?? thread.images?.[0]?.url`), the channel
+    icon (`channels.find(c => c.slug === thread.channel)?.icon`), and the
+    channel slug (`thread.channel`, treated as a slug per the v17 data
+    contract). These are passed to `ThreadCard` as discrete props so the
+    component is render-from-props — see [`thread-card.md`](./thread-card.md).
   - Threads + channels are read through `@pelilauta/threads/server` (source: `packages/threads/src/server/`):
     - `getThreads(limit, { order, public })` — generic threads accessor. Defaults: `order = 'flowTime'`, `public = true`. This widget calls `getThreads(5)`.
     - `getChannels()` — full channel directory.
@@ -60,6 +67,7 @@ The Top Threads Stream is the medium (primary) region of the front-page triad. I
 - [ ] `TopThreadsStream.astro` exists at the path above and is mounted into the medium column of the front-page triad.
 - [ ] Renders up to 5 public threads sorted by `flowTime` descending (`getThreads(5)` with default `order` and `public`).
 - [ ] Each thread renders as a `ThreadCard` with title, snippet, channel context, author byline, and a link to `/threads/{key}`.
+- [ ] Per-card data prep happens in this component's frontmatter, not inside `ThreadCard`. For each thread the frontmatter computes `snippet`, `coverUrl`, `channelSlug`, and `channelIcon` and passes them as props.
 - [ ] Author profiles for the rendered threads are resolved upstream of the card via `Promise.all(threads.map(t => getProfile(t.owners[0])))` and passed as the `authorProfile` prop. The author uid is read from `owners[0]`, never from the legacy `author` field. The `anonymousLabel` prop is sourced from `t("profiles:anonymous.nick")`.
 - [ ] Each rendered card has `lang={thread.locale}` on its root element.
 - [ ] A "show more" link to `/channels` is always present, regardless of result count or error state.

@@ -3,6 +3,9 @@
 //
 // Pure SSR: no client: directives, no <style>, no inline styles.
 // Errors are isolated — a Firestore failure renders the error block, not a 5xx.
+// Per ARCHITECTURE.md SSR Data Flow: snippet, cover, channel slug/icon, and
+// author profiles are resolved here in the frontmatter and passed to
+// ThreadCard as props. ThreadCard is a render-from-props component.
 // See specs/pelilauta/front-page/top-threads-stream/spec.md.
 
 import { getProfile, type Profile } from "@pelilauta/profiles/server";
@@ -10,6 +13,7 @@ import { ThreadCard } from "@pelilauta/threads/components";
 import type { Channel, Thread } from "@pelilauta/threads/server";
 import { getChannels, getThreads } from "@pelilauta/threads/server";
 import { logError } from "@pelilauta/utils/log";
+import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
 import { t } from "../../i18n";
 
 let threads: Thread[] = [];
@@ -44,10 +48,26 @@ if (!error) {
 
 const anonymousLabel = t("profiles:anonymous.nick");
 
-function channelIcon(channelSlug: string): string | undefined {
-  const channel = channels.find((c) => c.slug === channelSlug);
-  return channel?.icon;
+interface ThreadCardData {
+  thread: Thread;
+  snippet: string;
+  coverUrl?: string;
+  channelSlug: string;
+  channelIcon?: string;
+  authorProfile: Profile | null;
 }
+
+const cards: ThreadCardData[] = threads.map((thread, i) => {
+  const channel = channels.find((c) => c.slug === thread.channel);
+  return {
+    thread,
+    snippet: markdownToPlainText(thread.markdownContent || "", 220),
+    coverUrl: thread.poster ?? thread.images?.[0]?.url,
+    channelSlug: thread.channel,
+    channelIcon: channel?.icon,
+    authorProfile: authorProfiles[i] ?? null,
+  };
+});
 ---
 
 <div>
@@ -58,11 +78,14 @@ function channelIcon(channelSlug: string): string | undefined {
   <div class="cn-card-grid">
     {
       !error &&
-        threads.map((thread, i) => (
+        cards.map((card) => (
           <ThreadCard
-            thread={thread}
-            noun={channelIcon(thread.channel)}
-            authorProfile={authorProfiles[i] ?? null}
+            thread={card.thread}
+            snippet={card.snippet}
+            coverUrl={card.coverUrl}
+            channelSlug={card.channelSlug}
+            channelIcon={card.channelIcon}
+            authorProfile={card.authorProfile}
             anonymousLabel={anonymousLabel}
           />
         ))
