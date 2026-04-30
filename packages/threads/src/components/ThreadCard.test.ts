@@ -31,6 +31,7 @@ function makeThread(overrides: Partial<Thread> = {}): Thread {
 
 const baseProps = {
   channelSlug: "yleinen",
+  channelLinkLabel: "In Yleinen",
   anonymousLabel: "Anonymous",
 };
 
@@ -73,15 +74,16 @@ describe("ThreadCard", () => {
     expect(paragraphs[0]?.querySelector("a")).toBeTruthy();
   });
 
-  it("renders the channel link using the channelSlug prop", () => {
+  it("renders the channel link with the channelLinkLabel and channelSlug props", () => {
     render(ThreadCard, {
       props: {
-        thread: makeThread({ channel: "Pelit" }),
+        thread: makeThread({ channel: "pelit" }),
         channelSlug: "pelit",
+        channelLinkLabel: "In Pelit",
         anonymousLabel: "Anonymous",
       },
     });
-    const link = screen.getByRole("link", { name: "Pelit" });
+    const link = screen.getByRole("link", { name: "In Pelit" });
     expect(link.getAttribute("href")).toBe("/channels/pelit");
   });
 

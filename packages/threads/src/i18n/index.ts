@@ -8,8 +8,9 @@ import type { NestedTranslation } from "@pelilauta/i18n";
 
 export const fi: Record<string, NestedTranslation> = {
   title: "Keskustelut",
-  card: {
-    inChannel: "Aiheessa ",
+  thread: {
+    inChannel: "Aiheessa {topic}",
+    replyCount: "{count} vastausta",
   },
   channel: {
     threadCount: "{count} ketjua",
@@ -18,8 +19,9 @@ export const fi: Record<string, NestedTranslation> = {
 
 export const en: Record<string, NestedTranslation> = {
   title: "Discussions",
-  card: {
-    inChannel: "In ",
+  thread: {
+    inChannel: "In {topic}",
+    replyCount: "{count} replies",
   },
   channel: {
     threadCount: "{count} threads",

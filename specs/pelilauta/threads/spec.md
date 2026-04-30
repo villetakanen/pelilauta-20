@@ -185,7 +185,9 @@ The `./i18n` sub-export ships only static locale data — no runtime, no side ef
   English: "Discussions". Owned here (not in the host) so every consumer
   — including sub-apps that aren't the main Pelilauta host — reads the
   same label.
-- `threads:card.inChannel` — label preceding a channel link on a thread card.
+- `threads:thread.inChannel` — cross-surface "in {topic}" phrase about a Thread (used in cards, the detail page, summaries, search results). Finnish: "Aiheessa {topic}". English: "In {topic}". The `{topic}` substitution receives the channel display name resolved upstream.
+- `threads:thread.replyCount` — localized form of `Thread.replyCount`. Finnish: "{count} vastausta". English: "{count} replies". `{count}` substitution.
+- `threads:channel.threadCount` — localized form of `Channel.threadCount`. Finnish: "{count} ketjua". English: "{count} threads". `{count}` substitution.
 
 Front-page "show more" and error strings are app-level concerns, owned by the host (`pelilauta:action.showMore`, `pelilauta:error.fetch`), not by the threads package.
 

@@ -32,10 +32,11 @@ frontmatter; ThreadCard renders synchronously from the prepared values.
 - **Props:**
   ```ts
   {
-    thread: Thread;            // for title, key, locale, channel display name
+    thread: Thread;            // for title, key, locale (channel name read from props, not thread.channel)
     snippet?: string;          // pre-rendered plain-text body preview
     coverUrl?: string;         // pre-resolved cover image URL
     channelSlug: string;       // pre-resolved channel slug for the link href
+    channelLinkLabel: string;  // pre-rendered link text (e.g. "Aiheessa Pelit" / "In Pelit") via t("threads:thread.inChannel", { topic })
     channelIcon?: string;      // pre-resolved icon noun, omitted when unknown
     authorProfile?: Profile | null;
     anonymousLabel: string;    // required — no English default in code
@@ -57,8 +58,8 @@ frontmatter; ThreadCard renders synchronously from the prepared values.
     if the consumer supplied `channelIcon`, CnCard renders it next to the
     title (or on the cover, if a cover is present).
   - **Body (`.card-info`):** channel link (`<a href="/channels/{channelSlug}">`
-    around `thread.channel`), the snippet `<p>` if `snippet` is non-empty, and
-    the byline `<p>` composed via `ProfileLink`.
+    wrapping `channelLinkLabel`), the snippet `<p>` if `snippet` is non-empty,
+    and the byline `<p>` composed via `ProfileLink`.
 - **Interactivity model:** the card is multi-link — the title and (optional)
   cover image link to `/threads/{thread.key}` via CnCard's `href`; the channel
   name links to `/channels/{channelSlug}`; the byline links to
@@ -93,27 +94,29 @@ frontmatter; ThreadCard renders synchronously from the prepared values.
       and `anonymousLabel: string` passed in from the rendering page.
       ThreadCard itself never emits a bare `<a>` or `<span>` for the byline.
 - [ ] The title and optional cover image link to `/threads/{thread.key}`; the
-      channel name links to `/channels/{channelSlug}`; the card root is not a
-      link.
+      channel link uses `channelLinkLabel` as its text and links to
+      `/channels/{channelSlug}`; the card root is not a link.
 - [ ] The card's outermost element carries `lang={thread.locale}` for DOM
       content-locale stamping.
 
 ### Regression Guardrails
 
-- ThreadCard MUST NOT wrap its entire body in a single `<a>` (the
-  card-as-button anti-pattern). Granular link targets are part of the
-  interactivity contract.
-- The byline MUST go through `ProfileLink` for both the resolved-profile and
-  anonymous cases. Bare `<a>` / `<span>` byline markup is a regression.
-- ThreadCard MUST NOT import `getProfile`, `markdownToPlainText`, or any
-  derivation utility. All inputs are pre-resolved upstream; the component is
-  pure render-from-props.
-- The author uid is read by the upstream consumer from `thread.owners[0]`,
-  never from the legacy `thread.author` field. ThreadCard's contract
-  presupposes the consumer follows that rule.
-- `anonymousLabel` is a required prop with no in-component default.
-  Hard-coding an English fallback ("Anonymous") would emit untranslated text
-  in a Finnish-default app if a consumer forgot the prop.
+- The card body composes multiple discrete link targets (title via `CnCard`'s
+  `href`, channel via `<a>`, byline via `ProfileLink`). Wrapping the whole
+  body in a single `<a>` is the card-as-button anti-pattern and is a
+  regression.
+- The byline is delegated entirely to `ProfileLink` for both the
+  resolved-profile and anonymous cases; ThreadCard never emits byline markup
+  directly.
+- Imports limited to `CnCard`, `ProfileLink`, and the `Thread` / `Profile`
+  types. Derivation utilities (`getProfile`, `markdownToPlainText`, slug
+  computation, image fallback chains) live upstream; ThreadCard is pure
+  render-from-props.
+- The author uid is read by the upstream consumer from `thread.owners[0]`.
+  ThreadCard's contract presupposes the consumer follows that rule.
+- `anonymousLabel` is a required prop with no default. The required-prop
+  semantics fail loudly at type-check if a consumer forgets, preventing
+  untranslated fallback text from leaking into a non-English locale.
 
 ### Testing Scenarios
 
@@ -171,12 +174,12 @@ And no <a> element is emitted for the byline
    `Thread` data and ships from the threads package's build. This mirrors
    the pattern channels uses for `ChannelInfoRow.astro` (code in threads,
    contract under channels).
-3. **DS-vs-domain split.** Slot mechanics, elevation, border-radius,
-   typography, and other structural primitives are `CnCard`'s contract.
-   Whether/how ThreadCard consumes them is this spec's contract. A "missing
-   v17 visual feature" lands in this spec only when the resolution is a
-   ThreadCard consumption choice; if the resolution requires a new DS
-   primitive, it escalates to `specs/cyan-ds/` instead.
+3. **DS-vs-domain split.** Per [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md)
+   §DS-vs-domain boundary. ThreadCard is domain-shaped because its API names
+   `Thread`, `Channel`, and `Profile`; `CnCard`'s slots, tokens, and
+   structural primitives are the DS contract. A "missing v17 visual feature"
+   lands in this spec when the resolution is a ThreadCard consumption choice;
+   if it requires a new DS primitive, it escalates to `specs/cyan-ds/`.
 4. **Render-from-props boundary.** Any data derivation (markdown rendering,
    image fallback chains, slug computation, profile lookups) lives in the
    consumer's frontmatter, not in ThreadCard. This keeps the component

@@ -9,6 +9,7 @@ let {
   snippet,
   coverUrl,
   channelSlug,
+  channelLinkLabel,
   channelIcon,
   authorProfile = null,
   anonymousLabel,
@@ -17,6 +18,7 @@ let {
   snippet?: string;
   coverUrl?: string;
   channelSlug: string;
+  channelLinkLabel: string;
   channelIcon?: string;
   authorProfile?: Profile | null;
   anonymousLabel: string;
@@ -31,7 +33,7 @@ let {
     noun={channelIcon}
     elevation={1}
   >
-    <p><a href={`/channels/${channelSlug}`}>{thread.channel}</a></p>
+    <p><a href={`/channels/${channelSlug}`}>{channelLinkLabel}</a></p>
     {#if snippet}
       <p>{snippet}</p>
     {/if}

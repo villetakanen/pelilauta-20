@@ -23,6 +23,8 @@ Equivalent comment styles for languages that don't accept `//`:
 
 Multiple `Verifies:` lines in one artifact are fine; a single test or rule can cover several scenarios.
 
+A `Verifies:` tag is a claim that the artifact fails when the scenario's Then-clause is violated. Tagging an artifact that can't reach the scenario's Given (e.g. an e2e against live data with no fault-injection seam, or a `<=N` assertion claiming coverage of an `===N` Then-clause) is itself a contract violation, even though `pnpm spec:coverage` only checks tag→scenario lookups and won't catch it.
+
 ## Tooling
 
 - `pnpm spec:coverage` walks `specs/**/spec.md` for `#### Scenario: <name>` headings, walks the codebase for `Verifies:` tags, reads the registry below, and prints the inverse map. It exits non-zero on **orphan tags** (an artifact pointing at a scenario that doesn't exist — usually a typo or a renamed heading). It does NOT currently fail on uncovered scenarios; that's intentional during the rollout while legacy specs still use the old `**Vitest Unit Test:**` / `**Playwright E2E Test:**` slots.

@@ -1,4 +1,5 @@
 // E2E: Top Threads Stream — specs/pelilauta/front-page/top-threads-stream/spec.md
+// Verifies: specs/pelilauta/front-page/top-threads-stream/spec.md §Each card stamps the thread's content locale
 //
 // These tests run against the built site (pnpm preview). Thread data comes
 // from the dev Firebase project — the exact count depends on what's in the
