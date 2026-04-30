@@ -18,6 +18,7 @@ Aligned with the ASDLC Spec Engineer recipe (https://asdlc.io/recipes/spec-engin
 
 ### 1. Context loading
 
+- Read `ARCHITECTURE.md` — canonical record for the component model, SSR data-flow rules, and ADR index. This is mandatory; the inline summary in step 4 below is a convenience digest only and may lag.
 - Read `specs/TEMPLATE.md` — the spec MUST use its structure exactly, filling in test-mapping lines. Omit sections that add no information; do not invent new ones.
 - If updating, read the existing spec first.
 - Read parent specs along the path (e.g. `specs/cyan-ds/spec.md` when writing `specs/cyan-ds/tokens/spec.md`).
