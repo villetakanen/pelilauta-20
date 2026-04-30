@@ -1,9 +1,27 @@
+> **File and folder organization.** A spec's location reflects its shape:
+>
+> - **Feature = folder containing `spec.md`.**
+> - **Sub-spec of a feature = flat `<name>.md` sibling of `spec.md`.** Use this
+>   when a component, aspect, or sub-system deserves its own contract but is
+>   not a feature in its own right.
+> - **Sub-feature = subfolder with its own `spec.md`.** Use this when the
+>   sub-system could plausibly own further sub-specs of its own.
+>
+> Examples in this repo: `front-page/top-threads-stream/thread-card.md`
+> (component sub-spec — ThreadCard belongs to the stream, isn't a feature on
+> its own); `channels/channel-page/spec.md` (sub-feature — its own route, its
+> own future sub-specs).
+>
+> Deciding question: *could this thing plausibly own its own sub-specs?*
+> Yes → subfolder. No → flat sibling.
+
 ---
 feature: [Feature Name]
 status: [draft | alpha | stable | deprecated]
 maturity: [design | implementation | verified]
 last_major_review: 2026-04-25
-# [Optional] Link to the parent specification if this is a sub-feature
+# [Optional] Link to the parent spec for sub-specs and sub-features.
+# Flat sibling: `./spec.md`. Subfolder child: `../spec.md`.
 parent_spec: [Path to parent spec.md]
 # [Optional] URL to the Living Style Book (Required for Design System features)
 stylebook_url: [https://...]

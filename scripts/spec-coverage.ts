@@ -67,7 +67,8 @@ function walk(dir: string, out: string[] = []): string[] {
 function collectScenarios(): Scenario[] {
   const out: Scenario[] = [];
   for (const file of walk(SPEC_GLOB_ROOT)) {
-    if (!file.endsWith("spec.md")) continue;
+    if (extname(file) !== ".md") continue;
+    if (file === REGISTRY_FILE) continue;
     const lines = readFileSync(file, "utf8").split("\n");
     const relPath = relative(ROOT, file);
     for (const line of lines) {

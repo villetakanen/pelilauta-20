@@ -43,7 +43,7 @@ packages/threads/
     server/                  → SSR-safe re-exports (schemas, types, read-only fetches)
     client/                  → Client-only exports (writes, listeners, interactive UI)
     components/              → Svelte 5 / Astro UI components
-      ThreadCard.svelte      → preview card used in lists/streams (built on cn-card, plain-text snippet truncated to 220 characters)
+      ThreadCard.svelte      → preview card used by TopThreadsStream; contract at front-page/top-threads-stream/thread-card.md
       ThreadDetail.svelte    → full thread view with metadata
       ThreadEditor.svelte    → create/edit form (title, content, channel, tags, files)
       DiscussionSection.svelte → reply list with real-time Firestore listener
@@ -243,7 +243,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `getReplies(threadKey)` returns `Reply[]` sorted by `createdAt` ascending
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
-- [ ] `ThreadCard.svelte` renders a thread as a card built on `cn-card` with a plain-text snippet (max 220 characters, truncated with ellipsis at word boundary). The author byline composes `ProfileLink` from `@pelilauta/profiles/components`, with `authorProfile?: Profile | null` and `anonymousLabel: string` passed in from the rendering page. No bare `<a>` / `<span>` byline markup.
+- [ ] `ThreadCard.svelte` exists at `packages/threads/src/components/ThreadCard.svelte` for use by the TopThreadsStream feature; rendering contract is owned by `specs/pelilauta/front-page/top-threads-stream/thread-card.md`.
 - [ ] `ThreadDetail.svelte` renders a read-only thread (title, channel link, anonymous-aware byline, cover image, body) given `{ thread, bodyHtml }`. Markdown rendering happens upstream in the page's Astro frontmatter — the component is synchronous and SSR-pure. `ThreadDetail` deliberately uses bare semantic HTML (`<article>/<h1>/<p>/<img>/<section>`) rather than composing DS primitives: Cyan has no detail-shell primitive yet (`CnArticle`/`CnReadingPane` not yet specced), so the AGENTS.md "compose DS primitives underneath" rule is satisfied vacuously. When/if such a primitive lands in `specs/cyan-ds/`, `ThreadDetail` migrates to it.
 - [ ] `app/pelilauta/src/pages/threads/[threadKey]/index.astro` wires the read-only detail page: SSR-only (no `client:` directives), calls `getThread(threadKey)` and `markdownToHTML(thread.markdownContent)` upstream of `<ThreadDetail>`, handles missing-thread → 404, isolates Firestore failures behind a `pelilauta:error.fetch` block (HTTP 200), and uses the host `<Page>` wrapper. Front-page `ThreadCard` links resolve to a real, non-404 page.
 - [ ] `server/` entry still has zero client SDK imports now that it carries real content
@@ -369,26 +369,6 @@ And undefined is not returned
 ```
 
 - **Vitest Unit Test:** `packages/threads/src/api/getThread.test.ts`
-
-#### Scenario: ThreadCard composes ProfileLink for the author byline
-
-```gherkin
-Given a Thread with author "uid-a"
-And authorProfile = { key: "uid-a", nick: "Ada", username: "ada" }
-And anonymousLabel = "Anonymous"
-When ThreadCard is rendered
-Then the byline contains a ProfileLink that emits <a href="/profiles/uid-a">Ada</a>
-And no bare <a> or <span> byline markup is emitted directly by ThreadCard
-
-Given a Thread with author "-"
-And authorProfile = null
-And anonymousLabel = "Anonymous"
-When ThreadCard is rendered
-Then the byline contains a ProfileLink that emits <span>Anonymous</span>
-And no <a> element is emitted for the byline
-```
-
-- **Vitest Unit Test:** `packages/threads/src/components/ThreadCard.test.ts`
 
 #### Scenario: ThreadDetail renders a read-only thread
 

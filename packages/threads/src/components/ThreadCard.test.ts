@@ -1,5 +1,5 @@
-// ThreadCard component tests — specs/pelilauta/threads/spec.md
-// Verifies: specs/pelilauta/threads/spec.md §ThreadCard composes ProfileLink for the author byline
+// ThreadCard component tests — specs/pelilauta/front-page/top-threads-stream/thread-card.md
+// Verifies: specs/pelilauta/front-page/top-threads-stream/thread-card.md §ThreadCard composes ProfileLink for the author byline
 
 import type { Profile } from "@pelilauta/profiles/server";
 import { cleanup, render, screen } from "@testing-library/svelte";

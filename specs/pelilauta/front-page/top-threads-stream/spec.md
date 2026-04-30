@@ -1,8 +1,8 @@
 ---
 feature: Top Threads Stream
 status: stable
-maturity: verified
-last_major_review: 2026-04-25
+maturity: implementation
+last_major_review: 2026-04-30
 parent_spec: ../spec.md
 ---
 
@@ -22,9 +22,11 @@ The Top Threads Stream is the medium (primary) region of the front-page triad. I
 ### Architecture
 
 - **Component:** `app/pelilauta/src/components/front-page/TopThreadsStream.astro` — Astro component, server-rendered in the page's frontmatter, mounted into the medium column of `cn-content-triad` on the front page.
+- **Sub-specs:**
+  - [`thread-card.md`](./thread-card.md) — the per-row `ThreadCard` component contract (rendering, byline composition, v17-parity migration debt).
 - **Sub-components:**
-  - `ThreadCard` from `@pelilauta/threads` (Svelte 5 component) — renders an individual thread preview as a `cn-card` from the DS, including the author byline (composed via `ProfileLink`).
-  - `cn-card` from `@cyan` — DS card primitive (used via `ThreadCard`).
+  - `ThreadCard` from `@pelilauta/threads` (Svelte 5 component) — renders an individual thread preview as a `CnCard` from the DS, including the author byline (composed via `ProfileLink`). Contract owned by [`thread-card.md`](./thread-card.md).
+  - `CnCard` from `@cyan` — DS card primitive (used via `ThreadCard`).
 - **Data sources** (resolved in the Astro frontmatter):
   - **Threads:** the most recent **5** public threads, sorted by `flowTime` descending.
   - **Channels:** the channel directory (slug → icon mapping). Cached at module/process level since the channel set changes rarely.
