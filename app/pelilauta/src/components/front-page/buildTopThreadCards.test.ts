@@ -44,9 +44,11 @@ const fakeT: TFn = (key: string, subs?: LocaleSubstitutions) => {
   return key;
 };
 
+const DEFAULT_LOCALE = "en";
+
 describe("buildTopThreadCards", () => {
   it("returns an empty array when threads is empty", () => {
-    expect(buildTopThreadCards([], [yleinenChannel], [], fakeT)).toEqual([]);
+    expect(buildTopThreadCards([], [yleinenChannel], [], DEFAULT_LOCALE, fakeT)).toEqual([]);
   });
 
   it("preserves caller-controlled order across the mapping", () => {
@@ -55,18 +57,36 @@ describe("buildTopThreadCards", () => {
       makeThread({ key: "b", flowTime: 2 }),
       makeThread({ key: "c", flowTime: 1 }),
     ];
-    const cards = buildTopThreadCards(threads, [yleinenChannel], [null, null, null], fakeT);
+    const cards = buildTopThreadCards(
+      threads,
+      [yleinenChannel],
+      [null, null, null],
+      DEFAULT_LOCALE,
+      fakeT,
+    );
     expect(cards.map((c) => c.thread.key)).toEqual(["a", "b", "c"]);
   });
 
   it("emits one card per thread (5 in → 5 out)", () => {
     const threads = Array.from({ length: 5 }, (_, i) => makeThread({ key: `t${i}` }));
-    const cards = buildTopThreadCards(threads, [yleinenChannel], Array(5).fill(null), fakeT);
+    const cards = buildTopThreadCards(
+      threads,
+      [yleinenChannel],
+      Array(5).fill(null),
+      DEFAULT_LOCALE,
+      fakeT,
+    );
     expect(cards).toHaveLength(5);
   });
 
   it("resolves channelIcon from the matching channel", () => {
-    const cards = buildTopThreadCards([makeThread()], [yleinenChannel], [null], fakeT);
+    const cards = buildTopThreadCards(
+      [makeThread()],
+      [yleinenChannel],
+      [null],
+      DEFAULT_LOCALE,
+      fakeT,
+    );
     expect(cards[0].channelIcon).toBe("discussion");
   });
 
@@ -75,13 +95,20 @@ describe("buildTopThreadCards", () => {
       [makeThread({ channel: "ghost" })],
       [yleinenChannel],
       [null],
+      DEFAULT_LOCALE,
       fakeT,
     );
     expect(cards[0].channelIcon).toBeUndefined();
   });
 
   it("substitutes channel.name into the link label when the channel resolves", () => {
-    const cards = buildTopThreadCards([makeThread()], [yleinenChannel], [null], fakeT);
+    const cards = buildTopThreadCards(
+      [makeThread()],
+      [yleinenChannel],
+      [null],
+      DEFAULT_LOCALE,
+      fakeT,
+    );
     expect(cards[0].channelLinkLabel).toBe("In Yleinen");
   });
 
@@ -90,6 +117,7 @@ describe("buildTopThreadCards", () => {
       [makeThread({ channel: "ghost" })],
       [yleinenChannel],
       [null],
+      DEFAULT_LOCALE,
       fakeT,
     );
     expect(cards[0].channelLinkLabel).toBe("In ghost");
@@ -101,6 +129,7 @@ describe("buildTopThreadCards", () => {
       [makeThread({ channel: "yleinen" }), makeThread({ channel: "ghost" })],
       [yleinenChannel],
       [null, null],
+      DEFAULT_LOCALE,
       tSpy,
     );
     expect(tSpy).toHaveBeenCalledWith("threads:thread.inChannel", { topic: "Yleinen" });
@@ -112,6 +141,7 @@ describe("buildTopThreadCards", () => {
       [makeThread({ poster: "https://example.com/poster.jpg" })],
       [yleinenChannel],
       [null],
+      DEFAULT_LOCALE,
       fakeT,
     );
     expect(cards[0].coverUrl).toBe("https://example.com/poster.jpg");
@@ -122,6 +152,7 @@ describe("buildTopThreadCards", () => {
       [makeThread({ images: [{ url: "https://example.com/img.jpg", alt: "" }] })],
       [yleinenChannel],
       [null],
+      DEFAULT_LOCALE,
       fakeT,
     );
     expect(cards[0].coverUrl).toBe("https://example.com/img.jpg");
@@ -133,6 +164,7 @@ describe("buildTopThreadCards", () => {
       [makeThread(), makeThread({ key: "t2" })],
       [yleinenChannel],
       [profile, null],
+      DEFAULT_LOCALE,
       fakeT,
     );
     expect(cards[0].authorProfile).toBe(profile);
@@ -144,10 +176,64 @@ describe("buildTopThreadCards", () => {
       [makeThread({ markdownContent: "# Title\n\nBody **bold** text." })],
       [yleinenChannel],
       [null],
+      DEFAULT_LOCALE,
       fakeT,
     );
     expect(cards[0].snippet).toContain("Title");
     expect(cards[0].snippet).toContain("Body");
     expect(cards[0].snippet).not.toContain("**");
+  });
+
+  it("emits a dateLabel string for each card", () => {
+    const cards = buildTopThreadCards(
+      [makeThread()],
+      [yleinenChannel],
+      [null],
+      DEFAULT_LOCALE,
+      fakeT,
+    );
+    expect(typeof cards[0].dateLabel).toBe("string");
+    expect(cards[0].dateLabel.length).toBeGreaterThan(0);
+  });
+
+  it("dateLabel is ISO YYYY-MM-DD for a flowTime older than 72 hours", () => {
+    const oldTime = Date.now() - 4 * 24 * 60 * 60 * 1000; // 4 days ago
+    const cards = buildTopThreadCards(
+      [makeThread({ flowTime: oldTime })],
+      [yleinenChannel],
+      [null],
+      "en",
+      fakeT,
+    );
+    expect(cards[0].dateLabel).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it("dateLabel is a relative string (not ISO) for a flowTime within the last 72 hours", () => {
+    const recentTime = Date.now() - 2 * 60 * 60 * 1000; // 2 hours ago
+    const cards = buildTopThreadCards(
+      [makeThread({ flowTime: recentTime })],
+      [yleinenChannel],
+      [null],
+      "en",
+      fakeT,
+    );
+    // Should NOT match ISO date pattern
+    expect(cards[0].dateLabel).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    // Should be a non-empty string
+    expect(cards[0].dateLabel.length).toBeGreaterThan(0);
+  });
+
+  it("dateLabel uses the relative branch at the 72-hour boundary", () => {
+    // Exactly 72h ago, with a small subtraction to stay strictly inside the
+    // ≤ 72 inclusive bound after Math.abs and floating-point rounding.
+    const boundaryTime = Date.now() - 72 * 60 * 60 * 1000 + 1;
+    const cards = buildTopThreadCards(
+      [makeThread({ flowTime: boundaryTime })],
+      [yleinenChannel],
+      [null],
+      "en",
+      fakeT,
+    );
+    expect(cards[0].dateLabel).not.toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 });

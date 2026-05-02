@@ -15,6 +15,7 @@ Utilities provide reusable CSS classes for layout, typography, and visual concep
 - [Elevation](elevation/spec.md) — visual depth and surface z-axis grouping
 - [Visually Hidden](visually-hidden/spec.md) — `.sr-only` accessibility utility
 - [Text Caption](text-caption/spec.md) — `.text-caption` uppercase label typography
+- [Flex](flex/spec.md) — `.flex-grow` and `.flex-none` flex-item primitives
 
 ## Contract
 

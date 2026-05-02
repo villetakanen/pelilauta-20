@@ -1,7 +1,8 @@
-// ThreadCard component tests — specs/pelilauta/front-page/top-threads-stream/thread-card.md
-// Verifies:
-//   §ThreadCard composes ProfileLink for the author byline
-//   §ThreadCard composes the channel link into CnCard's eyebrow slot
+// ThreadCard component tests
+// Verifies: specs/pelilauta/front-page/top-threads-stream/thread-card.md §ThreadCard composes ProfileLink for the author byline in the actions slot
+// Verifies: specs/pelilauta/front-page/top-threads-stream/thread-card.md §ThreadCard composes the channel link into CnCard's eyebrow slot
+// Verifies: specs/pelilauta/front-page/top-threads-stream/thread-card.md §ThreadCard renders dateLabel beside the byline
+// Verifies: specs/pelilauta/front-page/top-threads-stream/thread-card.md §ThreadCard renders the reply-count link
 
 import type { Profile } from "@pelilauta/profiles/server";
 import { cleanup, render, screen } from "@testing-library/svelte";
@@ -35,6 +36,7 @@ const baseProps = {
   channelSlug: "yleinen",
   channelLinkLabel: "In Yleinen",
   anonymousLabel: "Anonymous",
+  dateLabel: "2026-04-30",
 };
 
 describe("ThreadCard", () => {
@@ -70,9 +72,13 @@ describe("ThreadCard", () => {
     const { container } = render(ThreadCard, {
       props: { thread: makeThread(), snippet: "", ...baseProps },
     });
-    const paragraphs = container.querySelectorAll("p");
-    // Byline paragraph only; channel link lives in the eyebrow slot, not a <p>.
-    expect(paragraphs.length).toBe(1);
+    // Byline p is in nav.actions, not .card-info — so .card-info should have no <p>
+    const cardInfo = container.querySelector(".card-info");
+    const paragraphsInCardInfo = cardInfo?.querySelectorAll("p") ?? [];
+    expect(paragraphsInCardInfo.length).toBe(0);
+    // Byline <p> should still exist in nav.actions
+    const actionsP = container.querySelector("nav.actions p");
+    expect(actionsP).not.toBeNull();
   });
 
   it("renders the channel link inside CnCard's eyebrow slot, not a <p>", () => {
@@ -82,6 +88,7 @@ describe("ThreadCard", () => {
         channelSlug: "pelit",
         channelLinkLabel: "In Pelit",
         anonymousLabel: "Anonymous",
+        dateLabel: "2026-04-30",
       },
     });
     const eyebrow = container.querySelector(".eyebrow");
@@ -98,6 +105,7 @@ describe("ThreadCard", () => {
         channelSlug: "pelit",
         channelLinkLabel: "In Pelit",
         anonymousLabel: "Anonymous",
+        dateLabel: "2026-04-30",
       },
     });
     const link = screen.getByRole("link", { name: "In Pelit" });
@@ -150,5 +158,70 @@ describe("ThreadCard", () => {
     expect(screen.getByText("Anonymous")).toBeTruthy();
     const profileLinks = container.querySelectorAll('a[href^="/profiles/"]');
     expect(profileLinks.length).toBe(0);
+  });
+
+  it("renders dateLabel as the second line of the byline paragraph", () => {
+    const { container } = render(ThreadCard, {
+      props: { thread: makeThread(), ...baseProps, dateLabel: "2 days ago" },
+    });
+    const actionsP = container.querySelector("nav.actions p");
+    expect(actionsP).not.toBeNull();
+    // Must contain a <br> element
+    expect(actionsP?.querySelector("br")).not.toBeNull();
+    // Must contain the dateLabel text
+    expect(actionsP?.textContent).toContain("2 days ago");
+  });
+
+  it("renders the reply-count link in the actions slot", () => {
+    const { container } = render(ThreadCard, {
+      props: {
+        thread: makeThread({ key: "thread-a", replyCount: 4 }),
+        ...baseProps,
+      },
+    });
+    const link = container.querySelector('nav.actions a[href="/threads/thread-a"]');
+    expect(link).not.toBeNull();
+    expect(link?.textContent).toContain("4");
+  });
+
+  it("renders the reply-count link with 0 when replyCount is undefined", () => {
+    const { container } = render(ThreadCard, {
+      props: {
+        thread: makeThread({ key: "thread-b", replyCount: undefined }),
+        ...baseProps,
+      },
+    });
+    const link = container.querySelector('nav.actions a[href="/threads/thread-b"]');
+    expect(link).not.toBeNull();
+    expect(link?.textContent).toContain("0");
+  });
+
+  it("the reply-count link target has no anchor and no query string", () => {
+    const { container } = render(ThreadCard, {
+      props: {
+        thread: makeThread({ key: "thread-a", replyCount: 4 }),
+        ...baseProps,
+      },
+    });
+    const link = container.querySelector('nav.actions a[href="/threads/thread-a"]');
+    const href = link?.getAttribute("href") ?? "";
+    expect(href).toBe("/threads/thread-a");
+    expect(href).not.toContain("#");
+    expect(href).not.toContain("?");
+  });
+
+  it("places the byline and reply-count as direct children of nav.actions", () => {
+    const { container } = render(ThreadCard, {
+      props: {
+        thread: makeThread({ key: "thread-a", replyCount: 4 }),
+        ...baseProps,
+      },
+    });
+    const nav = container.querySelector("nav.actions");
+    expect(nav).not.toBeNull();
+    const directChildren = Array.from(nav?.children ?? []);
+    expect(directChildren).toHaveLength(2);
+    expect(directChildren[0].tagName.toLowerCase()).toBe("p");
+    expect(directChildren[1].tagName.toLowerCase()).toBe("a");
   });
 });

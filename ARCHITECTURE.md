@@ -91,6 +91,24 @@ The repo is a single pnpm workspace organised into five tiers. Each tier has a p
 
 **Does not own:** routing (host), HTTP shell on API endpoints (host), structural primitives (cyan), or cross-cutting infrastructure (firebase, utils, models, i18n engine).
 
+#### Module independence and sub-shapes
+
+Every tier-4 package is independently addable: it owns its own schemas, accessors, and components, and never imports from another tier-4 package. `threads` does not import from `profiles`; `profiles` does not import from `auth` (auth is tier 5). The host — or a tier-4 component composing another tier-4 component at a call site — wires them together by passing the necessary identifiers as props.
+
+Within tier 4 there are two sub-shapes:
+
+- **First-class entry modules** — `packages/threads`, `packages/profiles`, future `packages/sites`. Each owns a Firestore collection, a route hierarchy under `app/pelilauta/src/pages/`, schemas for its entries, and components for rendering them. These are the verticals.
+- **Attached modules** (future) — `packages/reactions`, `packages/subscriptions`. They operate generically over any entry, accepting `(entryKey, entryType)` as their integration surface. They do not own a route hierarchy; their components mount inside other packages' rendering surfaces (for example, a reaction button inside `ThreadCard`'s actions slot). They never reach into a first-class entry's schema.
+
+The deciding test for a new tier-4 module:
+
+- Does it own a route hierarchy and a Firestore collection of its own? → First-class.
+- Does it augment *any* entry without caring which kind? → Attached.
+
+The integration direction for attached modules is one-way: a first-class entry's component imports an attached module's component and passes it the entry key + type. The attached module does not import or know about the entry-specific package. This keeps reactions / subscriptions plug-and-play across `threads`, `profiles`, `sites`, and any future entry type.
+
+Profiles is a first-class module despite the surface overlap with auth. Profiles owns the public-facing metadata for a uid (nick, avatar, bio); auth (tier 5) owns sessions, claims, and the identity boundary. The two are separate and neither imports the other.
+
 ### 5. Infrastructure (cross-cutting) packages — `packages/firebase`, `packages/models`, `packages/utils`, `packages/i18n`, `packages/auth`
 
 **Owns:** services consumed by both the host and domain packages. `firebase` initialises admin and client SDKs; `models` ships shared Zod schemas; `utils` ships pure helpers (logger, markdown transforms); `i18n` ships the translation engine; `auth` ships the auth machinery (session store, `authedFetch`, login/logout islands, `AuthHandler`/`AuthChrome`).

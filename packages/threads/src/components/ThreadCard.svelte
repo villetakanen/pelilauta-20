@@ -1,5 +1,6 @@
 <script lang="ts">
 import CnCard from "@cyan/components/CnCard.svelte";
+import CnIcon from "@cyan/components/CnIcon.svelte";
 import { ProfileLink } from "@pelilauta/profiles/components";
 import type { Profile } from "@pelilauta/profiles/server";
 import type { Thread } from "../schemas/ThreadSchema";
@@ -13,6 +14,7 @@ let {
   channelIcon,
   authorProfile = null,
   anonymousLabel,
+  dateLabel,
 }: {
   thread: Thread;
   snippet?: string;
@@ -22,6 +24,7 @@ let {
   channelIcon?: string;
   authorProfile?: Profile | null;
   anonymousLabel: string;
+  dateLabel: string;
 } = $props();
 </script>
 
@@ -39,6 +42,9 @@ let {
     {#if snippet}
       <p>{snippet}</p>
     {/if}
-    <p><ProfileLink profile={authorProfile} {anonymousLabel} /></p>
+    {#snippet actions()}
+      <p><ProfileLink profile={authorProfile} {anonymousLabel} /><br />{dateLabel}</p>
+      <a href={`/threads/${thread.key}`}><CnIcon noun="discussion" /><span>{thread.replyCount ?? 0}</span></a>
+    {/snippet}
   </CnCard>
 </div>

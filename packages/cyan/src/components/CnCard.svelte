@@ -290,9 +290,20 @@ let {
     flex-grow: 1;
   }
 
-  /* Actions: edge-to-edge nav */
+  /* Actions: edge-to-edge flex-row nav */
   .actions {
     margin-left: calc(-1 * var(--cn-gap));
     margin-right: calc(-1 * var(--cn-gap));
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--cn-gap);
+    height: calc(7 * var(--cn-grid));
+    padding: 0 var(--cn-gap);
+  }
+  .actions :global(p),
+  .actions :global(a) {
+    margin: 0;
   }
 </style>
