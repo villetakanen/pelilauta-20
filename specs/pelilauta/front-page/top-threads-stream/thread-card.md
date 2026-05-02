@@ -57,8 +57,13 @@ frontmatter; ThreadCard renders synchronously from the prepared values.
   - **Header (CnCard):** thread title rendered as `<h4>` inside `.card-header`;
     if the consumer supplied `channelIcon`, CnCard renders it next to the
     title (or on the cover, if a cover is present).
-  - **Body (`.card-info`):** channel link (`<a href="/channels/{channelSlug}">`
-    wrapping `channelLinkLabel`), the snippet `<p>` if `snippet` is non-empty,
+  - **Eyebrow (CnCard `eyebrow` slot):** the channel link
+    (`<a href="/channels/{channelSlug}">` wrapping `channelLinkLabel`) is
+    composed into CnCard's `eyebrow` slot, which renders it as a
+    caption-style overline above the title. Underline removal and the
+    caption typography are owned by CnCard's eyebrow primitive — ThreadCard
+    only supplies the link.
+  - **Body (`.card-info`):** the snippet `<p>` if `snippet` is non-empty,
     and the byline `<p>` composed via `ProfileLink`.
 - **Interactivity model:** the card is multi-link — the title and (optional)
   cover image link to `/threads/{thread.key}` via CnCard's `href`; the channel
@@ -86,16 +91,22 @@ frontmatter; ThreadCard renders synchronously from the prepared values.
 - [ ] `ThreadCard.svelte` renders a thread as a card built on `CnCard`,
       reading title, key, locale, and channel display name from `thread`, and
       receiving everything else as props.
-- [ ] The snippet, when non-empty, renders as a `<p>` between the channel link
-      and the byline. When `snippet` is empty or absent, the snippet `<p>` is
-      omitted (only the channel link and byline `<p>` remain).
+- [ ] The channel link is composed into CnCard's `eyebrow` slot as
+      `<a href="/channels/{channelSlug}">{channelLinkLabel}</a>` — rendered
+      as a caption-style overline above the title with the underline
+      suppressed by the eyebrow primitive. ThreadCard does not emit a
+      separate `<p>` for the channel link.
+- [ ] The snippet, when non-empty, renders as a `<p>` above the byline.
+      When `snippet` is empty or absent, the snippet `<p>` is omitted (only
+      the byline `<p>` remains in the body).
 - [ ] The author byline composes `ProfileLink` from
       `@pelilauta/profiles/components`, with `authorProfile?: Profile | null`
       and `anonymousLabel: string` passed in from the rendering page.
       ThreadCard itself never emits a bare `<a>` or `<span>` for the byline.
-- [ ] The title and optional cover image link to `/threads/{thread.key}`; the
-      channel link uses `channelLinkLabel` as its text and links to
-      `/channels/{channelSlug}`; the card root is not a link.
+- [ ] The title and optional cover image link to `/threads/{thread.key}`;
+      the channel link (rendered via CnCard's eyebrow slot) uses
+      `channelLinkLabel` as its text and links to `/channels/{channelSlug}`;
+      the card root is not a link.
 - [ ] The card's outermost element carries `lang={thread.locale}` for DOM
       content-locale stamping.
 
@@ -138,6 +149,17 @@ Then the byline contains a ProfileLink that emits <span>Anonymous</span>
 And no <a> element is emitted for the byline
 ```
 
+#### Scenario: ThreadCard composes the channel link into CnCard's eyebrow slot
+
+```gherkin
+Given a Thread with channel "pelit"
+And channelSlug "pelit"
+And channelLinkLabel "In Pelit"
+When ThreadCard is rendered
+Then a .eyebrow element contains <a href="/channels/pelit">In Pelit</a>
+And ThreadCard does not emit a <p> wrapping the channel link
+```
+
 ## Migration Debt and Decisions
 
 > v17-parity gaps captured for prioritisation. NOT part of the v20 MVP
@@ -156,31 +178,31 @@ And no <a> element is emitted for the byline
   (`lovedCount`), and creation/activity dates do not currently appear on the
   card. Wiring requires propagating the fields through `Thread` props and
   rendering them in the (future) `actions`-slot footer.
-- **Typography alignment.** The visual weight and scale of the channel link
-  relative to the snippet and title is not yet aligned with the v17 baseline.
-  Resolution lives in either `CnCard` typography tokens (DS) or ThreadCard's
-  composition choices, depending on the gap — investigate before deciding
-  ownership.
-
 ### Decisions for v20
 
-1. **One consumer policy.** ThreadCard is consumed only by TopThreadsStream
+1. **Channel-link typography parity (resolved 2026-04-30).** Closed via
+   CnCard's new `eyebrow` slot — ThreadCard composes the channel link
+   into it; the slot supplies caption-style typography (size, tracking,
+   case, weight) by composing the `.text-caption` utility. Authoritative
+   contract lives in [`specs/cyan-ds/components/cn-card/spec.md`](../../../cyan-ds/components/cn-card/spec.md)
+   §eyebrow and [`specs/cyan-ds/utilities/text-caption/spec.md`](../../../cyan-ds/utilities/text-caption/spec.md).
+2. **One consumer policy.** ThreadCard is consumed only by TopThreadsStream
    and no other consumer is planned. Adding a second consumer would re-open
    the "promote ThreadCard to its own feature spec" question; until then,
    this sub-spec is the right home.
-2. **Code lives in the threads package.** Even though the contract lives
+3. **Code lives in the threads package.** Even though the contract lives
    under `front-page/top-threads-stream/`, the implementation file stays at
    `packages/threads/src/components/ThreadCard.svelte` because it consumes
    `Thread` data and ships from the threads package's build. This mirrors
    the pattern channels uses for `ChannelInfoRow.astro` (code in threads,
    contract under channels).
-3. **DS-vs-domain split.** Per [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md)
+4. **DS-vs-domain split.** Per [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md)
    §DS-vs-domain boundary. ThreadCard is domain-shaped because its API names
    `Thread`, `Channel`, and `Profile`; `CnCard`'s slots, tokens, and
    structural primitives are the DS contract. A "missing v17 visual feature"
    lands in this spec when the resolution is a ThreadCard consumption choice;
    if it requires a new DS primitive, it escalates to `specs/cyan-ds/`.
-4. **Render-from-props boundary.** Any data derivation (markdown rendering,
+5. **Render-from-props boundary.** Any data derivation (markdown rendering,
    image fallback chains, slug computation, profile lookups) lives in the
    consumer's frontmatter, not in ThreadCard. This keeps the component
    synchronous, SSR-pure, and unit-testable with primitive props.

@@ -48,6 +48,7 @@ A `CnCard` is a fixed container for a piece of content. It can be used to displa
 | Slot | Description |
 |------|-------------|
 | default | Card body content. Use sparingly — 1-3 paragraphs of text. |
+| `eyebrow` | Editorial overline above the title. Composes the `.text-caption` utility (uppercase, tracked, `--cn-text-low`); links inside drop the underline. Use for category links, edition badges, system tags. |
 | `actions` | Bottom nav area for buttons and controls. Bleeds to card edges. |
 
 ## Elevation
@@ -159,6 +160,26 @@ Titles are automatically truncated to 2 lines with an ellipsis.
     Normal length title.
   </CnCard>
 </div>
+
+## Eyebrow Slot
+
+The `eyebrow` slot renders an editorial overline above the title. It composes the [`.text-caption`](../principles/typography) utility (0.75rem, uppercase, tracked, medium weight) and overlays `--cn-text-low` for colour; links inside the slot inherit the eyebrow colour and drop the global underline, re-adding it on hover and focus. Reach for it for category/channel links, system or edition tags, and other pre-title labels.
+
+```svelte
+<CnCard title="Iron-Tower">
+  {#snippet eyebrow()}
+    <a href="/channels/pelit">In Pelit</a>
+  {/snippet}
+  A short post about the iron-tower campaign.
+</CnCard>
+
+<CnCard title="Sundered Skerry" noun="books">
+  {#snippet eyebrow()}
+    D&D 5e
+  {/snippet}
+  Plain text eyebrow — system/edition badge.
+</CnCard>
+```
 
 ## Actions Slot
 

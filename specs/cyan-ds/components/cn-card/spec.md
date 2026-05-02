@@ -31,6 +31,7 @@ A flexible content container used to group related information. Optimized for Sv
     - `title`: Primary heading text (rendered as `h4` with 2-line truncation). If `href` is also set, wrapped in an `<a>` tag alongside the inline icon (if any).
     - `description`: Secondary content snippet (rendered as `<p>`).
   - **Slots (Snippet):**
+    - `eyebrow`: Optional editorial overline rendered immediately above the title. Typography is supplied by composing the `.text-caption` utility on the slot's wrapper (0.75rem, uppercase, tracked, medium weight); colour is `--cn-text-low`. Links inside the slot drop the global underline (`text-decoration: none`) and re-add it on `:hover` / `:focus-visible`. Used for category/channel links, edition badges, system tags, and similar pre-title labels.
     - `actions`: Bottom nav area for buttons/links. Rendered in `<nav>`, bleeds to card edges via negative margins.
     - `default`: Main body content (use sparingly — 1-3 paragraphs max).
 - **Dependencies:** 
@@ -50,6 +51,7 @@ A flexible content container used to group related information. Optimized for Sv
   - Cover image variant (with and without icon).
   - Responsive image demos (`srcset`).
   - Actions slot demo.
+  - Eyebrow slot demo.
   - Linked title demo.
   - Long title truncation demo.
   - CSS custom properties reference.
@@ -79,6 +81,9 @@ A flexible content container used to group related information. Optimized for Sv
 - [x] Actions nav bleeds to card edges via negative margins.
 - [x] Body text uses `--cn-text-low` for low-emphasis color.
 - [x] Component remains responsive and accessible (focus-visible on title link).
+- [x] `eyebrow` slot, when supplied, renders in a `.eyebrow.text-caption` block immediately above `.card-header` (after the cover, when cover is present). Typography is supplied by `.text-caption` (size, tracking, case, weight); the local rule contributes only `color: var(--cn-text-low)` and spacing.
+- [x] Links inside `.eyebrow` render without the global `text-decoration: underline` and re-add it on `:hover` and `:focus-visible`.
+- [x] When both `cover` and `eyebrow` are present, the eyebrow gains a `margin-top: var(--cn-grid)` (one grid unit of breathing room between the cover image and the eyebrow text).
 
 ### Regression Guardrails
 - **Theming**: Must use `.elevation-N` utility classes from `elevation.css` (handles background + shadow + relative nesting).
@@ -139,5 +144,15 @@ And the cover link should have tabindex="-1"
 Given a CnCard with description="Some text"
 When rendered
 Then a <p class="description"> should contain "Some text"
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/CnCard.test.ts`
+
+#### Scenario: Eyebrow slot renders above the title
+```gherkin
+Given a CnCard with an eyebrow snippet that emits a link
+When rendered
+Then a .eyebrow element exists as a sibling immediately preceding .card-header
+And the .eyebrow element contains the snippet's link
+And no .eyebrow element is rendered when the eyebrow snippet is absent
 ```
 - **Vitest Unit Test:** `packages/cyan/src/components/CnCard.test.ts`

@@ -13,6 +13,7 @@ let {
   alert = false,
   title = "",
   description = "",
+  eyebrow,
   actions,
   children,
 } = $props<{
@@ -26,6 +27,7 @@ let {
   alert?: boolean;
   title?: string;
   description?: string;
+  eyebrow?: Snippet;
   actions?: Snippet;
   children?: Snippet;
 }>();
@@ -53,6 +55,12 @@ let {
         <CnIcon {noun} size="large" />
       </div>
     {/if}
+  {/if}
+
+  {#if eyebrow}
+    <div class="eyebrow text-caption">
+      {@render eyebrow()}
+    </div>
   {/if}
 
   <div class="card-header">
@@ -181,6 +189,31 @@ let {
     background-blend-mode: hard-light;
     pointer-events: none;
     border-radius: 0 0 var(--cn-border-radius-card, var(--cn-border-radius-large)) var(--cn-border-radius-card, var(--cn-border-radius-large));
+  }
+
+  /* Eyebrow: editorial overline above the title.
+     Typography (size, tracking, case, weight) comes from the .text-caption
+     utility composed on the element. Only colour and spacing live here. */
+  .eyebrow {
+    margin: 0;
+    color: var(--cn-text-low);
+  }
+  /* Breathing room between the cover and the eyebrow when both are present */
+  .cover ~ .eyebrow {
+    margin-top: var(--cn-grid);
+  }
+  .eyebrow :global(a) {
+    color: inherit;
+    text-decoration: none;
+  }
+  .eyebrow :global(a:hover) {
+    color: var(--cn-link-hover);
+    text-decoration: underline;
+  }
+  .eyebrow :global(a:focus-visible) {
+    outline: 2px solid var(--cn-focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 
   /* Card header: icon + title row */

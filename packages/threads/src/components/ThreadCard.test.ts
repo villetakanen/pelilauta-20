@@ -1,5 +1,7 @@
 // ThreadCard component tests — specs/pelilauta/front-page/top-threads-stream/thread-card.md
-// Verifies: specs/pelilauta/front-page/top-threads-stream/thread-card.md §ThreadCard composes ProfileLink for the author byline
+// Verifies:
+//   §ThreadCard composes ProfileLink for the author byline
+//   §ThreadCard composes the channel link into CnCard's eyebrow slot
 
 import type { Profile } from "@pelilauta/profiles/server";
 import { cleanup, render, screen } from "@testing-library/svelte";
@@ -69,9 +71,24 @@ describe("ThreadCard", () => {
       props: { thread: makeThread(), snippet: "", ...baseProps },
     });
     const paragraphs = container.querySelectorAll("p");
-    // Channel link + byline paragraphs only, no snippet paragraph
-    expect(paragraphs.length).toBe(2);
-    expect(paragraphs[0]?.querySelector("a")).toBeTruthy();
+    // Byline paragraph only; channel link lives in the eyebrow slot, not a <p>.
+    expect(paragraphs.length).toBe(1);
+  });
+
+  it("renders the channel link inside CnCard's eyebrow slot, not a <p>", () => {
+    const { container } = render(ThreadCard, {
+      props: {
+        thread: makeThread({ channel: "pelit" }),
+        channelSlug: "pelit",
+        channelLinkLabel: "In Pelit",
+        anonymousLabel: "Anonymous",
+      },
+    });
+    const eyebrow = container.querySelector(".eyebrow");
+    expect(eyebrow).not.toBeNull();
+    const link = eyebrow?.querySelector("a");
+    expect(link?.getAttribute("href")).toBe("/channels/pelit");
+    expect(link?.textContent).toBe("In Pelit");
   });
 
   it("renders the channel link with the channelLinkLabel and channelSlug props", () => {

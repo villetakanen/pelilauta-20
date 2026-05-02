@@ -33,7 +33,9 @@ let {
     noun={channelIcon}
     elevation={1}
   >
-    <p><a href={`/channels/${channelSlug}`}>{channelLinkLabel}</a></p>
+    {#snippet eyebrow()}
+      <a href={`/channels/${channelSlug}`}>{channelLinkLabel}</a>
+    {/snippet}
     {#if snippet}
       <p>{snippet}</p>
     {/if}

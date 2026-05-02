@@ -1,4 +1,5 @@
 import { render } from "@testing-library/svelte";
+import { createRawSnippet } from "svelte";
 import { describe, expect, it } from "vitest";
 import CnCard from "./CnCard.svelte";
 
@@ -191,6 +192,45 @@ describe("CnCard noun icon", () => {
     // Icon should be in .cover-noun, not inside the title
     expect(container.querySelector("h4.title .cn-icon")).toBeNull();
     expect(container.querySelector(".cn-card .cover-noun")).not.toBeNull();
+  });
+});
+
+describe("CnCard eyebrow slot", () => {
+  const linkSnippet = createRawSnippet(() => ({
+    render: () => '<a href="/channels/pelit">In Pelit</a>',
+  }));
+
+  it("renders an .eyebrow block when the snippet is provided", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", eyebrow: linkSnippet },
+    });
+    const eyebrow = container.querySelector(".eyebrow");
+    expect(eyebrow).not.toBeNull();
+    expect(eyebrow?.querySelector("a")?.getAttribute("href")).toBe("/channels/pelit");
+  });
+
+  it("places the eyebrow as the immediate sibling preceding .card-header", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", eyebrow: linkSnippet },
+    });
+    const eyebrow = container.querySelector(".eyebrow");
+    expect(eyebrow?.nextElementSibling).toBe(container.querySelector(".card-header"));
+  });
+
+  it("omits the .eyebrow element when no snippet is provided", () => {
+    const { container } = render(CnCard, { props: { title: "Test" } });
+    expect(container.querySelector(".eyebrow")).toBeNull();
+  });
+
+  it("renders the eyebrow after the cover when both are present", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", cover: "/img.jpg", eyebrow: linkSnippet },
+    });
+    const cover = container.querySelector(".cover");
+    const eyebrow = container.querySelector(".eyebrow");
+    if (!cover || !eyebrow) throw new Error("expected both .cover and .eyebrow");
+    const ordering = cover.compareDocumentPosition(eyebrow);
+    expect(!!(ordering & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
   });
 });
 
