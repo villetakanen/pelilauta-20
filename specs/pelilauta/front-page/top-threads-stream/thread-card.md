@@ -10,7 +10,7 @@ parent_spec: ./spec.md
 
 > Sub-spec of [Top Threads Stream](./spec.md). ThreadCard is the per-row preview
 > component used by TopThreadsStream; it has no other consumers and is specced
-> separately because its rendering surface — particularly the v17-parity gap —
+> separately because its rendering surface — particularly the v18-parity gap —
 > is independently iterable from the stream's data-flow contract.
 
 ## Blueprint
@@ -150,7 +150,7 @@ frontmatter; ThreadCard renders synchronously from the prepared values.
   directly.
 - The byline lives in CnCard's `actions` slot, not in `.card-info`. Putting
   it back in the body is a regression to the pre-actions-slot layout and
-  loses v17 footer parity.
+  loses v18 footer parity.
 - The reply-count link targets `/threads/{thread.key}` only — no anchor, no
   `?jumpTo=unread` query parameter. Anchor / unread-jump support depends on
   reply rendering and read-state tracking that is out of scope for the v20
@@ -231,13 +231,13 @@ And the reply-count link is not omitted
 
 ## Migration Debt and Decisions
 
-> v17-parity gaps captured for prioritisation. NOT part of the v20 MVP
+> v18-parity gaps captured for prioritisation. NOT part of the v20 MVP
 > contract — these items will be promoted into Definition of Done when their
 > implementation is scheduled.
 
-### v17 features ThreadCard does not yet adopt
+### v18 features ThreadCard does not yet adopt
 
-- **Reactions (love button).** v17's actions toolbar carries a
+- **Reactions (love button).** v18's actions toolbar carries a
   `<ReactionButton>` between the byline and the reply-count link. In v20,
   reactions are an attached module per ARCHITECTURE.md §"Module
   independence and sub-shapes" and ship in a future `packages/reactions`.
@@ -246,32 +246,35 @@ And the reply-count link is not omitted
   component alongside ThreadCard, or — when the reactions module ships —
   passes it into a slot ThreadCard exposes. Promoting reactions parity is
   blocked on the reactions module, not on ThreadCard.
-- **Notify / unread (subscriptions).** v17 sets `cn-card.notify=true`
+- **Notify / unread (subscriptions).** v18 sets `cn-card.notify=true`
   on threads the authenticated user has not yet seen, via a CSR-only
-  `<CardSubscription>` effect that consumes the v17 `subscriptions`
+  `<CardSubscription>` effect that consumes the v18 `subscriptions`
   store. In v20, read-state and subscriptions are an attached module
   (`packages/subscriptions`, future). ThreadCard does not pass `notify`
   to CnCard from its own logic; the subscriptions module, when it ships,
   will wire the flag from outside.
-- **Rich-HTML snippet.** v17 uses `createRichSnippet(markdown, { maxLength: 220, headerClasses: ['text-h5'] })`
+- **Rich-HTML snippet.** v18 uses `createRichSnippet(markdown, { maxLength: 220, headerClasses: ['text-h5'] })`
   and renders the result with `Fragment set:html=`. v20 renders a plain-text
   snippet via `markdownToPlainText`. Porting the rich snippet preserves
   heading scale in the preview but is independent of footer parity and
   not yet scheduled.
 
-### v17 footer reverse-spec (2026-05-02)
+### v18 footer reverse-spec (2026-05-02)
 
 > Reversed from `.tmp/pelilauta-17/src/components/server/FrontPage/ThreadCard.astro`,
 > with supporting context from `ProfileLink.svelte`,
 > `ReactionButton.svelte`, `CardSubscription.svelte`, and the
 > `cn-card` element in `.tmp/cyan-design-system-4/packages/cyan-lit/src/cn-card/cn-card.ts`.
-> Captured here so a future promotion of these items into Definition of
-> Done has a single source of truth for what "v17 parity" means. Not yet a
-> v20 contract — the open questions below must be resolved first.
+> (The folder name is `pelilauta-17/` for legacy reasons but the
+> checked-out source is `pelilauta@18.13.3` — see
+> `.tmp/pelilauta-17/package.json`.) Captured here so a future
+> promotion of these items into Definition of Done has a single
+> source of truth for what "v18 parity" means. Not yet a v20
+> contract — the open questions below must be resolved first.
 
 #### Footer structure
 
-v17 fills `cn-card`'s `actions` slot with one horizontal toolbar
+v18 fills `cn-card`'s `actions` slot with one horizontal toolbar
 (`<div class="toolbar">`) containing three regions, in document order:
 
 1. **Byline + flow-time** — `<div class="grow">` wrapping a `<p>` with two
@@ -315,12 +318,12 @@ toolbar toward the bottom edge.
   between body and footer. v20 composes that channel-line via CnCard's
   `eyebrow` slot, whose typography distinguishes it from the snippet
   without a bottom border, so the divider is intentionally absent in v20.
-- **No localized date prefix on the card.** v17's `info.flowTime` /
+- **No localized date prefix on the card.** v18's `info.flowTime` /
   `info.createdAt` localized strings are used by the thread-info article
   and the channel-app `ThreadListItem`, but the front-page card emits the
   bare `YYYY-MM-DD` substring with no prefix.
 
-#### Behavioral contracts encoded in v17
+#### Behavioral contracts encoded in v18
 
 - **Byline reads `thread.owners[0]`.** v20 already follows this; the
   consumer pre-resolves the `Profile` upstream rather than passing a uid.
@@ -331,7 +334,7 @@ toolbar toward the bottom edge.
 - **Reply-count link target is `?jumpTo=unread#discussion`.** The query
   parameter is consumed by the thread-detail page; for anonymous visitors
   it falls back to a plain anchor scroll.
-- **`notify` flag is a CSR effect.** v17's `<CardSubscription>` is a
+- **`notify` flag is a CSR effect.** v18's `<CardSubscription>` is a
   script-only Svelte component (emits no markup) that mutates
   `cn-card.notify` based on `hasSeen(thread.key, thread.flowTime)` for the
   authenticated viewer. Anonymous visitors unconditionally see
@@ -361,12 +364,12 @@ contract changes are in §Definition of Done above.
    format dates itself; the consumer (`TopThreadsStream`) is
    responsible per the SSR Data Flow rule. The split is `Intl.RelativeTimeFormat`
    inside the 72-hour window and ISO outside it, matching the consistent
-   form of v17's `toDisplayString(date, relative=true)`.
+   form of v18's `toDisplayString(date, relative=true)`.
 5. **Snippet fidelity — deferred, not blocked on this work.** Plain-text
    snippet via `markdownToPlainText` stays in place for now. A future
    port of `createRichSnippet` would replace the snippet prop's type
    from `string` (text) to a richer shape; tracked above under
-   "v17 features ThreadCard does not yet adopt".
+   "v18 features ThreadCard does not yet adopt".
 
 ### Decisions for v20
 
@@ -389,7 +392,7 @@ contract changes are in §Definition of Done above.
 4. **DS-vs-domain split.** Per [`ARCHITECTURE.md`](../../../../ARCHITECTURE.md)
    §DS-vs-domain boundary. ThreadCard is domain-shaped because its API names
    `Thread`, `Channel`, and `Profile`; `CnCard`'s slots, tokens, and
-   structural primitives are the DS contract. A "missing v17 visual feature"
+   structural primitives are the DS contract. A "missing v18 visual feature"
    lands in this spec when the resolution is a ThreadCard consumption choice;
    if it requires a new DS primitive, it escalates to `specs/cyan-ds/`.
 5. **Render-from-props boundary.** Any data derivation (markdown rendering,
