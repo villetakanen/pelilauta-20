@@ -7,7 +7,8 @@
     "./markdownToHTML": "./src/markdownToHTML.ts",
     "./markdownToPlainText": "./src/markdownToPlainText.ts",
     "./sanitizeNext": "./src/sanitizeNext.ts",
-    "./dates": "./src/dates/index.ts"
+    "./dates": "./src/dates/index.ts",
+    "./images": "./src/images/index.ts"
   },
   "scripts": {
     "test": "vitest run"

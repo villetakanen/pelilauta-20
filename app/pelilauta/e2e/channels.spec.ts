@@ -12,8 +12,8 @@ test.describe("Channels directory", () => {
   test("renders the page with an h1 for SEO/a11y", async ({ page }) => {
     await page.goto("/channels");
 
-    // h1 is sr-only so it may not be visible — use toBeAttached
-    const h1 = page.locator("h1");
+    // h1 is sr-only so it may not be visible — assert semantic heading by name.
+    const h1 = page.getByRole("heading", { level: 1, name: /Keskustelut|Channels/i });
     await expect(h1).toBeAttached();
   });
 
