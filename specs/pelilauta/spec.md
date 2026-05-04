@@ -17,7 +17,7 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
   - [`packages/threads`](threads/spec.md) — Discussions vertical.
   - [`packages/profiles`](profiles/spec.md) — Public-identity vertical: schema, accessors, and the `ProfileLink` SSR primitive used everywhere a uid is cited. Profile ≠ account; account state lives in `@pelilauta/auth`.
   - [`packages/channels`](channels/spec.md) — Channels meta-list (the `/channels` directory page). Code lives inside `packages/threads/`; the spec is top-level because the directory is a bespoke navigation surface with its own contract.
-  - `packages/sites` — Game-site vertical (campaign pages, libraries, character sheets). _Spec TBD._
+  - [`packages/sites`](sites/spec.md) — Game-site vertical (campaign pages, libraries, character sheets). MVP scope ships schema, read accessors, `SiteCard`, `MembershipBadge`, and the `/sites` directory skeleton; authoring surfaces are TBD sub-specs.
   - Future verticals follow the same shape.
 - **Shared infrastructure packages** (listed bottom-up by dependency stack):
   - [`packages/models`](models/spec.md) — Zod schemas + TS types shared across packages.
@@ -29,14 +29,17 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
   - [`auth/`](auth/spec.md) — login/logout UX and `/login` page.
   - [`auth-package/`](auth-package/spec.md) — `@pelilauta/auth` workspace package: shell, sub-exports, dependency direction, staged extraction DoD.
   - [`channels/`](channels/spec.md) — `/channels` meta-list page (blocked on profiles MF Stage 1).
+  - [`dates/`](dates/spec.md) — flow-time and date label formatters (`flowTimeLabel`, `toIsoDate`).
   - [`firebase/`](firebase/spec.md) — Firebase workspace + auth.
   - [`front-page/`](front-page/spec.md) — landing page composition.
   - [`i18n/`](i18n/spec.md) — translation engine and host composition.
+  - [`images/`](images/spec.md) — image-optimisation helpers (`netlifyImage`, `generateSrcset`).
   - [`migrations/`](migrations/spec.md) — data migrations from prior versions.
   - [`models/`](models/spec.md) — shared schemas.
   - [`preferences/`](preferences/spec.md) — user preference store.
   - [`profiles/`](profiles/spec.md) — public-identity vertical: schema, accessors, `ProfileLink` SSR primitive.
   - [`session/`](session/spec.md) — session cookie, SSR identity, token repair, store.
+  - [`sites/`](sites/spec.md) — game-site vertical: schema, accessors, `SiteCard`, `MembershipBadge`. Authoring surfaces TBD as sub-specs.
   - [`threads/`](threads/spec.md) — discussions vertical.
 - **Constraints:**
   - **Host owns the seams, not the domain.** Domain logic lives in feature packages. Host code is composition: routing, layout, registry assembly, session boundary.

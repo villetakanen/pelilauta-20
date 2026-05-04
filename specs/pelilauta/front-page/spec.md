@@ -42,7 +42,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 ### Anti-Patterns
 
-- Do not add client-side JavaScript for initial render — the front page must be fully SSR, zero-JS by default
+- The anonymous render of the front page ships zero client-side JavaScript: no `client:*` directives, no hydration scripts. The authenticated render MAY mount `client:*` islands strictly limited to per-viewer progressive enhancements (e.g. `MembershipBadge` from [`top-sites-stream/spec.md`](./top-sites-stream/spec.md)). Caches split on the binary session-presence, never on uid value.
 - Do not import v17 components or patterns directly — build on the v20 DS primitives
 - Do not reference the background image via a hardcoded URL string (e.g. `"/myrrys-proprietary/..."` from v17's `public/` symlink pattern). Use an ES import so Astro/Vite hashes the asset at build time and validates the path at compile-time.
 - Apps never override the DS: the page MUST NOT contain `<style>` blocks, inline `style=""`, or locally-defined classes that override, substitute for, or patch around DS behavior. Missing DS capability is a DS bug fixed in `packages/cyan`, not a page workaround.
@@ -68,7 +68,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 ### Regression Guardrails
 
-- Front page must load with zero client-side JavaScript (no `client:` directives)
+- The anonymous render of the front page must load with zero client-side JavaScript (no `client:*` directives, no hydration scripts). The authenticated render MAY mount `client:*` islands strictly limited to per-viewer progressive enhancements (currently: `MembershipBadge` per [`top-sites-stream/spec.md`](./top-sites-stream/spec.md)). Adding `client:*` directives to the anonymous render — or expanding the authenticated allowlist beyond per-viewer enhancements — is a regression.
 - Token references in the page are disallowed entirely (the page must not contain any CSS). Token discipline is enforced at the DS layer.
 - `Page` `title` prop must be set to "Pelilauta"
 - **Image path resolution.** The poster's `src` MUST resolve via the ES `import` from `@myrrys/proprietary/...` — no hardcoded `/myrrys-proprietary/...` URL. Reverting to a string literal would break build-time asset hashing and silently 404 when the image is moved.
@@ -108,12 +108,23 @@ Then the three regions stack vertically in a single column
 
 - **Playwright E2E Test:** `app/pelilauta/e2e/front-page.spec.ts`
 
-#### Scenario: Front page is fully SSR with no client JS
+#### Scenario: Anonymous render of the front page ships no client-side JS
 
 ```gherkin
-Given the front page source is built
+Given the front page is requested without an authenticated session cookie
 When inspecting the output HTML
 Then no <script> tags with client-side hydration are present
+And no client:* directive appears anywhere in the rendered subtree
+```
+
+#### Scenario: Authenticated render mounts only allow-listed enhancement islands
+
+```gherkin
+Given the front page is requested with an authenticated session cookie
+When inspecting the output HTML
+Then any client:* directive present is on an allow-listed per-viewer
+  enhancement island (currently: MembershipBadge per top-sites-stream/spec.md)
+And no other client:* directives appear in the rendered subtree
 ```
 
 - **Vitest Unit Test:** (not applicable — verified by E2E and build output inspection)

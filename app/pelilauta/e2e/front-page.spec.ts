@@ -1,7 +1,7 @@
 // Verifies: specs/pelilauta/front-page/spec.md §Front page renders all three triad regions
 // Verifies: specs/pelilauta/front-page/spec.md §Triad renders side-by-side on wide viewports
 // Verifies: specs/pelilauta/front-page/spec.md §Triad stacks on narrow viewports
-// Verifies: specs/pelilauta/front-page/spec.md §Front page is fully SSR with no client JS
+// Verifies: specs/pelilauta/front-page/spec.md §Anonymous render of the front page ships no client-side JS
 // Verifies: specs/pelilauta/front-page/syndicate-stream/spec.md §Component contains no client-side JavaScript
 // Verifies: specs/pelilauta/front-page/syndicate-stream/spec.md §Source attribution and title links
 // Verifies: specs/pelilauta/front-page/syndicate-stream/spec.md §Items are separated by DS dividers
