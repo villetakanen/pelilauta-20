@@ -83,6 +83,7 @@ No URL prefixes. No redirects.
 - **`createT(locales: Locales, defaultLocale: string): TFn`** — returns a bound `t`.
 - **`t(key: string, subs?: LocaleSubstitutions, currentLocale?: string): string`**
 - Key grammar: `key := [namespace ":"] segment ("." segment)*`. If no `:` is present, namespace defaults to `"app"`.
+- Key naming convention: phrases about an entry-shaped data type — fields rendered for display, or relationship phrases that may appear across multiple UI surfaces — use `<package>:<entryType>.<fieldOrPhrase>`. Examples: `threads:thread.inChannel` (the cross-surface "in {topic}" phrase about a Thread), `threads:thread.replyCount` (localized form of `Thread.replyCount`), `threads:channel.threadCount` (localized form of `Channel.threadCount`). Surface-specific phrasing that does not generalize across surfaces stays at `<package>:<surface>.<phrase>` (e.g. error blocks or labels tied to one UI). The package namespace already names the owning vertical; no `entries.` tier is added.
 - Lookup order: `currentLocale` → `defaultLocale`. Missing in both → returns the input `key` verbatim.
 - Substitution: every `{name}` token replaced globally with the stringified value.
 - Each package's `./i18n` sub-export shape: `export const fi: NestedTranslation; export const en: NestedTranslation;`

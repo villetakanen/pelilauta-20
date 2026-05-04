@@ -1,40 +1,50 @@
 <script lang="ts">
 import CnCard from "@cyan/components/CnCard.svelte";
-import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import { ProfileLink } from "@pelilauta/profiles/components";
+import type { Profile } from "@pelilauta/profiles/server";
 import type { Thread } from "../schemas/ThreadSchema";
 
 let {
   thread,
-  noun,
+  snippet,
+  coverUrl,
+  channelSlug,
+  channelLinkLabel,
+  channelIcon,
+  authorProfile = null,
+  anonymousLabel,
+  dateLabel,
 }: {
   thread: Thread;
-  noun?: string;
+  snippet?: string;
+  coverUrl?: string;
+  channelSlug: string;
+  channelLinkLabel: string;
+  channelIcon?: string;
+  authorProfile?: Profile | null;
+  anonymousLabel: string;
+  dateLabel: string;
 } = $props();
-
-const posterUrl = $derived(
-  thread.poster
-    ? thread.poster
-    : thread.images && thread.images.length > 0
-      ? thread.images[0]?.url
-      : undefined,
-);
-
-const snippet = $derived(markdownToPlainText(thread.markdownContent || "", 220));
-
-const channelSlug = $derived(thread.channel.toLowerCase().replace(/\s+/g, "-"));
 </script>
 
 <div lang={thread.locale}>
   <CnCard
     href={`/threads/${thread.key}`}
     title={thread.title}
-    cover={posterUrl}
-    {noun}
+    cover={coverUrl}
+    noun={channelIcon}
     elevation={1}
   >
-    <p><a href={`/channels/${channelSlug}`}>{thread.channel}</a></p>
+    {#snippet eyebrow()}
+      <a href={`/channels/${channelSlug}`}>{channelLinkLabel}</a>
+    {/snippet}
     {#if snippet}
       <p>{snippet}</p>
     {/if}
+    {#snippet actions()}
+      <p><ProfileLink profile={authorProfile} {anonymousLabel} /><br />{dateLabel}</p>
+      <a href={`/threads/${thread.key}`}><CnIcon noun="discussion" /><span>{thread.replyCount ?? 0}</span></a>
+    {/snippet}
   </CnCard>
 </div>

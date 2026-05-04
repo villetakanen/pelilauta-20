@@ -1,6 +1,23 @@
+// CnCard component tests
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Linked Title (not Linked Card)
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Cover linked with href
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Description as string
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Elevation utility class
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Triangular corner indicators
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Eyebrow slot renders above the title
+// Verifies: specs/cyan-ds/components/cn-card/spec.md §Actions slot lays out as a flex row
+
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { render } from "@testing-library/svelte";
+import { createRawSnippet } from "svelte";
 import { describe, expect, it } from "vitest";
 import CnCard from "./CnCard.svelte";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const cnCardSource = readFileSync(path.join(__dirname, "CnCard.svelte"), "utf-8");
 
 describe("CnCard root element", () => {
   it("renders an article element as root", () => {
@@ -194,6 +211,45 @@ describe("CnCard noun icon", () => {
   });
 });
 
+describe("CnCard eyebrow slot", () => {
+  const linkSnippet = createRawSnippet(() => ({
+    render: () => '<a href="/channels/pelit">In Pelit</a>',
+  }));
+
+  it("renders an .eyebrow block when the snippet is provided", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", eyebrow: linkSnippet },
+    });
+    const eyebrow = container.querySelector(".eyebrow");
+    expect(eyebrow).not.toBeNull();
+    expect(eyebrow?.querySelector("a")?.getAttribute("href")).toBe("/channels/pelit");
+  });
+
+  it("places the eyebrow as the immediate sibling preceding .card-header", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", eyebrow: linkSnippet },
+    });
+    const eyebrow = container.querySelector(".eyebrow");
+    expect(eyebrow?.nextElementSibling).toBe(container.querySelector(".card-header"));
+  });
+
+  it("omits the .eyebrow element when no snippet is provided", () => {
+    const { container } = render(CnCard, { props: { title: "Test" } });
+    expect(container.querySelector(".eyebrow")).toBeNull();
+  });
+
+  it("renders the eyebrow after the cover when both are present", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", cover: "/img.jpg", eyebrow: linkSnippet },
+    });
+    const cover = container.querySelector(".cover");
+    const eyebrow = container.querySelector(".eyebrow");
+    if (!cover || !eyebrow) throw new Error("expected both .cover and .eyebrow");
+    const ordering = cover.compareDocumentPosition(eyebrow);
+    expect(!!(ordering & Node.DOCUMENT_POSITION_FOLLOWING)).toBe(true);
+  });
+});
+
 describe("CnCard layout", () => {
   it("has a spacer div to push actions to the bottom", () => {
     const { container } = render(CnCard, { props: { title: "Test" } });
@@ -205,5 +261,50 @@ describe("CnCard layout", () => {
     // when no actions snippet is provided, no <nav> is rendered
     const { container } = render(CnCard, { props: { title: "Test" } });
     expect(container.querySelector("nav.actions")).toBeNull();
+  });
+});
+
+describe("CnCard actions slot", () => {
+  const bylineSnippet = createRawSnippet(() => ({
+    render: () => "<p>Author Name</p>",
+  }));
+
+  it("renders nav.actions when an actions snippet is provided", () => {
+    const { container } = render(CnCard, {
+      props: { title: "Test", actions: bylineSnippet },
+    });
+    const nav = container.querySelector("nav.actions");
+    expect(nav).not.toBeNull();
+  });
+
+  it("applies flex-row layout to nav.actions", () => {
+    // jsdom does not compute scoped Svelte CSS via getComputedStyle.
+    // Per spec: "If neither is reliable, assert on the class name or a data
+    // attribute." We verify the contract by reading the component source
+    // directly — deterministic and tests the same source the browser compiles.
+    const { container } = render(CnCard, {
+      props: { title: "Test", actions: bylineSnippet },
+    });
+    const nav = container.querySelector("nav.actions");
+    expect(nav).not.toBeNull();
+    // Verify the .actions ruleset in CnCard.svelte contains the required
+    // flex declarations — the authoritative CSS source for the layout contract.
+    expect(cnCardSource).toMatch(/\.actions\s*\{[^}]*display:\s*flex/s);
+    expect(cnCardSource).toMatch(/\.actions\s*\{[^}]*flex-direction:\s*row/s);
+    expect(cnCardSource).toMatch(/\.actions\s*\{[^}]*justify-content:\s*space-between/s);
+  });
+
+  it("places snippet children as direct descendants of nav.actions", () => {
+    // createRawSnippet requires a single root element, so we verify that a
+    // snippet child renders as a direct child of nav.actions (no extra wrapper).
+    const { container } = render(CnCard, {
+      props: { title: "Test", actions: bylineSnippet },
+    });
+    const nav = container.querySelector("nav.actions");
+    expect(nav).not.toBeNull();
+    // The <p> from the snippet should be a direct child, not nested further
+    const directP = nav?.querySelector(":scope > p");
+    expect(directP).not.toBeNull();
+    expect(directP?.textContent).toContain("Author Name");
   });
 });

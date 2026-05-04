@@ -1,3 +1,11 @@
+---
+feature: Content Grids
+status: stable
+maturity: verified
+last_major_review: 2026-05-04
+parent_spec: ../../spec.md
+---
+
 # Feature: Content Grids
 
 ## Blueprint
@@ -72,7 +80,7 @@ These will be specified separately once the base content grids are implemented.
 - [x] `main` element (`.cn-app-main`) has `container-type: inline-size`.
 - [x] `.cn-content-prose` implements the centered 67ch readability grid (3-column: elastic | `min(67ch, 100%)` | elastic).
 - [x] `.cn-content-golden` implements a **grid-based** two-mode layout (consistent with prose/triad). **Mode 1** — `@container (min-width: calc(3rem + 67ch + 67ch / 2.618))` (see *Implementation Note: Container Query Constraints* for why `3rem` is a literal), `grid-template-columns: var(--cn-gap) 67ch var(--cn-gap) calc(67ch / 2.618) var(--cn-gap); width: fit-content; margin-inline: auto; row-gap: 0;` with primary at `grid-column: 2` and sidebar at `grid-column: 4`. Because the threshold uses `ch`, it tracks the block's actual rendered width; tracks are fixed (no `minmax`) so widths do not shrink — the mode flips cleanly the instant the container fits. **Mode 2** (below threshold): base 3-track grid `var(--cn-gap) 1fr var(--cn-gap)` with both children at `grid-column: 2` and `row-gap: var(--cn-gap)`.
-- [x] `.cn-content-triad` implements a **grid-based** two-mode layout. **Mode 1** — `@container (min-width: calc(4rem + 67ch / 1.618 + (67ch / 2.618) * 2))` (see *Implementation Note: Container Query Constraints* for why `4rem` is a literal), seven fixed tracks `var(--cn-gap) calc(67ch / 1.618) var(--cn-gap) calc(67ch / 2.618) var(--cn-gap) calc(67ch / 2.618) var(--cn-gap)`, `width: fit-content; margin-inline: auto; row-gap: 0;` with children at `grid-column: 2, 4, 6`. **Mode 2** (below threshold): base 3-track grid `var(--cn-gap) 1fr var(--cn-gap)` with children stacked in column 2 and `row-gap: var(--cn-gap)`.
+- [x] `.cn-content-triad` implements a **grid-based** two-mode layout. **Mode 1** — `@container (min-width: calc(4rem + 67ch / 1.618 + (67ch / 2.618) * 2))` (see *Implementation Note: Container Query Constraints* for why `4rem` is a literal), seven fixed tracks `var(--cn-gap) calc(67ch / 1.618) var(--cn-gap) calc(67ch / 2.618) var(--cn-gap) calc(67ch / 2.618) var(--cn-gap)`, `width: fit-content; margin-inline: auto; row-gap: 0;` with children at `grid-column: 2, 4, 6`. The wide-mode `nth-child` selectors use `:nth-child(N of :not(script, style, template))` to exclude injected `<script>` nodes (e.g. from Astro's `server:defer`) from the child count — ensuring the three content children always land in columns 2, 4, 6 regardless of injected script siblings. Supported in all evergreen browsers (CSS Selectors 4). **Mode 2** (below threshold): base 3-track grid `var(--cn-gap) 1fr var(--cn-gap)` with children stacked in column 2 and `row-gap: var(--cn-gap)`.
 - [x] On narrow containers (below each primitive's own threshold), layouts collapse to a single stacked column with `--cn-gap` gutters. Prose/Triad (and structural `section`/`article`) switch at `60rem`; Golden switches at `calc(3rem + 67ch + 67ch / 2.618)`; Triad switches at `calc(4rem + 67ch / 1.618 + (67ch / 2.618) * 2)`.
 - [x] `.cn-grid-full` spans all columns in any layout variant.
 - [x] Direct siblings (consecutive grid containers) are separated by `2 * --cn-gap`.

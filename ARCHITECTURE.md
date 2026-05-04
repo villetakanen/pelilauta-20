@@ -58,6 +58,82 @@ The component stays small and synchronous; the page owns the awaits.
 
 Authenticated CSR islands (editors, real-time `onSnapshot` listeners, write actions) run after hydration and are inherently client-side. Async work there is expected — but it is a *different* class of code, lives under each package's `client/` entry, and runs only behind an authenticated session, so the anonymous-SSR contract from `AGENTS.md` is preserved.
 
+## Workspace topology
+
+The repo is a single pnpm workspace organised into five tiers. Each tier has a positive responsibility and a "does not own" boundary; new code lands in the tier whose responsibility matches.
+
+### 1. Host — `app/pelilauta`
+
+**Owns:** routes (`pages/`, `pages/api/`), page-level data fetching in Astro frontmatter, layout composition (`layouts/Page.astro` wrapping `@cyan/layouts/Page.astro`), the session/auth boundary (cookie middleware, SSR identity projection from claims), the i18n composition seam (`src/i18n.ts` registering each package's locale exports under a namespace), and the HTTP shell on API routes (status codes, headers, ETag, `Cache-Control`).
+
+**Does not own:** schemas, domain UI, or locale strings. Each of those belongs to a domain package.
+
+### 2. DS docs — `app/cyan-ds`
+
+**Owns:** the living style book — a separate Astro site that documents the design system. Demos may use inline styles on demo wrappers (the carve-out from the apps-never-override-DS rule); production MDX content (prose, tables, copy) follows the ban.
+
+**Does not own:** anything that ships in the product. The two apps deploy independently. `app/cyan-ds` is not a microfrontend subset of `app/pelilauta`.
+
+### 3. Design system — `packages/cyan`
+
+**Owns:** structural primitives (`CnCard`, `CnIcon`, `CnAvatar`, `CnBackgroundPoster`, `Tray`, `AppBar`, `AppShell`), layouts (`Page.astro`, content grids, card grid), tokens (`--cn-*` namespace only), fonts. Components are i18n-agnostic — strings come from props/slots.
+
+**Does not own:** domain concepts. There is no `CnThreadCard`, no `CnChannelHeader`, no `CnPostSummary`. See §DS-vs-domain boundary below.
+
+### 4. Domain (vertical) packages — `packages/threads`, `packages/profiles`, future `packages/sites`
+
+**Owns:** one feature vertical each. The directory listing surface for a vertical may live inside the owning package even when the route is host-side (e.g. channel directory components live in `packages/threads/src/components/` because they consume `Channel` data). Each package ships these sub-exports:
+
+- `./server` — SSR-safe accessors, schemas, types, read-only fetches. No `firebase/*` (non-admin) imports.
+- `./client` — CSR-only writes, listeners, interactive islands. Runs only after authenticated hydration.
+- `./components` — domain UI components (Svelte 5 default). May be consumed from any host page.
+- `./i18n` — locale strings owned by the feature, ready to mount under a namespace by the host's composition seam.
+
+**Does not own:** routing (host), HTTP shell on API endpoints (host), structural primitives (cyan), or cross-cutting infrastructure (firebase, utils, models, i18n engine).
+
+#### Module independence and sub-shapes
+
+Every tier-4 package is independently addable: it owns its own schemas, accessors, and components, and never imports from another tier-4 package. `threads` does not import from `profiles`; `profiles` does not import from `auth` (auth is tier 5). The host — or a tier-4 component composing another tier-4 component at a call site — wires them together by passing the necessary identifiers as props.
+
+Within tier 4 there are two sub-shapes:
+
+- **First-class entry modules** — `packages/threads`, `packages/profiles`, future `packages/sites`. Each owns a Firestore collection, a route hierarchy under `app/pelilauta/src/pages/`, schemas for its entries, and components for rendering them. These are the verticals.
+- **Attached modules** (future) — `packages/reactions`, `packages/subscriptions`. They operate generically over any entry, accepting `(entryKey, entryType)` as their integration surface. They do not own a route hierarchy; their components mount inside other packages' rendering surfaces (for example, a reaction button inside `ThreadCard`'s actions slot). They never reach into a first-class entry's schema.
+
+The deciding test for a new tier-4 module:
+
+- Does it own a route hierarchy and a Firestore collection of its own? → First-class.
+- Does it augment *any* entry without caring which kind? → Attached.
+
+The integration direction for attached modules is one-way: a first-class entry's component imports an attached module's component and passes it the entry key + type. The attached module does not import or know about the entry-specific package. This keeps reactions / subscriptions plug-and-play across `threads`, `profiles`, `sites`, and any future entry type.
+
+Profiles is a first-class module despite the surface overlap with auth. Profiles owns the public-facing metadata for a uid (nick, avatar, bio); auth (tier 5) owns sessions, claims, and the identity boundary. The two are separate and neither imports the other.
+
+### 5. Infrastructure (cross-cutting) packages — `packages/firebase`, `packages/models`, `packages/utils`, `packages/i18n`, `packages/auth`
+
+**Owns:** services consumed by both the host and domain packages. `firebase` initialises admin and client SDKs; `models` ships shared Zod schemas; `utils` ships pure helpers (logger, markdown transforms); `i18n` ships the translation engine; `auth` ships the auth machinery (session store, `authedFetch`, login/logout islands, `AuthHandler`/`AuthChrome`).
+
+**Does not own:** any single feature vertical. If a function reads `Thread`-shaped data, it belongs in `packages/threads/`, not in `utils/`.
+
+### Microfrontends — explicitly out of scope
+
+There is no microfrontend layer. `app/pelilauta` is one Astro host, deployed as one Netlify function set. Splits between packages exist for cognitive boundaries inside that single deploy, not to enable independent shipping. Patterns that exist only to share code across hosts (re-export shims, framework-agnostic adapters, "package as redistributable unit") are not in scope; if a future split into multiple hosts is genuinely required, that decision lands as an ADR before any code moves.
+
+## DS-vs-domain boundary
+
+Cyan holds **structural** primitives only — visual building blocks defined in terms of geometry, elevation, typography, tokens, slots. **Domain-shaped** components — anything whose API or markup mentions a feature concept (`Thread`, `Channel`, `Profile`, `Site`, `Reply`, etc.) — live in the owning feature package's `./components` and compose cyan primitives underneath.
+
+The deciding test for any new component:
+
+- Does its props or its rendered markup reference a feature concept (a domain type, a feature route, a domain string)? → **Domain**, lives in `packages/<feature>/`.
+- Is its API expressible in geometry, elevation, slots, tokens, and DS-internal vocabulary alone? → **DS**, lives in `packages/cyan/`.
+
+Practical consequences:
+
+- A "missing v17 visual feature" lands in a domain spec only when the resolution is a consumption choice (which DS slot to fill, which token to bind). If the resolution requires a new structural primitive, it escalates to `specs/cyan-ds/` and lands in `packages/cyan/` first.
+- Names like `CnThreadCard`, `CnChannelInfoRow`, `CnPostSummary` should never appear. If a plan or commit message references one, it is a hallucination — check `packages/<domain>/src/components/` for the real component before assuming anything is missing.
+- DS components carry no locale-bound strings. The host (or the consuming domain component) supplies text via props or slots; cyan stays i18n-agnostic.
+
 ## Package boundaries
 
 **Packages exist for cognitive boundaries, not for distribution.** The pnpm workspace is sized so that humans and AI agents can hold one package's working set in mind (or in context) at a time. Boundaries serve maintainability and explicit dependency direction; they do not serve reuse, redistribution, or multi-host stubbing.
@@ -83,9 +159,12 @@ This complements the ban on framing packages as independently versionable: that 
 
 ## Directories
 
-- `packages/cyan/` — design system source (tokens, components, layouts).
-- `packages/threads/`, `packages/auth/`, `packages/firebase/`, `packages/utils/`, `packages/models/`, `packages/i18n/` — domain and infrastructure packages.
-- `app/cyan-ds/` — living style book documentation site.
-- `app/pelilauta/` — main application.
+Top-level layout (tier responsibilities are documented in §Workspace topology):
+
+- `app/pelilauta/` — host application.
+- `app/cyan-ds/` — living style book.
+- `packages/cyan/` — design system.
+- `packages/threads/`, `packages/profiles/` — domain (vertical) packages.
+- `packages/auth/`, `packages/firebase/`, `packages/i18n/`, `packages/models/`, `packages/utils/` — infrastructure (cross-cutting) packages.
 - `specs/` — feature contracts (intent + DoD + scenarios).
 - `docs/adr/` — Architecture Decision Records.

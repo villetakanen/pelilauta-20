@@ -20,6 +20,7 @@ If empty, ask the user for the source location.
 
 ### 1. Fetch / read the source
 
+- Read `ARCHITECTURE.md` — canonical record for the component model, SSR data-flow rules, and ADR index. This is mandatory; the inline summary in step 7 below is a convenience digest only and may lag.
 - **GitHub URL:** convert to `raw.githubusercontent.com` and fetch with WebFetch. For a directory, list contents via `gh api repos/{owner}/{repo}/contents/{path}` then fetch the files that carry architectural intent: schemas/types, main component, index/barrel exports, tests. Skip assets, generated files, and boilerplate.
 - **Local path:** read directly with Read/Grep/Glob — no WebFetch needed.
 - Read existing tests when present — they often encode unstated contracts the implementation alone doesn't reveal.

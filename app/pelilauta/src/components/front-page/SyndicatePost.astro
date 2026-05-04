@@ -1,0 +1,25 @@
+---
+// SyndicatePost — individual post item for SyndicateStream.
+// Does NOT use CnCard. Composed from DS parts only: <section>,
+// <p class="text-caption">, heading element, <p> body.
+// No <style> block, no inline style="", no app-local layout classes.
+// See specs/pelilauta/front-page/syndicate-stream/spec.md
+
+type Props = {
+  post: {
+    title: string;
+    link: string;
+    contentSnippet: string;
+  };
+  sourceName: string;
+  homeUrl: string;
+};
+
+const { post, sourceName, homeUrl } = Astro.props;
+---
+
+<section>
+  <p class="text-caption"><a href={homeUrl}>{sourceName}</a></p>
+  <h3 class="text-h3"><a href={post.link}>{post.title}</a></h3>
+  <p>{post.contentSnippet}</p>
+</section>

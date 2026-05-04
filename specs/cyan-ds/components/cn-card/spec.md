@@ -31,7 +31,8 @@ A flexible content container used to group related information. Optimized for Sv
     - `title`: Primary heading text (rendered as `h4` with 2-line truncation). If `href` is also set, wrapped in an `<a>` tag alongside the inline icon (if any).
     - `description`: Secondary content snippet (rendered as `<p>`).
   - **Slots (Snippet):**
-    - `actions`: Bottom nav area for buttons/links. Rendered in `<nav>`, bleeds to card edges via negative margins.
+    - `eyebrow`: Optional editorial overline rendered immediately above the title. Typography is supplied by composing the `.text-caption` utility on the slot's wrapper (0.75rem, uppercase, tracked, medium weight); colour is `--cn-text-low`. Links inside the slot drop the global underline (`text-decoration: none`) and re-add it on `:hover` / `:focus-visible`. Used for category/channel links, edition badges, system tags, and similar pre-title labels.
+    - `actions`: Bottom toolbar area for buttons/links. Rendered as a horizontal flex row inside `<nav>` — `display: flex; flex-direction: row; align-items: center; justify-content: space-between; gap: var(--cn-gap); height: calc(7 * var(--cn-grid)); padding: 0 var(--cn-gap);` — with `margin: 0 calc(-1 * var(--cn-gap))` so the row reaches the card's outer edges. Direct children of the snippet are arranged at the row's start and end (two-region case: byline left, action right). For more than two children or a "grow" pattern, consumers compose the `.flex-grow` / `.flex-none` utilities on the children. The slot is layout-only; children supply their own typography.
     - `default`: Main body content (use sparingly — 1-3 paragraphs max).
 - **Dependencies:** 
   - `CnIcon`: Used for the `noun` prop.
@@ -50,6 +51,7 @@ A flexible content container used to group related information. Optimized for Sv
   - Cover image variant (with and without icon).
   - Responsive image demos (`srcset`).
   - Actions slot demo.
+  - Eyebrow slot demo.
   - Linked title demo.
   - Long title truncation demo.
   - CSS custom properties reference.
@@ -77,8 +79,12 @@ A flexible content container used to group related information. Optimized for Sv
 - [x] Card has `min-height: calc(7 * var(--cn-line))`.
 - [x] Card uses `container-type: inline-size` and `cqw` units for cover sizing.
 - [x] Actions nav bleeds to card edges via negative margins.
+- [x] When the `actions` snippet is present, `<nav class="actions">` lays its children out as a horizontal flex row with `align-items: center`, `justify-content: space-between`, `gap: var(--cn-gap)`, `height: calc(7 * var(--cn-grid))`, and `padding: 0 var(--cn-gap)`. With two children, the first lands at row start and the second at row end without any consumer wrappers.
 - [x] Body text uses `--cn-text-low` for low-emphasis color.
 - [x] Component remains responsive and accessible (focus-visible on title link).
+- [x] `eyebrow` slot, when supplied, renders in a `.eyebrow.text-caption` block immediately above `.card-header` (after the cover, when cover is present). Typography is supplied by `.text-caption` (size, tracking, case, weight); the local rule contributes only `color: var(--cn-text-low)` and spacing.
+- [x] Links inside `.eyebrow` render without the global `text-decoration: underline` and re-add it on `:hover` and `:focus-visible`.
+- [x] When both `cover` and `eyebrow` are present, the eyebrow gains a `margin-top: var(--cn-grid)` (one grid unit of breathing room between the cover image and the eyebrow text).
 
 ### Regression Guardrails
 - **Theming**: Must use `.elevation-N` utility classes from `elevation.css` (handles background + shadow + relative nesting).
@@ -139,5 +145,28 @@ And the cover link should have tabindex="-1"
 Given a CnCard with description="Some text"
 When rendered
 Then a <p class="description"> should contain "Some text"
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/CnCard.test.ts`
+
+#### Scenario: Eyebrow slot renders above the title
+```gherkin
+Given a CnCard with an eyebrow snippet that emits a link
+When rendered
+Then a .eyebrow element exists as a sibling immediately preceding .card-header
+And the .eyebrow element contains the snippet's link
+And no .eyebrow element is rendered when the eyebrow snippet is absent
+```
+- **Vitest Unit Test:** `packages/cyan/src/components/CnCard.test.ts`
+
+#### Scenario: Actions slot lays out as a flex row
+```gherkin
+Given a CnCard with an actions snippet emitting two direct children
+When rendered
+Then nav.actions has display: flex
+And nav.actions has flex-direction: row
+And nav.actions has align-items: center
+And nav.actions has justify-content: space-between
+And nav.actions has the standard toolbar height (7 * --cn-grid)
+And no nav.actions element is rendered when the actions snippet is absent
 ```
 - **Vitest Unit Test:** `packages/cyan/src/components/CnCard.test.ts`

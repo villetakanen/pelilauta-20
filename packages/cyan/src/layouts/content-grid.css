@@ -154,13 +154,21 @@
     margin-inline: auto;
     row-gap: 0;
   }
-  .cn-content-triad > *:nth-child(1) {
+  /*
+   * Use `:nth-child(N of :not(script, style, template))` to exclude Astro's
+   * injected `<script>` tags (e.g. from server:defer) from the nth-child count.
+   * This means the three content children land in their correct grid columns
+   * regardless of how many injected script siblings appear alongside them.
+   * Supported in all evergreen browsers (CSS Selectors 4 — Chrome 111+,
+   * Firefox 113+, Safari 16.4+).
+   */
+  .cn-content-triad > :nth-child(1 of :not(script, style, template)) {
     grid-column: 2;
   }
-  .cn-content-triad > *:nth-child(2) {
+  .cn-content-triad > :nth-child(2 of :not(script, style, template)) {
     grid-column: 4;
   }
-  .cn-content-triad > *:nth-child(3) {
+  .cn-content-triad > :nth-child(3 of :not(script, style, template)) {
     grid-column: 6;
   }
 }

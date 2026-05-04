@@ -1,0 +1,10 @@
+/* Flex growth utilities — specs/cyan-ds/utilities/flex/spec.md */
+
+.flex-grow {
+  flex-grow: 1;
+}
+
+.flex-none {
+  flex-grow: 0;
+  flex-shrink: 0;
+}

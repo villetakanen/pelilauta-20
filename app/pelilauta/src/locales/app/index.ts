@@ -24,6 +24,9 @@ export const fi: NestedTranslation = {
     fetch: "Lataaminen epäonnistui",
     notFound: "Sivua ei löytynyt",
   },
+  syndicate: {
+    heading: "Yhteisön blogit",
+  },
 };
 
 export const en: NestedTranslation = {
@@ -45,5 +48,8 @@ export const en: NestedTranslation = {
   error: {
     fetch: "Failed to load",
     notFound: "Page not found",
+  },
+  syndicate: {
+    heading: "Community blogs",
   },
 };

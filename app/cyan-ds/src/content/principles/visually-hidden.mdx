@@ -1,0 +1,49 @@
+---
+title: Visually Hidden
+description: Hide content visually while keeping it in the accessibility tree.
+order: 30
+status: stable
+icon: eye
+---
+
+{/* Verifies: specs/cyan-ds/utilities/visually-hidden/spec.md §Element is visually hidden but in the accessibility tree */}
+
+`.sr-only` removes content from the visual layout while keeping it fully present in the accessibility tree — screen readers, voice control, and other assistive technologies still encounter the element in normal document order. The selector is `.sr-only:not(:focus):not(:active)`: because keyboard focus or pointer activation lifts the element back into view, skip-navigation links can be hidden from sighted users yet appear the moment a keyboard user tabs to them.
+
+## Skip navigation link
+
+<a href="#main-content" class="sr-only">Skip to main content</a>
+
+Tab to this paragraph to reveal the skip link above.
+
+<span id="main-content"></span>
+
+## Icon button with hidden label
+
+<button type="button">
+  <svg aria-hidden="true" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" fill="currentColor"/>
+  </svg>
+  <span class="sr-only">Delete item</span>
+</button>
+
+An icon-only button whose accessible name is provided by a `.sr-only` span. Screen readers announce "Delete item"; sighted users see only the trash icon.
+
+## Redundant form label
+
+<label>
+  <span class="sr-only">Email address</span>
+  <input type="email" placeholder="Email address" />
+</label>
+
+The visible placeholder and the hidden label carry the same text. Assistive technologies that may not surface `placeholder` as an accessible name will read the `.sr-only` label instead.
+
+## Live region announcement
+
+<div aria-live="polite" class="sr-only">Item added to cart</div>
+
+This element is announced by screen readers when its content changes; sighted users see nothing.
+
+## When NOT to use `.sr-only`
+
+Use `aria-label` directly on the element when no DOM node needs to exist — for example, an icon button where the entire affordance is the icon and you do not need the label to be focusable or to act as a live region. Use `.sr-only` when the text must be in the DOM for assistive tech that does not surface every `aria-label`, when the content is a live region whose text changes at runtime, or when keyboard users need to focus the element itself (skip links). One name per concept: v20 ships `.sr-only` only — there is no `.screen-reader-only` alias.

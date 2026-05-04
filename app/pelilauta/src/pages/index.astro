@@ -2,7 +2,9 @@
 import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
 import CnCard from "@cyan/components/CnCard.svelte";
 import heroImg from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
+import SyndicateStream from "../components/front-page/SyndicateStream.astro";
 import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
+import { t } from "../i18n";
 import Page from "../layouts/Page.astro";
 ---
 
@@ -12,26 +14,12 @@ import Page from "../layouts/Page.astro";
   <section class="cn-content-triad">
     <TopThreadsStream />
 
-    <div>
-      <h2>Blog-roll</h2>
-      <div class="cn-card-grid">
-        <CnCard
-          title="Why West Marches Works"
-          href="/blog/why-west-marches-works"
-          description="A syndicated post from roleplayingtips.com on emergent storytelling in open-world campaigns."
-        />
-        <CnCard
-          title="Designing Encounter Balance"
-          href="/blog/designing-encounter-balance"
-          description="From theangrygm.com — a hard look at CR math and why it falls apart in actual play."
-        />
-        <CnCard
-          title="Session Zero Checklist 2026"
-          href="/blog/session-zero-checklist"
-          description="Refreshed starter kit from dmsguild-community for kicking off a new campaign without rework."
-        />
+    <SyndicateStream server:defer>
+      <div slot="fallback">
+        <h2>{t("app:syndicate.heading")}</h2>
+        <p class="text-caption">Loading community posts&hellip;</p>
       </div>
-    </div>
+    </SyndicateStream>
 
     <div>
       <h2>Latest sites</h2>

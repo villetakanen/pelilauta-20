@@ -122,7 +122,7 @@ App pages and app components MUST NOT use inline `style="..."` attributes or pag
 
 **Exception (deferred tech debt):** a feature's spec §Out of Scope may explicitly defer a DS escalation with a tracker link and a `/* DEFERRED */` marker comment; such deferrals are tech debt, not precedent.
 
-**DS vs domain boundary.** Cyan DS holds *structural* primitives only — no `Cn**` components for domain concepts. Domain-shaped components (e.g. `ThreadCard`, `ChannelHeader`, `SitePageHeader`) live in their feature package (`packages/threads/`, future `packages/sites/`, etc.) and compose DS primitives underneath. If a plan mentions `CnThreadSummary`, `CnPostCard`, or similar, it's a hallucination — check `packages/<domain>/src/components/` before declaring a domain component missing.
+**DS vs domain boundary.** Canonical contract lives in [`ARCHITECTURE.md`](ARCHITECTURE.md) §DS-vs-domain boundary. Short version: cyan holds structural primitives only; anything whose API or markup names a feature concept (`Thread`, `Channel`, `Profile`, ...) lives in the owning feature package's `./components`. Names like `CnThreadCard` or `CnPostSummary` should never appear; if a plan references one, check `packages/<domain>/src/components/` first.
 
 ## Workspace conventions
 
