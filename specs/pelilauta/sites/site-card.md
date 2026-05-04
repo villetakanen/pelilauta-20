@@ -26,7 +26,7 @@ surface; current consumers include the front-page top-sites
 stream and the future `/sites` directory, with profile views,
 search results, and any "list of sites" surface joining as they
 land. The card sits alongside `MembershipBadge` (a sibling
-component owned by [`membership-badge.md`](./membership-badge.md))
+component owned by [`membership-badge/spec.md`](./membership-badge/spec.md))
 and composes it conditionally inside its actions slot.
 
 ### Architecture
@@ -119,7 +119,7 @@ The card composes `CnCard` with the following slot layout:
 The card surfaces no owner identity as text — there is no
 byline, no nick, no avatar image, no profile link. The
 membership badge is a per-viewer self-membership signal, not a
-byline. See [`membership-badge.md`](./membership-badge.md) for
+byline. See [`membership-badge/spec.md`](./membership-badge/spec.md) for
 the badge contract.
 
 #### Constraints
@@ -153,7 +153,7 @@ the badge contract.
   `MembershipBadge.svelte` from `./components`. The card
   imports the sibling component directly (intra-package
   import); the sibling's contract is owned by
-  [`membership-badge.md`](./membership-badge.md).
+  [`membership-badge/spec.md`](./membership-badge/spec.md).
 
 ### Consumers (initial)
 

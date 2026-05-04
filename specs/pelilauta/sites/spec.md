@@ -40,8 +40,10 @@ The MVP scope of this spec covers:
 2. The schema (`SiteSchema`, v17 contract preserved verbatim).
 3. The minimum read-side accessors (`getSites`, `getSite`).
 4. The reusable view components: `SiteCard` (flat sibling spec
-   [`site-card.md`](./site-card.md)) and `MembershipBadge` (flat
-   sibling spec [`membership-badge.md`](./membership-badge.md)).
+   [`site-card.md`](./site-card.md)) and `MembershipBadge`
+   (subfolder sub-spec
+   [`membership-badge/spec.md`](./membership-badge/spec.md) —
+   independent feature, reused beyond `SiteCard`).
 5. The system-noun mapping (Site `system` → cyan icon noun).
 6. The `sites:title` i18n key.
 
@@ -85,7 +87,7 @@ packages/sites/
     server/                  → SSR-safe re-exports (schemas, types, read accessors, systemToNoun)
     components/              → Svelte 5 / Astro UI components
       SiteCard.svelte        → preview card; contract at site-card.md
-      MembershipBadge.svelte → CSR-only "you are an owner / player" indicator; contract at membership-badge.md
+      MembershipBadge.svelte → CSR-only "you are an owner / player" indicator; contract at membership-badge/spec.md
     i18n/
       index.ts               → exports fi, en — locale strings for the sites namespace
 ```
@@ -179,7 +181,7 @@ URL surface.
   actions slot. Reused across the front-page stream, the
   `/sites` directory, profile views, and any future surface that
   lists sites.
-- [`membership-badge.md`](./membership-badge.md) —
+- [`membership-badge/spec.md`](./membership-badge/spec.md) —
   `MembershipBadge.svelte` rendering contract: CSR-only,
   authenticated-mount-only, owner badge for `uid ∈ owners`,
   player badge for `uid ∈ players AND uid ∉ owners`.
@@ -253,7 +255,7 @@ engine contract and host composition rules.
   Astro frontmatter decides whether to emit the `client:idle`
   directive (via `Astro.locals.session`); the badge component
   reads the session store only post-hydration. See
-  [`membership-badge.md`](./membership-badge.md).
+  [`membership-badge/spec.md`](./membership-badge/spec.md).
 
 ## Contract
 
@@ -305,7 +307,7 @@ Stages are cumulative.
       [`site-card.md`](./site-card.md).
 - [ ] `MembershipBadge.svelte` exists at
       `packages/sites/src/components/MembershipBadge.svelte` per
-      [`membership-badge.md`](./membership-badge.md).
+      [`membership-badge/spec.md`](./membership-badge/spec.md).
 - [ ] Front-page `TopSitesStream` (per
       [`../front-page/top-sites-stream/spec.md`](../front-page/top-sites-stream/spec.md))
       renders against this package without any host-side

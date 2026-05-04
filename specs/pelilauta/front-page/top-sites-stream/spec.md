@@ -53,7 +53,7 @@ spec'd separately and consumed here as discrete props.
     `@pelilauta/sites/components` — the per-row preview card.
     The stream calls `SiteCard` once per site, threading
     pre-resolved props.
-  - [`MembershipBadge`](../../sites/membership-badge.md) from
+  - [`MembershipBadge`](../../sites/membership-badge/spec.md) from
     `@pelilauta/sites/components` — CSR-only "you are an owner
     / player" indicator, mounted by `SiteCard` only when its
     `isAuthenticated` prop is `true`. The mount decision
@@ -174,7 +174,7 @@ spec'd separately and consumed here as discrete props.
 - [ ] When `Astro.locals.session` is truthy, each rendered
       `SiteCard` mounts exactly one `MembershipBadge`
       `client:idle` island. (Per-card badge rules:
-      [`../../sites/membership-badge.md`](../../sites/membership-badge.md).)
+      [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).)
 - [ ] The widget does not call `getProfile(...)` and does not
       import from `@pelilauta/profiles`.
 - [ ] A visible `<h2>` region heading appears above the list,
@@ -300,7 +300,7 @@ And the response is shareable across all authenticated viewers
 > [`../../sites/site-card.md`](../../sites/site-card.md). Per-viewer
 > badge scenarios (owner viewer, player viewer, stranger
 > viewer, reactive session updates) live in
-> [`../../sites/membership-badge.md`](../../sites/membership-badge.md).
+> [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
 
 ## Migration Debt and Decisions
 
@@ -335,7 +335,7 @@ And the response is shareable across all authenticated viewers
    to also signal players (`uid ∈ players AND uid ∉ owners` →
    `meeple` icon), and only mounts on authenticated requests.
    Spec:
-   [`../../sites/membership-badge.md`](../../sites/membership-badge.md).
+   [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
 6. **HTTP self-fetch in the widget.** v18 calls
    `fetch(${Astro.url.origin}/api/sites?limit=5)` inside its
    own frontmatter. v20 reads in-process via the shared
@@ -377,7 +377,7 @@ And the response is shareable across all authenticated viewers
    on the session cookie, no CSR island).
 3. **Membership badges on the front-page card — present;
    contract owned by**
-   [`../../sites/membership-badge.md`](../../sites/membership-badge.md).
+   [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
    Owner badge (`avatar`), player badge (`meeple`), strangers
    render nothing. CSR-only, mounted only on authenticated
    requests via the `isAuthenticated` prop on `SiteCard`.
@@ -395,7 +395,7 @@ And the response is shareable across all authenticated viewers
    Surfaces (`systemToNoun`).
 8. **Membership badge icon nouns — `avatar` (owner), `meeple`
    (player).** Detail:
-   [`../../sites/membership-badge.md`](../../sites/membership-badge.md).
+   [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
 9. **Authenticated-mount mechanism — `Astro.locals.session`.**
    The stream's frontmatter reads it once and threads the
    binary truthiness into each card as `isAuthenticated`.
