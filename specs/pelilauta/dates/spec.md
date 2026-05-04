@@ -1,55 +1,60 @@
 ---
-feature: Date and Flow-Time Labels
+feature: Date Labels
 status: draft
 maturity: design
 last_major_review: 2026-05-04
 parent_spec: ../spec.md
 ---
 
-# Feature: Date and Flow-Time Labels
+# Feature: Date Labels
 
 > Reverse-spec'd from
 > `.tmp/pelilauta-17/src/utils/contentHelpers.ts:toDisplayString`
 > with v20 threshold and behaviour adjustments. v18 returns
 > relative time only when the elapsed delta is < 72 hours and
 > falls back to the ISO date string otherwise; v20 widens the
-> relative window to 7 days and ships a dedicated `flowTimeLabel`
+> relative window to 7 days and ships a dedicated `dateLabel`
 > formatter so card and stream surfaces consume one
 > well-specified helper instead of branching on `relative` flags
 > at call sites.
+>
+> v20 deliberately drops v18's defensive empty-input handling
+> (`if (!date) return 'N/A'`). The v20 helper is a pure
+> converter that takes a real `Date` or millisecond `number`;
+> handling the absent / unset / sentinel-value case is the
+> caller's responsibility upstream.
 
 ## Blueprint
 
 ### Context
 
 Several Pelilauta surfaces (site cards, thread cards, syndicate
-items) display "when did this last move?" — sourced from the
-`flowTime` field on `Entry`-shaped documents (sites, threads,
-replies). The display string blends two formats:
+items, audit headers) display "when did this happen?" — sourced
+from a `Date` or millisecond `number` upstream. The display
+string blends two formats:
 
 - **Relative** ("2 days ago" / "2 päivää sitten") for activity
   that is recent enough to be cognitively useful as a delta —
   v20 caps relative formatting at less than 7 days. The 7-day
-  widening from v18's 72 hours reflects how `flowTime` is used:
+  widening from v18's 72 hours reflects how flow-time is used:
   on the front-page sites stream, the most recent 5 sites are
   often older than 3 days, and seeing "5 days ago" reads more
   naturally than a bare ISO date.
 - **Absolute** (`YYYY-MM-DD`) for activity ≥ 7 days old, where
   the precise date is more useful than a relative offset.
 
-`flowTimeLabel` exposes this rule as a single pure function. The
-helper is locale-aware via `Intl.RelativeTimeFormat` and
-`Intl.DateTimeFormat`, so callers pass the viewer's `uxLocale`
-and receive a localised string.
+`dateLabel` exposes this rule as a single pure function. The
+helper is locale-aware via `Intl.RelativeTimeFormat`, so callers
+pass the viewer's `uxLocale` and receive a localised string.
 
-`flowTimeLabel` is its own utility — not a re-export, not a
-thin wrapper. v18's `toDisplayString(date, relative, locale)`
-mixes the threshold, formatting, and the bare-ISO fallback into
-one function with a boolean flag; v20 extracts the
-threshold-and-format choice into `flowTimeLabel` and leaves the
+`dateLabel` is its own utility — not a re-export, not a thin
+wrapper. v18's `toDisplayString(date, relative, locale)` mixes
+the threshold, formatting, and the bare-ISO fallback into one
+function with a boolean flag; v20 extracts the
+threshold-and-format choice into `dateLabel` and leaves the
 absolute-only fallback (still useful for non-flow-time fields
 like `createdAt` headers and audit timestamps) on a separate,
-narrower helper.
+narrower helper (`toIsoDate`).
 
 ### Architecture
 
@@ -59,56 +64,68 @@ narrower helper.
 - **Sub-export:** add `./dates` to `packages/utils/package.json`
   exports map.
 - **Co-located tests:**
-  - `packages/utils/src/dates/flowTimeLabel.test.ts`
+  - `packages/utils/src/dates/dateLabel.test.ts`
   - `packages/utils/src/dates/toIsoDate.test.ts`
 
 #### API
 
 ```ts
-export function flowTimeLabel(
-  flowTime: number | Date | undefined,
-  locale: string,                          // e.g. 'fi', 'en'
-  now?: Date,                              // injectable for tests; defaults to new Date()
+export function dateLabel(
+  date: number | Date,
+  locale: string,                  // e.g. 'fi', 'en'
+  now?: Date,                      // injectable for tests; defaults to new Date()
 ): string;
 
-export function toIsoDate(
-  date: number | Date | undefined,
-): string;
+export function toIsoDate(date: number | Date): string;
 ```
 
-#### `flowTimeLabel` behaviour
+Both functions are pure converters. The signature is the
+contract: `undefined`, `null`, missing fields, or sentinel
+values (`0` for a "never-flowed" `Entry`, etc.) MUST be filtered
+upstream by the caller. Passing `undefined` is a programmer
+error; TypeScript prevents it at compile time, and the runtime
+makes no defensive guarantee for loosely-typed callers.
 
-1. **Empty input** (`undefined`, `null`, or a `Date` whose
-   underlying number is `NaN`) → return `''`. v18's
-   `toDisplayString` returned the literal string `'N/A'` for
-   missing input; v20 prefers the empty string so consumers
-   that splice the result into card markup do not accidentally
-   render the `'N/A'` placeholder. Card-side empty values render
-   as truly empty.
-2. **Compute elapsed milliseconds.** `elapsedMs = now.getTime()
-   - new Date(flowTime).getTime()`. The sign of `elapsedMs` is
+#### `dateLabel` behaviour
+
+1. **Compute elapsed milliseconds.** `elapsedMs = now.getTime() -
+   new Date(date).getTime()`. The sign of `elapsedMs` is
    preserved — future timestamps yield negative deltas, which
    `Intl.RelativeTimeFormat` formats correctly ("in 2 days").
-3. **Threshold decision.** When `Math.abs(elapsedMs) < 7 *
-   24 * 60 * 60 * 1000` (i.e. less than 7 days), return the
-   relative format. Otherwise, return the absolute format
-   `YYYY-MM-DD`.
-4. **Relative format.** Use `Intl.RelativeTimeFormat(locale, {
+2. **Threshold decision.** When `Math.abs(elapsedMs) < 7 * 24 *
+   60 * 60 * 1000` (i.e. less than 7 days), return the relative
+   format. Otherwise, return the absolute format `YYYY-MM-DD`.
+3. **Relative format.** Use `Intl.RelativeTimeFormat(locale, {
    numeric: 'auto' })` and choose the largest unit whose
    absolute magnitude is at least 1:
    - seconds (when `|elapsedMs| < 60s`),
    - minutes (when `|elapsedMs| < 60m`),
    - hours (when `|elapsedMs| < 24h`),
    - days (when `|elapsedMs| < 7d`).
-   The unit selection is consistent with `Intl.RelativeTimeFormat`
-   default behaviour and matches v18.
-5. **Absolute format.** Return the first 10 characters of the
+4. **Absolute format.** Return the first 10 characters of the
    ISO 8601 representation of the date —
-   `new Date(flowTime).toISOString().substring(0, 10)`. The ISO
-   format is locale-stable on purpose: the consuming surfaces
-   want a deterministic, sortable date string that does not
-   depend on the user's UX locale (Finnish and English readers
-   both reliably parse `2026-05-04`).
+   `new Date(date).toISOString().substring(0, 10)`. The output
+   is **UTC-stable**: the format is deterministic, sortable, and
+   independent of the viewer's UX locale (Finnish and English
+   readers both reliably parse `2026-05-04`). It is **not
+   timezone-stable**: see §Timezone below.
+
+##### Timezone
+
+The absolute output is the UTC date, derived from
+`Date.toISOString()`. Two viewers in different timezones see
+different absolute strings for a `date` near a UTC midnight
+boundary — e.g. a `date` at `2026-05-04T01:00:00Z` renders as
+`"2026-05-04"` for everyone, including a viewer in UTC+12 whose
+local clock reads 13:00 on May 4 and a viewer in UTC-8 whose
+local clock reads 17:00 on May 3. This is intentional v18
+carry-forward: the format stays deterministic and sortable
+across the platform's caching layers, at the cost of a one-day
+offset for viewers far from UTC near midnight. Switching to a
+viewer-local date (via `Intl.DateTimeFormat`) would make the
+output viewer-specific and break shared response caching; that
+trade-off is not worth the timezone correctness for this
+helper's surfaces (card footers, audit headers).
 
 #### `toIsoDate` behaviour
 
@@ -116,8 +133,7 @@ A narrower companion that always returns the absolute
 `YYYY-MM-DD` string regardless of elapsed time. Used by
 non-flow-time surfaces (audit headers, "created on" footers,
 admin tables) where the relative-window logic is not wanted.
-Returns `''` for empty input, mirrors `flowTimeLabel`'s absolute
-branch otherwise.
+Mirrors `dateLabel`'s absolute branch.
 
 #### Constraints
 
@@ -125,79 +141,89 @@ branch otherwise.
   helper N times with the same arguments and the same `now`
   returns the same result.
 - **SSR-safe.** No browser globals, no DOM APIs.
-  `Intl.RelativeTimeFormat` and `Intl.DateTimeFormat` are
-  available in Node and Edge runtimes.
+  `Intl.RelativeTimeFormat` is available in Node and Edge
+  runtimes (Node 14+).
 - **Injectable `now`.** Tests pass an explicit `now: Date` so
   threshold-edge behaviour can be asserted without freezing the
   system clock. Production callers omit `now` and let the
   helper default to `new Date()`.
-- **Empty input is not an error.** Missing `flowTime` returns
-  the empty string — callers render the empty string visibly
-  empty, not as a `'N/A'` placeholder.
+- **No defensive empty-input handling.** The signature accepts
+  only real values (`number | Date`). Callers handle absent /
+  sentinel / unparsed-input upstream — typically via a
+  short-circuit (`if (!flowTime) return '—';` at the call site)
+  or a `?? '—'` fallback in the consuming template. The helper
+  makes no special promise about `0`, `NaN`-backed Dates, or
+  any other "valid type, broken value." `0` renders as the
+  literal epoch (`1970-01-01`); `new Date(NaN)` renders as the
+  platform's invalid-Date string. See §Migration debt vs v18.
 - **The 7-day threshold is part of the contract.** Tightening
   to 72 hours (the v18 default) or loosening to 30 days both
   change the visual feel of the cards. Either is acceptable as
   a future design change but lands as a spec edit, not a
   silent tweak.
 - **Locale unit-selection follows `Intl.RelativeTimeFormat`
-  defaults.** Custom unit pluralisation, custom
-  ordinal handling, custom "yesterday" / "tomorrow" wording
-  beyond `numeric: 'auto'` are out of scope for this helper.
-- **`flowTime` field stays verbatim.** This helper consumes the
-  v17 `flowTime` field shape (number of milliseconds since
-  epoch, or a Firestore Timestamp converted to `Date` upstream
-  by `@pelilauta/models`'s `toDate`). It does not introduce a
-  new field.
+  defaults.** Custom unit pluralisation, custom ordinal
+  handling, custom "yesterday" / "tomorrow" wording beyond
+  `numeric: 'auto'` are out of scope.
 
 ### Dependencies
 
-- `Intl.RelativeTimeFormat` (browser + Node / Edge built-in).
-- `Intl.DateTimeFormat` (built-in) — only via the ISO
-  `substring(0, 10)` path, which actually uses
-  `Date.toISOString` rather than `DateTimeFormat`. Listed for
-  completeness; no separate import.
+- `Intl.RelativeTimeFormat` (built-in; Node 14+, evergreen
+  browsers).
 
 ### Consumers (initial)
 
 - [`../sites/site-card.md`](../sites/site-card.md) — flow-time
-  footer string.
+  footer. The card's host (e.g. `TopSitesStream.astro`) filters
+  sentinel values upstream and passes a real `Date` / `number`.
 - The forthcoming `ThreadCard` `dateLabel` prop (per
   [`../front-page/top-threads-stream/spec.md`](../front-page/top-threads-stream/spec.md))
-  — same helper, same threshold rule. (The `ThreadCard` spec
-  currently does not pin the format; converging on this helper
-  is a follow-up that lands when the dateLabel resolution
-  decision is taken there.)
+  — same helper, same threshold rule, same upstream-filter
+  responsibility.
 - Any future card or stream surface that needs "when did this
-  last move?".
+  happen?".
+
+### Migration debt vs v18
+
+- v18's `toDisplayString(date, relative, locale)` returned the
+  literal string `'N/A'` for falsy input (`if (!date) return
+  'N/A'`). v20 drops the defensive check entirely; the helper
+  signature rejects `undefined`, and falsy values like `0`
+  render as their literal date (epoch → `"1970-01-01"`). This
+  is a deliberate API tightening. v20 callers that previously
+  relied on the `'N/A'` fallback short-circuit upstream
+  themselves.
+- v18 capped relative formatting at 72 hours; v20 widens to 7
+  days. See §Context for rationale.
+- v18 mixes relative and absolute behind a `relative: boolean`
+  flag on a single `toDisplayString` function. v20 splits into
+  two functions: `dateLabel` (threshold-aware,
+  relative-or-absolute) and `toIsoDate` (always absolute).
 
 ## Contract
 
 ### Definition of Done
 
-- [ ] `packages/utils/src/dates/flowTimeLabel.ts` exists and
-      exports `flowTimeLabel(flowTime, locale, now?)`.
+- [ ] `packages/utils/src/dates/dateLabel.ts` exists and exports
+      `dateLabel(date, locale, now?)`.
 - [ ] `packages/utils/src/dates/toIsoDate.ts` exists and exports
       `toIsoDate(date)`.
 - [ ] `packages/utils/src/dates/index.ts` re-exports both
       symbols.
 - [ ] `packages/utils/package.json` declares a `./dates`
       sub-export pointing at the index.
-- [ ] For elapsed time < 7 days, `flowTimeLabel` returns a
+- [ ] Both functions accept `number | Date` only — TypeScript
+      rejects `undefined`/`null` at compile time.
+- [ ] For elapsed time < 7 days, `dateLabel` returns a
       locale-formatted relative-time string via
       `Intl.RelativeTimeFormat(locale, { numeric: 'auto' })`.
-- [ ] For elapsed time ≥ 7 days, `flowTimeLabel` returns the
-      ISO date `YYYY-MM-DD`.
-- [ ] For empty input (undefined, null, NaN-backed Date),
-      `flowTimeLabel` returns `''`.
-- [ ] Future timestamps (negative elapsed) format correctly
-      (e.g. "in 2 days" via the `Intl.RelativeTimeFormat`
-      sign).
+- [ ] For elapsed time ≥ 7 days, `dateLabel` returns the ISO
+      date `YYYY-MM-DD`.
 - [ ] `toIsoDate` returns the same `YYYY-MM-DD` string for any
-      valid input regardless of elapsed time, and `''` for
-      empty input.
-- [ ] Co-located tests cover all of the above, including the
-      threshold edges (just-under-7d → relative,
-      exactly-7d → absolute, just-over-7d → absolute).
+      valid input regardless of elapsed time.
+- [ ] Co-located tests cover the happy paths and the threshold
+      edges (just-under-7d → relative, exactly-7d → absolute,
+      just-over-7d → absolute).
 
 ### Regression Guardrails
 
@@ -205,108 +231,100 @@ branch otherwise.
   explicit spec edit. A silent tightening to 72 hours (v18) or
   loosening to 30 days changes the visual rhythm of the front
   page and is a regression.
-- Empty input MUST return `''` — never a `'N/A'` placeholder
-  or any other prose. Surfaces depend on the empty result
-  rendering as truly empty.
-- Absolute format MUST remain locale-stable (`YYYY-MM-DD`).
-  Switching to a locale-formatted absolute (e.g.
-  "4. toukokuuta 2026") would defeat sortability and create
-  layout instability across locales.
+- Absolute format MUST remain UTC `YYYY-MM-DD`. Switching to a
+  locale-formatted absolute (e.g. "4. toukokuuta 2026") or a
+  viewer-local timezone-derived date defeats sortability,
+  breaks shared response caching, and creates layout
+  instability across locales / timezones.
 - The helper MUST stay pure and side-effect-free. Adding
   caching, memoisation, or telemetry would obscure the
   threshold-edge behaviour.
+- The signature MUST stay narrow (`number | Date`). Adding
+  `undefined` / `null` defensive handling to the implementation
+  re-couples the helper to a defensive role v20 deliberately
+  removed.
 
 ### Testing Scenarios
 
-#### Scenario: Less than 1 minute ago renders as "now"-class relative
+#### Scenario: A few seconds ago renders as relative seconds
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is 30 seconds before now
-When flowTimeLabel(flowTime, 'en', now) is called
-Then the result is a relative-time string for seconds (e.g. "30 seconds ago" or "now")
-And the result is locale-aware ("ago" / "sitten" depending on locale)
+And date is 30 seconds before now
+When dateLabel(date, 'en', now) is called
+Then the result equals Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-30, 'second')
 ```
 
 #### Scenario: A few hours ago renders as relative hours
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is 5 hours before now
-When flowTimeLabel(flowTime, 'fi', now) is called
-Then the result is the Finnish relative-hours string
-  produced by Intl.RelativeTimeFormat('fi', { numeric: 'auto' }) for 'hour' / -5
+And date is 5 hours before now
+When dateLabel(date, 'fi', now) is called
+Then the result equals Intl.RelativeTimeFormat('fi', { numeric: 'auto' }).format(-5, 'hour')
 ```
 
 #### Scenario: 5 days ago renders as relative days
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is exactly 5 days before now
-When flowTimeLabel(flowTime, 'en', now) is called
-Then the result is "5 days ago" (or the equivalent
-  Intl.RelativeTimeFormat output for 'day' / -5)
+And date is exactly 5 days before now
+When dateLabel(date, 'en', now) is called
+Then the result equals Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(-5, 'day')
 ```
 
 #### Scenario: Just under 7 days renders as relative
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is 6 days, 23 hours, 59 minutes before now
-When flowTimeLabel(flowTime, 'en', now) is called
-Then the result is a relative-day string (e.g. "7 days ago"
-  rounded by Intl.RelativeTimeFormat)
-And the result is NOT the absolute "2026-04-27" / "2026-04-28"
+And date is 6 days, 23 hours, 59 minutes before now
+When dateLabel(date, 'en', now) is called
+Then the result is a relative-day string from Intl.RelativeTimeFormat
+And the result does NOT match the YYYY-MM-DD ISO-date pattern
 ```
 
 #### Scenario: Exactly 7 days renders as absolute
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is exactly 7 days before now (2026-04-27T12:00:00Z)
-When flowTimeLabel(flowTime, 'en', now) is called
+And date is exactly 7 days before now (2026-04-27T12:00:00Z)
+When dateLabel(date, 'en', now) is called
 Then the result is "2026-04-27"
-And the result is NOT a relative-time string
 ```
 
 #### Scenario: More than 7 days renders as absolute
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is 30 days before now
-When flowTimeLabel(flowTime, 'fi', now) is called
+And date is 30 days before now
+When dateLabel(date, 'fi', now) is called
 Then the result is "2026-04-04"
-And the result format is YYYY-MM-DD regardless of locale
+And the result is the same UTC YYYY-MM-DD string regardless of locale
 ```
 
 #### Scenario: Future timestamp renders as relative (positive direction)
 
 ```gherkin
 Given now is 2026-05-04T12:00:00Z
-And flowTime is 2 days after now
-When flowTimeLabel(flowTime, 'en', now) is called
-Then the result is "in 2 days" (or the equivalent
-  Intl.RelativeTimeFormat output for 'day' / +2)
+And date is 2 days after now
+When dateLabel(date, 'en', now) is called
+Then the result equals Intl.RelativeTimeFormat('en', { numeric: 'auto' }).format(2, 'day')
 ```
 
-#### Scenario: Empty input returns the empty string
+#### Scenario: Epoch input has no special-casing
 
 ```gherkin
-Given flowTime is undefined
-When flowTimeLabel(flowTime, 'en') is called
-Then the result is ''
-And no exception is thrown
-
-Given flowTime is null
-When flowTimeLabel(flowTime, 'en') is called
-Then the result is ''
-
-Given flowTime is new Date(NaN)
-When flowTimeLabel(flowTime, 'en') is called
-Then the result is ''
+Given now is 2026-05-04T12:00:00Z
+And date is the number 0 (the v17 "never-flowed" sentinel for an unset Entry.flowTime)
+When dateLabel(date, 'en', now) is called
+Then the result is "1970-01-01"
+And no defensive empty-string fallback is returned
 ```
 
-#### Scenario: toIsoDate is unaffected by elapsed time
+(Callers that treat 0 as "never" filter it upstream — see
+§Constraints "No defensive empty-input handling.")
+
+#### Scenario: toIsoDate returns the UTC date for any timestamp
 
 ```gherkin
 Given a Date for 2026-05-04T12:00:00Z
@@ -317,7 +335,21 @@ Given a Date for 1999-01-01T00:00:00Z
 When toIsoDate(date) is called
 Then the result is "1999-01-01"
 
-Given undefined
-When toIsoDate(undefined) is called
-Then the result is ''
+Given the number 0
+When toIsoDate(0) is called
+Then the result is "1970-01-01"
+```
+
+#### Scenario: Absolute output is UTC, not viewer-local
+
+```gherkin
+Given a Date at 2026-05-04T01:00:00Z (1 AM UTC)
+And the running process's TZ is set to "Pacific/Auckland" (UTC+12, local clock would read 13:00 on May 4)
+When toIsoDate(date) is called
+Then the result is "2026-05-04"
+
+Given the same Date at 2026-05-04T01:00:00Z
+And the running process's TZ is set to "America/Los_Angeles" (UTC-8, local clock would read 17:00 on May 3)
+When toIsoDate(date) is called
+Then the result is still "2026-05-04"
 ```

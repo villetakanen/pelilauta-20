@@ -6,7 +6,8 @@
     "./log": "./src/log.ts",
     "./markdownToHTML": "./src/markdownToHTML.ts",
     "./markdownToPlainText": "./src/markdownToPlainText.ts",
-    "./sanitizeNext": "./src/sanitizeNext.ts"
+    "./sanitizeNext": "./src/sanitizeNext.ts",
+    "./dates": "./src/dates/index.ts"
   },
   "scripts": {
     "test": "vitest run"
