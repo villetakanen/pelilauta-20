@@ -100,7 +100,7 @@ v20 is a code refresh, not a schema redo. Firestore document shapes, collection 
 ## Server architecture
 
 - **No Firebase Cloud Functions.** Server-side logic lives in Astro API routes (`app/pelilauta/src/pages/api/**`), deployed as Netlify functions. Use `firebase-admin` inside API routes with service-account credentials. Adding a `functions/` directory or `firebase-functions` dependency requires explicit spec-level justification.
-- **Anonymous = SSR-only.** Pages without an authenticated session render as pure SSR with no client-side JavaScript: no Firebase subscriptions, no editors, no CSR mounting. This is the SEO surface and must remain crawlable and lean.
+- **Anonymous = SSR-only and cache-shareable.** Pages without an authenticated session render content fully at the server: no client-side data fetching, no Firebase subscriptions, no editors, no per-viewer state resolution. This is the SEO surface and must remain crawlable, lean, and byte-identical across all anonymous viewers. Decorative or visual `client:*` islands (animations, scroll effects, theme toggles, and similar enhancements that don't fetch data, render content, or vary by viewer identity) are permitted on anonymous renders provided they preserve cache-shareability.
 - **Authenticated = SSR shell + CSR mount.** Once a valid session cookie is present, SSR still renders the base shell; Svelte islands hydrate on top for editors, subscribed Firestore data, and write actions.
 - **Write actions on anonymous pages degrade to login prompts** (`<a href="/login?next=...">`), not disabled JS widgets.
 - **Don't design features that require a CSR shell on every page** — that defeats the anonymous-SSR contract.

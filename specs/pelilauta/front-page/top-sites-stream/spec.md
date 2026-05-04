@@ -31,12 +31,13 @@ vertical list of preview cards, completing the front page's
 blog-roll).
 
 This widget owns only its front-page composition: the heading,
-the show-more link, the error and empty states, and the binding
-between session presence and `MembershipBadge` mount. The
-`SiteCard` component, the `MembershipBadge` component, the
-`Site` schema, the `getSites` accessor, the
-image-optimisation helpers, and the flow-time formatter are each
-spec'd separately and consumed here as discrete props.
+the show-more link, the error and empty states, and the per-card
+`client:idle` decision that turns each authenticated `<SiteCard>`
+into a hydrated island. The `SiteCard` component, the
+`MembershipBadge` component, the `Site` schema, the `getSites`
+accessor, the image-optimisation helpers, and the flow-time
+formatter are each spec'd separately and consumed here as
+discrete props.
 
 ### Architecture
 
@@ -53,11 +54,15 @@ spec'd separately and consumed here as discrete props.
     `@pelilauta/sites/components` — the per-row preview card.
     The stream calls `SiteCard` once per site, threading
     pre-resolved props.
-  - [`MembershipBadge`](../../sites/membership-badge/spec.md) from
-    `@pelilauta/sites/components` — CSR-only "you are an owner
-    / player" indicator, mounted by `SiteCard` only when its
-    `isAuthenticated` prop is `true`. The mount decision
-    originates here, in the stream's frontmatter.
+  - [`MembershipBadge`](../../sites/membership-badge/spec.md) —
+    consumed transitively via `SiteCard`. SiteCard renders the
+    badge inside its actions area only when `isAuthenticated`
+    is `true`; this stream's frontmatter is the surface that
+    decides whether each card is hydrated at all (the
+    `client:idle` directive lives on the `<SiteCard>` tag, per
+    [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md)
+    §Authentication wiring). No `client:*` directive ever
+    decorates `<MembershipBadge>` itself.
   - `CnCard` from `@pelilauta/cyan` — DS card primitive,
     consumed transitively via `SiteCard`.
 
@@ -96,25 +101,32 @@ spec'd separately and consumed here as discrete props.
     (show-more link, shared with `TopThreadsStream`);
     `pelilauta:error.fetch` (error block, shared with
     `TopThreadsStream`).
-  - Sites-owned key: `sites:title` (stream `<h2>` heading —
-    "Sivustot" / "Sites", owned by `@pelilauta/sites/i18n`,
-    shared with the `/sites` directory `<h1>`).
+  - Sites-owned key: `sites:title` (stream `<h2>` heading,
+    shared with the `/sites` directory `<h1>`). Owned by the
+    Sites i18n surface — see
+    [`../../sites/i18n/spec.md`](../../sites/i18n/spec.md).
   - All resolved through the host-bound `t` from
     `app/pelilauta/src/i18n.ts`. **No `@pelilauta/profiles`
     dependency** — the card carries no owner identity, so no
     `profiles:*` key is consumed.
 
 - **Constraints:**
-  - **Anonymous render = zero JS.** When
+  - **Anonymous render = no CSR.** When
     `Astro.locals.session` is falsy, every `SiteCard` is
     rendered with `isAuthenticated={false}` and the widget
-    emits no `client:*` directives anywhere in its subtree.
-  - **Authenticated render = SSR shell + per-card CSR badge.**
-    When `Astro.locals.session` is truthy, every `SiteCard`
-    is rendered with `isAuthenticated={true}` and each card
-    mounts exactly one `MembershipBadge` `client:idle`
-    island. That island is the only client JS the front page
-    mounts in this widget's subtree.
+    emits no viewer-state-dependent `client:*` directives in
+    its subtree (per the parent front-page contract: visual
+    islands that preserve cache-shareability are permitted, but
+    this widget currently has none).
+  - **Authenticated render = SSR shell + per-card `<SiteCard>`
+    island.** When `Astro.locals.session` is truthy, every
+    `<SiteCard>` is emitted with `isAuthenticated={true}` and
+    `client:idle` on the `<SiteCard>` tag itself. The card
+    hydrates as a single island; `MembershipBadge` runs as a
+    child of that hydration scope and renders the per-viewer
+    indicator post-hydration. The hydrated subtree per card is
+    the only client JS this widget contributes to the front
+    page.
   - **Cache key.** The page response splits on session
     presence (binary), not on uid value — anonymous responses
     are shareable across all anonymous viewers, and
@@ -175,9 +187,13 @@ spec'd separately and consumed here as discrete props.
       `isAuthenticated`.
 - [ ] When `Astro.locals.session` is falsy, the rendered
       subtree contains no `client:*` directive anywhere.
-- [ ] When `Astro.locals.session` is truthy, each rendered
-      `SiteCard` mounts exactly one `MembershipBadge`
-      `client:idle` island. (Per-card badge rules:
+- [ ] When `Astro.locals.session` is truthy, each `<SiteCard>`
+      is emitted with `client:idle` on the `<SiteCard>` tag
+      itself. SiteCard renders MembershipBadge inside its
+      actions area as a normal Svelte child — no `client:*`
+      decorates `<MembershipBadge>`. (Per-card rules:
+      [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md)
+      §Authentication wiring; per-viewer badge rules:
       [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).)
 - [ ] The widget does not call `getProfile(...)` and does not
       import from `@pelilauta/profiles`.
@@ -210,11 +226,11 @@ spec'd separately and consumed here as discrete props.
   accessor with an HTTP self-fetch is a regression — the
   component must not depend on its own API route resolving
   before SSR completes.
-- **Anonymous render zero-JS preserved.** Threading
+- **Anonymous render stays CSR-free.** Threading
   `isAuthenticated={true}` to a card on an anonymous request,
-  or otherwise emitting a `client:*` directive on an anonymous
-  render, is a regression against the front-page
-  anonymous-SSR-only contract.
+  or emitting a viewer-state-dependent `client:*` directive on
+  an anonymous render, is a regression against the front-page
+  anonymous-SSR contract.
 - **No per-uid SSR.** The SSR must not resolve badge state
   (e.g. "is this viewer in owners?") server-side. The decision
   lives inside the CSR `MembershipBadge` island; the stream
@@ -276,17 +292,22 @@ And the rendered HTML for the Top Sites Stream subtree contains no client:* dire
 And no MembershipBadge mount marker is present in the SSR HTML
 ```
 
-#### Scenario: Authenticated render mounts a MembershipBadge per card
+#### Scenario: Authenticated render hydrates each SiteCard as an island
 
 ```gherkin
 Given the request carries an authenticated session cookie
 And getSites(5, { order: 'flowTime', public: true }) returns 5 sites
 When the front page is rendered
-Then every SiteCard receives isAuthenticated={true}
-And exactly one <MembershipBadge owners={site.owners} players={site.players} client:idle />
-  mount marker appears per rendered SiteCard inside its actions slot
-And no SSR-side resolution of badge state occurs (the SSR HTML does not encode
-  "is current viewer in owners" or "is current viewer in players")
+Then every <SiteCard> in the SSR HTML carries Astro's hydration
+  marker for client:idle and receives isAuthenticated={true}
+And no client:* attribute appears on any <MembershipBadge> element
+  (the directive lives on the SiteCard boundary, not the badge)
+And inside each SiteCard's actions area the SSR HTML contains
+  MembershipBadge's empty placeholder (the badge's $uid is null
+  at SSR; per-viewer state resolves only after hydration)
+And no SSR-side resolution of badge state occurs (the SSR HTML
+  does not encode "is current viewer in owners" or "is current
+  viewer in players")
 ```
 
 #### Scenario: SSR cache splits on session presence, not on uid
@@ -297,6 +318,14 @@ When each requests the front page
 Then their SSR HTML for the Top Sites Stream is byte-identical
   (per-viewer badge resolution happens after hydration, inside MembershipBadge)
 And the response is shareable across all authenticated viewers
+
+Given an anonymous viewer and an authenticated viewer
+When each requests the front page
+Then the two responses differ — every <SiteCard> in the
+  authenticated response carries the client:idle hydration
+  marker; the anonymous response carries none
+And each cohort's response is still shareable across viewers
+  within that cohort
 ```
 
 > Per-card rendering scenarios (cover, eyebrow, body, footer,
@@ -389,8 +418,9 @@ And the response is shareable across all authenticated viewers
    [`../../images/spec.md`](../../images/spec.md)** in
    `packages/utils/src/images/`.
 5. **Show-more link target — `/sites`** owned by the Sites
-   package's directory route (per
-   [`../../sites/spec.md`](../../sites/spec.md) §Routes).
+   package's directory route (deferred to a TBD sub-spec per
+   [`../../sites/spec.md`](../../sites/spec.md) §Authoring DoD;
+   the link 404s at MVP).
 6. **`flowTime` label format — own util, relative if < 7 days
    else absolute.** Spec:
    [`../../dates/spec.md`](../../dates/spec.md).

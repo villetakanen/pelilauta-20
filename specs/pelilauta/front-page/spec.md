@@ -42,7 +42,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 ### Anti-Patterns
 
-- The anonymous render of the front page ships zero client-side JavaScript: no `client:*` directives, no hydration scripts. The authenticated render MAY mount `client:*` islands strictly limited to per-viewer progressive enhancements (e.g. `MembershipBadge` from [`top-sites-stream/spec.md`](./top-sites-stream/spec.md)). Caches split on the binary session-presence, never on uid value.
+- The anonymous render of the front page contains no CSR: no `client:*` islands that fetch data, render content, subscribe to live state, or vary by viewer identity. Decorative/visual `client:*` islands that preserve cache-shareability across all anonymous viewers are permitted. The authenticated render MAY additionally mount `client:*` islands for per-viewer progressive enhancements; the specific islands and their granularity are owned by each stream's sub-spec. Caches split on the binary session-presence, never on uid value.
 - Do not import v17 components or patterns directly — build on the v20 DS primitives
 - Do not reference the background image via a hardcoded URL string (e.g. `"/myrrys-proprietary/..."` from v17's `public/` symlink pattern). Use an ES import so Astro/Vite hashes the asset at build time and validates the path at compile-time.
 - Apps never override the DS: the page MUST NOT contain `<style>` blocks, inline `style=""`, or locally-defined classes that override, substitute for, or patch around DS behavior. Missing DS capability is a DS bug fixed in `packages/cyan`, not a page workaround.
@@ -68,7 +68,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 ### Regression Guardrails
 
-- The anonymous render of the front page must load with zero client-side JavaScript (no `client:*` directives, no hydration scripts). The authenticated render MAY mount `client:*` islands strictly limited to per-viewer progressive enhancements (currently: `MembershipBadge` per [`top-sites-stream/spec.md`](./top-sites-stream/spec.md)). Adding `client:*` directives to the anonymous render — or expanding the authenticated allowlist beyond per-viewer enhancements — is a regression.
+- The anonymous render of the front page contains no CSR: no `client:*` islands that fetch data, render content, subscribe to live state, or vary by viewer identity. The authenticated render MAY mount additional `client:*` islands for per-viewer progressive enhancements; the specific islands are owned by each stream's sub-spec. Adding viewer-state-dependent `client:*` directives to the anonymous render — or expanding the authenticated allowlist beyond per-viewer enhancements — is a regression.
 - Token references in the page are disallowed entirely (the page must not contain any CSS). Token discipline is enforced at the DS layer.
 - `Page` `title` prop must be set to "Pelilauta"
 - **Image path resolution.** The poster's `src` MUST resolve via the ES `import` from `@myrrys/proprietary/...` — no hardcoded `/myrrys-proprietary/...` URL. Reverting to a string literal would break build-time asset hashing and silently 404 when the image is moved.
@@ -122,8 +122,8 @@ And no client:* directive appears anywhere in the rendered subtree
 ```gherkin
 Given the front page is requested with an authenticated session cookie
 When inspecting the output HTML
-Then any client:* directive present is on an allow-listed per-viewer
-  enhancement island (currently: MembershipBadge per top-sites-stream/spec.md)
+Then any client:* directive present is on a per-viewer enhancement
+  island declared by an active stream sub-spec
 And no other client:* directives appear in the rendered subtree
 ```
 
