@@ -44,7 +44,7 @@ discrete props.
 - **Component:**
   `app/pelilauta/src/components/front-page/TopSitesStream.astro`
   — Astro component, server-rendered in the page's frontmatter,
-  mounted into the secondary small column of `cn-content-triad`
+  mounted into the tertiary small column of `cn-content-triad`
   on the front page. Mirrors `TopThreadsStream.astro`'s shape
   (per
   [`../top-threads-stream/spec.md`](../top-threads-stream/spec.md)).
@@ -90,11 +90,11 @@ discrete props.
     `` `/tags/${site.system}` ``; `dateLabel` from
     `@pelilauta/utils/dates` (per
     [`../../dates/spec.md`](../../dates/spec.md)).
-  - **Session presence:** the frontmatter reads
-    `Astro.locals.session` and threads its boolean truthiness
-    into each `SiteCard` as `isAuthenticated`. This is the
-    only auth-aware decision the stream owns; the badge
-    component itself reads the viewer's uid post-hydration.
+  - **Session presence:** the frontmatter computes
+    `isAuthenticated = Astro.locals.uid !== null` once and
+    threads the boolean into each `SiteCard`. This is the only
+    auth-aware decision the stream owns; the badge component
+    itself reads the viewer's uid post-hydration.
 
 - **i18n:**
   - Host-owned app keys: `pelilauta:action.showMore`
@@ -112,14 +112,14 @@ discrete props.
 
 - **Constraints:**
   - **Anonymous render = no CSR.** When
-    `Astro.locals.session` is falsy, every `SiteCard` is
-    rendered with `isAuthenticated={false}` and the widget
-    emits no viewer-state-dependent `client:*` directives in
-    its subtree (per the parent front-page contract: visual
-    islands that preserve cache-shareability are permitted, but
-    this widget currently has none).
+    `Astro.locals.uid` is null, every `SiteCard` is rendered
+    with `isAuthenticated={false}` and the widget emits no
+    viewer-state-dependent `client:*` directives in its subtree
+    (per the parent front-page contract: visual islands that
+    preserve cache-shareability are permitted, but this widget
+    currently has none).
   - **Authenticated render = SSR shell + per-card `<SiteCard>`
-    island.** When `Astro.locals.session` is truthy, every
+    island.** When `Astro.locals.uid` is non-null, every
     `<SiteCard>` is emitted with `isAuthenticated={true}` and
     `client:idle` on the `<SiteCard>` tag itself. The card
     hydrates as a single island; `MembershipBadge` runs as a
@@ -166,7 +166,7 @@ discrete props.
 ### Definition of Done
 
 - [ ] `TopSitesStream.astro` exists at the path above and is
-      mounted into the secondary small column of the
+      mounted into the tertiary small column of the
       front-page triad on
       `app/pelilauta/src/pages/index.astro`.
 - [ ] Renders up to 5 non-hidden sites sorted by `flowTime`
@@ -182,12 +182,11 @@ discrete props.
       fetching, no transforms, no formatting. (Per-card
       rendering rules:
       [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md).)
-- [ ] The frontmatter reads `Astro.locals.session` once and
-      threads its boolean truthiness into every `SiteCard` as
-      `isAuthenticated`.
-- [ ] When `Astro.locals.session` is falsy, the rendered
-      subtree contains no `client:*` directive anywhere.
-- [ ] When `Astro.locals.session` is truthy, each `<SiteCard>`
+- [ ] The frontmatter computes `isAuthenticated = Astro.locals.uid !== null`
+      once and threads the boolean into every `SiteCard`.
+- [ ] When `Astro.locals.uid` is null, the rendered subtree
+      contains no `client:*` directive anywhere.
+- [ ] When `Astro.locals.uid` is non-null, each `<SiteCard>`
       is emitted with `client:idle` on the `<SiteCard>` tag
       itself. SiteCard renders MembershipBadge inside its
       actions area as a normal Svelte child — no `client:*`
@@ -207,7 +206,8 @@ discrete props.
       the front page renders normally and the response status
       is 200. The failure is logged via the host's logger.
 - [ ] No `<style>` blocks, no inline styles, no utility/local
-      classes in `TopSitesStream.astro`.
+      classes in `TopSitesStream.astro` (one explicit exception
+      with `/* DEFERRED */` marker — see §Out of Scope).
 - [ ] No use of `fetch(Astro.url.origin + ...)` — data is
       loaded via the shared accessor module.
 ### Regression Guardrails
@@ -268,6 +268,22 @@ Then the Top Sites Stream renders no SiteCard elements
 And the show-more link to /sites is still present
 And no error block is shown
 And the response status is 200
+```
+
+#### Scenario: Per-card prop computation
+
+```gherkin
+Given getSites(5, { order: 'flowTime', public: true }) returns sites with system,
+  owners/players, flowTime, and optional posterURL values
+When TopSitesStream frontmatter maps sites into SiteCard props
+Then each mapped card includes systemNoun from systemToNoun(site.system)
+And systemLabel resolves from t('sites:site.systems.{system}') with fallback
+  to the raw site.system slug on i18n misses
+And systemHref equals "/tags/{site.system}"
+And dateLabel is formatted from flowTime via @pelilauta/utils/dates
+And coverUrl resolves via @pelilauta/utils/images
+And coverSrcset and coverSizes are emitted only when production image transforms
+  are active
 ```
 
 #### Scenario: Data-fetch failure shows the localised error block
@@ -334,6 +350,28 @@ And each cohort's response is still shareable across viewers
 > badge scenarios (owner viewer, player viewer, stranger
 > viewer, reactive session updates) live in
 > [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
+
+## Out of Scope (deferred tech debt)
+
+### Toolbar utility primitive (DS gap)
+
+The show-more row uses `class="toolbar items-center"` to lay
+out the link, mirroring the v18 cyan-4 utilities at
+`.tmp/cyan-design-system-4/packages/cyan-css/src/utilities/toolbar.css`.
+v20 cyan does not yet ship a toolbar utility primitive. Per the
+`AGENTS.md` deferred-tech-debt exception, the classes carry
+forward in
+`app/pelilauta/src/components/front-page/TopSitesStream.astro`
+with a `/* DEFERRED */` marker comment; the sister
+`TopThreadsStream.astro` carries the same classes and the same
+debt.
+
+**Tracker:** this section. Resolved when:
+1. `packages/cyan/src/**` ships a v20 toolbar utility (or a
+   layout primitive that produces the flex-row-with-spacing
+   shape).
+2. Both stream components drop the marker comment and consume
+   the v20 primitive.
 
 ## Migration Debt and Decisions
 
@@ -430,9 +468,10 @@ And each cohort's response is still shareable across viewers
 8. **Membership badge icon nouns — `avatar` (owner), `meeple`
    (player).** Detail:
    [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
-9. **Authenticated-mount mechanism — `Astro.locals.session`.**
-   The stream's frontmatter reads it once and threads the
-   binary truthiness into each card as `isAuthenticated`.
+9. **Authenticated-mount mechanism — `Astro.locals.uid`.**
+   The stream's frontmatter computes
+   `isAuthenticated = Astro.locals.uid !== null` once and
+   threads the boolean into each card.
 10. **Parent-spec guardrail update — parent updated.** The
     parent `front-page/spec.md`'s "zero client-side
     JavaScript" guardrail has been rewritten to "anonymous =

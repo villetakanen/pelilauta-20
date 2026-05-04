@@ -1,0 +1,89 @@
+---
+// TopSitesStream — data-bound widget for the front-page Sites region.
+//
+// Pure SSR for anonymous visitors: when Astro.locals.uid is null, no client:*
+// directives are emitted in this subtree. When a session is present, each
+// SiteCard is hydrated as a client:idle island so MembershipBadge activates
+// post-hydration.
+//
+// Per ARCHITECTURE.md SSR Data Flow: per-card props (cover URL/srcset/sizes,
+// system noun/label/href, dateLabel) are computed here in the frontmatter and
+// passed to SiteCard as prepared props. SiteCard is a render-from-props
+// component.
+//
+// See specs/pelilauta/front-page/top-sites-stream/spec.md.
+
+import { SiteCard } from "@pelilauta/sites/components";
+import { getSites } from "@pelilauta/sites/server";
+import { logError } from "@pelilauta/utils/log";
+import { DEFAULT_LOCALE, t } from "../../i18n";
+import { buildTopSiteCards } from "./buildTopSiteCards";
+
+const isAuthenticated = Astro.locals.uid !== null;
+
+let cards: ReturnType<typeof buildTopSiteCards> = [];
+let error = false;
+
+try {
+  const sites = await getSites(5, { order: "flowTime", public: true });
+  cards = buildTopSiteCards(sites, DEFAULT_LOCALE, t);
+} catch (e) {
+  logError("TopSitesStream", e);
+  error = true;
+}
+---
+
+<div>
+  <h2>{t("sites:title")}</h2>
+
+  {error && <p>{t("pelilauta:error.fetch")}</p>}
+
+  <div class="cn-card-grid">
+    {
+      !error &&
+        cards.map((card) =>
+          isAuthenticated ? (
+            <SiteCard
+              key={card.key}
+              name={card.name}
+              description={card.description}
+              owners={card.owners}
+              players={card.players}
+              systemNoun={card.systemNoun}
+              systemLabel={card.systemLabel}
+              systemHref={card.systemHref}
+              coverUrl={card.coverUrl}
+              coverSrcset={card.coverSrcset}
+              coverSizes={card.coverSizes}
+              dateLabel={card.dateLabel}
+              isAuthenticated={true}
+              client:idle
+            />
+          ) : (
+            <SiteCard
+              key={card.key}
+              name={card.name}
+              description={card.description}
+              owners={card.owners}
+              players={card.players}
+              systemNoun={card.systemNoun}
+              systemLabel={card.systemLabel}
+              systemHref={card.systemHref}
+              coverUrl={card.coverUrl}
+              coverSrcset={card.coverSrcset}
+              coverSizes={card.coverSizes}
+              dateLabel={card.dateLabel}
+              isAuthenticated={false}
+            />
+          )
+        )
+    }
+  </div>
+
+  {/* DEFERRED: toolbar/items-center are v18 cyan-4 utilities not yet ported
+       to v20 cyan. See specs/pelilauta/front-page/top-sites-stream/spec.md
+       §Out of Scope. */}
+  <div class="toolbar items-center">
+    <a class="button" href="/sites">{t("pelilauta:action.showMore")}</a>
+  </div>
+</div>

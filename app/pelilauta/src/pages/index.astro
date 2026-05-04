@@ -1,8 +1,8 @@
 ---
 import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
-import CnCard from "@cyan/components/CnCard.svelte";
 import heroImg from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
 import SyndicateStream from "../components/front-page/SyndicateStream.astro";
+import TopSitesStream from "../components/front-page/TopSitesStream.astro";
 import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
 import { t } from "../i18n";
 import Page from "../layouts/Page.astro";
@@ -21,25 +21,6 @@ import Page from "../layouts/Page.astro";
       </div>
     </SyndicateStream>
 
-    <div>
-      <h2>Latest sites</h2>
-      <div class="cn-card-grid">
-        <CnCard
-          title="Ebon Vale Chronicles"
-          href="/sites/ebon-vale"
-          description="A Forgotten Realms homebrew wiki updated this week with three new factions."
-        />
-        <CnCard
-          title="Kiven Aavat"
-          href="/sites/kiven-aavat"
-          description="Finnish-language Mothership campaign site with ship schematics and crew manifests."
-        />
-        <CnCard
-          title="The Spire Campaign"
-          href="/sites/the-spire"
-          description="Session logs and NPC dossiers for an ongoing Spire: The City Must Fall campaign."
-        />
-      </div>
-    </div>
+    <TopSitesStream />
   </section>
 </Page>

@@ -75,6 +75,9 @@ importers:
       '@pelilauta/profiles':
         specifier: workspace:*
         version: link:../../packages/profiles
+      '@pelilauta/sites':
+        specifier: workspace:*
+        version: link:../../packages/sites
       '@pelilauta/threads':
         specifier: workspace:*
         version: link:../../packages/threads
