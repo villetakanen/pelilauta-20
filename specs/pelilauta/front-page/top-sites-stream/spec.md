@@ -10,7 +10,6 @@ parent_spec: ../spec.md
 
 > Reverse-spec'd from
 > `.tmp/pelilauta-17/src/components/server/FrontPage/TopSitesStream.astro`
-> + `.tmp/pelilauta-17/src/pages/api/sites/index.ts`
 > + `.tmp/pelilauta-17/src/components/server/ui/SiteCard.astro`. The
 > per-card rendering contract has been factored out into the
 > Sites package's own component spec
@@ -89,12 +88,6 @@ spec'd separately and consumed here as discrete props.
     only auth-aware decision the stream owns; the badge
     component itself reads the viewer's uid post-hydration.
 
-- **API contracts:** none owned by this widget. The HTTP API
-  endpoint `/api/sites.json` (host-owned, tier 1) wraps the
-  same `getSites` accessor; the SSR component reads
-  in-process and does not call it. (Same DRY-between-SSR-and-HTTP
-  pattern as `TopThreadsStream`.)
-
 - **i18n:**
   - Host-owned app keys: `pelilauta:action.showMore`
     (show-more link, shared with `TopThreadsStream`);
@@ -126,11 +119,10 @@ spec'd separately and consumed here as discrete props.
     authenticated viewers. The SSR never resolves badge state
     per-uid.
   - **Read in-process.** The component reads via the shared
-    accessor module (`@pelilauta/sites/server`). HTTP-shell
-    concerns (status, ETag, `Cache-Control`) live on the
-    `/api/sites.json` route that wraps the same module. No
+    accessor module (`@pelilauta/sites/server`). No
     `fetch(${Astro.url.origin}/api/sites...)` in the
-    component.
+    component — there is no `/api/sites.json` HTTP surface in
+    the MVP (see [`../../sites/spec.md`](../../sites/spec.md)).
   - **Bounded result set.** The list contains at most 5
     sites. Older sites are reachable via the show-more link.
   - **Empty state non-erroneous.** Zero non-hidden sites
@@ -198,10 +190,6 @@ spec'd separately and consumed here as discrete props.
       classes in `TopSitesStream.astro`.
 - [ ] No use of `fetch(Astro.url.origin + ...)` — data is
       loaded via the shared accessor module.
-- [ ] The shared accessor module is also the source the
-      public HTTP API endpoint (`/api/sites.json`) calls — no
-      duplicate query logic.
-
 ### Regression Guardrails
 
 - The result-set ceiling stays at 5 unless the parent
@@ -351,9 +339,11 @@ And the response is shareable across all authenticated viewers
 6. **HTTP self-fetch in the widget.** v18 calls
    `fetch(${Astro.url.origin}/api/sites?limit=5)` inside its
    own frontmatter. v20 reads in-process via the shared
-   accessor; the API route exists for external HTTP consumers
-   and DRY between SSR and HTTP, not as the widget's data
-   path. (`TopThreadsStream` made the same migration.)
+   accessor and ships no `/api/sites.json` HTTP surface at
+   MVP (see [`../../sites/spec.md`](../../sites/spec.md));
+   the v18 route has no v20 consumer in scope. If a future
+   client (mobile app, CSR pagination) needs a JSON surface,
+   it gets specced then.
 7. **`OnboardingCard` mounted at the top of the stream.** v18
    embeds `<OnboardingCard client:only="svelte"/>` at the top
    of the sites column — a "log in to create a site" pitch
@@ -420,7 +410,8 @@ And the response is shareable across all authenticated viewers
 - v18 widget: `.tmp/pelilauta-17/src/components/server/FrontPage/TopSitesStream.astro`
 - v18 card: `.tmp/pelilauta-17/src/components/server/ui/SiteCard.astro`
 - v18 schema: `.tmp/pelilauta-17/src/schemas/SiteSchema.ts`
-- v18 API route: `.tmp/pelilauta-17/src/pages/api/sites/index.ts`
+- v18 API route (NOT carried forward; no v20 consumer in scope):
+  `.tmp/pelilauta-17/src/pages/api/sites/index.ts`
 - v18 image helpers: `.tmp/pelilauta-17/src/utils/images/netlifyImage.ts`
 - v18 system-noun helpers:
   `.tmp/pelilauta-17/src/utils/schemaHelpers.ts`,

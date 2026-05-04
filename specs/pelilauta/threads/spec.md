@@ -167,7 +167,7 @@ the migration. Harmonizing them is out of scope for v20.
 #### Accessor Surfaces
 
 - `getThreads(limit: number, options?: { order?: 'flowTime' | 'createdAt'; public?: boolean }): Promise<Thread[]>`
-  - Defaults: `order = 'flowTime'`, `public = true`. Mirrors storage field names — `public` is the on-disk boolean, not a renamed alias.
+  - Defaults: `order = 'flowTime'`, `public = true`. The `public` parameter happens to share its name with the on-disk field; per [`ARCHITECTURE.md`](../../../ARCHITECTURE.md) §Accessor naming the rule is modern API ergonomics, this is a coincidence.
 - `getThread(key: string): Promise<Thread | undefined>`
 - `getReplies(threadKey: string): Promise<Reply[]>`
 - `getChannels(): Promise<Channel[]>` — reads the `meta/threads` doc, parses `topics` through `ChannelsSchema`, returns the array. Module-level cached; cache invalidated on channel writes.
@@ -210,7 +210,7 @@ The host (`app/pelilauta/src/i18n.ts`) imports from `@pelilauta/threads/i18n` an
 - **Page-level Astro components live in `app/pelilauta`.** This package owns schemas, accessors, and reusable components — not routes.
 - **Schemas extend `ContentEntrySchema` / `EntrySchema` from `@pelilauta/models`.** Field shapes are not duplicated.
 - **SSR uses one-shot queries.** Real-time `onSnapshot` listeners run only after client hydration.
-- **Accessor parameter names mirror storage field names.** `getThreads({ public })` because storage uses `public`. No API-level renames that diverge from the on-disk shape.
+- **Accessor parameter naming follows [`ARCHITECTURE.md`](../../../ARCHITECTURE.md) §Accessor naming.** `getThreads({ public })` happens to align with the storage field name `public`, but the rule is "modern API ergonomics permitted, map to legacy storage internally," not "always mirror storage."
 - **`./i18n` sub-export is locale strings only.** No runtime code, no side effects, no imports beyond the `NestedTranslation` type.
 - **Host owns the `threads` namespace assignment.** This package proposes the namespace name in this spec; the host's i18n composition seam decides where the strings hang.
 - **`ThreadCard` does not fetch profiles.** Author rendering composes `ProfileLink` from `@pelilauta/profiles/components` with a pre-resolved `authorProfile` prop. The rendering page (e.g. `TopThreadsStream`) is responsible for calling `getProfile(thread.owners[0])` upstream and passing the result in. `ThreadCard` MUST NOT inline a bare `<a>` / `<span>` for the byline — every author citation goes through `ProfileLink`.
@@ -271,7 +271,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - Deleting a thread must also delete its reply sub-collection.
 - `server/` must not import any `firebase/firestore` client modules.
 - The `meta/threads` channels storage shape MUST NOT change. Any "modernization" to per-doc storage is a breaking data contract change and out of scope for v20.
-- `getThreads`'s parameter names MUST remain mirrors of storage field names. If storage adds/renames a field, accessors track it; accessors do not invent independent names.
+- Accessor parameter naming follows [`ARCHITECTURE.md`](../../../ARCHITECTURE.md) §Accessor naming. The storage shape is preserved verbatim; the accessor API is free to use modern parameter names that map to legacy storage internally.
 - The `threads` namespace key in the i18n composition is informally proposed by this package; the host file is authoritative. This spec MUST NOT assert a namespace claim that bypasses the host seam.
 
 ### Testing Scenarios

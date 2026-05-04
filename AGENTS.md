@@ -82,7 +82,7 @@ v20 is a code refresh, not a schema redo. Firestore document shapes, collection 
 - **Allowed:** adding optional fields with `.default()` (existing docs parse cleanly).
 - **Not allowed without explicit user approval:** renames, retypes, structural moves, collection reshapes.
 - A v17 quirk that costs nothing to keep stays, even if a greenfield design would do it differently. "Modernization" instincts do not override this.
-- Accessor / API surfaces (e.g. `getThreads({ public: false })`) MAY use modern naming that maps to legacy storage names internally — that is API ergonomics, not a contract change.
+- Accessor / API surfaces (e.g. `getThreads({ public: false })`) use modern naming and may map to legacy storage names internally. Canonical rule: [`ARCHITECTURE.md`](ARCHITECTURE.md) §Accessor naming. That is API ergonomics, not a contract change.
 
 ## UI Architecture (Modern SSR + Progressive Svelte)
 

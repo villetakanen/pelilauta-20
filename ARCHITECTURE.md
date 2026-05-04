@@ -147,6 +147,21 @@ Practical consequences:
 
 This complements the ban on framing packages as independently versionable: that rule says what packages are *not* (a release boundary); the rule above says what they *are* (a cognitive boundary).
 
+## Accessor naming
+
+**Accessor parameter names follow modern API ergonomics. The v17 on-disk field shape is preserved verbatim in storage; the accessor is free to name its parameters in terms callers reason about, mapping to the storage predicate internally.**
+
+Example: `getSites({ public: true })` is the modern API even though the storage predicate it satisfies is `hidden === false`. `getThreads({ public })` is also the modern API; in that case the storage field happens to also be `public`, so the API name and the storage name coincide — but that coincidence is not the rule.
+
+The boundary:
+
+- **Storage shape** (Firestore field names, document layouts, sub-collection paths) is preserved verbatim from v17. See `CLAUDE.md` §Data contracts.
+- **Accessor API shape** (parameter names, option keys, return shape) is modern. The accessor takes a renamed option, queries on the legacy storage field, and returns parsed Zod-validated objects.
+
+Why the split: storage compatibility forces v17-faithful field names on disk, but agents and humans writing call sites should reason in current vocabulary. Forcing call sites to remember legacy field names (e.g. `getSites({ hidden: false })` for a "show me the public ones" query) leaks a v17 quirk through the entire app surface. The accessor is the right place to absorb the rename.
+
+Domain specs MAY restate this rule with a one-line pointer to this section, but MUST NOT define a contradictory local rule.
+
 ## Text conventions
 
 - **Ellipsis: Unicode `…` (U+2026), universally.** Truncation, elision, and "more to come" markers in any generated text — UI snippets, SEO `<meta name="description">`, notification bodies, RSS `description`, plain-text and HTML projections of markdown — use the single Unicode horizontal ellipsis character, not three ASCII dots `...`. One glyph, one code point, semantically a punctuation mark, consistent across surfaces. Helpers that produce truncated strings (e.g. `packages/utils/src/markdownToPlainText.ts`) emit `…` and callers that prefer ASCII override at the call site rather than at the helper.
