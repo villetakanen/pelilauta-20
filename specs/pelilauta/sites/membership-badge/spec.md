@@ -43,7 +43,7 @@ image, or profile link.
   presence (typically via `Astro.locals.session` in Astro
   frontmatter, then `<MembershipBadge … client:idle />` only
   when authenticated). Cross-site contract is owned by callers
-  — see [`../site-card.md`](../site-card.md) for the canonical
+  — see [`../site-card/spec.md`](../site-card/spec.md) for the canonical
   consumer pattern. The badge does not re-validate the gate.
 - **Session source.** Imports `uid` from
   `@pelilauta/auth/client` (an `atom<string | null>` nanostore)
@@ -97,7 +97,7 @@ const role = $derived(
 
 ### Consumers
 
-- [`../site-card.md`](../site-card.md) — mounts the badge in
+- [`../site-card/spec.md`](../site-card/spec.md) — mounts the badge in
   the card actions slot when `isAuthenticated === true`.
 
 ## Contract

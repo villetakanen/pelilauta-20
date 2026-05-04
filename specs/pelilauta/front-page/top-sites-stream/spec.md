@@ -13,7 +13,7 @@ parent_spec: ../spec.md
 > + `.tmp/pelilauta-17/src/components/server/ui/SiteCard.astro`. The
 > per-card rendering contract has been factored out into the
 > Sites package's own component spec
-> ([`../../sites/site-card.md`](../../sites/site-card.md)) — this
+> ([`../../sites/site-card/spec.md`](../../sites/site-card/spec.md)) — this
 > stream spec covers only the front-page-specific composition.
 > v20 has no implementation yet; this spec captures the
 > carry-forward contract.
@@ -49,7 +49,7 @@ spec'd separately and consumed here as discrete props.
   [`../top-threads-stream/spec.md`](../top-threads-stream/spec.md)).
 
 - **Sub-components consumed (each owned by its own spec):**
-  - [`SiteCard`](../../sites/site-card.md) from
+  - [`SiteCard`](../../sites/site-card/spec.md) from
     `@pelilauta/sites/components` — the per-row preview card.
     The stream calls `SiteCard` once per site, threading
     pre-resolved props.
@@ -73,13 +73,16 @@ spec'd separately and consumed here as discrete props.
   - **Per-card derived values:** for each site the
     frontmatter computes the `SiteCard` props
     (`coverUrl`, `coverSrcset`, `coverSizes`, `systemNoun`,
-    `flowTimeLabel`) and threads `owners` and `players`
-    through directly. Cover URLs come from
-    `@pelilauta/utils/images` (per
+    `systemLabel`, `systemHref`, `dateLabel`) and threads
+    `owners` and `players` through directly. Cover URLs come
+    from `@pelilauta/utils/images` (per
     [`../../images/spec.md`](../../images/spec.md));
     `systemNoun` from `systemToNoun` (per
     [`../../sites/spec.md`](../../sites/spec.md)
-    §Accessor Surfaces); `flowTimeLabel` from
+    §Accessor Surfaces); `systemLabel` from
+    `t('sites:site.systems.{system}')` with fallback to the
+    raw `site.system` slug; `systemHref` as
+    `` `/tags/${site.system}` ``; `dateLabel` from
     `@pelilauta/utils/dates` (per
     [`../../dates/spec.md`](../../dates/spec.md)).
   - **Session presence:** the frontmatter reads
@@ -161,11 +164,12 @@ spec'd separately and consumed here as discrete props.
       fetch to its own API route.
 - [ ] For each site, the frontmatter resolves the discrete
       `SiteCard` props upstream (`coverUrl`, `coverSrcset`,
-      `coverSizes`, `systemNoun`, `flowTimeLabel`) and threads
-      `owners`, `players`, `name`, `key`, `description`
-      through. The card does no data fetching, no transforms,
-      no formatting. (Per-card rendering rules:
-      [`../../sites/site-card.md`](../../sites/site-card.md).)
+      `coverSizes`, `systemNoun`, `systemLabel`, `systemHref`,
+      `dateLabel`) and threads `owners`, `players`, `name`,
+      `key`, `description` through. The card does no data
+      fetching, no transforms, no formatting. (Per-card
+      rendering rules:
+      [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md).)
 - [ ] The frontmatter reads `Astro.locals.session` once and
       threads its boolean truthiness into every `SiteCard` as
       `isAuthenticated`.
@@ -297,7 +301,7 @@ And the response is shareable across all authenticated viewers
 
 > Per-card rendering scenarios (cover, eyebrow, body, footer,
 > badge slot composition) live in
-> [`../../sites/site-card.md`](../../sites/site-card.md). Per-viewer
+> [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md). Per-viewer
 > badge scenarios (owner viewer, player viewer, stranger
 > viewer, reactive session updates) live in
 > [`../../sites/membership-badge/spec.md`](../../sites/membership-badge/spec.md).
@@ -316,12 +320,12 @@ And the response is shareable across all authenticated viewers
 2. **Custom element `<cn-card>`.** v18 used the lit-based
    custom element. v20's `SiteCard` composes
    `CnCard.svelte`. Detail in
-   [`../../sites/site-card.md`](../../sites/site-card.md).
+   [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md).
 3. **App-local utility classes.** v18 markup uses
    `flex flex-col`, `flex items-center mt-2`, `grow`,
    `downscaled`, `toolbar`, `button`. None exist in v20 cyan;
    v20 composes DS primitives instead. Per-card detail in
-   [`../../sites/site-card.md`](../../sites/site-card.md).
+   [`../../sites/site-card/spec.md`](../../sites/site-card/spec.md).
 4. **`netlifyImage` / `generateSrcset` helpers.** v18's
    `src/utils/images/netlifyImage.ts` ports to
    `packages/utils/src/images/`. Spec:
@@ -356,7 +360,7 @@ And the response is shareable across all authenticated viewers
 9. **`toDisplayString` 72-hour relative threshold.** v18's
    relative time caps at 72 hours and falls back to ISO
    afterwards. v20 widens to 7 days inside a dedicated
-   `flowTimeLabel` formatter. Spec:
+   `dateLabel` formatter. Spec:
    [`../../dates/spec.md`](../../dates/spec.md).
 10. **`hidden`-only public filter.** v18 filters via
     `where('hidden', '==', false)` only. The v20 accessor

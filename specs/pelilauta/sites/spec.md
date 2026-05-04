@@ -39,13 +39,16 @@ The MVP scope of this spec covers:
 1. The package shell (workspace package, three sub-exports).
 2. The schema (`SiteSchema`, v17 contract preserved verbatim).
 3. The minimum read-side accessors (`getSites`, `getSite`).
-4. The reusable view components: `SiteCard` (flat sibling spec
-   [`site-card.md`](./site-card.md)) and `MembershipBadge`
+4. The reusable view components: `SiteCard` (subfolder sub-spec
+   [`site-card/spec.md`](./site-card/spec.md)) and `MembershipBadge`
    (subfolder sub-spec
-   [`membership-badge/spec.md`](./membership-badge/spec.md) —
-   independent feature, reused beyond `SiteCard`).
+   [`membership-badge/spec.md`](./membership-badge/spec.md)) —
+   each an independent feature, reused beyond a single surface.
 5. The system-noun mapping (Site `system` → cyan icon noun).
-6. The `sites:title` i18n key.
+6. The package's i18n surface (sub-spec
+   [`i18n/spec.md`](./i18n/spec.md)) — the cross-surface
+   `sites:title` heading and the `sites:site.systems.*`
+   convention sub-tree consumed by `SiteCard`'s eyebrow.
 
 The `/sites` directory route, per-site detail page, and all
 authorship surfaces (write APIs, editors, page-tree CRUD,
@@ -86,7 +89,7 @@ packages/sites/
       getSite.ts             → single site by key
     server/                  → SSR-safe re-exports (schemas, types, read accessors, systemToNoun)
     components/              → Svelte 5 / Astro UI components
-      SiteCard.svelte        → preview card; contract at site-card.md
+      SiteCard.svelte        → preview card; contract at site-card/spec.md
       MembershipBadge.svelte → CSR-only "you are an owner / player" indicator; contract at membership-badge/spec.md
     i18n/
       index.ts               → exports fi, en — locale strings for the sites namespace
@@ -175,7 +178,7 @@ URL surface.
 
 #### Components (sub-specs)
 
-- [`site-card.md`](./site-card.md) — `SiteCard.svelte` rendering
+- [`site-card/spec.md`](./site-card/spec.md) — `SiteCard.svelte` rendering
   contract: cover, name, system-noun eyebrow, description body,
   flow-time footer, conditional `MembershipBadge` mount in the
   actions slot. Reused across the front-page stream, the
@@ -188,23 +191,14 @@ URL surface.
 
 #### i18n
 
-The `./i18n` sub-export ships only static locale data — no
-runtime, no side effects. Sites-owned key set (MVP):
-
-- `sites:title` — the canonical heading for the Sites vertical.
-  Used wherever the sites domain needs to name itself: the
-  front-page `TopSitesStream` `<h2>`, the future `/sites`
-  index `<h1>`, and any other surface that hosts sites
-  content. Finnish: "Sivustot". English: "Sites".
-
-Authorship strings (editor labels, settings copy, members-page
-copy, handouts/characters/clocks per-feature copy) are out of
-scope for the MVP and land with their respective sub-specs.
-
-The host (`app/pelilauta/src/i18n.ts`) imports from
-`@pelilauta/sites/i18n` and assigns the trees to the `sites`
-namespace. See [`../i18n/spec.md`](../i18n/spec.md) for the
-engine contract and host composition rules.
+i18n surface owned by [`./i18n/spec.md`](./i18n/spec.md) —
+declares the cross-surface keys and convention sub-trees that
+ship from `@pelilauta/sites/i18n`. Per-feature authorship
+strings (editor labels, settings copy, members-page copy,
+handouts/characters/clocks per-feature copy) are owned by their
+respective feature specs, not by the i18n sub-spec. Engine
+contract and host composition rules:
+[`../i18n/spec.md`](../i18n/spec.md).
 
 ### Dependencies
 
@@ -219,7 +213,7 @@ engine contract and host composition rules.
 - `@pelilauta/utils/images` — `netlifyImage` /
   `generateSrcset`, consumed by `SiteCard` for cover-image
   optimisation. Spec: [`../images/spec.md`](../images/spec.md).
-- `@pelilauta/utils/dates` — `flowTimeLabel`, consumed by
+- `@pelilauta/utils/dates` — `dateLabel`, consumed by
   `SiteCard` for the flow-time footer string. Spec:
   [`../dates/spec.md`](../dates/spec.md).
 - `@pelilauta/i18n` — used only for the `NestedTranslation`
@@ -300,11 +294,11 @@ Stages are cumulative.
       Firestore + Zod errors to the caller.
 - [ ] `systemToNoun(system)` returns the v17 mapping for known
       systems, `"homebrew"` for unknown (plus a `logWarn`).
-- [ ] `i18n/index.ts` exports `fi` and `en` trees containing at
-      least `sites:title`.
+- [ ] `i18n/index.ts` exports `fi` and `en` trees per
+      [`./i18n/spec.md`](./i18n/spec.md).
 - [ ] `SiteCard.svelte` exists at
       `packages/sites/src/components/SiteCard.svelte` per
-      [`site-card.md`](./site-card.md).
+      [`site-card/spec.md`](./site-card/spec.md).
 - [ ] `MembershipBadge.svelte` exists at
       `packages/sites/src/components/MembershipBadge.svelte` per
       [`membership-badge/spec.md`](./membership-badge/spec.md).
@@ -335,9 +329,6 @@ begins.
 - `MembershipBadge.svelte` MUST NOT be referenced from
   `server/` exports; it is CSR-only and lives behind
   `./components`.
-- The `sites` namespace key in the i18n composition is
-  informally proposed by this package; the host file is
-  authoritative.
 
 ### Testing Scenarios
 
@@ -430,11 +421,3 @@ Then "homebrew" is returned
 And a warning is logged via @pelilauta/utils/log
 ```
 
-#### Scenario: Sites i18n sub-export ships sites:title
-
-```gherkin
-Given a Locales registry assembled by the host that assigns @pelilauta/sites/i18n to the "sites" namespace
-When the host-bound t resolves "sites:title" with locale "fi"
-Then it returns "Sivustot"
-And the same key resolves to "Sites" for locale "en"
-```

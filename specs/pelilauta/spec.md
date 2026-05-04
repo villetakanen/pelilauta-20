@@ -29,7 +29,7 @@ Pelilauta is the RPG community platform: an Astro-rendered host that composes a 
   - [`auth/`](auth/spec.md) — login/logout UX and `/login` page.
   - [`auth-package/`](auth-package/spec.md) — `@pelilauta/auth` workspace package: shell, sub-exports, dependency direction, staged extraction DoD.
   - [`channels/`](channels/spec.md) — `/channels` meta-list page (blocked on profiles MF Stage 1).
-  - [`dates/`](dates/spec.md) — flow-time and date label formatters (`flowTimeLabel`, `toIsoDate`).
+  - [`dates/`](dates/spec.md) — date label formatters (`dateLabel`, `toIsoDate`).
   - [`firebase/`](firebase/spec.md) — Firebase workspace + auth.
   - [`front-page/`](front-page/spec.md) — landing page composition.
   - [`i18n/`](i18n/spec.md) — translation engine and host composition.

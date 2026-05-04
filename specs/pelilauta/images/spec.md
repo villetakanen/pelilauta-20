@@ -163,7 +163,7 @@ The helper has no defensive empty-input branch.
 
 ### Consumers (initial)
 
-- [`../sites/site-card.md`](../sites/site-card.md) — site cover
+- [`../sites/site-card/spec.md`](../sites/site-card/spec.md) — site cover
   via `netlifyImage` + `generateSrcset`.
 - Any future surface that displays a Firebase Storage image
   (profile avatars, thread covers, page assets, handouts).

@@ -173,7 +173,7 @@ Mirrors `dateLabel`'s absolute branch.
 
 ### Consumers (initial)
 
-- [`../sites/site-card.md`](../sites/site-card.md) — flow-time
+- [`../sites/site-card/spec.md`](../sites/site-card/spec.md) — flow-time
   footer. The card's host (e.g. `TopSitesStream.astro`) filters
   sentinel values upstream and passes a real `Date` / `number`.
 - The forthcoming `ThreadCard` `dateLabel` prop (per
