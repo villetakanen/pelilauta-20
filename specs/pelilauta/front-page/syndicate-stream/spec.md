@@ -2,7 +2,7 @@
 feature: SyndicateStream
 status: draft
 maturity: design
-last_major_review: 2026-05-03
+last_major_review: 2026-05-04
 parent_spec: ../spec.md
 ---
 
@@ -81,11 +81,18 @@ attribution so the merged origin remains legible.
   - `app/pelilauta/src/pages/api/rss-feeds.json.ts` — `GET` handler
     that fetches the configured RSS feeds in parallel with a per-feed
     timeout, validates each item shape, slices to the per-feed item
-    limit, and returns a JSON map `{ <feedName>: RSSItem[], ... }`.
+    limit, and returns a JSON map `{ <feedName>: FeedEnvelope, ... }`.
+    The per-feed envelope carries `homeUrl` and `guaranteed` from the
+    config so the widget has no reason to import the config file
+    directly — the API response is the single boundary.
     Response carries `Cache-Control: s-maxage=600,
-    stale-while-revalidate=86400` so Netlify's edge cache absorbs
-    bursts and the third-party feeds are queried at most every ten
-    minutes per region.
+    stale-while-revalidate=86400, stale-if-error=86400` so Netlify's
+    edge cache absorbs bursts (the third-party feeds are queried at
+    most every ten minutes per region), serves stale-but-good content
+    for up to 24h while revalidating in the background, and — if the
+    background revalidation itself fails (upstream 5xx, timeout,
+    network error) — keeps serving the last good response for up to
+    24h instead of going dark.
 - **Data shape:**
   ```ts
   type RSSItem = {
@@ -95,8 +102,21 @@ attribution so the merged origin remains legible.
     contentSnippet: string; // plain-text preview the parser extracted
   };
 
+  /**
+   * Per-feed envelope in the API response.
+   * homeUrl and guaranteed are propagated from the feed config so the
+   * widget (SyndicateStream.astro) does not need to import the config.
+   * This preserves the "render-from-API" contract: the widget reads only
+   * what the API route returns and knows no feed URLs.
+   */
+  type FeedEnvelope = {
+    homeUrl: string;     // source homepage URL (eyebrow link target)
+    guaranteed: boolean; // true → at least one post must appear in merged stream
+    items: RSSItem[];    // validated, sliced items from this feed
+  };
+
   type FeedData = {
-    [feedName: string]: RSSItem[]; // e.g. { myrrys: [...], roolipelitiedotus: [...] }
+    [feedName: string]: FeedEnvelope; // e.g. { myrrys: { homeUrl, guaranteed, items }, ... }
   };
   ```
 - **Feed configuration (config-driven, arbitrary list):** the API
@@ -129,9 +149,9 @@ attribution so the merged origin remains legible.
 
 - **Merge algorithm (host-side, in `SyndicateStream.astro` or a
   pure helper):**
-  1. Flatten the API response (`{ [feedName]: RSSItem[] }`) into
-     `Array<RSSItem & { source: string }>`, annotating each item
-     with its feed name.
+  1. Flatten the API response (`{ [feedName]: FeedEnvelope }`) into
+     `Array<RSSItem & { source: string; homeUrl: string }>`, annotating
+     each item with its feed name and the `homeUrl` from the envelope.
   2. Sort by `pubDate` descending (most recent first). Ties are
      broken alphabetically by `source` for stability.
   3. Take the natural top N (N = 5) as the candidate stream.
@@ -213,13 +233,19 @@ Per item (`SyndicatePost`):
 
 ### Definition of Done
 
+- [ ] `SyndicateStream.astro` renders a visible `<h2>` region heading
+      (i18n key `app:syndicate.heading`; "Yhteisön blogit" / "Community blogs")
+      above the post list. The same heading MUST also appear inside the
+      `fallback` slot so it is visible during the deferred SSR window.
 - [ ] `SyndicateStream.astro` renders a single chronological list of
       up to five `SyndicatePost` cards inside the front-page's
       secondary small triad column.
 - [ ] `SyndicateStream.astro` reads its data only from the
       `/api/rss-feeds.json` route — no direct RSS parsing, no
       hardcoded feed URLs, no per-feed knowledge baked into the
-      widget.
+      widget. The widget reads `homeUrl` and `guaranteed` from the
+      per-feed `FeedEnvelope` in the API response, not from the
+      config file.
 - [ ] The merge algorithm sorts all returned items by `pubDate`
       descending, takes the top 5, and applies the
       `guaranteed`-feed substitution rule: any feed marked
@@ -238,9 +264,11 @@ Per item (`SyndicatePost`):
       a per-feed timeout, validates each item against the
       `RSSItem` shape, slices to each feed's configured item
       limit, and returns `Content-Type: application/json` with
-      `Cache-Control: s-maxage=600, stale-while-revalidate=86400`.
-      The route makes no assumption about the number or names of
-      feeds.
+      `Cache-Control: s-maxage=600, stale-while-revalidate=86400, stale-if-error=86400`.
+      The response shape is `{ [feedName]: FeedEnvelope }` where each
+      envelope carries `homeUrl`, `guaranteed`, and `items` so the
+      widget has no reason to import the config. The route makes no
+      assumption about the number or names of feeds.
 - [ ] A failure or timeout on one feed does not break the rest —
       the failing feed contributes no items to the merge, surviving
       feeds contribute normally, and the stream renders whatever
@@ -271,9 +299,14 @@ Per item (`SyndicatePost`):
   feed timing out does not zero the other feed's posts in the
   rendered output.
 - **Cache headers are part of the contract.** The API route's
-  `s-maxage=600, stale-while-revalidate=86400` is what makes the
-  defer window survivable on cold cache. Removing or shortening
-  these without an explicit decision is a regression.
+  `s-maxage=600, stale-while-revalidate=86400, stale-if-error=86400`
+  is what makes the defer window survivable on cold cache and what
+  keeps the column populated when upstream feeds are temporarily
+  unreachable. Removing or shortening any of these without an
+  explicit decision is a regression. `stale-if-error` is the
+  load-bearing piece for upstream outages: without it, the column
+  silently empties out the moment the cache expires during a feed
+  outage.
 - **No external network call from the component.** The component
   fetches `${Astro.url.origin}/api/rss-feeds.json` only. Any direct
   RSS parser import inside the component is a regression — the
@@ -292,7 +325,8 @@ Per item (`SyndicatePost`):
 
 ```gherkin
 Given the /api/rss-feeds.json route returns
-  { myrrys: [M1, M2, M3], roolipelitiedotus: [R1, R2, R3] }
+  { myrrys: { homeUrl: "https://www.myrrys.com", guaranteed: true, items: [M1, M2, M3] },
+    roolipelitiedotus: { homeUrl: "https://roolipelitiedotus.fi", guaranteed: false, items: [R1, R2, R3] } }
 And M1 is the most recent of all six posts
 And M2, R1, R2, R3, M3 follow in descending pubDate order
 When SyndicateStream renders
@@ -305,7 +339,9 @@ And M3 is omitted (oldest, did not make the top 5)
 
 ```gherkin
 Given the /api/rss-feeds.json route returns
-  { myrrys: [M1, M2, M3], roolipelitiedotus: [R1, R2, R3], extra: [X1, X2, X3] }
+  { myrrys: { homeUrl: "https://www.myrrys.com", guaranteed: true, items: [M1, M2, M3] },
+    roolipelitiedotus: { homeUrl: "https://roolipelitiedotus.fi", guaranteed: false, items: [R1, R2, R3] },
+    extra: { homeUrl: "https://extra.example.com", guaranteed: false, items: [X1, X2, X3] } }
 And R1, R2, R3, X1, X2 are the five most recent posts (no Myrrys post in the natural top 5)
 And myrrys is configured with guaranteed: true
 And M1 is the most recent Myrrys post
@@ -320,7 +356,8 @@ And the candidate item evicted to make room is the chronologically oldest non-gu
 
 ```gherkin
 Given the /api/rss-feeds.json route returns
-  { myrrys: [], roolipelitiedotus: [R1, R2, R3] }
+  { myrrys: { homeUrl: "https://www.myrrys.com", guaranteed: true, items: [] },
+    roolipelitiedotus: { homeUrl: "https://roolipelitiedotus.fi", guaranteed: false, items: [R1, R2, R3] } }
 And myrrys is configured with guaranteed: true
 When SyndicateStream renders
 Then 3 SyndicatePost items render (R1, R2, R3)
@@ -354,7 +391,8 @@ And no app-local divider class is used
 
 ```gherkin
 Given the /api/rss-feeds.json route returns
-  { myrrys: [M1, M2], roolipelitiedotus: [R1] }
+  { myrrys: { homeUrl: "https://www.myrrys.com", guaranteed: true, items: [M1, M2] },
+    roolipelitiedotus: { homeUrl: "https://roolipelitiedotus.fi", guaranteed: false, items: [R1] } }
 When SyndicateStream renders
 Then exactly 3 SyndicatePost items render
 And no placeholder or "no more posts" filler is rendered
@@ -367,7 +405,7 @@ Given the front page is requested
 When the deferred SyndicateStream slot resolves
 Then the widget reads /api/rss-feeds.json from Astro.url.origin
 And the response carries Content-Type: application/json
-And the response carries Cache-Control with s-maxage=600 and stale-while-revalidate=86400
+And the response carries Cache-Control with s-maxage=600, stale-while-revalidate=86400, and stale-if-error=86400
 ```
 
 #### Scenario: API route survives a single-feed failure
@@ -377,8 +415,27 @@ Given the myrrys feed times out
 And the roolipelitiedotus feed responds normally
 When /api/rss-feeds.json is invoked
 Then the response status is 200
-And the response body contains { myrrys: [], roolipelitiedotus: [3 items] }
+And the response body contains
+  { myrrys: { homeUrl: "https://www.myrrys.com", guaranteed: true, items: [] },
+    roolipelitiedotus: { homeUrl: "https://roolipelitiedotus.fi", guaranteed: false, items: [3 items] } }
 And the failure is logged via logError
+```
+
+#### Scenario: Multiple guaranteed feeds — substituted-in item is not evicted by a subsequent substitution
+
+```gherkin
+Given the /api/rss-feeds.json route returns
+  { feedA: { homeUrl: "https://a.example.com", guaranteed: true, items: [A1, A2] },
+    feedB: { homeUrl: "https://b.example.com", guaranteed: true, items: [B1, B2] },
+    feedC: { homeUrl: "https://c.example.com", guaranteed: false, items: [C1, C2, C3, C4, C5] } }
+And C1–C5 are the five most recent posts (feedA and feedB are both absent from the natural top 5)
+And feedA and feedB are both configured with guaranteed: true
+When SyndicateStream renders
+Then exactly 5 SyndicatePost items render
+And one item is from feedA (the most recent feedA post, A1)
+And one item is from feedB (the most recent feedB post, B1)
+And A1 (substituted in first) was not evicted when feedB's substitution ran
+And C5 and C4 (the two oldest natural candidates) are the items evicted
 ```
 
 #### Scenario: Component contains no client-side JavaScript

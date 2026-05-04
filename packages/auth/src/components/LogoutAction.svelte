@@ -4,15 +4,17 @@ import { onMount } from "svelte";
 
 let busy = $state(false);
 let errored = $state(false);
+let hydrated = $state(false);
 
-onMount(() =>
-  sessionState.subscribe((s) => {
+onMount(() => {
+  hydrated = true;
+  return sessionState.subscribe((s) => {
     if (s === "error") {
       busy = false;
       errored = true;
     }
-  }),
-);
+  });
+});
 
 async function onClick() {
   if (busy) return;
@@ -30,6 +32,7 @@ async function onClick() {
     type="button"
     class="cta"
     onclick={onClick}
+    data-hydrated={hydrated ? "true" : "false"}
     disabled={busy}
     aria-busy={busy}
   >

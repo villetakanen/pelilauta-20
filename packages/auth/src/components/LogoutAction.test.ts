@@ -27,6 +27,8 @@ describe("LogoutAction.svelte", () => {
     render(LogoutAction);
     const button = screen.getByRole("button");
 
+    expect(button.getAttribute("data-hydrated")).toBe("true");
+
     await fireEvent.click(button);
 
     expect(sessionStore.fullLogout).toHaveBeenCalledTimes(1);

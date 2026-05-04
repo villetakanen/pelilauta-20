@@ -1,0 +1,43 @@
+---
+// SyndicateStream — front-page Blog-roll widget.
+// Pure SSR; no client: directives, no <style>, no inline styles.
+// Reads feed data from /api/rss-feeds.json, merges feeds into one
+// chronological top-5 stream, applies guaranteed-floor rule.
+// Mounted under server:defer on index.astro.
+// See specs/pelilauta/front-page/syndicate-stream/spec.md
+
+import { logError } from "@pelilauta/utils/log";
+import { t } from "../../i18n";
+import type { FeedData } from "../../pages/api/rss-feeds.json";
+import { mergeSyndicateFeeds } from "./mergeSyndicateFeeds";
+import SyndicatePost from "./SyndicatePost.astro";
+
+let mergedPosts: Awaited<ReturnType<typeof mergeSyndicateFeeds>> = [];
+
+try {
+  const response = await fetch(`${Astro.url.origin}/api/rss-feeds.json`);
+  if (response.ok) {
+    const feedData: FeedData = await response.json();
+    mergedPosts = mergeSyndicateFeeds(feedData, 5);
+  } else {
+    logError("SyndicateStream", `RSS feed API returned ${response.status} ${response.statusText}`);
+  }
+} catch (error) {
+  logError("SyndicateStream", "Failed to fetch RSS feeds", error);
+}
+---
+
+<div>
+  <h2>{t("app:syndicate.heading")}</h2>
+
+  {mergedPosts.map((item, idx) => (
+    <>
+      {idx > 0 && <hr />}
+      <SyndicatePost
+        post={item}
+        sourceName={item.source}
+        homeUrl={item.homeUrl}
+      />
+    </>
+  ))}
+</div>

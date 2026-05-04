@@ -1,5 +1,8 @@
 ---
 feature: Front Page
+status: draft
+maturity: implementation
+last_major_review: 2026-05-04
 parent_spec: ../spec.md
 ---
 
@@ -17,16 +20,18 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 - **Layout grid:** [`cn-content-triad`](../../cyan-ds/layouts/content-grids/spec.md) — one **medium** column (threads) and two **small** columns (blog-roll, latest sites). The page composes its content-grid shells itself inside `Page`'s default slot; it does not wrap them in any local container and contains no local CSS.
 - **Components used:**
   - `Page` (`packages/cyan/src/layouts/Page.astro`) — standard non-book page shell with tray + content area
-  - `CnCard` (`packages/cyan/src/components/CnCard.svelte`) — preview cards for all three streams
+  - `CnCard` (`packages/cyan/src/components/CnCard.svelte`) — preview cards for Latest sites
+  - `TopThreadsStream` (`app/pelilauta/src/components/front-page/TopThreadsStream.astro`) — live Firestore-backed threads column
+  - `SyndicateStream` (`app/pelilauta/src/components/front-page/SyndicateStream.astro`) — live RSS feed Blog-roll column (see sub-spec `syndicate-stream/spec.md`); mounted with `server:defer`
   - `CnBackgroundPoster` (`packages/cyan/src/components/CnBackgroundPoster.astro`) — singleton atmospheric-background primitive, mounted via the `app-background-poster` named slot on `Page`. Sourced with an ES import of `@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg` — Astro/Vite hashes and serves the asset at build time; the poster consumes `heroImg.src` from the returned `ImageMetadata`.
-- **Data:** Static placeholder content for now; designed so each stream can later be fetched server-side in the Astro frontmatter and mapped to `CnCard` props.
+- **Data:** Threads and Blog-roll are live data. Latest sites remain static placeholder `CnCard` components; they will become live data in a future sprint.
 
 #### Sections
 
 | Section | Triad position | Content | Priority |
 |---|---|---|---|
 | Threads | Medium (primary) | List of `CnCard` components representing recent discussion threads | P0 |
-| Blog-roll | Small (secondary) | List of `CnCard` components representing posts from syndicated sources | P1 |
+| Blog-roll | Small (secondary) | `SyndicateStream` widget rendering up to 5 `SyndicatePost` items from configured RSS feeds | P1 |
 | Latest sites | Small (tertiary) | List of `CnCard` components representing recently updated community sites | P1 |
 
 ### Dependencies
@@ -50,9 +55,9 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 - [ ] `index.astro` composes on `Page` from `@cyan/layouts/Page.astro`
 - [ ] Page uses `cn-content-triad` with three labelled regions: Threads (medium), Blog-roll (small), Latest sites (small)
-- [ ] Threads region displays at least 3 placeholder `CnCard` components with title, description, and href
-- [ ] Blog-roll region displays at least 3 placeholder `CnCard` components sourced from syndicated feeds (placeholder content for now)
-- [ ] Latest sites region displays at least 3 placeholder `CnCard` components representing community sites
+- [ ] Threads region renders via `TopThreadsStream` (live Firestore data); falls back gracefully if the data layer is unavailable
+- [ ] Blog-roll region renders via `SyndicateStream` (live RSS data, `server:defer`; see `syndicate-stream/spec.md`); its `<h2>` heading is visible in both resolved and fallback states
+- [ ] Latest sites region displays at least 3 `CnCard` components representing community sites (static placeholder for now)
 - [ ] Each region has a visible heading (`<h2>`) naming the region
 - [ ] Page passes `pnpm check` with no errors
 - [ ] Page renders correctly at mobile / narrow (triad collapses to a single stacked column per the content-grid contract) and desktop / wide (triad renders three columns side-by-side)
@@ -75,8 +80,9 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 ```gherkin
 Given the user navigates to "/"
 When the page loads
-Then a region labelled "Threads" with at least 3 cards is visible
-  And a region labelled "Blog-roll" with at least 3 cards is visible
+Then a region with an <h2> labelled "Threads" (or "Keskustelut") is visible
+  And a region with an <h2> labelled "Community blogs" (or "Yhteisön blogit") is visible
+    (either as the resolved SyndicateStream or its deferred fallback)
   And a region labelled "Latest sites" with at least 3 cards is visible
 ```
 
