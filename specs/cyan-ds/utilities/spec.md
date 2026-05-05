@@ -16,6 +16,7 @@ Utilities provide reusable CSS classes for layout, typography, and visual concep
 - [Visually Hidden](visually-hidden/spec.md) — `.sr-only` accessibility utility
 - [Text Caption](text-caption/spec.md) — `.text-caption` uppercase label typography
 - [Flex](flex/spec.md) — `.flex-grow` and `.flex-none` flex-item primitives
+- [Chip](chip/spec.md) — `.cn-chip` pill tag + `.cn-chip-list` flex-wrap row
 
 ## Contract
 

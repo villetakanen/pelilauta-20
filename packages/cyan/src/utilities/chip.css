@@ -1,0 +1,70 @@
+/* Chip utilities — specs/cyan-ds/utilities/chip/spec.md */
+
+.cn-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: calc(var(--cn-grid) * 0.5);
+  vertical-align: middle;
+
+  padding: calc(var(--cn-grid) * 0.5) calc(var(--cn-grid) * 2);
+  margin: 0;
+
+  border-radius: 9999px;
+  border: none;
+
+  font-family: inherit;
+  font-size: var(--cn-font-size-text-small);
+  font-weight: var(--cn-font-weight-button);
+  line-height: var(--cn-line-height-button);
+  letter-spacing: var(--cn-letter-spacing-button);
+  white-space: nowrap;
+  text-decoration: none;
+
+  background-color: color-mix(in oklab, var(--cn-button) 33%, transparent);
+  color: var(--cn-on-surface);
+
+  cursor: default;
+  user-select: none;
+  transition: background-color var(--cn-duration-ui) var(--cn-easing-ui);
+}
+
+a.cn-chip,
+button.cn-chip {
+  cursor: pointer;
+}
+
+a.cn-chip:hover,
+button.cn-chip:hover {
+  background-color: color-mix(in oklab, var(--cn-button) 50%, transparent);
+}
+
+a.cn-chip:active,
+button.cn-chip:active {
+  background-color: color-mix(in oklab, var(--cn-button) 33%, transparent);
+  filter: brightness(0.95);
+}
+
+a.cn-chip:focus-visible,
+button.cn-chip:focus-visible {
+  outline: 2px solid var(--cn-focus-ring);
+  outline-offset: 2px;
+}
+
+button.cn-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.cn-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--cn-grid);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cn-chip {
+    transition: none;
+  }
+}

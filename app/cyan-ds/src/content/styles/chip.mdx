@@ -1,0 +1,94 @@
+---
+title: Chips
+description: Pill-shaped tag utility for navigation, filtering, and metadata.
+status: draft
+---
+
+import CnIcon from "@cyan/components/CnIcon.svelte";
+
+Compact, pill-shaped tags for navigation links, filter toggles, and read-only metadata — applied as a utility class directly on `<a>`, `<button>`, or `<span>` elements.
+
+## Demo
+
+### Chip types
+
+<div class="cn-chip-list">
+  <a class="cn-chip" href="#">Fiction</a>
+  <a class="cn-chip" href="#">Adventure</a>
+  <a class="cn-chip" href="#">Sci-Fi</a>
+  <a class="cn-chip" href="#">Fantasy</a>
+  <span class="cn-chip">Status: Active</span>
+  <span class="cn-chip">Featured</span>
+  <span class="cn-chip">Read-only</span>
+  <button class="cn-chip" type="button">Filter toggle</button>
+  <button class="cn-chip" type="button" disabled>Disabled</button>
+</div>
+
+### Chips with icons (FeaturedTags pattern)
+
+Combine a leading `<CnIcon size="xsmall">` child inside a `.cn-chip`. The chip's `gap` already accommodates the icon — no extra class is needed.
+
+<div class="cn-chip-list">
+  <a class="cn-chip" href="#"><CnIcon noun="avatar" size="xsmall" />Profiles</a>
+  <a class="cn-chip" href="#"><CnIcon noun="meeple" size="xsmall" />Tabletop</a>
+  <a class="cn-chip" href="#"><CnIcon noun="filter" size="xsmall" />Filter</a>
+  <a class="cn-chip" href="#"><CnIcon noun="love" size="xsmall" />Favourites</a>
+</div>
+
+## Properties
+
+### `.cn-chip`
+
+| Property | Value |
+|---|---|
+| `display` | `inline-flex` |
+| `align-items` | `center` |
+| `justify-content` | `center` |
+| `gap` | `calc(var(--cn-grid) * 0.5)` |
+| `vertical-align` | `middle` |
+| `padding` | `calc(var(--cn-grid) * 0.5) calc(var(--cn-grid) * 2)` |
+| `margin` | `0` |
+| `border-radius` | `9999px` (full-pill) |
+| `border` | `none` |
+| `font-family` | `inherit` |
+| `font-size` | `var(--cn-font-size-text-small)` |
+| `font-weight` | `var(--cn-font-weight-button)` |
+| `line-height` | `var(--cn-line-height-button)` |
+| `letter-spacing` | `var(--cn-letter-spacing-button)` |
+| `white-space` | `nowrap` |
+| `text-decoration` | `none` |
+| `background-color` | `color-mix(in oklab, var(--cn-button) 33%, transparent)` |
+| `color` | `var(--cn-on-surface)` |
+| `cursor` | `default` (pointer on `a`, `button`) |
+| `user-select` | `none` |
+| `transition` | `background-color var(--cn-duration-ui) var(--cn-easing-ui)` |
+
+### `.cn-chip-list`
+
+| Property | Value |
+|---|---|
+| `display` | `flex` |
+| `flex-wrap` | `wrap` |
+| `gap` | `var(--cn-grid)` |
+
+## Token reference
+
+| Token | Role |
+|---|---|
+| `--cn-button` | Base for the `color-mix()` surface |
+| `--cn-on-surface` | Chip text color |
+| `--cn-focus-ring` | `:focus-visible` outline color |
+| `--cn-grid` | Gap between chips in a list; vertical and horizontal padding base |
+| `--cn-font-size-text-small` | Chip label font size |
+| `--cn-font-weight-button` | Chip label font weight |
+| `--cn-line-height-button` | Chip label line height |
+| `--cn-letter-spacing-button` | Chip label letter spacing |
+| `--cn-duration-ui` | Transition duration |
+| `--cn-easing-ui` | Transition easing |
+
+## Accessibility
+
+- **Keyboard focus:** `:focus-visible` renders a `2px solid var(--cn-focus-ring)` outline with `2px` offset. Mouse-driven focus does not trigger the ring (per `:focus-visible` semantics).
+- **Native semantics preserved:** `.cn-chip` adds no ARIA roles. `<a>` stays a link, `<button>` stays a button, `<span>` stays a span — choose the element that matches the interaction.
+- **Reduced motion:** `@media (prefers-reduced-motion: reduce)` disables the background-color transition. State changes (hover, active) remain functional but are instantaneous.
+- **Disabled state:** `button.cn-chip:disabled` applies `opacity: 0.5` and `pointer-events: none`. The element remains in the DOM and accessibility tree; use `aria-disabled` instead of `disabled` if you need to keep it reachable by screen readers.
