@@ -34,7 +34,8 @@ test.describe("Front Page", () => {
       .locator("section.cn-content-triad")
       .first()
       .locator("div")
-      .filter({ has: page.getByRole("heading", { name: /Latest sites|Sivustot/i, level: 2 }) });
+      .filter({ has: page.getByRole("heading", { name: /Latest sites|Sivustot/i, level: 2 }) })
+      .first();
     await expect(latestSitesRegion).toBeVisible();
     const siteCards = latestSitesRegion.locator("article.cn-card");
     expect(await siteCards.count()).toBeGreaterThanOrEqual(3);

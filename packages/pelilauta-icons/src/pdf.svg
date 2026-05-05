@@ -9,6 +9,7 @@
    xmlns:svg="http://www.w3.org/2000/svg">
   <g
      id="icon"
+     fill="currentColor"
      transform="matrix(0.25396835,0,0,0.25396824,-1.015923,-1.0159202)">
     <path
        d="m 480,288 v -32 h -96 v 160 h 32 v -64 h 48 v -32 h -48 v -32 z"

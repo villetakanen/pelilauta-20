@@ -11,6 +11,9 @@ export const fi: NestedTranslation = {
   tag: {
     synonymsLabel: "Synonyymit ({count}):",
   },
+  featuredTags: {
+    title: "Tunnisteet",
+  },
   footer: {
     feed: {
       title: "Syotteet",
@@ -38,6 +41,9 @@ export const en: NestedTranslation = {
   },
   tag: {
     synonymsLabel: "Synonyms ({count}):",
+  },
+  featuredTags: {
+    title: "Tags",
   },
   footer: {
     feed: {

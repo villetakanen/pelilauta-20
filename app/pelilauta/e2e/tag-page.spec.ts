@@ -2,7 +2,8 @@
 // Verifies: specs/pelilauta/tag-page/spec.md §Canonical supertag URL renders the rich header
 // Verifies: specs/pelilauta/tag-page/spec.md §Plain tag with content renders the bare-slug heading
 // Verifies: specs/pelilauta/tag-page/spec.md §Plain tag with no content returns 404
-// Verifies: specs/pelilauta/tag-page/spec.md §Anonymous render is byte-identical across viewers
+// Verifies: specs/pelilauta/tag-page/spec.md §Page-rendered content is consistent across auth states
+// Verifies: specs/pelilauta/tag-page/spec.md §Anonymous response contains no `client:*` directive
 // Verifies: specs/pelilauta/tag-page/spec.md §Synonym redirect terminates at canonical 200 with no loop
 //
 // Assumes pnpm seed:e2e has been run. The seed populates:
@@ -148,10 +149,10 @@ test(// Verifies: specs/pelilauta/tag-page/spec.md §Plain tag with no content r
 });
 
 // ---------------------------------------------------------------------------
-// Scenario: Anonymous render is byte-identical across viewers
+// Scenario: Page-rendered content is consistent across auth states
 // ---------------------------------------------------------------------------
 
-test(// Verifies: specs/pelilauta/tag-page/spec.md §Anonymous render is byte-identical across viewers
+test(// Verifies: specs/pelilauta/tag-page/spec.md §Page-rendered content is consistent across auth states
 "Anonymous and authenticated GET /tags/pathfinder render byte-identical tag-page content with no client: directives", async ({
   page,
   request,

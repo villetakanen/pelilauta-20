@@ -346,29 +346,30 @@ And the supertag header is NOT rendered (despite the supertag existing in the
   in-process registry — the page does not partial-render around the failure)
 ```
 
-#### Scenario: Anonymous render is byte-identical across viewers
+#### Scenario: Page-rendered content is consistent across auth states
 
 ```gherkin
 Given two requests to /tags/pathfinder, one with no session cookie and one with
   a session cookie for an authenticated user
 When each page is rendered
-Then the SSR HTML is byte-identical between the two responses
-And neither response contains a client:* directive
-And the response is shareable across all viewers in either cohort
+Then the page-rendered content (heading, description, synonyms row) is
+  byte-identical between the two responses
+And the page emits no `client:*` directive from its own template on either
+  request (the shared layout MAY inject `client:*` islands such as
+  `AuthHandler` on authenticated responses; that's a layout concern outside
+  this page's scope)
 ```
 
-#### Scenario: Supertag with no description in active locale omits the paragraph
+#### Scenario: Anonymous response contains no `client:*` directive
 
 ```gherkin
-Given a request to /tags/d&d (the canonical D&D slug, decoded form)
-And the active locale is en
-And the en tree's tags:supertag.d&d.description key is absent (per
-  ../tags/i18n/spec.md §Convention sub-trees — EN descriptions are deferred)
+Given a request to /tags/pathfinder with no session cookie
 When the page is rendered
-Then the response status is 200
-And the supertag header (icon + displayName + synonyms row) renders
-And no description <p> renders below the heading
-And the engine's missing-key sentinel does NOT leak into the rendered output
+Then the SSR HTML contains no `client:*` directive anywhere — neither from
+  this page's own markup nor from the shared layout (anonymous renders ship
+  no per-viewer islands)
+And the response body is byte-identical across all anonymous viewers
+  (cache-shareable per the parent front-page contract)
 ```
 
 ## Migration Debt and Decisions
@@ -423,7 +424,22 @@ And the engine's missing-key sentinel does NOT leak into the rendered output
 
 ### Decisions resolved
 
-1. **Page is a feature, not a sub-spec of the tags
+1. **Description locale fallback is engine-driven, not
+   page-driven.** The i18n engine resolves
+   `tags:supertag.{slug}.description` against the active
+   locale, then falls back to the default locale (`fi`) if the
+   key is absent. EN-locale requests for D&D therefore receive
+   the Finnish description rather than the missing-key
+   sentinel — graceful UX without any consumer-side branching.
+   The page retains a defensive sentinel-detection guard for
+   the rare case a supertag has no description in EITHER
+   locale. The earlier v20 draft proposed an explicit
+   "Supertag with no description in active locale omits the
+   paragraph" scenario; that scenario was dropped because the
+   engine's locale fallback makes it unreachable for any
+   supertag with a `fi` description (which all 5 MVP entries
+   have).
+2. **Page is a feature, not a sub-spec of the tags
    package.** The package owns data and helpers; this page
    owns the route, the rendering, the redirect, the 404
    decision, and the SEO surface.

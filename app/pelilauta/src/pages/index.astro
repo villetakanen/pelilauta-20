@@ -1,6 +1,7 @@
 ---
 import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
 import heroImg from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
+import FeaturedTags from "../components/front-page/FeaturedTags.astro";
 import SyndicateStream from "../components/front-page/SyndicateStream.astro";
 import TopSitesStream from "../components/front-page/TopSitesStream.astro";
 import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
@@ -21,6 +22,10 @@ import Page from "../layouts/Page.astro";
       </div>
     </SyndicateStream>
 
-    <TopSitesStream />
+    <div>
+      <TopSitesStream />
+      <hr />
+      <FeaturedTags />
+    </div>
   </section>
 </Page>

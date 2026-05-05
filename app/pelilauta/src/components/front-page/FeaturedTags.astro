@@ -1,0 +1,22 @@
+---
+// FeaturedTags — front-page widget surfacing the curated supertag chip row.
+// Pure SSR; no client: directives, no <style>, no inline styles, no app-local utility classes.
+// Data source: SUPERTAGS registry from @pelilauta/tags/server (in-process, synchronous).
+// See specs/pelilauta/front-page/featured-tags/spec.md
+
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import { SUPERTAGS } from "@pelilauta/tags/server";
+import { t } from "../../i18n";
+---
+
+<section>
+  <h2 class="text-h3">{t("pelilauta:featuredTags.title")}</h2>
+  <div class="cn-chip-list">
+    {SUPERTAGS.map((supertag) => (
+      <a class="cn-chip" href={`/tags/${encodeURI(supertag.canonicalTag)}`}>
+        <CnIcon noun={supertag.icon} size="xsmall" />
+        <span>{t(`tags:supertag.${supertag.canonicalTag}.displayName`)}</span>
+      </a>
+    ))}
+  </div>
+</section>
