@@ -162,6 +162,28 @@ Why the split: storage compatibility forces v17-faithful field names on disk, bu
 
 Domain specs MAY restate this rule with a one-line pointer to this section, but MUST NOT define a contradictory local rule.
 
+## Doc-ID materialization
+
+**Every Zod schema describing a Firestore document has a `key` field whose value is the doc's ID. Readers override the on-disk value at parse time so the parsed entity always carries `key === doc.id`.**
+
+Pattern:
+
+```ts
+SchemaName.parse({ ...doc.data(), key: doc.id });
+```
+
+**Why:** TS-side convenience. Code handling entities benefits from `entity.key` being one accessible field rather than callers carrying `(doc.data(), doc.id)` pairs. The cost — write-time round-trips materialize `key` into the doc data — is ignored on the way out, so divergent values are harmless.
+
+**Implications:**
+
+- Carry-forward data with stale or divergent `key` fields parses cleanly. Readers don't trust the stored value.
+- Future doc-ID convention changes (e.g. flat-keying nested page-tag docs to `${siteKey}-${pageKey}`) don't require data migration — the schema parses regardless of what's on disk.
+- Entity-level code references `entity.key` directly without separately threading `doc.id`.
+
+This rule applies to every domain schema in the workspace — `SiteSchema`, `ThreadSchema`, `TagSchema`, `ProfileSchema`, and so on. The on-disk `key` field is a materialization artifact, not the source of truth.
+
+Domain specs MAY restate this rule with a one-line pointer to this section, but MUST NOT define a contradictory local rule.
+
 ## Text conventions
 
 - **Ellipsis: Unicode `…` (U+2026), universally.** Truncation, elision, and "more to come" markers in any generated text — UI snippets, SEO `<meta name="description">`, notification bodies, RSS `description`, plain-text and HTML projections of markdown — use the single Unicode horizontal ellipsis character, not three ASCII dots `...`. One glyph, one code point, semantically a punctuation mark, consistent across surfaces. Helpers that produce truncated strings (e.g. `packages/utils/src/markdownToPlainText.ts`) emit `…` and callers that prefer ASCII override at the call site rather than at the helper.

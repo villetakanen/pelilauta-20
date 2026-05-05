@@ -193,35 +193,55 @@ follow-up if the encoded-slug edge cases (e.g. `d%26d` vs
 `decodeURIComponent` inside `getTagDisplayInfo` for matching;
 v20 carries this forward.
 
-#### Routes (host-owned, all out of MVP scope)
+- `hasTaggedEntries(slug: string): Promise<boolean>`
+  - Async function. Canonicalizes the input via
+    `resolveTagSynonym`, then expands to
+    `[canonical, ...synonyms].map(s => decodeURIComponent(s).toLowerCase())`
+    using `getSupertag` to resolve synonyms. Queries the `tags`
+    Firestore collection
+    (`where('tags', 'array-contains-any', allTags).limit(1)`)
+    and returns `!snap.empty`.
+  - Reads server-side via `@pelilauta/firebase/server`. Errors
+    propagate to the caller (no swallowing), matching the
+    read-side discipline of `getSites` and `getThreads`.
+  - The MVP consumer is the `/tags/[tag]` route at
+    [`../tag-page/spec.md`](../tag-page/spec.md), which uses
+    the boolean to make the plain-tag 404/200 decision (see
+    that spec's §Routing logic).
+  - Tag docs the helper would parse if it expanded into a
+    list-fetch follow this workspace's
+    [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+    §Doc-ID materialization rule —
+    `TagSchema.parse({ ...doc.data(), key: doc.id })`. The MVP
+    presence-check doesn't parse, but the rule is documented
+    so any list-fetch successor obeys it.
 
-All tags routes are deferred to TBD sub-specs (see
-§Authoring DoD). The MVP ships no `app/pelilauta/src/pages/tags/**`
-files; consumers of the package at MVP are limited to in-process
-helper-callers (registry lookups happen anywhere a caller
-imports from `@pelilauta/tags/server`).
+#### Routes (owned by external feature specs)
 
-The eventual `/tags/[tag]` route lands as
-[`./tag-page/spec.md`](./tag-page/spec.md) (TBD); the front-page
-chip widget lands as
+This package ships no `app/pelilauta/src/pages/**` files. The
+`/tags/[tag]` route is a separate feature with its own spec at
+[`../tag-page/spec.md`](../tag-page/spec.md); the front-page
+`FeaturedTags` widget is a sibling feature at
 [`../front-page/featured-tags/spec.md`](../front-page/featured-tags/spec.md)
-(TBD). Both consume the same registry and helpers from this
-package.
+(TBD). Both consume the registry and helpers exported from
+`@pelilauta/tags/server`.
 
-#### Components (sub-specs, deferred)
+#### External features that consume this package
 
-- **`FeaturedTags` front-page widget** — TBD at
-  [`../front-page/featured-tags/spec.md`](../front-page/featured-tags/spec.md).
-  Renders a chip row (using `cn-chip` + `cn-chip-list` from
-  cyan) of all 5 supertags from the registry. Reads
-  `displayName` per entry from the i18n surface. Routes each
-  chip to `/tags/{canonicalTag}`.
-- **`/tags/[tag]` route page** — TBD at
-  [`./tag-page/spec.md`](./tag-page/spec.md). MVP renders the
-  supertag's localized `displayName` (and optional
-  `description`) when the slug resolves to a registry entry,
-  otherwise renders the raw slug as the heading. No
-  Firestore-backed entry listing at MVP.
+The following are each owned by their own feature specs — not
+sub-specs of this package — and consume the package's exports
+(registry, helpers, i18n):
+
+- **`FeaturedTags` front-page widget** — feature spec at
+  [`../front-page/featured-tags/spec.md`](../front-page/featured-tags/spec.md)
+  (TBD). Renders a chip row of the curated supertags from the
+  registry, using cyan's `cn-chip` + `cn-chip-list`. Routes
+  each chip to `/tags/{canonicalTag}`.
+- **`/tags/[tag]` route page** — feature spec at
+  [`../tag-page/spec.md`](../tag-page/spec.md). Renders the
+  supertag header for registered slugs, raw `#{slug}` heading
+  for plain tags with content, 404s plain tags without
+  content. Owns the synonym 301 redirect.
 
 #### i18n
 
@@ -245,13 +265,11 @@ slug.
 
 ### Dependencies
 
+- `@pelilauta/firebase/server` — server-side Firestore reads
+  for `hasTaggedEntries`.
 - `@pelilauta/i18n` — used only for the `NestedTranslation`
   type by the `./i18n` sub-export.
 - `zod` — schema validation.
-
-The package has **no Firebase dependency** at MVP — the supertag
-registry is in-process data, the helpers are pure, and the
-TagSchema is documented but not parsed against a runtime read.
 
 ### Constraints
 
@@ -321,29 +339,30 @@ Stages are cumulative.
 - [ ] `getSupertag(slug)` returns the registry entry for any
       canonical slug or any of its synonyms; returns `null`
       otherwise.
+- [ ] `hasTaggedEntries(slug)` returns `true` when at least
+      one Firestore document in the `tags` collection has the
+      canonical slug or any of its synonyms in its `tags`
+      array; returns `false` otherwise. Errors propagate.
 - [ ] `i18n/index.ts` exports `fi` and `en` trees per
       [`./i18n/spec.md`](./i18n/spec.md) — at minimum
       `displayName` for each of the 5 registry entries.
 - [ ] The synonym map is built once at module load, not on
       every `resolveTagSynonym` call.
 
-#### Authoring DoD (Stage 3+ — TBD sub-specs)
+#### Authoring DoD (Stage 3+ — TBD package extensions)
 
-The following surfaces are out of scope for this parent spec
-and each lands as its own sub-spec when work begins:
+External feature consumers are owned by their own feature
+specs, not by this package. See §External features that
+consume this package.
 
-- `FeaturedTags` front-page widget →
-  [`../front-page/featured-tags/spec.md`](../front-page/featured-tags/spec.md)
-  (TBD).
-- `/tags/[tag]` route page →
-  [`./tag-page/spec.md`](./tag-page/spec.md) (TBD). MVP scope
-  for that sub-spec is "render the supertag header" — no
-  Firestore-backed entry listing.
-- Synonym redirect (HTTP 301 from synonym slug to canonical
-  slug) — landed as part of the `/tags/[tag]` sub-spec.
-- Firestore-backed entry listing on the tag page — TBD,
-  separate sub-spec; reintroduces a Firestore reader to
-  the package's `./server` surface.
+Out-of-MVP package-level extensions (each lands as its own
+sub-spec OF this package when work begins):
+
+- Firestore-backed entry-list helper — extends `./server`
+  with a list-fetch accessor (separate from the MVP
+  `hasTaggedEntries` presence-check). Lands when a consumer
+  surface needs to render entries (e.g. a follow-up to the
+  tag page).
 - Tag-authoring surfaces (write APIs for tag-stamping
   entries, registry editor UI) — out of MVP, TBD sub-specs.
 
@@ -442,6 +461,35 @@ Given a freshly imported helpers/resolveTagSynonym module
 When resolveTagSynonym is called 100 times
 Then the synonym map is constructed exactly once (at module load)
 And subsequent calls reuse the same map instance
+```
+
+#### Scenario: hasTaggedEntries returns true when an entry exists for the canonical or any synonym
+
+```gherkin
+Given the tags collection contains at least one document with
+  'pathfinder' (or any of its synonyms — e.g. 'pf2e', 'päffä') in its tags array
+When hasTaggedEntries('pathfinder') is called
+Then true is returned
+And the array-contains-any query expanded the input to
+  [canonical, ...synonyms].map(decodeURIComponent + lowercase)
+```
+
+#### Scenario: hasTaggedEntries returns false when no matching entry exists
+
+```gherkin
+Given the tags collection contains no document with 'made-up-game-name'
+  in its tags array (and the slug has no registered synonyms)
+When hasTaggedEntries('made-up-game-name') is called
+Then false is returned
+```
+
+#### Scenario: hasTaggedEntries propagates Firestore errors
+
+```gherkin
+Given a Firestore failure on the tags collection query
+When hasTaggedEntries('pathfinder') is called
+Then the underlying error propagates to the caller
+And no fallback value is substituted
 ```
 
 ## Migration Debt and Decisions
