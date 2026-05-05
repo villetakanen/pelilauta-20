@@ -196,9 +196,13 @@ v20 carries this forward.
 - `hasTaggedEntries(slug: string): Promise<boolean>`
   - Async function. Canonicalizes the input via
     `resolveTagSynonym`, then expands to
-    `[canonical, ...synonyms].map(s => decodeURIComponent(s).toLowerCase())`
-    using `getSupertag` to resolve synonyms. Queries the `tags`
-    Firestore collection
+    `[...new Set([canonical, ...synonyms].map(s => decodeURIComponent(s).toLowerCase()))]`
+    using `getSupertag` to resolve synonyms. The `Set` dedup is
+    load-bearing: a canonical slug can decode to a string that's
+    also in its own synonyms list (e.g. `'d%26d'` decodes to
+    `'d&d'`, which is also a D&D synonym), and Firestore's
+    `array-contains-any` behavior with duplicate query terms is
+    undocumented. Queries the `tags` Firestore collection
     (`where('tags', 'array-contains-any', allTags).limit(1)`)
     and returns `!snap.empty`.
   - Reads server-side via `@pelilauta/firebase/server`. Errors
@@ -218,13 +222,50 @@ v20 carries this forward.
 
 #### Routes (owned by external feature specs)
 
-This package ships no `app/pelilauta/src/pages/**` files. The
-`/tags/[tag]` route is a separate feature with its own spec at
-[`../tag-page/spec.md`](../tag-page/spec.md); the front-page
-`FeaturedTags` widget is a sibling feature at
+This package ships no production `app/pelilauta/src/pages/**`
+files. The `/tags/[tag]` route is a separate feature with its
+own spec at [`../tag-page/spec.md`](../tag-page/spec.md); the
+front-page `FeaturedTags` widget is a sibling feature at
 [`../front-page/featured-tags/spec.md`](../front-page/featured-tags/spec.md)
 (TBD). Both consume the registry and helpers exported from
 `@pelilauta/tags/server`.
+
+A development-only test endpoint at
+`app/pelilauta/src/pages/api/test/has-tagged-entries.ts`
+exposes `hasTaggedEntries` for E2E verification — see
+§Test-only API endpoint below.
+
+#### Test-only API endpoint
+
+Verifying `hasTaggedEntries` against real Firestore data
+requires an HTTP surface for the Playwright E2E suite to
+call. The package itself ships no production HTTP API at MVP
+(per §Routes); the test surface lives in the host app under
+the established `/api/test/*` convention.
+
+- **Path:** `app/pelilauta/src/pages/api/test/has-tagged-entries.ts`.
+- **Method + params:** `GET` with `?slug=<canonical-or-synonym>`.
+- **Response (200):** `{ result: boolean }` — the helper's return
+  value for the supplied slug.
+- **Triple-layer defense** (mirrors `api/test/seed-session.ts`,
+  the precedent set by `specs/pelilauta/session/spec.md`
+  §Test-only seed route):
+  1. **DEV-only build guard:**
+     `if (!import.meta.env.DEV) return new Response(null, { status: 404 })`.
+     Production builds return 404 immediately, regardless of
+     headers or query params.
+  2. **Env var presence:** the route reuses
+     `SECRET_e2e_seed_secret` (one shared secret protects all
+     `/api/test/*` endpoints — managed in `.env.development`).
+     Missing → 500.
+  3. **Header match:** caller must send
+     `x-e2e-seed-secret: <secret>`. Missing or wrong → 401.
+- **Bad input:** missing or empty `slug` query param → 400.
+- **Scope:** the endpoint exists ONLY for E2E verification.
+  It is not part of any feature contract; the
+  [`../tag-page/spec.md`](../tag-page/spec.md) consumer reads
+  the helper in-process via `@pelilauta/tags/server`, never
+  through this endpoint.
 
 #### External features that consume this package
 

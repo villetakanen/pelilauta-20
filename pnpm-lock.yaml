@@ -78,6 +78,9 @@ importers:
       '@pelilauta/sites':
         specifier: workspace:*
         version: link:../../packages/sites
+      '@pelilauta/tags':
+        specifier: workspace:*
+        version: link:../../packages/tags
       '@pelilauta/threads':
         specifier: workspace:*
         version: link:../../packages/threads
@@ -287,6 +290,9 @@ importers:
 
   packages/tags:
     dependencies:
+      '@pelilauta/firebase':
+        specifier: workspace:*
+        version: link:../firebase
       '@pelilauta/i18n':
         specifier: workspace:*
         version: link:../i18n

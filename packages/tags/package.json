@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@pelilauta/firebase": "workspace:*",
     "@pelilauta/i18n": "workspace:*",
     "zod": "^3.24.0"
   },

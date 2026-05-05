@@ -235,6 +235,55 @@ const SEED_CHANNELS = [
 ];
 
 // ---------------------------------------------------------------------------
+// Tag projection seed data
+//
+// Mirrors the shape toTagData() produces in v18. Only seed threads with
+// non-empty tags arrays get a projection document.
+// Doc-ID === data.key per the §Doc-ID materialization rule in ARCHITECTURE.md.
+// ---------------------------------------------------------------------------
+
+type TagProjection = {
+  title: string;
+  type: "thread";
+  key: string;
+  tags: string[];
+  author: string;
+  flowTime: number;
+};
+
+function buildTagProjections(): Array<[string, TagProjection]> {
+  const result: Array<[string, TagProjection]> = [];
+  for (const [docId, data] of Object.entries(SEED_THREADS)) {
+    const rawTags = data.tags as string[] | undefined;
+    if (!rawTags || rawTags.length === 0) continue;
+
+    const key = (data.key as string | undefined) ?? docId;
+    const author =
+      Array.isArray(data.owners) && data.owners.length > 0
+        ? String(data.owners[0])
+        : typeof data.author === "string"
+          ? data.author
+          : "";
+    // flowTime: stored as Timestamp in seed data — extract as milliseconds.
+    const flowTimeTs = data.flowTime as Timestamp;
+    const flowTimeMs = flowTimeTs.toDate().getTime();
+
+    result.push([
+      key,
+      {
+        title: data.title as string,
+        type: "thread",
+        key,
+        tags: rawTags.map((t) => t.toLowerCase()),
+        author,
+        flowTime: flowTimeMs,
+      },
+    ]);
+  }
+  return result;
+}
+
+// ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
 
@@ -264,6 +313,20 @@ async function main() {
   }
   await profileBatch.commit();
   console.log(`  Upserted ${Object.keys(SEED_PROFILES).length} profiles to 'profiles'`);
+
+  // 5. Clear and re-seed tags collection (tag projection documents).
+  const tagsDeleted = await clearCollection("tags");
+  console.log(`  Deleted ${tagsDeleted} documents from 'tags'`);
+
+  const tagProjections = buildTagProjections();
+  if (tagProjections.length > 0) {
+    const tagBatch = db.batch();
+    for (const [key, projection] of tagProjections) {
+      tagBatch.set(db.collection("tags").doc(key), projection);
+    }
+    await tagBatch.commit();
+  }
+  console.log(`  Wrote ${tagProjections.length} tag projections to 'tags'`);
 
   console.log("\nDone. Seed data ready for E2E tests.");
   process.exit(0);

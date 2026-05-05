@@ -1,9 +1,10 @@
 // SSR-safe barrel for @pelilauta/tags.
 //
-// Re-exports schemas, types, registry data, and pure lookup helpers.
-// No Firebase imports — the package has no Firestore reader at MVP.
+// Re-exports schemas, types, registry data, pure lookup helpers,
+// and the Firestore-backed hasTaggedEntries helper.
 // See specs/pelilauta/tags/spec.md §Architecture.
 
+export { hasTaggedEntries } from "../api/hasTaggedEntries";
 export { SUPERTAGS } from "../data/supertags";
 export { getSupertag } from "../helpers/getSupertag";
 export { resolveTagSynonym } from "../helpers/resolveTagSynonym";
