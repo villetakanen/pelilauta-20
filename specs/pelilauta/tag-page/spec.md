@@ -95,8 +95,13 @@ content exists, or 404s if not).
      lowercases internally; the comparison below uses the
      lowercased input.
   3. If `canonical !== tag.toLowerCase()` → return
-     `Astro.redirect(`/tags/${canonical}`, 301)`. This is the
-     synonym-canonicalization redirect.
+     `Astro.redirect(`/tags/${encodeURI(canonical)}`, 301)`. This
+     is the synonym-canonicalization redirect. The `encodeURI`
+     wrap is required per
+     [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+     §URL routing and redirect encoding — without it, the Fetch
+     API serializes non-ASCII codepoints (umlauts, etc.) as
+     Latin-1 in the Location header and the round-trip fails.
   4. `supertag = getSupertag(canonical)` — `SupertagEntry | null`.
   5. `hasEntries = await hasTaggedEntries(canonical)` —
      boolean. Errors propagate (see §Constraints).
@@ -206,8 +211,10 @@ content exists, or 404s if not).
       path above and is registered by Astro's filesystem
       routing.
 - [ ] The frontmatter calls `resolveTagSynonym` and issues a
-      `Astro.redirect(canonical, 301)` when the input differs
-      from the canonical (case-normalized comparison).
+      `Astro.redirect(`/tags/${encodeURI(canonical)}`, 301)` when
+      the input differs from the canonical (case-normalized
+      comparison). `encodeURI` is required for non-ASCII
+      canonicals to round-trip cleanly.
 - [ ] The frontmatter calls `getSupertag(canonical)` and
       `hasTaggedEntries(canonical)` and applies the §Routing
       logic decision table.
@@ -272,8 +279,19 @@ content exists, or 404s if not).
 Given a request to /tags/dnd (a known synonym for the D&D supertag)
 When the page is rendered
 Then the response status is 301
-And the Location header is /tags/d%26d (the canonical slug, URL-encoded)
+And the Location header is /tags/d&d (encodeURI leaves `&` literal — it's a sub-delim, allowed in path segments)
 And no body content is rendered
+```
+
+#### Scenario: Synonym redirect terminates at canonical 200 with no loop
+
+```gherkin
+Given a request to /tags/dnd (a known synonym for the D&D supertag)
+When the redirect chain is followed to its terminal response
+Then the final URL resolves to the canonical slug (after one 301 hop)
+And the final status is 200
+And the supertag header (icon + displayName + description + synonyms chips) renders
+And the chain length is exactly two requests (one 301, one 200)
 ```
 
 #### Scenario: Canonical supertag URL renders the rich header
@@ -342,9 +360,9 @@ And the response is shareable across all viewers in either cohort
 #### Scenario: Supertag with no description in active locale omits the paragraph
 
 ```gherkin
-Given a request to /tags/d%26d (the canonical D&D slug)
+Given a request to /tags/d&d (the canonical D&D slug, decoded form)
 And the active locale is en
-And the en tree's tags:supertag.d%26d.description key is absent (per
+And the en tree's tags:supertag.d&d.description key is absent (per
   ../tags/i18n/spec.md §Convention sub-trees — EN descriptions are deferred)
 When the page is rendered
 Then the response status is 200

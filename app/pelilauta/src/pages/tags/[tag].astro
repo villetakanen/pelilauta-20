@@ -1,0 +1,94 @@
+---
+// Tag detail page — anonymous-SSR, no client: directives.
+// Renders the tag header for registered supertags (rich header) and plain tags
+// (bare-slug heading). 404s when a plain tag has no Firestore entries.
+// See specs/pelilauta/tag-page/spec.md.
+
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import { getSupertag, hasTaggedEntries, resolveTagSynonym } from "@pelilauta/tags/server";
+import { t } from "../../i18n";
+import Page from "../../layouts/Page.astro";
+
+const { tag } = Astro.params;
+
+// Guard: Astro's dynamic routing ensures `tag` is present, but be defensive.
+if (!tag) {
+  return new Response(null, { status: 404 });
+}
+
+// Step 1: canonicalize.
+const canonical = resolveTagSynonym(tag);
+
+// Step 2: synonym redirect — 301 (permanent).
+// `canonical` from resolveTagSynonym is the decoded form (e.g. "d&d").
+// encodeURI encodes non-ASCII and spaces but leaves reserved characters
+// (including &) intact, producing a valid RFC-3986 path segment.
+// Use encodeURI (NOT encodeURIComponent) per ARCHITECTURE.md §URL routing
+// and redirect encoding.
+if (canonical !== tag.toLowerCase()) {
+  return Astro.redirect(`/tags/${encodeURI(canonical)}`, 301);
+}
+
+// Step 3: registry lookup (sync, no I/O).
+const supertag = getSupertag(canonical);
+
+// Step 4: Firestore presence-check — errors propagate (no try/catch).
+const hasEntries = await hasTaggedEntries(canonical);
+
+// Step 5: 404 decision for plain tags with no content.
+if (!supertag && !hasEntries) {
+  return new Response(null, { status: 404 });
+}
+
+// ── Successful 200 path ──────────────────────────────────────────────────────
+
+Astro.response.headers.set(
+  "Cache-Control",
+  "public, max-age=300, s-maxage=600, stale-while-revalidate=1800",
+);
+
+// SEO: displayName and optional description.
+const displayName = supertag ? t(`tags:supertag.${canonical}.displayName`) : canonical;
+
+const rawDescription = supertag ? t(`tags:supertag.${canonical}.description`) : undefined;
+
+// The engine returns the key itself when the translation is missing.
+// Treat the missing-key sentinel as "no description".
+const descriptionSentinel = `tags:supertag.${canonical}.description`;
+const description =
+  rawDescription !== undefined && rawDescription !== descriptionSentinel
+    ? rawDescription
+    : undefined;
+
+const title = `#${displayName}`;
+// Page layout requires description as string; empty string means "no meta description".
+const pageDescription = description ?? "";
+---
+
+<Page title={title} description={pageDescription}>
+  {
+    supertag ? (
+      <Fragment>
+        <h1>
+          <CnIcon noun={supertag.icon} />
+          {displayName}
+        </h1>
+        {description && <p>{description}</p>}
+        {supertag.synonyms.length > 0 && (
+          <Fragment>
+            <p class="text-caption">
+              {t("pelilauta:tag.synonymsLabel", { count: supertag.synonyms.length })}
+            </p>
+            <div class="cn-chip-list">
+              {supertag.synonyms.map((syn) => (
+                <span class="cn-chip">#{syn}</span>
+              ))}
+            </div>
+          </Fragment>
+        )}
+      </Fragment>
+    ) : (
+      <h1>#{canonical}</h1>
+    )
+  }
+</Page>

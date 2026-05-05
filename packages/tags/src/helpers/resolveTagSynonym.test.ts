@@ -9,15 +9,15 @@ import { resolveTagSynonym } from "./resolveTagSynonym";
 
 describe("resolveTagSynonym", () => {
   it("maps 'DnD' (mixed case) to the D&D canonical slug", () => {
-    expect(resolveTagSynonym("DnD")).toBe("d%26d");
+    expect(resolveTagSynonym("DnD")).toBe("d&d");
   });
 
-  it("maps 'd&d' to the D&D canonical slug", () => {
-    expect(resolveTagSynonym("d&d")).toBe("d%26d");
+  it("maps 'd&d' to the D&D canonical slug (canonical maps to itself)", () => {
+    expect(resolveTagSynonym("d&d")).toBe("d&d");
   });
 
   it("maps 'dungeons & dragons' to the D&D canonical slug", () => {
-    expect(resolveTagSynonym("dungeons & dragons")).toBe("d%26d");
+    expect(resolveTagSynonym("dungeons & dragons")).toBe("d&d");
   });
 
   it("maps 'päffä' to 'pathfinder' canonical slug", () => {
@@ -32,8 +32,8 @@ describe("resolveTagSynonym", () => {
     expect(resolveTagSynonym("FitD")).toBe("pbta");
   });
 
-  it("maps 'coc' to 'call+of+cthulhu' canonical slug", () => {
-    expect(resolveTagSynonym("coc")).toBe("call+of+cthulhu");
+  it("maps 'coc' to 'call of cthulhu' canonical slug", () => {
+    expect(resolveTagSynonym("coc")).toBe("call of cthulhu");
   });
 
   it("passes through an unknown slug lowercased", () => {
@@ -46,7 +46,7 @@ describe("resolveTagSynonym", () => {
 
   it("normalizes input via lowercasing before lookup", () => {
     // Calling with all-caps synonym should still resolve correctly.
-    expect(resolveTagSynonym("DND")).toBe("d%26d");
+    expect(resolveTagSynonym("DND")).toBe("d&d");
   });
 
   it("the synonym map is built once at module load, not per-call", () => {
@@ -61,7 +61,7 @@ describe("resolveTagSynonym", () => {
     // IIFE. This is enforced by code review / the module structure; the test
     // confirms the observable behavior is correct across many invocations.
     for (let i = 0; i < 100; i++) {
-      expect(resolveTagSynonym("DnD")).toBe("d%26d");
+      expect(resolveTagSynonym("DnD")).toBe("d&d");
       expect(resolveTagSynonym("made-up")).toBe("made-up");
     }
   });

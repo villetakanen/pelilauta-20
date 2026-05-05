@@ -13,16 +13,8 @@ import type { SupertagEntry } from "../schemas/SupertagSchema";
 
 export const SUPERTAGS: readonly SupertagEntry[] = Object.freeze([
   {
-    canonicalTag: "d%26d",
-    synonyms: [
-      "dnd",
-      "d&d",
-      "dungeons & dragons",
-      "dungeons and dragons",
-      "dd",
-      "d and d",
-      "deddu",
-    ],
+    canonicalTag: "d&d",
+    synonyms: ["dnd", "dungeons & dragons", "dungeons and dragons", "dd", "d and d", "deddu"],
     icon: "d20",
   },
   {
@@ -31,7 +23,7 @@ export const SUPERTAGS: readonly SupertagEntry[] = Object.freeze([
     icon: "compass",
   },
   {
-    canonicalTag: "legendoja %26 lohikäärmeitä",
+    canonicalTag: "legendoja & lohikäärmeitä",
     synonyms: [
       "legendoja ja lohikäärmeita",
       "l&l",
@@ -49,7 +41,7 @@ export const SUPERTAGS: readonly SupertagEntry[] = Object.freeze([
     icon: "books",
   },
   {
-    canonicalTag: "call+of+cthulhu",
+    canonicalTag: "call of cthulhu",
     synonyms: ["coc", "cthulhu", "call of cthulu", "delta green", "dg"],
     icon: "tentacles",
   },

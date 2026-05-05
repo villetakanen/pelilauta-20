@@ -57,11 +57,13 @@ declares the tags-owned keys themselves.
   heading.
 
 The `{slug}` segment is the supertag's `canonicalTag` from the
-registry verbatim, including URL-encoded characters where
-present (`d%26d`, `legendoja %26 lohikäärmeitä`,
-`call+of+cthulhu`). The slugs are JS object keys at runtime,
-which tolerates spaces and percent-escapes; the dotted-path
-lookup descends one level per `.` so callers compute keys as
+registry verbatim, in **decoded form** (`d&d`,
+`legendoja & lohikäärmeitä`, `call of cthulhu`) per
+[`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+§URL routing and redirect encoding. The slugs are JS object keys
+at runtime, which tolerates spaces, ampersands, and other
+non-alphanumerics; the dotted-path lookup descends one level per
+`.` so callers compute keys as
 `` `tags:supertag.${supertag.canonicalTag}.displayName` ``.
 
 #### Supertag entries (MVP)
@@ -71,11 +73,11 @@ The package ships entries for all 5 supertags listed in
 
 | Slug | `displayName` (fi) | `displayName` (en) | `description` (fi) |
 |---|---|---|---|
-| `d%26d` | `D&D` | `D&D` | `Dungeons & Dragons keskustelut, kampanjat ja materiaalit` |
+| `d&d` | `D&D` | `D&D` | `Dungeons & Dragons keskustelut, kampanjat ja materiaalit` |
 | `pathfinder` | `Pathfinder` | `Pathfinder` | `Pathfinder-roolipeli, säännöt, hahmot ja seikkailut` |
-| `legendoja %26 lohikäärmeitä` | `Legendoja & lohikäärmeitä` | `Legendoja & lohikäärmeitä` | `Legendoja ja Lohikäärmeitä -roolipeliin liittyvät keskustelut ja sivut.` |
+| `legendoja & lohikäärmeitä` | `Legendoja & lohikäärmeitä` | `Legendoja & lohikäärmeitä` | `Legendoja ja Lohikäärmeitä -roolipeliin liittyvät keskustelut ja sivut.` |
 | `pbta` | `PbtA` | `PbtA` | `Powered by the Apocalypse -järjestelmän pelit ja keskustelut` |
-| `call+of+cthulhu` | `Call of Cthulhu` | `Call of Cthulhu` | `Call of Cthulhu ja muut sen sukulaiset` |
+| `call of cthulhu` | `Call of Cthulhu` | `Call of Cthulhu` | `Call of Cthulhu ja muut sen sukulaiset` |
 
 **Notes on the values:**
 
@@ -152,7 +154,7 @@ And the same key resolves to "Pathfinder" for locale "en"
 ```gherkin
 Given the same Locales registry
 When the host-bound t resolves
-  "tags:supertag.legendoja %26 lohikäärmeitä.displayName"
+  "tags:supertag.legendoja & lohikäärmeitä.displayName"
   with locale "fi"
 Then it returns "Legendoja & lohikäärmeitä"
 And the same key resolves to "Legendoja & lohikäärmeitä" for locale "en"
@@ -162,7 +164,7 @@ And the same key resolves to "Legendoja & lohikäärmeitä" for locale "en"
 
 ```gherkin
 Given the same Locales registry
-When the host-bound t resolves "tags:supertag.d%26d.description"
+When the host-bound t resolves "tags:supertag.d&d.description"
   with locale "fi"
 Then it returns "Dungeons & Dragons keskustelut, kampanjat ja materiaalit"
 ```
@@ -171,7 +173,7 @@ Then it returns "Dungeons & Dragons keskustelut, kampanjat ja materiaalit"
 
 ```gherkin
 Given the same Locales registry
-When the host-bound t resolves "tags:supertag.d%26d.description"
+When the host-bound t resolves "tags:supertag.d&d.description"
   with locale "en"
 Then the engine returns its missing-key sentinel (typically the key string)
 And the consumer is expected to detect this and either fall back to fi

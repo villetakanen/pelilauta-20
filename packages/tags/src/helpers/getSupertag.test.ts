@@ -41,28 +41,28 @@ describe("getSupertag", () => {
     expect(bySynonym).toEqual(byCanonical);
   });
 
-  it("returns the D&D entry for canonical slug 'd%26d'", () => {
-    const entry = getSupertag("d%26d");
+  it("returns the D&D entry for canonical slug 'd&d'", () => {
+    const entry = getSupertag("d&d");
     expect(entry).not.toBeNull();
-    expect(entry?.canonicalTag).toBe("d%26d");
+    expect(entry?.canonicalTag).toBe("d&d");
     expect(entry?.icon).toBe("d20");
   });
 
   it("returns the D&D entry for synonym 'dnd'", () => {
     const entry = getSupertag("dnd");
-    expect(entry?.canonicalTag).toBe("d%26d");
+    expect(entry?.canonicalTag).toBe("d&d");
   });
 
-  it("returns the L&L entry for its encoded canonical slug", () => {
-    const entry = getSupertag("legendoja %26 lohikäärmeitä");
+  it("returns the L&L entry for its decoded canonical slug", () => {
+    const entry = getSupertag("legendoja & lohikäärmeitä");
     expect(entry).not.toBeNull();
-    expect(entry?.canonicalTag).toBe("legendoja %26 lohikäärmeitä");
+    expect(entry?.canonicalTag).toBe("legendoja & lohikäärmeitä");
     expect(entry?.icon).toBe("ll-ampersand");
   });
 
-  it("returns the call+of+cthulhu entry for synonym 'coc'", () => {
+  it("returns the call of cthulhu entry for synonym 'coc'", () => {
     const entry = getSupertag("coc");
-    expect(entry?.canonicalTag).toBe("call+of+cthulhu");
+    expect(entry?.canonicalTag).toBe("call of cthulhu");
   });
 
   it("returns null for an unregistered slug", () => {

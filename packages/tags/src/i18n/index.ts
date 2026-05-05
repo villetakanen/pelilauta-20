@@ -5,8 +5,8 @@
 // See specs/pelilauta/tags/i18n/spec.md §Supertag entries.
 //
 // Key structure: supertag.{canonicalTag}.displayName / .description
-// The {canonicalTag} segment is verbatim from the registry, including
-// URL-encoded characters (e.g. "d%26d", "legendoja %26 lohikäärmeitä").
+// The {canonicalTag} segment is verbatim from the registry (decoded form,
+// e.g. "d&d", "legendoja & lohikäärmeitä", "call of cthulhu").
 //
 // EN descriptions are deferred at MVP — the en tree ships displayName only.
 
@@ -14,7 +14,7 @@ import type { NestedTranslation } from "@pelilauta/i18n";
 
 export const fi: Record<string, NestedTranslation> = {
   supertag: {
-    "d%26d": {
+    "d&d": {
       displayName: "D&D",
       description: "Dungeons & Dragons keskustelut, kampanjat ja materiaalit",
     },
@@ -22,7 +22,7 @@ export const fi: Record<string, NestedTranslation> = {
       displayName: "Pathfinder",
       description: "Pathfinder-roolipeli, säännöt, hahmot ja seikkailut",
     },
-    "legendoja %26 lohikäärmeitä": {
+    "legendoja & lohikäärmeitä": {
       displayName: "Legendoja & lohikäärmeitä",
       description: "Legendoja ja Lohikäärmeitä -roolipeliin liittyvät keskustelut ja sivut.",
     },
@@ -30,7 +30,7 @@ export const fi: Record<string, NestedTranslation> = {
       displayName: "PbtA",
       description: "Powered by the Apocalypse -järjestelmän pelit ja keskustelut",
     },
-    "call+of+cthulhu": {
+    "call of cthulhu": {
       displayName: "Call of Cthulhu",
       description: "Call of Cthulhu ja muut sen sukulaiset",
     },
@@ -39,19 +39,19 @@ export const fi: Record<string, NestedTranslation> = {
 
 export const en: Record<string, NestedTranslation> = {
   supertag: {
-    "d%26d": {
+    "d&d": {
       displayName: "D&D",
     },
     pathfinder: {
       displayName: "Pathfinder",
     },
-    "legendoja %26 lohikäärmeitä": {
+    "legendoja & lohikäärmeitä": {
       displayName: "Legendoja & lohikäärmeitä",
     },
     pbta: {
       displayName: "PbtA",
     },
-    "call+of+cthulhu": {
+    "call of cthulhu": {
       displayName: "Call of Cthulhu",
     },
   },

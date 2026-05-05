@@ -5,7 +5,7 @@
 // (packages/tags/src/i18n/index.ts), not in the registry data file.
 //
 // Fields:
-//   canonicalTag — canonical slug (URL-encoded where needed, e.g. "d%26d")
+//   canonicalTag — canonical slug (decoded form, e.g. "d&d")
 //   synonyms     — alternative slugs (lowercase, multi-lingual)
 //   icon         — cn-icon noun
 

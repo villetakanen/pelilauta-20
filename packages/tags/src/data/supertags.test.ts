@@ -12,11 +12,11 @@ describe("SUPERTAGS registry", () => {
 
   it("contains all 5 expected canonical slugs", () => {
     const canonicalTags = SUPERTAGS.map((e) => e.canonicalTag);
-    expect(canonicalTags).toContain("d%26d");
+    expect(canonicalTags).toContain("d&d");
     expect(canonicalTags).toContain("pathfinder");
-    expect(canonicalTags).toContain("legendoja %26 lohikäärmeitä");
+    expect(canonicalTags).toContain("legendoja & lohikäärmeitä");
     expect(canonicalTags).toContain("pbta");
-    expect(canonicalTags).toContain("call+of+cthulhu");
+    expect(canonicalTags).toContain("call of cthulhu");
   });
 
   it("every entry has a non-empty synonyms array", () => {
@@ -31,8 +31,8 @@ describe("SUPERTAGS registry", () => {
     }
   });
 
-  it("d%26d entry has icon 'd20'", () => {
-    const dnd = SUPERTAGS.find((e) => e.canonicalTag === "d%26d");
+  it("d&d entry has icon 'd20'", () => {
+    const dnd = SUPERTAGS.find((e) => e.canonicalTag === "d&d");
     expect(dnd?.icon).toBe("d20");
   });
 

@@ -4,9 +4,11 @@
 // given slug (canonical or any synonym), or null if the slug is not
 // registered. Plain-tag fallback is the consumer's responsibility.
 //
-// Carries forward v17's decodeURIComponent behavior for matching —
-// the canonical slugs in the registry use URL-encoding (e.g. "d%26d"),
-// and comparison decodes both sides before comparing.
+// The decodeURIComponent on entry.canonicalTag is defensive — registry
+// canonicals are stored decoded (e.g. "d&d"), so the decode is a no-op
+// on registered entries. Decoding the input slug supports callers that
+// happen to pass URL-encoded forms; both sides are normalized before
+// comparison so the match is robust to incoming encoding variations.
 
 import { SUPERTAGS } from "../data/supertags";
 import type { SupertagEntry } from "../schemas/SupertagSchema";

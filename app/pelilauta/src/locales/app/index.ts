@@ -8,6 +8,9 @@ export const fi: NestedTranslation = {
   action: {
     showMore: "Näytä lisää",
   },
+  tag: {
+    synonymsLabel: "Synonyymit ({count}):",
+  },
   footer: {
     feed: {
       title: "Syotteet",
@@ -32,6 +35,9 @@ export const fi: NestedTranslation = {
 export const en: NestedTranslation = {
   action: {
     showMore: "Show more",
+  },
+  tag: {
+    synonymsLabel: "Synonyms ({count}):",
   },
   footer: {
     feed: {

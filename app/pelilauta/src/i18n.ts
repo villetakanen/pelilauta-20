@@ -7,6 +7,7 @@
 import { createT, type Locales } from "@pelilauta/i18n";
 import { en as profilesEn, fi as profilesFi } from "@pelilauta/profiles/i18n";
 import { en as sitesEn, fi as sitesFi } from "@pelilauta/sites/i18n";
+import { en as tagsEn, fi as tagsFi } from "@pelilauta/tags/i18n";
 import { seoEn, seoFi, en as threadsEn, fi as threadsFi } from "@pelilauta/threads/i18n";
 import { en as appEn, fi as appFi } from "./locales/app/index.js";
 
@@ -16,6 +17,7 @@ const locales: Locales = {
     pelilauta: appFi,
     profiles: profilesFi,
     sites: sitesFi,
+    tags: tagsFi,
     threads: threadsFi,
     seo: seoFi,
   },
@@ -24,6 +26,7 @@ const locales: Locales = {
     pelilauta: appEn,
     profiles: profilesEn,
     sites: sitesEn,
+    tags: tagsEn,
     threads: threadsEn,
     seo: seoEn,
   },

@@ -184,6 +184,34 @@ This rule applies to every domain schema in the workspace — `SiteSchema`, `Thr
 
 Domain specs MAY restate this rule with a one-line pointer to this section, but MUST NOT define a contradictory local rule.
 
+## URL routing and redirect encoding
+
+**Internal data uses decoded forms; URL serialization (redirects, generated links) explicitly encodes via `encodeURI`.**
+
+The web platform's encoding layering forces this split:
+
+- **Astro auto-decodes `Astro.params`** for SSR dynamic routes. App code receives parameters in their decoded form (e.g. `Astro.params.tag === "d&d"` for URL `/tags/d%26d`).
+- **The Fetch API specifies header values as `ByteString`** (Latin-1, single-byte encoded). Codepoints `> 0x7F` that fit in Latin-1 (like `ä` U+00E4) get serialized to single bytes (`%E4`), producing Latin-1 percent-encoded URLs that violate the WHATWG URL Standard's UTF-8 requirement.
+- **Application code must explicitly UTF-8-encode** non-ASCII before putting it in a Location header.
+
+Pattern:
+
+```ts
+return Astro.redirect(`/path/${encodeURI(slug)}`, 301);
+```
+
+**Why `encodeURI` and not `encodeURIComponent`:** `encodeURIComponent` encodes too aggressively, including `/`, `?`, `#` (which break URL paths). Astro v5's migration notes formally discourage `decodeURIComponent` for the same reason; `encodeURI` is its symmetric counterpart for serialization. `encodeURI` encodes non-ASCII (UTF-8) and spaces, leaves reserved characters and valid existing percent-sequences alone.
+
+**Implications:**
+
+- **Domain registries** (supertag slugs, channel keys, profile handles, etc.) store identifiers in **decoded form**. URL-encoded forms in internal storage create round-trip mismatches: Astro decodes `Astro.params`, the resolver compares against the URL-encoded canonical, fails to match, and either redirect-loops or 404s.
+- **Carry-forward data from v17** may use URL-encoded canonicals because v17's HTTP self-fetch path called `decodeURIComponent` explicitly inside the API route, papering over the round-trip. v20's in-process reads don't have that papering layer — convert to decoded form when migrating data into a v20 registry.
+- **Tests for redirect-emitting routes** MUST follow the redirect chain to its terminal status. Asserting only the 301 Location header is insufficient — the destination URL must round-trip cleanly back to the same canonical, not loop.
+
+References: [Astro Routing Reference](https://docs.astro.build/en/reference/routing-reference/), [Astro #16313](https://github.com/withastro/astro/issues/16313), [Astro #14464](https://github.com/withastro/astro/issues/14464).
+
+Domain specs MAY restate this rule with a one-line pointer to this section, but MUST NOT define a contradictory local rule.
+
 ## Text conventions
 
 - **Ellipsis: Unicode `…` (U+2026), universally.** Truncation, elision, and "more to come" markers in any generated text — UI snippets, SEO `<meta name="description">`, notification bodies, RSS `description`, plain-text and HTML projections of markdown — use the single Unicode horizontal ellipsis character, not three ASCII dots `...`. One glyph, one code point, semantically a punctuation mark, consistent across surfaces. Helpers that produce truncated strings (e.g. `packages/utils/src/markdownToPlainText.ts`) emit `…` and callers that prefer ASCII override at the call site rather than at the helper.

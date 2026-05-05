@@ -27,11 +27,11 @@ export async function hasTaggedEntries(slug: string): Promise<boolean> {
 
   // Step 3: build the full query-term array — canonical plus all synonyms,
   // decoded and lowercased to match how toTagData stores entry tags.
-  // Deduplicated via Set: the canonical slug can decode to a string that's
-  // also in the synonyms list (e.g. canonical 'd%26d' decodes to 'd&d',
-  // which is also a D&D synonym). Firestore's array-contains-any behavior
-  // with duplicate query terms is undocumented — passing a unique set keeps
-  // us on the documented happy path.
+  // Deduplicated via Set: a canonical slug or a synonym can decode to a
+  // string that's identical to another entry in the list (a possibility
+  // the registry's data shape doesn't explicitly forbid). Firestore's
+  // array-contains-any behavior with duplicate query terms is undocumented —
+  // passing a unique set keeps us on the documented happy path.
   const allTags = [
     ...new Set(
       [canonical, ...(supertag?.synonyms ?? [])].map((s) => decodeURIComponent(s).toLowerCase()),

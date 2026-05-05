@@ -25,19 +25,19 @@ describe("tags i18n — fi tree", () => {
 
   it("L&L displayName is 'Legendoja & lohikäärmeitä' in fi", () => {
     const entry = (fi.supertag as Record<string, Record<string, string>>)[
-      "legendoja %26 lohikäärmeitä"
+      "legendoja & lohikäärmeitä"
     ];
     expect(entry?.displayName).toBe("Legendoja & lohikäärmeitä");
   });
 
-  it("d%26d description is present in fi", () => {
-    const entry = (fi.supertag as Record<string, Record<string, string>>)["d%26d"];
+  it("d&d description is present in fi", () => {
+    const entry = (fi.supertag as Record<string, Record<string, string>>)["d&d"];
     expect(entry?.description).toBe("Dungeons & Dragons keskustelut, kampanjat ja materiaalit");
   });
 
   it("all 5 supertags have displayName in fi", () => {
     const supertag = fi.supertag as Record<string, Record<string, string>>;
-    const slugs = ["d%26d", "pathfinder", "legendoja %26 lohikäärmeitä", "pbta", "call+of+cthulhu"];
+    const slugs = ["d&d", "pathfinder", "legendoja & lohikäärmeitä", "pbta", "call of cthulhu"];
     for (const slug of slugs) {
       expect(supertag[slug]?.displayName, `fi displayName missing for ${slug}`).toBeTruthy();
     }
@@ -45,7 +45,7 @@ describe("tags i18n — fi tree", () => {
 
   it("all 5 supertags have description in fi", () => {
     const supertag = fi.supertag as Record<string, Record<string, string>>;
-    const slugs = ["d%26d", "pathfinder", "legendoja %26 lohikäärmeitä", "pbta", "call+of+cthulhu"];
+    const slugs = ["d&d", "pathfinder", "legendoja & lohikäärmeitä", "pbta", "call of cthulhu"];
     for (const slug of slugs) {
       expect(supertag[slug]?.description, `fi description missing for ${slug}`).toBeTruthy();
     }
@@ -70,20 +70,20 @@ describe("tags i18n — en tree", () => {
 
   it("L&L displayName is 'Legendoja & lohikäärmeitä' in en (Finnish brand verbatim)", () => {
     const entry = (en.supertag as Record<string, Record<string, string>>)[
-      "legendoja %26 lohikäärmeitä"
+      "legendoja & lohikäärmeitä"
     ];
     expect(entry?.displayName).toBe("Legendoja & lohikäärmeitä");
   });
 
-  it("d%26d description is ABSENT in en at MVP (deferred)", () => {
-    const entry = (en.supertag as Record<string, Record<string, string | undefined>>)["d%26d"];
+  it("d&d description is ABSENT in en at MVP (deferred)", () => {
+    const entry = (en.supertag as Record<string, Record<string, string | undefined>>)["d&d"];
     // description key must not be present for any supertag in en at MVP
     expect(entry?.description).toBeUndefined();
   });
 
   it("all 5 supertags have displayName in en", () => {
     const supertag = en.supertag as Record<string, Record<string, string>>;
-    const slugs = ["d%26d", "pathfinder", "legendoja %26 lohikäärmeitä", "pbta", "call+of+cthulhu"];
+    const slugs = ["d&d", "pathfinder", "legendoja & lohikäärmeitä", "pbta", "call of cthulhu"];
     for (const slug of slugs) {
       expect(supertag[slug]?.displayName, `en displayName missing for ${slug}`).toBeTruthy();
     }
@@ -91,7 +91,7 @@ describe("tags i18n — en tree", () => {
 
   it("no supertag has description in en at MVP", () => {
     const supertag = en.supertag as Record<string, Record<string, unknown>>;
-    const slugs = ["d%26d", "pathfinder", "legendoja %26 lohikäärmeitä", "pbta", "call+of+cthulhu"];
+    const slugs = ["d&d", "pathfinder", "legendoja & lohikäärmeitä", "pbta", "call of cthulhu"];
     for (const slug of slugs) {
       expect(supertag[slug]?.description, `unexpected en description for ${slug}`).toBeUndefined();
     }

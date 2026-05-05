@@ -65,7 +65,7 @@ describe("hasTaggedEntries", () => {
       // Verifies: specs/pelilauta/tags/spec.md §hasTaggedEntries returns true when an entry exists for the canonical or any synonym
       mockGet.mockResolvedValue({ empty: false });
 
-      await hasTaggedEntries("d%26d");
+      await hasTaggedEntries("d&d");
 
       // The .where() call receives the 'array-contains-any' operator and the expanded tag list.
       const whereCall = mockWhere.mock.calls[0] as unknown as [string, string, string[]];
@@ -73,7 +73,7 @@ describe("hasTaggedEntries", () => {
       expect(whereCall[1]).toBe("array-contains-any");
 
       const allTags: string[] = whereCall[2];
-      // canonical 'd%26d' decoded → 'd&d', lowercased → 'd&d'
+      // canonical 'd&d' (decoded form, no further decoding needed)
       expect(allTags).toContain("d&d");
       // synonyms from the registry (decoded + lowercased)
       expect(allTags).toContain("dnd");
@@ -83,9 +83,8 @@ describe("hasTaggedEntries", () => {
       for (const tag of allTags) {
         expect(tag).toBe(tag.toLowerCase());
       }
-      // D&D has 7 synonyms + 1 canonical = 8 raw terms, but the canonical
-      // 'd%26d' decodes to 'd&d' which is also a synonym — after Set-dedup
-      // the array has 7 unique entries.
+      // D&D has 6 synonyms + 1 canonical = 7 unique entries (no duplicates
+      // since 'd&d' is now the canonical and not repeated in the synonyms list).
       expect(allTags).toHaveLength(7);
       // No duplicates after dedup.
       expect(new Set(allTags).size).toBe(allTags.length);
@@ -130,7 +129,7 @@ describe("hasTaggedEntries", () => {
       // Verifies: specs/pelilauta/tags/spec.md §hasTaggedEntries returns true when an entry exists for the canonical or any synonym
       mockGet.mockResolvedValue({ empty: true });
 
-      // 'deddu' is a synonym of 'd%26d'
+      // 'deddu' is a synonym of 'd&d'
       await hasTaggedEntries("deddu");
 
       const whereCall = mockWhere.mock.calls[0] as unknown as [string, string, string[]];

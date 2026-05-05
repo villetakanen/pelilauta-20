@@ -141,7 +141,7 @@ fields). The fields:
 
 ```ts
 {
-  canonicalTag: string;         // canonical slug (URL-encoded if needed, e.g. "d%26d")
+  canonicalTag: string;         // canonical slug (decoded form, e.g. "d&d")
   synonyms: string[];           // alternative slugs (lowercase, multi-lingual)
   icon: string;                 // cn-icon noun
 }
@@ -156,11 +156,11 @@ fields). The fields:
 
 | Canonical slug | Icon noun | Synonyms (selected) |
 |---|---|---|
-| `d%26d` | `d20` | `dnd`, `d&d`, `dungeons & dragons`, `dd`, `deddu` |
+| `d&d` | `d20` | `dnd`, `dungeons & dragons`, `dd`, `deddu` |
 | `pathfinder` | `compass` | `pathfinder 2e`, `pf2e`, `pf`, `päffä` |
-| `legendoja %26 lohikäärmeitä` | `ll-ampersand` | `l&l`, `ll`, `löllö`, `letl`, `lössö`, `Suuri seikkailu` |
+| `legendoja & lohikäärmeitä` | `ll-ampersand` | `l&l`, `ll`, `löllö`, `letl`, `lössö`, `Suuri seikkailu` |
 | `pbta` | `books` | `powered by the apocalypse`, `apocalypse world`, `FitD` |
-| `call+of+cthulhu` | `tentacles` | `coc`, `cthulhu`, `delta green`, `dg` |
+| `call of cthulhu` | `tentacles` | `coc`, `cthulhu`, `delta green`, `dg` |
 
 The `displayName` and `description` for each entry land in
 the i18n sub-spec, keyed by canonical slug. The full v17
@@ -187,22 +187,23 @@ synonyms list carries forward verbatim per entry.
     from v17's `getTagDisplayInfo` for clarity — the function
     returns the supertag entry, not "display info."
 
-The helpers MAY also expose URL-encoding-aware variants in a
-follow-up if the encoded-slug edge cases (e.g. `d%26d` vs
-`d&d`) prove fragile in practice. v18's behaviour does
-`decodeURIComponent` inside `getTagDisplayInfo` for matching;
-v20 carries this forward.
+v20 stores canonicals in **decoded form** (`d&d`, not v18's
+`d%26d`) per [`../../../ARCHITECTURE.md`](../../../ARCHITECTURE.md)
+§URL routing and redirect encoding. The helper still does
+`decodeURIComponent` defensively when comparing inputs to
+support both encoded and decoded incoming forms.
 
 - `hasTaggedEntries(slug: string): Promise<boolean>`
   - Async function. Canonicalizes the input via
     `resolveTagSynonym`, then expands to
     `[...new Set([canonical, ...synonyms].map(s => decodeURIComponent(s).toLowerCase()))]`
-    using `getSupertag` to resolve synonyms. The `Set` dedup is
-    load-bearing: a canonical slug can decode to a string that's
-    also in its own synonyms list (e.g. `'d%26d'` decodes to
-    `'d&d'`, which is also a D&D synonym), and Firestore's
-    `array-contains-any` behavior with duplicate query terms is
-    undocumented. Queries the `tags` Firestore collection
+    using `getSupertag` to resolve synonyms. The `decodeURIComponent`
+    is defensive (canonicals are stored decoded, but tolerating
+    URL-encoded inputs costs nothing); the `Set` dedup guards
+    against a canonical or synonym being a no-op decode of another
+    entry. Firestore's `array-contains-any` behavior with duplicate
+    query terms is undocumented, so passing a unique set keeps us
+    on the documented happy path. Queries the `tags` Firestore collection
     (`where('tags', 'array-contains-any', allTags).limit(1)`)
     and returns `!snap.empty`.
   - Reads server-side via `@pelilauta/firebase/server`. Errors
@@ -432,7 +433,7 @@ sub-spec OF this package when work begins):
 
 ```gherkin
 Given a raw Firestore document at tags/{key} with type='thread',
-  key='abc123', tags=['d%26d', 'pathfinder'], author='u-alice',
+  key='abc123', tags=['d&d', 'pathfinder'], author='u-alice',
   flowTime=1730000000000, title='Adventure log'
 When TagSchema.parse() runs
 Then the parsed Tag has all 6 fields populated with the source values
@@ -444,7 +445,7 @@ And the type is the string literal 'thread'
 ```gherkin
 Given the registry contains the D&D entry with synonyms ['dnd', 'd&d', ...]
 When resolveTagSynonym('DnD') is called
-Then 'd%26d' is returned (the canonical slug)
+Then 'd&d' is returned (the canonical slug, decoded form)
 And the input case is normalized via lowercasing before lookup
 ```
 
@@ -489,8 +490,8 @@ Then null is returned
 ```gherkin
 Given the supertag registry exported from packages/tags/src/data/supertags.ts
 When the array's canonicalTag values are inspected
-Then the set contains exactly 'd%26d', 'pathfinder',
-  'legendoja %26 lohikäärmeitä', 'pbta', and 'call+of+cthulhu'
+Then the set contains exactly 'd&d', 'pathfinder',
+  'legendoja & lohikäärmeitä', 'pbta', and 'call of cthulhu'
 And every entry has a non-empty synonyms array
 And every entry has a non-empty icon noun
 ```
