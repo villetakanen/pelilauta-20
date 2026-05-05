@@ -285,6 +285,19 @@ importers:
         specifier: ^3.2.4
         version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
 
+  packages/tags:
+    dependencies:
+      '@pelilauta/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
+    devDependencies:
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3)
+
   packages/threads:
     dependencies:
       '@pelilauta/cyan':
