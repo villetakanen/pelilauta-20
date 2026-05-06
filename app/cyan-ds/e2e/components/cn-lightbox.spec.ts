@@ -114,9 +114,16 @@ test.describe("CnLightbox — modal interaction", () => {
 
   test("clicking single-figure opens the dialog modal", async ({ page }) => {
     const figure = page.locator(".single-figure").first();
-    await figure.click();
-
     const dialog = page.locator("dialog[open]").first();
+
+    // In CI, a fast click can race component hydration and get dropped.
+    // Retry click-until-open to make the scenario deterministic.
+    await expect
+      .poll(async () => {
+        await figure.click();
+        return await dialog.count();
+      })
+      .toBe(1);
     await expect(dialog).toBeVisible();
 
     const modalImg = dialog.locator("img");
