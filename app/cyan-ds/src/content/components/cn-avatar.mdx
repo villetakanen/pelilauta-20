@@ -6,7 +6,7 @@ status: stable
 
 import CnAvatar from "@cyan/components/CnAvatar.svelte";
 
-The `CnAvatar` component is used to represent users across the platform. It handles image loading with a graceful fallback to initials or a generic icon.
+The `CnAvatar` component is used to represent users across the platform. It handles image loading with a graceful fallback to initials or a generic icon. Every avatar carries a subtle elevation-1 shadow so it reads as a distinct identity token across surfaces; the lift is structural, not opt-in.
 
 ## Usage
 
@@ -64,6 +64,7 @@ Supports `small` (36px) and `medium` (48px, default) variants.
 | `src` | `string` | - | Optional image URL. |
 | `nick` | `string` | - | Optional username for initials and color tinting. |
 | `size` | `'small' \| 'medium'` | `'medium'` | The component diameter. |
+| `aria-hidden` | `boolean \| 'true' \| 'false'` | - | Decorative mode: suppresses `role="img"`/`aria-label` and emits `aria-hidden="true"`. |
 
 ## CSS Tokens
 
@@ -71,6 +72,7 @@ The component consumes the following tokens:
 
 - `--cn-grid`: Base unit for spacing (if used).
 - `--cn-line`: Base unit for sizing.
+- `--cn-shadow-elevation-1`: Always-on box-shadow on the avatar frame.
 - `--chroma-surface-30`: Base for dark tints.
 - `--chroma-surface-60`: Tint multiplier base.
 - `--chroma-surface-95`: Text color for initials.

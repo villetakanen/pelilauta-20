@@ -14,6 +14,7 @@ test.describe("CnAvatar Component", () => {
     await expect(page.locator("h1")).toHaveText("CnAvatar");
   });
 
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Image with Error Fallback
   test("renders image correctly when src is provided", async ({ page }) => {
     const avatar = page.locator(".cn-avatar").first();
     const img = avatar.locator("img");
@@ -26,6 +27,7 @@ test.describe("CnAvatar Component", () => {
     await expect(fallback).toBeHidden();
   });
 
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Initials Display
   test("renders initials fallback when nick is provided without src", async ({ page }) => {
     // The "Initials & Deterministic Background" demo starts at index 2
     const aliceAvatar = page.locator(".cn-avatar").nth(2);
@@ -37,6 +39,7 @@ test.describe("CnAvatar Component", () => {
     await expect(aliceAvatar.locator("img")).toHaveCount(0);
   });
 
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Initials Display
   test("background color is deterministic based on nick", async ({ page }) => {
     const aliceAvatar = page.locator(".cn-avatar").nth(2);
     const bobAvatar = page.locator(".cn-avatar").nth(3);
@@ -50,6 +53,7 @@ test.describe("CnAvatar Component", () => {
     // Re-verify Alice color is same if we had another Alice (skipped here as we only have one)
   });
 
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Icon Placeholder
   test("renders icon fallback for generic placeholder", async ({ page }) => {
     // The "Generic Placeholder" demo is nth(7)
     const genericAvatar = page.locator(".cn-avatar").nth(7);
@@ -58,6 +62,7 @@ test.describe("CnAvatar Component", () => {
     await expect(icon).toHaveAttribute("data-noun", "avatar");
   });
 
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Size Variants
   test("sizes scale correctly (36px vs 48px)", async ({ page }) => {
     const smallAvatar = page.locator('.cn-avatar[data-size="small"]');
     const mediumAvatar = page.locator('.cn-avatar[data-size="medium"]').first();
@@ -72,6 +77,7 @@ test.describe("CnAvatar Component", () => {
     expect(mediumBox?.height).toBe(48);
   });
 
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Image with Error Fallback
   test("reveals initials when image fails to load", async ({ page }) => {
     // Block pravatar so every image request fails before the page finishes
     // loading. Network interception is registered before navigation so the very
@@ -92,5 +98,32 @@ test.describe("CnAvatar Component", () => {
     // handler can reveal it without a round-trip.
     await expect(fallback).toBeAttached();
     await expect(fallback.locator(".cn-avatar__initials")).toHaveText("AL");
+  });
+
+  // Verifies: specs/cyan-ds/components/cn-avatar/spec.md §Always-on elevation
+  test("every avatar's box-shadow matches --cn-shadow-elevation-1's resolved geometry", async ({
+    page,
+  }) => {
+    // Resolve the token through a probe element so we compare against the same
+    // computed-style pipeline the avatar's box-shadow goes through. Reading the
+    // raw custom-property off :root would yield the unresolved calc() string.
+    const { expected, actual } = await page.evaluate(() => {
+      const probe = document.createElement("div");
+      probe.style.boxShadow = "var(--cn-shadow-elevation-1)";
+      document.body.appendChild(probe);
+      const expected = window.getComputedStyle(probe).boxShadow;
+      probe.remove();
+
+      const avatars = Array.from(document.querySelectorAll<HTMLElement>(".cn-avatar"));
+      const actual = avatars.map((el) => window.getComputedStyle(el).boxShadow);
+      return { expected, actual };
+    });
+
+    expect(expected).not.toBe("none");
+    expect(expected).not.toBe("");
+    expect(actual.length).toBeGreaterThan(0);
+    for (const boxShadow of actual) {
+      expect(boxShadow).toBe(expected);
+    }
   });
 });

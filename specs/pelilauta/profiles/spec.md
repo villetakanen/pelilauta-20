@@ -18,6 +18,8 @@ The Profiles microfrontend owns the **public-facing identity** of accounts: the 
 
 The MVP feature of this package is **`ProfileLink`** — an SSR citation that renders a resolved `Profile` as a clickable link to the user's profile page (or an anonymous fallback when no profile is available). Twenty-four v17 surfaces consume something equivalent (channels, thread cards, thread list items, thread detail, replies, search, sites, inbox, admin, history, tags). [`channels/spec.md`](../channels/spec.md) and the future thread-card spec are directly blocked on it.
 
+A sibling primitive, **`AvatarLink`** ([`../avatar-link/spec.md`](../avatar-link/spec.md)), provides the avatar-only counterpart: `<a href="/profiles/{uid}"><CnAvatar/></a>` for resolved profiles, bare `<CnAvatar/>` for the anonymous fallback. Same prop pattern as `ProfileLink` (profile-as-prop, upstream-resolved). `ReplyArticle` is the immediate consumer; surfaces that need both citations render `ProfileLink` + `AvatarLink` as siblings.
+
 Reverse-engineered from `pelilauta-17` sources at:
 
 - `src/components/svelte/app/ProfileLink.svelte` — the v17 CSR component
@@ -46,6 +48,7 @@ packages/profiles/
     components/
       index.ts                 → barrel
       ProfileLink.svelte       → SSR profile→nick→anchor (zero JS, no client: directive)
+      AvatarLink.svelte        → SSR profile→avatar-anchor (sibling to ProfileLink; see ../avatar-link/spec.md)
     i18n/
       index.ts                 → fi, en — locale strings under the profiles namespace
 ```

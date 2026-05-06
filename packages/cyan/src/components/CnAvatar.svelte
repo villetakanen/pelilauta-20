@@ -10,9 +10,12 @@ interface Props {
   src?: string;
   nick?: string;
   size?: "small" | "medium";
+  "aria-hidden"?: boolean | "true" | "false";
 }
 
-let { src, nick, size = "medium" }: Props = $props();
+let { src, nick, size = "medium", "aria-hidden": ariaHidden }: Props = $props();
+
+let isHidden = $derived(ariaHidden === true || ariaHidden === "true");
 
 /**
  * Deterministic Hash for Background Color (sum of char codes % 100)
@@ -53,8 +56,9 @@ let showImage = $derived(!!src && !imageErrored);
 <div
   class="cn-avatar cn-avatar--{size}"
   style="--avatar-bg: {backgroundColor}; --avatar-size: {avatarSize};"
-  role="img"
-  aria-label={nick ? `${nick}'s avatar` : "User avatar"}
+  role={isHidden ? undefined : "img"}
+  aria-label={isHidden ? undefined : nick ? `${nick}'s avatar` : "User avatar"}
+  aria-hidden={ariaHidden}
   data-nick={nick}
   data-size={size}
 >
@@ -93,6 +97,7 @@ let showImage = $derived(!!src && !imageErrored);
     border-radius: 50%;
     overflow: hidden;
     background-color: var(--avatar-bg);
+    box-shadow: var(--cn-shadow-elevation-1);
     position: relative;
     user-select: none;
     flex-shrink: 0;

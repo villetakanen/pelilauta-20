@@ -72,6 +72,8 @@
 
   /* Elevation / Shadow (Grid-derived, no magic numbers) */
   --cn-shadow-color: light-dark(var(--chroma-surface-30), var(--chroma-surface-0));
+  --cn-shadow-elevation-1: calc(var(--cn-grid) * 0.125) calc(var(--cn-grid) * 0.125)
+    calc(var(--cn-grid) * 0.5) var(--cn-shadow-color);
   --cn-shadow-elevation-2: calc(var(--cn-grid) * 0.25) calc(var(--cn-grid) * 0.25) var(--cn-grid)
     var(--cn-shadow-color);
   --cn-shadow-button-hover: var(--cn-shadow-elevation-2);
