@@ -97,6 +97,9 @@ Output a structured review using this format:
 **Specs reviewed:** [list of spec files read, or "none found"]
 **Files reviewed:** [count of files in diff]
 **Verdict:** PASS | PASS WITH NOTES | FAIL
+**Loop decision:** ship it | fix before commit | discuss
+**Loop trigger labels:** [none | comma-separated labels]
+**Loop trigger reason:** [single concise sentence; required unless loop decision is `ship it`]
 
 ---
 
@@ -135,6 +138,28 @@ Output a structured review using this format:
 - **FAIL** — At least one violation found (spec violation, security issue, correctness bug)
 - **PASS WITH NOTES** — No violations, but there are observations worth considering
 - **PASS** — Clean. No violations, no notes worth raising.
+
+Loop decision mapping:
+
+- `ship it` — when verdict is `PASS`
+- `fix before commit` — when verdict is `FAIL`, or `PASS WITH NOTES` that contains action-required issues
+- `discuss` — when correctness cannot be determined without product/contract clarification
+
+Loop trigger labels (use one or more when decision is not `ship it`):
+
+- `test-failure` — failing tests or missing required regression test
+- `lint-warning` — lint/format violations or warning-level blockers elevated by policy
+- `type-error` — type-check failures or prohibited type escapes
+- `build-failure` — build or Astro check failures
+- `spec-violation` — behavior conflicts with explicit spec contract
+- `spec-gap` — spec missing/ambiguous for changed behavior
+- `architecture-violation` — AGENTS/ARCHITECTURE boundary break (SSR/CSR/data-flow)
+- `security-risk` — auth, injection, secrets, or data-leak concern
+- `correctness-bug` — logic defect, edge-case bug, or regression risk
+- `performance-risk` — unbounded loads, N+1, avoidable heavy work
+- `needs-clarification` — user/product decision required before safe implementation
+
+When multiple labels apply, list them in severity order and make the reason sentence mention the highest-severity trigger first.
 
 **Bias toward false positives over false negatives.** It is better to flag something that turns out to be fine than to miss a real issue. The author can dismiss notes; they can't un-ship bugs.
 

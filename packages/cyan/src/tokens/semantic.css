@@ -57,6 +57,12 @@
   --cn-color-info: light-dark(var(--chroma-info-20), var(--chroma-info-60));
   --cn-color-love: light-dark(var(--chroma-love-40), var(--chroma-love-60));
 
+  /* Bubble surfaces */
+  --cn-bubble: light-dark(var(--chroma-surface-90), var(--chroma-surface-30));
+  --cn-on-bubble: light-dark(var(--chroma-surface-20), var(--chroma-surface-95));
+  --cn-reply-bubble: light-dark(var(--chroma-primary-70), var(--chroma-primary-40));
+  --cn-on-reply-bubble: light-dark(var(--chroma-surface-100), var(--chroma-surface-95));
+
   /* Inputs / Forms */
   --cn-input: light-dark(var(--chroma-surface-80), var(--chroma-surface-0));
   --cn-on-input: var(--cn-on-surface);
@@ -80,4 +86,11 @@
     color-mix(in oklch, var(--chroma-primary-40), transparent 70%)
   );
   --cn-on-selection: var(--cn-on-surface);
+
+  /* Lightbox surfaces — derive directly from chroma scales, NOT from --cn-surface-* aliases */
+  --cn-lightbox-background: light-dark(var(--chroma-surface-30), var(--chroma-surface-30));
+  --cn-lightbox-color: light-dark(var(--chroma-surface-95), var(--chroma-surface-95));
+  --cn-lightbox-border-radius: var(--cn-border-radius-medium);
+  --cn-lightbox-image-border-radius: var(--cn-border-radius-small);
+  --cn-lightbox-inner-spacing: var(--cn-grid);
 }

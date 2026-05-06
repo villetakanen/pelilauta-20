@@ -1,0 +1,99 @@
+---
+title: CnLightbox
+description: Responsive image gallery with single-figure, horizontal-scroll strip, and full-screen modal overlay.
+status: draft
+---
+
+import CnLightbox from "@cyan/components/CnLightbox.svelte";
+
+`CnLightbox` renders one or more images compactly with progressive disclosure. A single image becomes a 16:9 figure; multiple images become a horizontally scrollable square-thumbnail strip. Clicking any image opens a full-screen `<dialog>` modal for close viewing.
+
+## Single Image (16:9 figure + figcaption)
+
+<CnLightbox
+  client:load
+  images={[{ src: "https://picsum.photos/seed/lightbox-single/800/450", caption: "A lone mountain peak at dusk" }]}
+/>
+
+## Multi-Image Horizontal Scroll Strip (3 images with overlaid captions)
+
+<CnLightbox
+  client:load
+  images={[
+    { src: "https://picsum.photos/seed/lightbox-a/400/400", caption: "Forest path in autumn" },
+    { src: "https://picsum.photos/seed/lightbox-b/400/400", caption: "Lakeside at golden hour" },
+    { src: "https://picsum.photos/seed/lightbox-c/400/400", caption: "Snow-capped peaks" },
+    { src: "https://picsum.photos/seed/lightbox-d/400/400", caption: "Desert dunes at noon" },
+  ]}
+/>
+
+## Modal Interaction Demo
+
+Click any image below to open the full-screen modal. Close with the × button, the ESC key, or by clicking the darkened backdrop outside the image.
+
+<CnLightbox
+  client:load
+  images={[
+    { src: "https://picsum.photos/seed/lightbox-modal-1/600/400", caption: "Click me to open the modal" },
+    { src: "https://picsum.photos/seed/lightbox-modal-2/600/400", caption: "Or click this one" },
+  ]}
+/>
+
+## Keyboard Demo
+
+Open the modal above, then press **ESC** to close it. Focus is trapped inside the dialog by the browser's native `<dialog>` implementation — Tab stays within the close button and the image. No custom focus-trap script is needed.
+
+## Native Horizontal Scroll Demo (right-edge fade affordance)
+
+The strip below is intentionally wide — use trackpad two-finger swipe, mouse **Shift+Scroll**, or drag the scrollbar to reveal images on the right. Notice the right-edge fade gradient that signals off-screen content.
+
+<CnLightbox
+  client:load
+  images={[
+    { src: "https://picsum.photos/seed/lb-scroll-1/400/400", caption: "One" },
+    { src: "https://picsum.photos/seed/lb-scroll-2/400/400", caption: "Two" },
+    { src: "https://picsum.photos/seed/lb-scroll-3/400/400", caption: "Three" },
+    { src: "https://picsum.photos/seed/lb-scroll-4/400/400", caption: "Four" },
+    { src: "https://picsum.photos/seed/lb-scroll-5/400/400", caption: "Five" },
+  ]}
+/>
+
+## Empty Array (void render)
+
+An empty `images` array renders nothing — no figure, no container, no dialog. The component occupies zero space.
+
+<CnLightbox client:load images={[]} />
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `images` | `Image[]` | `[]` | Array of image objects. Each item: `{ src: string; caption: string }`. Caption doubles as the `alt` attribute — supply meaningful captions for accessibility. |
+
+**Image interface:**
+
+```ts
+interface Image {
+  src: string;     // URL or path to the image file
+  caption: string; // Alt text AND visible figcaption — the same string serves both
+}
+```
+
+## CSS Tokens
+
+| Token | Description |
+|---|---|
+| `--cn-lightbox-background` | Background of the lightbox container and modal |
+| `--cn-lightbox-color` | Text color for captions on the single-image figure |
+| `--cn-lightbox-border-radius` | Corner radius of the outer container |
+| `--cn-lightbox-image-border-radius` | Corner radius applied to each image |
+| `--cn-lightbox-inner-spacing` | Padding inside the container and gap between thumbnails |
+| `--cn-grid` | Base spacing unit used for the fade-gradient width |
+| `--z-index-modal` | Z-index for the modal dialog (platform layering token) |
+
+## Accessibility
+
+- **Caption = alt text.** The same `caption` string is used as both the `alt` attribute and the visible `<figcaption>`. Consumers MUST supply meaningful captions; empty captions degrade image accessibility.
+- **Native `<dialog>` element.** The modal uses the HTML `<dialog>` element opened via `showModal()`. The browser provides the focus trap, ESC-to-close, top-layer rendering, and the `dialog` landmark for assistive technology. No custom ARIA roles or focus-trap scripts are needed or used.
+- **ESC-to-close.** Pressing ESC when the modal is open closes it — this is standard browser behaviour for `<dialog>` elements.
+- **Backdrop click.** Clicking the semi-transparent area outside the image (the `<dialog>` element itself, not its content) also closes the modal.

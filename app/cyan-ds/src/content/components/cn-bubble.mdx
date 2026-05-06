@@ -1,0 +1,80 @@
+---
+title: CnBubble
+description: Speech-bubble container for discussion replies and chat-like messages.
+status: draft
+---
+
+import CnBubble from "@cyan/components/CnBubble.svelte";
+
+`CnBubble` renders one message surface with a directional tail. Use default mode for "other" messages and `reply` mode for own messages.
+
+## Basic Variants
+
+<div style="display: grid; gap: var(--cn-gap); padding: var(--cn-gap);">
+  <CnBubble>
+    <p>Default bubble. Tail points left.</p>
+  </CnBubble>
+  <CnBubble reply>
+    <p>Reply bubble. Tail points right.</p>
+  </CnBubble>
+</div>
+
+## Conversation Flow
+
+<div style="display: grid; gap: var(--cn-grid); padding: var(--cn-gap);">
+  <CnBubble>
+    <p>Hey! Did you check the encounter notes?</p>
+  </CnBubble>
+  <CnBubble reply>
+    <p>Yep. Added initiative and loot summary.</p>
+  </CnBubble>
+  <CnBubble>
+    <p>Perfect, shipping to the table page now.</p>
+  </CnBubble>
+</div>
+
+## Header Flush (Leading)
+
+<CnBubble>
+  <header>Byline / meta band on the top edge</header>
+  <p>The leading <code>&lt;header&gt;</code> sits flush with the bubble's top edge — typical use is the author byline plus action menu.</p>
+</CnBubble>
+
+## Footer Flush (Trailing)
+
+<CnBubble>
+  <p>The trailing <code>&lt;footer&gt;</code> sits flush with the bubble's bottom edge — typical use is a timestamp or auxiliary actions row.</p>
+  <footer>Timestamp / actions on the bottom edge</footer>
+</CnBubble>
+
+## Media Composition
+
+<CnBubble>
+  <p>Image strip inside the bubble body.</p>
+  <div style="display: flex; gap: var(--cn-grid); margin-top: var(--cn-grid);">
+    <img src="https://picsum.photos/seed/bubble-1/220/120" alt="" loading="lazy" />
+    <img src="https://picsum.photos/seed/bubble-2/220/120" alt="" loading="lazy" />
+  </div>
+</CnBubble>
+
+## Empty Bubble
+
+<CnBubble />
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `reply` | `boolean` | `false` | Switches to own-message variant with right-aligned tail. |
+
+## CSS Tokens
+
+| Token | Description |
+|---|---|
+| `--cn-bubble` | Default bubble background |
+| `--cn-on-bubble` | Default bubble foreground |
+| `--cn-reply-bubble` | Reply bubble background |
+| `--cn-on-reply-bubble` | Reply bubble foreground |
+| `--cn-border-radius-medium` | Corner radius |
+| `--cn-grid` | Padding/margin unit |
+| `--cn-gap` | Bubble offset and tail size unit |

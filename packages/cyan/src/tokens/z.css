@@ -14,4 +14,7 @@
   --cn-z-reply-dialog: 41000;
   --cn-z-modal: 50000;
   --cn-z-snackbar: 60000;
+
+  /* Consumer-facing alias for --cn-z-modal */
+  --z-index-modal: var(--cn-z-modal);
 }

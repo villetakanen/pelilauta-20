@@ -10,7 +10,7 @@ Use this skill strictly to finalize and deploy completed work. You must execute 
 ## Execution Sequence
 
 1. **Verify Quality:** Run `pnpm verify`.
-   - If the command fails, immediately stop the shipping process, analyze the terminal errors, and fix the codebase. 
+   - If the command fails, immediately stop the shipping process, analyze the terminal errors, and fix the codebase.
    - If the command succeeds, proceed to Step 2.
 
 2. **Stage Files:** Run `git status` to identify modified files. Stage only the specific files relevant to your task using:
