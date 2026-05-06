@@ -1,12 +1,13 @@
 // ReplySchema — legacy-tolerant Zod schema for thread reply documents.
 // See specs/pelilauta/threads/spec.md §Reply Schema.
 
-import { ContentEntrySchema, ImageArraySchema, toDate } from "@pelilauta/models";
+import { ContentEntrySchema, ImageArraySchema, withEntryNormalization } from "@pelilauta/models";
 import { z } from "zod";
 
 export const REPLIES_COLLECTION = "comments";
 
 // See ThreadSchema.ts for the full rationale — same v17 parity rules.
+// Entry-level timestamp coercion is handled by withEntryNormalization.
 const normalizeRawReply = (raw: unknown): unknown => {
   if (!raw || typeof raw !== "object") return raw;
   const data = { ...(raw as Record<string, unknown>) };
@@ -24,15 +25,10 @@ const normalizeRawReply = (raw: unknown): unknown => {
     data.author = data.owners[0];
   }
 
-  data.createdAt = toDate(data.createdAt);
-  data.updatedAt = toDate(data.updatedAt);
-  data.flowTime = toDate(data.flowTime).getTime();
-
   return data;
 };
 
-export const ReplySchema = z.preprocess(
-  normalizeRawReply,
+export const ReplySchema = withEntryNormalization(
   ContentEntrySchema.extend({
     threadKey: z.string(),
     images: ImageArraySchema.optional(),
@@ -42,6 +38,7 @@ export const ReplySchema = z.preprocess(
     quoteref: z.string().optional(),
     owners: z.array(z.string()).min(1, "Reply must have at least one owner"),
   }),
+  normalizeRawReply,
 );
 
 export type Reply = z.infer<typeof ReplySchema>;

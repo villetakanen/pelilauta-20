@@ -7,7 +7,7 @@
 // Storage shape is preserved verbatim from pelilauta-17
 // (feedback_no_breaking_data_contracts memory).
 
-import { ContentEntrySchema, ImageArraySchema, toDate } from "@pelilauta/models";
+import { ContentEntrySchema, ImageArraySchema, withEntryNormalization } from "@pelilauta/models";
 import { z } from "zod";
 
 export const THREADS_COLLECTION_NAME = "stream";
@@ -19,11 +19,9 @@ export const THREADS_COLLECTION_NAME = "stream";
 //   - Legacy `topic` field aliased to `channel`
 //   - Missing `title` / `channel` coalesced to "" (matches v17's `|| ''`)
 //   - `author` unconditionally forced to owners[0] when owners non-empty
-//   - createdAt/updatedAt unconditionally coerced through toDate() — missing
-//     dates resolve to new Date(0), matching v17 behavior for consumers that
-//     don't null-check the field
-//   - flowTime unconditionally coerced through toDate().getTime() — missing
-//     becomes 0, matching v17
+//
+// Entry-level timestamp coercion (createdAt/updatedAt → Date, flowTime → epoch
+// ms) is handled by withEntryNormalization — see specs/pelilauta/models/spec.md.
 const normalizeRawThread = (raw: unknown): unknown => {
   if (!raw || typeof raw !== "object") return raw;
   const data = { ...(raw as Record<string, unknown>) };
@@ -54,18 +52,10 @@ const normalizeRawThread = (raw: unknown): unknown => {
     data.author = data.owners[0];
   }
 
-  // Unconditional timestamp coercion (v17 parity). toDate() handles Firestore
-  // Timestamp / number / string / Date / null / undefined with a new Date(0)
-  // fallback, so missing fields resolve to epoch-0 rather than undefined.
-  data.createdAt = toDate(data.createdAt);
-  data.updatedAt = toDate(data.updatedAt);
-  data.flowTime = toDate(data.flowTime).getTime();
-
   return data;
 };
 
-export const ThreadSchema = z.preprocess(
-  normalizeRawThread,
+export const ThreadSchema = withEntryNormalization(
   ContentEntrySchema.extend({
     title: z.string(),
     channel: z.string(),
@@ -86,6 +76,7 @@ export const ThreadSchema = z.preprocess(
     // Override: at least one owner required for authorization
     owners: z.array(z.string()).min(1, "Please add at least one thread owner."),
   }),
+  normalizeRawThread,
 );
 
 export type Thread = z.infer<typeof ThreadSchema>;

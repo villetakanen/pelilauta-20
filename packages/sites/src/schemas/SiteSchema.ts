@@ -4,30 +4,16 @@
 // .tmp/pelilauta-17/src/schemas/SiteSchema.ts — every field name, type,
 // default, and .optional() marker carries forward. v20 delta: none.
 //
-// Legacy tolerance for Firestore Timestamps is encoded via a z.preprocess
-// wrapper that coerces createdAt/updatedAt through toDate() before the
-// schema validates them — mirrors ThreadSchema's approach.
+// Entry-level timestamp coercion (createdAt / updatedAt → Date, flowTime →
+// epoch ms) is handled by withEntryNormalization. See
+// specs/pelilauta/models/spec.md.
 //
 // Storage shape preserved per feedback_no_breaking_data_contracts.
 
-import { EntrySchema, toDate } from "@pelilauta/models";
+import { EntrySchema, withEntryNormalization } from "@pelilauta/models";
 import { z } from "zod";
 import { CategoryRefSchema } from "./CategoryRefSchema";
 import { PageRefSchema } from "./PageRefSchema";
-
-// Pre-parse normalization — coerces Firestore Timestamps to Date objects
-// and normalizes flowTime to epoch milliseconds. Matches ThreadSchema pattern.
-const normalizeRawSite = (raw: unknown): unknown => {
-  if (!raw || typeof raw !== "object") return raw;
-  const data = { ...(raw as Record<string, unknown>) };
-
-  // Unconditional timestamp coercion — toDate() handles Firestore Timestamp /
-  // number / string / Date / null / undefined with new Date(0) fallback.
-  data.createdAt = toDate(data.createdAt);
-  data.updatedAt = toDate(data.updatedAt);
-
-  return data;
-};
 
 export const SITES_COLLECTION_NAME = "sites";
 
@@ -50,8 +36,7 @@ const AssetSchema = z.object({
 export const SiteSortOrderSchema = z.enum(["name", "createdAt", "flowTime", "manual"]);
 export type SiteSortOrder = z.infer<typeof SiteSortOrderSchema>;
 
-export const SiteSchema = z.preprocess(
-  normalizeRawSite,
+export const SiteSchema = withEntryNormalization(
   EntrySchema.extend({
     // Core fields
     name: z.string().default("[...]"),
