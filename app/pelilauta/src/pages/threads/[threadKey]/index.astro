@@ -1,9 +1,12 @@
 ---
-// Thread detail page — read-only, anonymous-friendly, pure SSR.
-// No client: directives, no Firestore listeners, no auth gate.
+// Thread detail page — read-only, anonymous-friendly, SSR with progressive reply hydration.
+// Anonymous viewers: full SSR reply list, no JS for the reply list.
+// Authenticated viewers: same SSR seed, then ThreadReplies hydrates for realtime updates.
 // See specs/pelilauta/threads/spec.md Stage-2 DoD.
+// See specs/pelilauta/threads/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
+// See specs/pelilauta/threads/replies/spec.md §Host page parses ?since= into targetFlowTime
 
-import { ThreadDetail } from "@pelilauta/threads/components";
+import { ThreadDetail, ThreadReplies } from "@pelilauta/threads/components";
 import type { Thread } from "@pelilauta/threads/server";
 import { getThread } from "@pelilauta/threads/server";
 import { logError } from "@pelilauta/utils/log";
@@ -11,6 +14,9 @@ import { markdownToHTML } from "@pelilauta/utils/markdownToHTML";
 import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
 import { t } from "../../../i18n";
 import Page from "../../../layouts/Page.astro";
+import { parseSinceParam } from "./parseSinceParam";
+import type { InitialReplyEntry } from "./prepareInitialReplies";
+import { prepareInitialReplies } from "./prepareInitialReplies";
 
 const { threadKey } = Astro.params;
 
@@ -21,6 +27,10 @@ if (!threadKey) {
 let thread: Thread | undefined;
 let bodyHtml = "";
 let error = false;
+let initialReplies: InitialReplyEntry[] = [];
+
+const currentUid = Astro.locals.uid ?? null;
+const targetFlowTime = parseSinceParam(Astro.request.url);
 
 if (threadKey) {
   try {
@@ -28,6 +38,8 @@ if (threadKey) {
     if (thread) {
       // Markdown rendering happens upstream in the frontmatter — SSR Data Flow rule.
       bodyHtml = await markdownToHTML(thread.markdownContent ?? "");
+      // Reply SSR seed: profiles and bodyHtml resolved upstream, never in .svelte templates.
+      initialReplies = await prepareInitialReplies(threadKey);
     } else {
       Astro.response.status = 404;
     }
@@ -54,4 +66,30 @@ const description = thread
   {error && <p>{t("pelilauta:error.fetch")}</p>}
   {!error && !thread && <p>{t("pelilauta:error.notFound")}</p>}
   {!error && thread && <ThreadDetail thread={thread} bodyHtml={bodyHtml} />}
+  {!error && thread && (
+    <>
+      {currentUid ? (
+        // Authenticated: hydrate with client:idle so the SSR seed paints first,
+        // then the realtime listener mounts after the browser is idle.
+        // client:idle is friendlier on FCP than client:load — the SSR seed is
+        // already visible; realtime updates can wait until the main thread is free.
+        <ThreadReplies
+          client:idle
+          threadKey={threadKey!}
+          {initialReplies}
+          {currentUid}
+          {targetFlowTime}
+        />
+      ) : (
+        // Anonymous: pure SSR, no JS bundle for the reply list.
+        // No client: directive means Astro does not ship a hydration script.
+        <ThreadReplies
+          threadKey={threadKey!}
+          {initialReplies}
+          currentUid={null}
+          {targetFlowTime}
+        />
+      )}
+    </>
+  )}
 </Page>

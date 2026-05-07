@@ -4,11 +4,14 @@
 // Direct: node --experimental-strip-types packages/firebase/scripts/seed-e2e.ts
 //
 // What it does:
-//   1. Deletes all documents in the `stream` collection
+//   1. Deletes all documents in the `stream` collection along with their
+//      `comments` sub-collections (Firestore does not cascade these).
 //   2. Writes 5 thread documents with known keys
-//   3. Writes the `meta/threads` document with a `topics` array containing
+//   3. Writes reply sub-collections under `stream/{threadKey}/comments/*`
+//      for threads with non-zero replyCount, so M5–M8 has real data to render.
+//   4. Writes the `meta/threads` document with a `topics` array containing
 //      the channels referenced by the seed threads
-//   4. Upserts profile documents for the two seed thread author uids so
+//   5. Upserts profile documents for the two seed thread author uids so
 //      ProfileLink resolves to real nicks instead of the anonymous fallback.
 //      Does NOT clear the `profiles` collection — real user profiles coexist.
 //
@@ -66,6 +69,38 @@ async function clearCollection(collectionPath: string): Promise<number> {
   }
   await batch.commit();
   return snapshot.size;
+}
+
+/**
+ * Clear the `stream` collection AND every thread's `comments` sub-collection.
+ *
+ * Firestore does not cascade deletes from a parent doc to its sub-collections,
+ * so reply docs would otherwise be orphaned across reseeds. Walks each existing
+ * thread, deletes its comments, then drops the thread docs themselves.
+ */
+async function clearStreamAndReplies(): Promise<{ threads: number; replies: number }> {
+  const snapshot = await db.collection("stream").get();
+  if (snapshot.empty) return { threads: 0, replies: 0 };
+
+  let replies = 0;
+  for (const threadDoc of snapshot.docs) {
+    const commentsSnap = await threadDoc.ref.collection("comments").get();
+    if (commentsSnap.empty) continue;
+    const batch = db.batch();
+    for (const replyDoc of commentsSnap.docs) {
+      batch.delete(replyDoc.ref);
+    }
+    await batch.commit();
+    replies += commentsSnap.size;
+  }
+
+  const threadBatch = db.batch();
+  for (const doc of snapshot.docs) {
+    threadBatch.delete(doc.ref);
+  }
+  await threadBatch.commit();
+
+  return { threads: snapshot.size, replies };
 }
 
 // ---------------------------------------------------------------------------
@@ -171,6 +206,98 @@ const SEED_THREADS: Record<string, Record<string, unknown>> = {
     title: "Tapahtumat 2023",
     topic: "tapahtumat",
     updatedAt: ts("2023-02-22T09:14:47Z"),
+  },
+};
+
+// ---------------------------------------------------------------------------
+// Reply seed — sub-collection docs at stream/{threadKey}/comments/{replyKey}
+//
+// Reply count and shape mirror what the parent thread's `replyCount` advertises,
+// so the front-page reply counter and the detail-page rendered list stay in
+// sync. Written as raw Firestore data (Timestamp, not Date) — ReplySchema's
+// preprocessors handle the conversion at read time.
+//
+// Two real seed authors (Petri / YN8...; Mikko / Osqlm...) are reused so
+// AvatarLink and ProfileLink resolve to real nicks rather than the anonymous
+// fallback.
+// ---------------------------------------------------------------------------
+
+const SEED_REPLIES: Record<string, Record<string, Record<string, unknown>>> = {
+  "seed-hahmonluonti": {
+    "seed-reply-hl-1": {
+      flowTime: ts("2024-10-13T08:00:00Z"),
+      createdAt: ts("2024-10-13T08:00:00Z"),
+      updatedAt: ts("2024-10-13T08:00:00Z"),
+      owners: ["OsqlmotvuGco7FuG0adVp4fk5TW2"],
+      author: "OsqlmotvuGco7FuG0adVp4fk5TW2",
+      markdownContent:
+        "Storyteller on tästä loistava esimerkki. Burning Wheel taas tekee saman Lifepath-systeemillä — heikkoudet syntyy hahmon historiasta, ei erillisestä listasta.",
+    },
+    "seed-reply-hl-2": {
+      flowTime: ts("2024-10-13T18:30:00Z"),
+      createdAt: ts("2024-10-13T18:30:00Z"),
+      updatedAt: ts("2024-10-13T18:30:00Z"),
+      owners: ["YN8dQz3H8OMsb0L4jImAlROPQpo1"],
+      author: "YN8dQz3H8OMsb0L4jImAlROPQpo1",
+      markdownContent:
+        "Burning Wheel on hyvä pointti. Uudemmissa peleissä yritetään saada sama juttu aspekteilla tai flageilla, mutta jotain häviää kun heikkoudet ei ole sidottu numeerisiin arvoihin.",
+    },
+    "seed-reply-hl-3": {
+      flowTime: ts("2024-10-14T10:30:58Z"),
+      createdAt: ts("2024-10-14T10:30:58Z"),
+      updatedAt: ts("2024-10-14T10:30:58Z"),
+      owners: ["OsqlmotvuGco7FuG0adVp4fk5TW2"],
+      author: "OsqlmotvuGco7FuG0adVp4fk5TW2",
+      markdownContent:
+        "FATE:n aspektit on abstraktimpia kuin Storytellerin Flaws. Sekä rakastan että vihaan molempia eri syistä — eri pelit eri seurueille.",
+    },
+  },
+  "seed-pelit-seurattavaksi": {
+    "seed-reply-ps-1": {
+      flowTime: ts("2023-08-15T08:12:00Z"),
+      createdAt: ts("2023-08-15T08:12:00Z"),
+      updatedAt: ts("2023-08-15T08:12:00Z"),
+      owners: ["OsqlmotvuGco7FuG0adVp4fk5TW2"],
+      author: "OsqlmotvuGco7FuG0adVp4fk5TW2",
+      markdownContent:
+        "Linkin takana ollut artikkeli oli kyllä hyvä. Etäpelaaminen on muuttanut sitä mitä yleisö pelaamiselta odottaa.",
+    },
+    "seed-reply-ps-2": {
+      flowTime: ts("2023-08-15T11:45:00Z"),
+      createdAt: ts("2023-08-15T11:45:00Z"),
+      updatedAt: ts("2023-08-15T11:45:00Z"),
+      owners: ["YN8dQz3H8OMsb0L4jImAlROPQpo1"],
+      author: "YN8dQz3H8OMsb0L4jImAlROPQpo1",
+      markdownContent:
+        "Joo, ja varsinkin tuo havainto että pelin _esitettävyys_ kameralle on noussut ihan yhtä tärkeäksi kuin pelin sisäinen draama.",
+    },
+    "seed-reply-ps-3": {
+      flowTime: ts("2023-08-15T19:08:00Z"),
+      createdAt: ts("2023-08-15T19:08:00Z"),
+      updatedAt: ts("2023-08-15T19:08:00Z"),
+      owners: ["OsqlmotvuGco7FuG0adVp4fk5TW2"],
+      author: "OsqlmotvuGco7FuG0adVp4fk5TW2",
+      markdownContent:
+        "Tämä. Kotipöydässä riittää että pelaajat tietää mitä hahmo tekee; striimissä pitää myös katsoja saada mukaan ilman että hidastetaan peliä.",
+    },
+    "seed-reply-ps-4": {
+      flowTime: ts("2023-08-16T07:30:00Z"),
+      createdAt: ts("2023-08-16T07:30:00Z"),
+      updatedAt: ts("2023-08-16T07:30:00Z"),
+      owners: ["YN8dQz3H8OMsb0L4jImAlROPQpo1"],
+      author: "YN8dQz3H8OMsb0L4jImAlROPQpo1",
+      markdownContent:
+        "Aktuelli pointti. Onko kellään kokemuksia siitä että striimaaminen on _parantanut_ pöytäpelaamista? Mä en ole vielä uskaltanut testata.",
+    },
+    "seed-reply-ps-5": {
+      flowTime: ts("2023-08-16T09:21:59Z"),
+      createdAt: ts("2023-08-16T09:21:59Z"),
+      updatedAt: ts("2023-08-16T09:21:59Z"),
+      owners: ["OsqlmotvuGco7FuG0adVp4fk5TW2"],
+      author: "OsqlmotvuGco7FuG0adVp4fk5TW2",
+      markdownContent:
+        "Mulla on hyviä kokemuksia. Pelaajat valmistautuu paremmin kun tietää että sessio on tallessa, ja se nostaa pelin yleistä laatua.",
+    },
   },
 };
 
@@ -290,9 +417,9 @@ function buildTagProjections(): Array<[string, TagProjection]> {
 async function main() {
   console.log("Seeding E2E test data into Firestore...\n");
 
-  // 1. Clear stream collection
-  const deleted = await clearCollection("stream");
-  console.log(`  Deleted ${deleted} documents from 'stream'`);
+  // 1. Clear stream collection AND its `comments` sub-collections
+  const { threads: threadsDeleted, replies: repliesDeleted } = await clearStreamAndReplies();
+  console.log(`  Deleted ${threadsDeleted} threads and ${repliesDeleted} replies from 'stream'`);
 
   // 2. Write seed threads
   const batch = db.batch();
@@ -301,6 +428,23 @@ async function main() {
   }
   await batch.commit();
   console.log(`  Wrote ${Object.keys(SEED_THREADS).length} threads to 'stream'`);
+
+  // 2b. Write reply sub-collections under stream/{threadKey}/comments/{replyKey}
+  let replyCount = 0;
+  let threadsWithReplies = 0;
+  const replyBatch = db.batch();
+  for (const [threadKey, replies] of Object.entries(SEED_REPLIES)) {
+    threadsWithReplies++;
+    for (const [replyKey, replyData] of Object.entries(replies)) {
+      replyBatch.set(
+        db.collection("stream").doc(threadKey).collection("comments").doc(replyKey),
+        replyData,
+      );
+      replyCount++;
+    }
+  }
+  if (replyCount > 0) await replyBatch.commit();
+  console.log(`  Wrote ${replyCount} replies across ${threadsWithReplies} thread sub-collections`);
 
   // 3. Write channel directory
   await db.doc("meta/threads").set({ topics: SEED_CHANNELS }, { merge: true });

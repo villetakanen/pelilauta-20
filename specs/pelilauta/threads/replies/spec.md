@@ -349,3 +349,19 @@ Given the request URL has no ?since param
 When the host page renders
 Then targetFlowTime=undefined is passed to <ThreadReplies>
 ```
+
+## Known Defects
+
+> Defects observed in the landed M5–M8 implementation. Recorded for follow-up; not part of the acceptance contract for the milestones already shipped. Each entry frames the implementation's silent choice against the spec's implicit intent — promoting any of these into Testing Scenarios is the path to forcing a fix.
+
+### Date display leaks the SSR runtime's locale
+
+`ReplyArticle` formats `reply.createdAt` with `toLocaleDateString()` and no explicit locale. During SSR the runtime's locale is whatever the Netlify function defaults to; for anonymous viewers the rendered string is then frozen into a cache-shareable response that crosses every viewer's locale boundary. This is at odds with §Anonymous SSR response is uid-independent and listener-free's cache-shareability promise — the response is still uid-independent, but it bakes the server's locale into a response shared across viewers with different locale preferences.
+
+**Fix direction:** route the date through a deterministic helper (the existing `@pelilauta/utils` date helpers, or just emit the ISO `datetime` attribute and a `<time>`-only formatter on the client). Spec is silent on the surface format; clarifying it would also tighten this defect into a regression test.
+
+### Listener-pushed replies render with empty `bodyHtml` and `null` profile
+
+§ThreadReplies merges a docChanges diff into the rendered list assumes listener-merged replies are visually equivalent to SSR-seeded ones, but does not specify how `bodyHtml` and `profile` are populated post-mount. The current implementation appends `{ reply, bodyHtml: "", profile: null }` for `added` diffs, so a reply that arrives via the realtime upgrade displays no body and an anonymous-fallback avatar/profile until the page reloads. Modified diffs preserve the seeded `bodyHtml`/`profile` (only `reply` is replaced); they're unaffected.
+
+**Fix direction:** either (a) render markdown client-side via a Svelte-safe helper exposed from `@pelilauta/utils`, or (b) ship a CSR `prepareReplyEntry(reply)` helper from `@pelilauta/threads/client` that resolves the profile (via an authed API call) and renders the body before merging into `entries`. Either path also wants a tightened scenario here that asserts the merged entry's body and profile match what an SSR seed would have produced.
