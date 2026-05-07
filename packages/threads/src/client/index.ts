@@ -8,3 +8,5 @@
 export * from "../schemas/ChannelSchema";
 export * from "../schemas/ReplySchema";
 export * from "../schemas/ThreadSchema";
+export type { RepliesChangeCallback, ReplyDiff } from "./subscribeReplies";
+export { subscribeReplies } from "./subscribeReplies";

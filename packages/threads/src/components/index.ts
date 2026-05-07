@@ -1,5 +1,7 @@
 export { default as ChannelInfoRow } from "./ChannelInfoRow.astro";
 export { default as ChannelsApp } from "./ChannelsApp.astro";
 export { default as ChannelsList } from "./ChannelsList.astro";
+export { default as ReplyArticle } from "./ReplyArticle.svelte";
 export { default as ThreadCard } from "./ThreadCard.svelte";
 export { default as ThreadDetail } from "./ThreadDetail.svelte";
+export { default as ThreadReplies } from "./ThreadReplies.svelte";
