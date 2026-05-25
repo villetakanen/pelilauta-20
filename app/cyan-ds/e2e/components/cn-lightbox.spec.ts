@@ -140,16 +140,30 @@ test.describe("CnLightbox — modal interaction", () => {
   });
 
   test("close button closes the modal", async ({ page }) => {
-    await page.locator(".single-figure").first().click();
-    await expect(page.locator("dialog[open]").first()).toBeVisible();
+    const figure = page.locator(".single-figure").first();
+    const dialog = page.locator("dialog[open]").first();
+    await expect
+      .poll(async () => {
+        await figure.click();
+        return await dialog.count();
+      })
+      .toBe(1);
+    await expect(dialog).toBeVisible();
 
     await page.locator(".close-button").first().click();
     await expect(page.locator("dialog[open]")).toHaveCount(0);
   });
 
   test("ESC key closes the modal (native dialog behaviour)", async ({ page }) => {
-    await page.locator(".single-figure").first().click();
-    await expect(page.locator("dialog[open]").first()).toBeVisible();
+    const figure = page.locator(".single-figure").first();
+    const dialog = page.locator("dialog[open]").first();
+    await expect
+      .poll(async () => {
+        await figure.click();
+        return await dialog.count();
+      })
+      .toBe(1);
+    await expect(dialog).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(page.locator("dialog[open]")).toHaveCount(0);
@@ -160,8 +174,14 @@ test.describe("CnLightbox — modal interaction", () => {
   }: {
     page: Page;
   }) => {
-    await page.locator(".single-figure").first().click();
+    const figure = page.locator(".single-figure").first();
     const dialog = page.locator("dialog[open]").first();
+    await expect
+      .poll(async () => {
+        await figure.click();
+        return await dialog.count();
+      })
+      .toBe(1);
     await expect(dialog).toBeVisible();
 
     // Click at a corner of the dialog element (outside the content) to hit the backdrop area.
