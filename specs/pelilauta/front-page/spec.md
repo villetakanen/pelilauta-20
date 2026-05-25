@@ -12,7 +12,7 @@ parent_spec: ../spec.md
 
 ### Context
 
-The front page is the landing surface for Pelilauta — it orients visitors and returning users by surfacing recent community activity across three information streams. This v20 spec defines the **minimum viable front page** needed to scaffold the app shell, routing, and content-grid integration. It still defers rich data features (real syndication, FABs) from v17. **Background poster support has landed**: the front page mounts the `juno-viinikka-dragon-1.jpg` atmospheric image from `@myrrys/proprietary` via the [`CnBackgroundPoster`](../../cyan-ds/components/cn-background-poster/spec.md) DS primitive.
+The front page is the landing surface for Pelilauta — it orients visitors and returning users by surfacing recent community activity across three information streams. **Floating Action Buttons (FABs) are supported**: authenticated, active (non-frozen) users see actions to create content, which are hidden for anonymous and frozen accounts. **Background poster support has landed**: the front page mounts the `juno-viinikka-dragon-1.jpg` atmospheric image from `@myrrys/proprietary` via the [`CnBackgroundPoster`](../../cyan-ds/components/cn-background-poster/spec.md) DS primitive.
 
 ### Architecture
 
@@ -24,6 +24,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
   - `TopThreadsStream` (`app/pelilauta/src/components/front-page/TopThreadsStream.astro`) — live Firestore-backed threads column
   - `SyndicateStream` (`app/pelilauta/src/components/front-page/SyndicateStream.astro`) — live RSS feed Blog-roll column (see sub-spec `syndicate-stream/spec.md`); mounted with `server:defer`
   - `CnBackgroundPoster` (`packages/cyan/src/components/CnBackgroundPoster.astro`) — singleton atmospheric-background primitive, mounted via the `app-background-poster` named slot on `Page`. Sourced with an ES import of `@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg` — Astro/Vite hashes and serves the asset at build time; the poster consumes `heroImg.src` from the returned `ImageMetadata`.
+  - `FrontpageFabs` (`packages/threads/src/components/FrontpageFabs.svelte`) — Svelte 5 contextual FAB tray component, reactive to client session state. Mounted client-side with `client:idle`.
 - **Data:** Threads and Blog-roll are live data. Latest sites remain static placeholder `CnCard` components; they will become live data in a future sprint.
 
 #### Sections
@@ -38,6 +39,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 - `packages/cyan` — AppShell, CnCard, content-grid, tokens
 - `@myrrys/proprietary` — source of the front-page atmospheric image (`juno-viinikka-dragon-1.jpg`). Workspace dependency declared in `app/pelilauta/package.json`.
+- `packages/threads` — source of `FrontpageFabs` and thread creation triggers.
 - Future: Firebase/data layer for live thread data (out of scope for this spec)
 
 ### Anti-Patterns
@@ -51,7 +53,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 
 ## Contract
 
-### Definition of Done
+## Definition of Done
 
 - [ ] `index.astro` composes on `Page` from `@cyan/layouts/Page.astro`
 - [ ] Page uses `cn-content-triad` with three labelled regions: Threads (medium), Blog-roll (small), Latest sites (small)
@@ -59,6 +61,7 @@ The front page is the landing surface for Pelilauta — it orients visitors and 
 - [ ] Blog-roll region renders via `SyndicateStream` (live RSS data, `server:defer`; see `syndicate-stream/spec.md`); its `<h2>` heading is visible in both resolved and fallback states
 - [ ] Latest sites region displays at least 3 `CnCard` components representing community sites (static placeholder for now)
 - [ ] Each region has a visible heading (`<h2>`) naming the region
+- [ ] `FrontpageFabs` Svelte component is mounted in the `fab-tray` slot with `client:idle` (it hydrates only for logged-in sessions)
 - [ ] Page passes `pnpm check` with no errors
 - [ ] Page renders correctly at mobile / narrow (triad collapses to a single stacked column per the content-grid contract) and desktop / wide (triad renders three columns side-by-side)
 - [ ] `index.astro` contains no `<style>` block, no inline `style=""` attributes, and no locally-defined classes
@@ -129,3 +132,27 @@ And no other client:* directives appear in the rendered subtree
 
 - **Vitest Unit Test:** (not applicable — verified by E2E and build output inspection)
 - **Playwright E2E Test:** `app/pelilauta/e2e/front-page.spec.ts`
+
+#### Scenario: Front-Page FAB visible to active, authenticated users
+
+```gherkin
+Given an authenticated user who is NOT frozen
+When the front page is rendered
+Then the floating action button to create a thread is visible inside the fab-tray
+```
+
+#### Scenario: Front-Page FAB hidden from anonymous users
+
+```gherkin
+Given an anonymous user
+When the front page is rendered
+Then the floating action button to create a thread is NOT visible
+```
+
+#### Scenario: Front-Page FAB hidden from frozen users
+
+```gherkin
+Given an authenticated user whose account is frozen
+When the front page is rendered
+Then the floating action button to create a thread is NOT visible
+```
