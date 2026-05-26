@@ -139,6 +139,9 @@ importers:
       '@pelilauta/utils':
         specifier: workspace:*
         version: link:../utils
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.1.1
@@ -315,6 +318,9 @@ importers:
 
   packages/threads:
     dependencies:
+      '@pelilauta/auth':
+        specifier: workspace:*
+        version: link:../auth
       '@pelilauta/cyan':
         specifier: workspace:*
         version: link:../cyan

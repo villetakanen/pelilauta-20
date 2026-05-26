@@ -1,0 +1,127 @@
+/* Floating Action Button (FAB)
+ *
+ * Applies to button.fab, a.fab, and a.button.fab — no Svelte component wrapper.
+ * Ported from cyan-4 packages/cyan-css/src/core/fab.css with v20 token mapping
+ * and gradient colour-space updated from lch (cyan-4) to `in oklab` (v20 convention).
+ *
+ * Token dependencies:
+ *   --cn-fab-size, --cn-grid, --cn-border-radius-large, --cn-button-size,
+ *   --cn-shadow-elevation-1, --cn-shadow-elevation-2, --cn-shadow-elevation-4,
+ *   --cn-fab, --cn-on-fab, --cn-button-cta, --cn-button, --cn-on-button,
+ *   --cn-on-button-cta, --cn-surface, --cn-on-surface,
+ *   --cn-icon-size-small, --cn-duration-ui, --cn-easing-ui
+ */
+
+a.fab,
+a.fab.button,
+button.fab {
+  position: relative;
+  min-width: var(--cn-fab-size);
+  height: var(--cn-fab-size);
+  border-radius: var(--cn-border-radius-large);
+  display: inline-flex;
+  /* Prevent FABs from growing inside flex/grid containers.
+     Use an explicit non-flexible shorthand so this rule wins
+     over generic selectors like `.flex > *`. */
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--cn-shadow-elevation-1);
+  border: none;
+  cursor: pointer;
+  transition: all var(--cn-duration-ui) var(--cn-easing-ui);
+  text-decoration: none;
+  z-index: 1;
+  background: linear-gradient(in oklab 137deg, var(--cn-fab), var(--cn-fab-blend));
+  color: var(--cn-on-fab);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--cn-surface), transparent);
+}
+
+/* CTA variant — and synonym .call-to-action for cyan-4 compatibility */
+a.fab.cta,
+a.fab.button.cta,
+button.fab.cta,
+a.fab.call-to-action,
+a.fab.button.call-to-action,
+button.fab.call-to-action {
+  background: linear-gradient(in oklab 137deg, var(--cn-fab-cta), var(--cn-fab-cta-blend));
+  color: var(--cn-on-fab-cta);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--cn-surface), transparent);
+}
+
+/* Secondary variant — recessive darkblue-to-blue gradient */
+a.fab.secondary,
+a.fab.button.secondary,
+button.fab.secondary {
+  background: linear-gradient(
+    in oklab 137deg,
+    var(--cn-fab-secondary),
+    var(--cn-fab-secondary-blend)
+  );
+  color: var(--cn-on-fab-secondary);
+  text-shadow: 0 0 8px color-mix(in oklab, var(--cn-surface), transparent);
+}
+
+/* Keep flex: 0 0 auto for backward compatibility with `.flex > .fab` */
+.flex > .fab {
+  flex: 0 0 auto;
+}
+
+/* Elevation: hover lifts, active drops */
+.fab:hover {
+  box-shadow: var(--cn-shadow-elevation-4);
+}
+
+.fab:active {
+  box-shadow: var(--cn-shadow-elevation-2);
+}
+
+/* Icon sizing inside FABs */
+.fab .cn-icon {
+  font-size: var(--cn-icon-size-small);
+  width: var(--cn-icon-size-small);
+  height: var(--cn-icon-size-small);
+  flex-shrink: 0;
+}
+
+/* Small variant — collapses to button dimensions */
+a.fab.small,
+button.fab.small {
+  min-width: var(--cn-button-size);
+  height: var(--cn-button-size);
+  border-radius: var(--cn-border-radius-large);
+}
+
+/* Higher specificity to win over `.flex > *` and similar generic flex rules */
+button.fab,
+a.button.fab,
+.button.fab {
+  flex: 0 0 auto;
+}
+
+/* Flex container overrides — keep fixed FAB size inside flex rows */
+.flex > .fab,
+.flex > button.fab,
+.flex > a.button.fab,
+.flex > .button.fab {
+  flex: 0 0 auto;
+  min-width: var(--cn-fab-size);
+  height: var(--cn-fab-size);
+}
+
+/* Small FABs in flex containers use button dimensions */
+.flex > .fab.small,
+.flex > button.fab.small,
+.flex > a.button.fab.small,
+.flex > .button.fab.small {
+  min-width: var(--cn-button-size);
+  height: var(--cn-button-size);
+}
+
+/* Leading icon/loader alignment (no extra left margin for flush start) */
+button.fab .cn-loader:first-child:not(:only-child),
+a.button.fab .cn-loader:first-child:not(:only-child),
+button.fab .cn-icon:first-child:not(:only-child),
+a.button.fab .cn-icon:first-child:not(:only-child) {
+  margin-left: 0;
+}

@@ -73,3 +73,5 @@ Add a standardized fixed-position container for floating action buttons in the b
   - [ ] Verify FAB visibility for standard logged-in users.
   - [ ] Verify FAB is hidden for anonymous users.
   - [ ] Verify FAB is hidden for seeded frozen users.
+- [ ] **Follow-up (out of scope for this plan)**
+  - [ ] TODO: Implement server-side frozen enforcement in `/api/threads/create` — UI gating is progressive enhancement; server must also reject writes for frozen users per specs/pelilauta/session/frozen.md §Regression Guardrails "Strict Server Enforcement".

@@ -42,6 +42,7 @@ A user account on Pelilauta can be "frozen" by administrators to restrict their 
 - [ ] `/api/auth/status` resolves the user's `frozen` state from Firestore and includes `frozen` in the JSON response.
 - [ ] `AuthHandler` syncs the `frozen` status from the status check to the client-side session store.
 - [ ] Svelte 5 FAB components hide themselves if the user's `frozen` status is `true`.
+- [ ] When `Astro.locals.uid` is null at SSR time, the FAB tray renders a server-side `<a href="/login?next=...">` login CTA in place of the authenticated FAB island. The Svelte FAB component is NOT mounted on anonymous renders (preserves session/spec.md §Anonymous surfaces ship zero CSR for auth).
 
 ### Regression Guardrails
 - **Fail-Safe Visibility:** If the user's session state is loading or auth status is indeterminate, write actions/FABs must remain hidden until status is authoritatively confirmed.
@@ -70,4 +71,12 @@ And the response body is { loggedIn: true, uid, claims, frozen: false }
 Given the AuthHandler reconciles with a response indicating frozen: true
 When the session store is updated
 Then the client-side session store's profile is updated with frozen = true
+```
+
+#### Scenario: Anonymous viewer sees login CTA in FAB tray
+```gherkin
+Given an anonymous viewer requests the front page
+When the page is rendered
+Then the fab-tray contains a server-rendered <a href="/login?next=/create/thread"> link
+And the FrontpageFabs Svelte island is not present in the SSR output
 ```

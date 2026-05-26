@@ -126,6 +126,14 @@ const seo = buildSeoHead({
     </main>
 
     {
+      Astro.slots.has("fab-tray") && (
+        <nav class="cn-fab-tray" aria-label="Quick actions">
+          <slot name="fab-tray" />
+        </nav>
+      )
+    }
+
+    {
       showFooter && (
         <AppFooter>
           <slot name="footer-body" slot="footer-body" />
@@ -189,6 +197,16 @@ const seo = buildSeoHead({
 
   .cn-app-footer {
     grid-column: 1 / -1;
+  }
+
+  .cn-fab-tray {
+    position: fixed;
+    right: var(--cn-gap, 1rem);
+    bottom: var(--cn-gap, 1rem);
+    z-index: var(--cn-z-fab);
+    display: flex;
+    flex-direction: column;
+    gap: var(--cn-grid, 0.5rem);
   }
 
   /* --- Layout: View --- */

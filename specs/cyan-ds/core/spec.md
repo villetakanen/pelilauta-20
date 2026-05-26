@@ -30,6 +30,7 @@ Distinct from:
 
 - [Buttons](buttons/spec.md) — atomic CSS for `<button>` / `<a class="button">`.
 - [Dividers](dividers/spec.md) — atomic CSS for `<hr>`.
+- [FAB](fab/spec.md) — atomic CSS for floating action buttons (`button.fab` / `a.button.fab`).
 
 ## Contract
 

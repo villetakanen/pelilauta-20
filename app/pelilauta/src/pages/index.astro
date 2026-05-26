@@ -1,16 +1,29 @@
 ---
 import CnBackgroundPoster from "@cyan/components/CnBackgroundPoster.astro";
+import CnIcon from "@cyan/components/CnIcon.svelte";
 import heroImg from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
+import { FrontpageFabs } from "@pelilauta/threads/components";
 import FeaturedTags from "../components/front-page/FeaturedTags.astro";
 import SyndicateStream from "../components/front-page/SyndicateStream.astro";
 import TopSitesStream from "../components/front-page/TopSitesStream.astro";
 import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
 import { t } from "../i18n";
 import Page from "../layouts/Page.astro";
+
+const { uid } = Astro.locals;
 ---
 
 <Page title="Pelilauta 20" description="Pelilauta on roolipelaajien yhteisö — kanavat, keskustelut ja sivustot." layout="view" noun="fox" asPageHeading>
   <CnBackgroundPoster slot="app-background-poster" src={heroImg.src} />
+  {uid
+    ? <FrontpageFabs slot="fab-tray" label={t("app:fab.create-thread")} client:load />
+    : (
+      <a slot="fab-tray" class="button fab" href="/login?next=/create/thread">
+        <CnIcon noun="send" />
+        <span>{t("app:fab.create-thread")}</span>
+      </a>
+    )
+  }
 
   <section class="cn-content-triad">
     <TopThreadsStream />

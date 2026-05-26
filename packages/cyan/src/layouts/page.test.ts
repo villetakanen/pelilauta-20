@@ -1,4 +1,8 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+
+const PAGE_ASTRO = readFileSync(resolve(__dirname, "Page.astro"), "utf-8");
 
 /**
  * Page.astro is a pure structural composition on top of AppShell — it cannot
@@ -15,16 +19,13 @@ describe("Page Layout — Contract", () => {
     expect(defaultLayout).toBe("sidebar");
   });
 
-  it("exposes tray, actions, footer and default slots", () => {
-    // Contract: Page forwards `tray`, `actions`, `footer-body`, and
-    // `app-footer-credits` named slots to AppShell,
-    // and renders the default slot directly inside <main class="cn-app-main">.
-    const exposedSlots = ["tray", "actions", "footer-body", "app-footer-credits", "default"];
-    expect(exposedSlots).toContain("tray");
-    expect(exposedSlots).toContain("actions");
-    expect(exposedSlots).toContain("footer-body");
-    expect(exposedSlots).toContain("app-footer-credits");
-    expect(exposedSlots).toContain("default");
+  it("forwards named slots to AppShell including fab-tray", () => {
+    expect(PAGE_ASTRO).toContain('<slot name="tray" slot="tray" />');
+    expect(PAGE_ASTRO).toContain('<slot name="fab-tray" slot="fab-tray" />');
+    expect(PAGE_ASTRO).toContain('<slot name="actions" slot="actions" />');
+    expect(PAGE_ASTRO).toContain('<slot name="footer-body" slot="footer-body" />');
+    expect(PAGE_ASTRO).toContain('<slot name="app-footer-credits" slot="app-footer-credits" />');
+    expect(PAGE_ASTRO).toContain("<slot />");
   });
 
   it("does not own the page H1", () => {

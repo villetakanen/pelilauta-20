@@ -1,0 +1,127 @@
+---
+title: "Floating Action Buttons"
+description: Atomic styling for circular elevated action buttons.
+icon: fox
+order: 2
+status: draft
+---
+
+import ThemeSplit from "@cyan/components/living-style-books/ThemeSplit.astro";
+import CnIcon from "@cyan/components/CnIcon.svelte";
+import CnLoader from "@cyan/components/cn-loader/CnLoader.svelte";
+
+# Floating Action Buttons
+
+Pelilauta styles `<button class="fab">` and `<a class="button fab">` directly — no component wrapper. Any FAB is correctly elevated and shaped before JavaScript hydrates.
+
+**A FAB always carries an icon.** The icon is the FAB's primary affordance; the label is optional and used on roomy viewports. If there's no icon to convey the action, use a regular `.button` instead.
+
+## Blueprint
+
+<ThemeSplit>
+  <div class="row gap-2 p-2 align-items-center">
+    <a href="#" class="button fab"><CnIcon noun="add" /><span>New thread</span></a>
+    <button class="fab" aria-label="Default FAB"><CnIcon noun="add" /></button>
+    <button class="fab cta" aria-label="CTA FAB"><CnIcon noun="check" /></button>
+    <button class="fab secondary" aria-label="Secondary FAB"><CnIcon noun="edit" /></button>
+    <button class="fab small" aria-label="Small FAB"><CnIcon noun="add" /></button>
+  </div>
+</ThemeSplit>
+
+## Usage
+
+### Icon-only (compact)
+
+```html
+<button class="fab" aria-label="Create">
+  <span class="cn-icon"><!-- icon --></span>
+</button>
+```
+
+### Icon + label (extended)
+
+On wider viewports, follow the icon with a `<span>` label to make the action explicit.
+
+```html
+<a href="/create" class="button fab">
+  <span class="cn-icon"><!-- icon --></span>
+  <span>New thread</span>
+</a>
+```
+
+### Button vs anchor
+
+Use `<button class="fab">` for in-page actions (open a dialog, submit). Use `<a class="button fab" href="…">` when the action navigates.
+
+## Variants
+
+### CTA
+
+The CTA FAB uses the error/CTA colour ramp and is reserved for the single most important action in a view.
+
+```html
+<button class="fab cta" aria-label="Get Started">
+  <span class="cn-icon"><!-- icon --></span>
+</button>
+```
+
+### Secondary
+
+Add `.secondary` for a recessive FAB rendered with a dark-blue → blue gradient. Use it when an elevated affordance is needed but the action isn't the page's primary CTA.
+
+There is **no `.text` variant for FAB.** If the action doesn't warrant an elevated surface, use a regular `.button` instead.
+
+```html
+<button class="fab secondary" aria-label="Edit">
+  <span class="cn-icon"><!-- icon --></span>
+</button>
+```
+
+### Small
+
+Add `.small` to collapse the FAB to `--cn-button-size` dimensions — useful in constrained spaces or alongside other button elements.
+
+```html
+<button class="fab small" aria-label="Save">
+  <span class="cn-icon"><!-- icon --></span>
+</button>
+
+<!-- Combined with secondary -->
+<button class="fab small secondary" aria-label="Delete">
+  <span class="cn-icon"><!-- icon --></span>
+</button>
+```
+
+## Accessibility
+
+- Provide an accessible name for icon-only FABs via `aria-label`, `aria-labelledby`, or a visually-hidden `<span>`.
+- Ensure the FAB meets minimum touch-target size recommendations (the default `--cn-fab-size` is 56 px / 7 grid units).
+- For anchor FABs, preserve `href`, `target`, and `rel` to maintain link semantics and security.
+
+## Guidelines
+
+- Reserve FABs for the most important or most frequent action in a given context.
+- Avoid placing multiple competing FABs in the same view.
+- Prefer icon-only FABs on compact screens; always include an accessible name.
+- Use `.cta` sparingly — it signals the single primary action on the screen.
+
+## Tokens
+
+| Token | Role |
+|-------|------|
+| `--cn-fab-size` | FAB diameter (7 × `--cn-grid`, 56 px) |
+| `--cn-fab` | Default gradient start stop (FAB-specific neon accent) |
+| `--cn-surface` | Default gradient blend target |
+| `--cn-on-fab` | Default foreground |
+| `--cn-fab-cta` | CTA gradient start stop (hot-pink accent) |
+| `--cn-fab-cta-blend` | CTA gradient end stop |
+| `--cn-on-fab-cta` | CTA foreground |
+| `--cn-fab-secondary` | Secondary gradient start stop (dark blue) |
+| `--cn-fab-secondary-blend` | Secondary gradient end stop (blue) |
+| `--cn-on-fab-secondary` | Secondary foreground |
+| `--cn-on-surface` | Secondary gradient blend target |
+| `--cn-shadow-elevation-1` | Resting elevation |
+| `--cn-shadow-elevation-2` | Active (pressed) elevation |
+| `--cn-shadow-elevation-4` | Hover elevation |
+| `--cn-border-radius-large` | Corner radius (makes the square bounding box circular) |
+| `--cn-button-size` | `.small` variant dimensions |

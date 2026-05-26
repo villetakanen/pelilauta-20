@@ -1,3 +1,4 @@
+import { getAccount } from "@pelilauta/auth/server";
 import type { APIRoute } from "astro";
 import { resolveSessionFromCookie } from "../../../utils/resolveSession";
 
@@ -11,7 +12,18 @@ export const GET: APIRoute = async ({ cookies }) => {
     cookies.get("session")?.value,
     "api/auth/status",
   );
-  return new Response(JSON.stringify({ loggedIn: uid !== null, uid, claims }), {
+
+  if (uid === null) {
+    return new Response(JSON.stringify({ loggedIn: false, uid: null, claims: null }), {
+      status: 200,
+      headers: JSON_NO_STORE,
+    });
+  }
+
+  const account = await getAccount(uid);
+  const frozen = account?.frozen ?? false;
+
+  return new Response(JSON.stringify({ loggedIn: true, uid, claims, frozen }), {
     status: 200,
     headers: JSON_NO_STORE,
   });

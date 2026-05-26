@@ -36,13 +36,22 @@ async function reconcile() {
     const resp = await fetch("/api/auth/status", { cache: "no-store" });
     if (!resp.ok) throw new Error(`Status oracle returned ${resp.status}`);
 
-    const { loggedIn, uid: serverUid } = await resp.json();
+    const { loggedIn, uid: serverUid, frozen } = await resp.json();
 
     if (!loggedIn || serverUid !== ssrUid) {
       // Server no longer recognizes this session.
       await fullLogout();
       return;
     }
+
+    // Server says we are good — propagate frozen status to the profile store.
+    // Read the live atom value to avoid stale closure of ssrProfile.
+    const currentProfile = profile.get() ?? ssrProfile;
+    profile.set({
+      nick: currentProfile?.nick ?? "User",
+      avatarURL: currentProfile?.avatarURL,
+      frozen: frozen ?? false,
+    });
 
     // Server says we are good, but client is missing the user.
     // Force a token refresh to try and wake up the client SDK.

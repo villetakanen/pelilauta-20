@@ -8,6 +8,9 @@ export const fi: NestedTranslation = {
   action: {
     showMore: "Näytä lisää",
   },
+  fab: {
+    "create-thread": "Uusi keskustelu",
+  },
   tag: {
     synonymsLabel: "Synonyymit ({count}):",
   },
@@ -38,6 +41,9 @@ export const fi: NestedTranslation = {
 export const en: NestedTranslation = {
   action: {
     showMore: "Show more",
+  },
+  fab: {
+    "create-thread": "New conversation",
   },
   tag: {
     synonymsLabel: "Synonyms ({count}):",

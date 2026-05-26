@@ -1,3 +1,4 @@
+import * as authServer from "@pelilauta/auth/server";
 import * as firebaseServer from "@pelilauta/firebase/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { cookiesWithValue, makeApiContext } from "./_testContext";
@@ -9,6 +10,10 @@ vi.mock("@pelilauta/firebase/server", () => ({
     const { admin } = c;
     return { admin };
   }),
+}));
+
+vi.mock("@pelilauta/auth/server", () => ({
+  getAccount: vi.fn(),
 }));
 
 afterEach(() => {
@@ -25,13 +30,66 @@ describe("/api/auth/status", () => {
       iat: 123,
     } as never);
 
+    vi.mocked(authServer.getAccount).mockResolvedValue({ frozen: false });
+
     const response = await GET(ctx);
     const body = await response.json();
 
     expect(firebaseServer.verifySessionCookie).toHaveBeenCalledWith("valid-cookie", true);
     expect(response.status).toBe(200);
     expect(response.headers.get("cache-control")).toBe("no-store");
-    expect(body).toEqual({ loggedIn: true, uid: "oracle-123", claims: { admin: true } });
+    expect(body).toEqual({
+      loggedIn: true,
+      uid: "oracle-123",
+      claims: { admin: true },
+      frozen: false,
+    });
+  });
+
+  it("Scenario: Status oracle returns frozen=true when getAccount returns { frozen: true }", async () => {
+    // Verifies: specs/pelilauta/session/frozen.md §Status oracle returns frozen status for standard users
+    const { ctx } = makeApiContext({ cookies: cookiesWithValue("frozen-cookie") });
+
+    vi.mocked(firebaseServer.verifySessionCookie).mockResolvedValue({
+      uid: "frozen-uid",
+      iat: 123,
+    } as never);
+
+    vi.mocked(authServer.getAccount).mockResolvedValue({ frozen: true });
+
+    const response = await GET(ctx);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      loggedIn: true,
+      uid: "frozen-uid",
+      claims: { admin: undefined },
+      frozen: true,
+    });
+  });
+
+  it("Scenario: Status oracle returns frozen=false when getAccount returns null (missing doc)", async () => {
+    // Verifies: specs/pelilauta/session/frozen.md §Status oracle returns frozen=false when account document is missing
+    const { ctx } = makeApiContext({ cookies: cookiesWithValue("no-account-cookie") });
+
+    vi.mocked(firebaseServer.verifySessionCookie).mockResolvedValue({
+      uid: "no-account-uid",
+      iat: 123,
+    } as never);
+
+    vi.mocked(authServer.getAccount).mockResolvedValue(null);
+
+    const response = await GET(ctx);
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body).toEqual({
+      loggedIn: true,
+      uid: "no-account-uid",
+      claims: { admin: undefined },
+      frozen: false,
+    });
   });
 
   it("Scenario: Status oracle reports loggedIn=false for a missing cookie", async () => {

@@ -91,6 +91,27 @@ describe("AuthHandler.svelte", () => {
     expect(window.location.reload).not.toHaveBeenCalled();
   });
 
+  it("Scenario: AuthHandler propagates frozen=true to the profile store after reconciliation", async () => {
+    // Verifies: specs/pelilauta/session/frozen.md §Client session store reflects frozen status after status check
+    const mockUser = { getIdToken: vi.fn().mockResolvedValue("new-token") } as unknown as User;
+    mockAuth = mockAuthFixture({ currentUser: mockUser });
+    vi.mocked(firebaseClient.getAuth).mockReturnValue(mockAuth);
+
+    vi.mocked(fetch as Mock).mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ loggedIn: true, uid: ssrUid, frozen: true }),
+    });
+
+    render(AuthHandler, { ssrUid, ssrProfile });
+
+    authStateCallback(null);
+
+    await waitFor(() => {
+      const currentProfile = profile.get();
+      expect(currentProfile?.frozen).toBe(true);
+    });
+  });
+
   it("Scenario: AuthHandler logs out when the server oracle reports loggedIn=false", async () => {
     vi.mocked(fetch as Mock).mockImplementation((url) => {
       if (url === "/api/auth/status") {

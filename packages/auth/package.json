@@ -13,7 +13,8 @@
   "dependencies": {
     "@pelilauta/cyan": "workspace:*",
     "@pelilauta/firebase": "workspace:*",
-    "@pelilauta/utils": "workspace:*"
+    "@pelilauta/utils": "workspace:*",
+    "zod": "^3.24.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.1.1",

@@ -3,7 +3,7 @@ import ProfileButton from "@cyan/components/ProfileButton.svelte";
 import CyanPage from "@cyan/layouts/Page.astro";
 import brandImage from "@myrrys/proprietary/juno-viinikka/juno-viinikka-dragon-1.jpg";
 import { AuthChrome, AuthHandler } from "@pelilauta/auth/components";
-import { projectProfileFromClaims } from "@pelilauta/auth/server";
+import { getAccount, projectProfileFromClaims } from "@pelilauta/auth/server";
 import AppFooter from "../components/footer/AppFooter.astro";
 
 interface Props {
@@ -34,12 +34,22 @@ const {
 
 // Synthesize a profile projection when the SSR identity is resolved; see
 // specs/pelilauta/session/spec.md §Data models.
-const profile = uid && claims ? projectProfileFromClaims(claims) : null;
+// Frozen status is resolved server-side to avoid flash and ensure fail-safe
+// visibility: FABs remain hidden until frozen is authoritatively confirmed.
+// specs/pelilauta/session/frozen.md §Fail-Safe Visibility
+const profile =
+  uid && claims
+    ? {
+        ...projectProfileFromClaims(claims),
+        frozen: (await getAccount(uid))?.frozen ?? false,
+      }
+    : null;
 ---
 
 <CyanPage defaultImage={defaultImage} siteName={siteName} {...rest}>
   <slot name="app-background-poster" slot="app-background-poster" />
   <slot name="tray" slot="tray" />
+  <slot name="fab-tray" slot="fab-tray" />
   <Fragment slot="footer-body">
     <slot name="footer-body">
       <AppFooter />

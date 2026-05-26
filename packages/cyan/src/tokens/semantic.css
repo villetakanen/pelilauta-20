@@ -29,10 +29,34 @@
   /* Buttons & Interactive */
   --cn-button: light-dark(var(--chroma-surface-50), var(--chroma-surface-40));
   --cn-button-light: light-dark(var(--chroma-primary-50), var(--chroma-primary-50));
-  --cn-button-accent: light-dark(var(--chroma-primary-20), var(--chroma-primary-70));
   --cn-button-cta: light-dark(var(--chroma-error-40), var(--chroma-error-40));
   --cn-on-button: light-dark(var(--chroma-surface-100), var(--chroma-surface-100));
   --cn-on-button-cta: light-dark(var(--chroma-surface-100), var(--chroma-surface-100));
+
+  /* FAB — distinct accent surface, separate from regular --cn-button*.
+   * Matches cyan-4's FAB visual identity within v20's OKLCH ramp:
+   *   light: bright lime/chartreuse (cyan-4 used hsl(65, 100%, 63%))
+   *   dark:  muted mid forest-green (cyan-4 used hsl(134, 44%, 44%))
+   * Foreground stays light-dark(black, white) per cyan-4.
+   *
+   * --cn-fab-blend is the gradient end-stop the FAB mixes toward — a
+   * deliberately chromatic surface stop (not --cn-surface, which is too
+   * neutral) so the gradient fades from green toward the cyan-4 signature
+   * green-grey-blue rather than washing out to white/black. */
+  --cn-fab: light-dark(var(--chroma-primary-70), var(--chroma-primary-70));
+  --cn-fab-blend: light-dark(var(--chroma-surface-50), var(--chroma-surface-50));
+  --cn-on-fab: white;
+  /* CTA FAB — error/hot-pink start, blends toward the same cool surface stop
+   * as the primary FAB so both variants share the cyan-4 "fade-to-blue" signature. */
+  --cn-fab-cta: light-dark(var(--chroma-error-60), var(--chroma-error-60));
+  --cn-fab-cta-blend: light-dark(var(--chroma-surface-50), var(--chroma-surface-50));
+  --cn-on-fab-cta: white;
+  /* Secondary FAB — recessive dark-blue to blue gradient using only the
+   * chroma-surface ramp (hue 242). Same flat (no light-dark variance) shape
+   * as the primary and CTA FAB tokens. */
+  --cn-fab-secondary: light-dark(var(--chroma-surface-30), var(--chroma-surface-30));
+  --cn-fab-secondary-blend: light-dark(var(--chroma-surface-60), var(--chroma-surface-60));
+  --cn-on-fab-secondary: white;
   --cn-hover: light-dark(
     color-mix(in oklch, var(--chroma-surface-50), transparent 90%),
     color-mix(in oklch, var(--chroma-surface-50), transparent 80%)
