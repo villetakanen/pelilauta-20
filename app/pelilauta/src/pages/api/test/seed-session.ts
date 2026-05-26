@@ -4,7 +4,7 @@
 // Triple-layer defense ensures this route is inert in production.
 // See specs/pelilauta/session/spec.md §Test-only seed route.
 
-import { createSessionCookie, getAuth } from "@pelilauta/firebase/server";
+import { createSessionCookie, getAuth, getDb } from "@pelilauta/firebase/server";
 import type { APIRoute } from "astro";
 
 const FIVE_DAYS_MS = 5 * 24 * 60 * 60 * 1000;
@@ -24,10 +24,12 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   let uid: unknown;
   let claims: unknown;
+  let frozen: unknown;
   try {
     const body = await request.json();
     uid = body.uid;
     claims = body.claims;
+    frozen = body.frozen;
   } catch (e) {
     console.debug("[api/test/seed-session] POST - invalid JSON", e);
     return new Response("Invalid JSON", { status: 400 });
@@ -35,6 +37,10 @@ export const POST: APIRoute = async ({ request, cookies }) => {
 
   if (typeof uid !== "string" || !uid) {
     return new Response("Missing uid", { status: 400 });
+  }
+
+  if (frozen !== undefined && typeof frozen !== "boolean") {
+    return new Response("Invalid frozen", { status: 400 });
   }
 
   // Step 1: mint a custom token via admin SDK.
@@ -66,6 +72,16 @@ export const POST: APIRoute = async ({ request, cookies }) => {
     return new Response("Custom token exchange failed", { status: 502 });
   }
   const { idToken } = await exchangeRes.json();
+
+  // Optional fixture hook: seed account/{uid}.frozen for frozen-user E2E paths.
+  if (typeof frozen === "boolean") {
+    try {
+      await getDb().collection("account").doc(uid).set({ frozen }, { merge: true });
+    } catch (e) {
+      console.error("[api/test/seed-session] account seed failed", e);
+      return new Response("Account seed failed", { status: 500 });
+    }
+  }
 
   // Step 3: create session cookie via admin SDK — same function the production
   // route uses. Cookie attrs must exactly match /api/auth/session.ts.

@@ -99,8 +99,8 @@ test.describe("Front Page", () => {
 
     // Find rendered SyndicatePost sections inside the SyndicateStream subtree.
     // SyndicatePost renders as <section> with a <p class="text-caption"> attribution.
-    const triad = page.locator("section.cn-content-triad").first();
-    const attributionCaptions = triad.locator("p.text-caption");
+    const syndicateRegion = syndicateHeading.locator("xpath=ancestor::div[1]");
+    const attributionCaptions = syndicateRegion.locator("p.text-caption");
     const captionCount = await attributionCaptions.count();
 
     if (captionCount > 0) {
@@ -112,7 +112,7 @@ test.describe("Front Page", () => {
       expect(href).toBeTruthy();
 
       // G1: the post title is rendered as an h3 with an anchor (post.link)
-      const postSections = triad.locator("section");
+      const postSections = syndicateRegion.locator("section");
       const firstSection = postSections.first();
       const titleLink = firstSection.locator("h3 a");
       await expect(titleLink).toBeVisible();
@@ -129,7 +129,7 @@ test.describe("Front Page", () => {
 
     if (captionCount > 1) {
       // G2: for N items there should be N-1 <hr> elements separating them
-      const hrs = triad.locator("hr");
+      const hrs = syndicateRegion.locator("hr");
       const hrCount = await hrs.count();
       expect(hrCount).toBe(captionCount - 1);
     }

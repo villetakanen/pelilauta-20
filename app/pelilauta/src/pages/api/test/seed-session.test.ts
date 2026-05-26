@@ -6,6 +6,7 @@ import { POST } from "./seed-session";
 vi.mock("@pelilauta/firebase/server", () => ({
   createSessionCookie: vi.fn(),
   getAuth: vi.fn(),
+  getDb: vi.fn(),
 }));
 
 afterEach(() => {
@@ -126,6 +127,59 @@ describe("/api/test/seed-session", () => {
           maxAge: FIVE_DAYS_MS / 1000,
         }),
       );
+    });
+
+    it("seeds account frozen=true when frozen is provided", async () => {
+      const set = vi.fn();
+      const accountSet = vi.fn().mockResolvedValue(undefined);
+      const { ctx } = makeApiContext({
+        cookies: { set },
+        body: { uid: "frozen-e2e-user", claims: { nick: "FrozenUser" }, frozen: true },
+        headers: { "x-e2e-seed-secret": "correct-secret" },
+      });
+
+      const mockAdminAuth = {
+        createCustomToken: vi.fn().mockResolvedValue("mock-custom-token"),
+      };
+      vi.mocked(firebaseServer.getAuth).mockReturnValue(mockAdminAuth as never);
+      vi.mocked(firebaseServer.getDb).mockReturnValue({
+        collection: vi.fn().mockReturnValue({
+          doc: vi.fn().mockReturnValue({
+            set: accountSet,
+          }),
+        }),
+      } as never);
+
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockResolvedValue({
+          ok: true,
+          json: vi.fn().mockResolvedValue({ idToken: "mock-id-token" }),
+        }),
+      );
+
+      vi.mocked(firebaseServer.createSessionCookie).mockResolvedValue("mock-session-cookie");
+
+      const response = await POST(ctx);
+
+      expect(response.status).toBe(200);
+      expect(accountSet).toHaveBeenCalledWith({ frozen: true }, { merge: true });
+    });
+
+    it("returns 400 when frozen is not boolean", async () => {
+      const set = vi.fn();
+      const { ctx } = makeApiContext({
+        cookies: { set },
+        body: { uid: "e2e-test-user-1", frozen: "yes" },
+        headers: { "x-e2e-seed-secret": "correct-secret" },
+      });
+
+      const response = await POST(ctx);
+
+      expect(response.status).toBe(400);
+      expect(await response.text()).toBe("Invalid frozen");
+      expect(firebaseServer.getAuth).not.toHaveBeenCalled();
+      expect(set).not.toHaveBeenCalled();
     });
   });
 });
