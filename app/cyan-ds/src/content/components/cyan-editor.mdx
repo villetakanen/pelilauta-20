@@ -1,0 +1,111 @@
+---
+title: CyanEditor (cyan-editor)
+description: Markdown editor primitive — framework-agnostic factory over CodeMirror 6.
+order: 20
+status: draft
+---
+import CyanEditorDemo from "../../components/CyanEditorDemo.svelte";
+
+The `cyan-editor` package provides a markdown text editor primitive built on
+CodeMirror 6. It ships as a **framework-agnostic factory** — no custom element,
+no Lit, no framework runtime. Svelte islands and Astro demos wrap it in their
+own lifecycle.
+
+It lives in its own workspace package (`@pelilauta/cyan-editor`) rather than
+inside `@pelilauta/cyan` so the base DS bundle stays free of CodeMirror,
+DOMPurify, and Turndown weight.
+
+## Basic usage (Svelte)
+
+For Svelte hosts, import the `<CnEditor>` wrapper — it handles the mount /
+destroy lifecycle and two-way value binding. The wrapper is a thin host
+around the same factory under the hood.
+
+```svelte
+<script lang="ts">
+  import CnEditor from "@pelilauta/cyan-editor/svelte";
+  let body = $state("# Hello");
+</script>
+
+<CnEditor bind:value={body} placeholder="Write markdown..." />
+```
+
+## Factory usage (framework-agnostic)
+
+For Astro pages, MDX demos, or any non-Svelte host, use the factory directly.
+This is what `<CnEditor>` wraps.
+
+```ts
+import { createCnEditor } from "@pelilauta/cyan-editor";
+
+const handle = createCnEditor(targetEl, {
+  value: "# Hello",
+  placeholder: "Write markdown...",
+  onChange: (next) => console.log(next),
+});
+
+// Later
+handle.destroy();
+```
+
+<CyanEditorDemo
+  client:only="svelte"
+  label="Basic"
+  value={"# Hello\n\nThis is **cyan-editor** rendering live markdown.\n\n- list item\n- *emphasis*\n- `monospace`"}
+/>
+
+## With placeholder, gutter, and state toggles
+
+<CyanEditorDemo
+  client:only="svelte"
+  label="Interactive"
+  placeholder="Try pasting some HTML in here..."
+  gutter
+  showStateToggles
+/>
+
+## Options
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `value` | `string` | `''` | Initial document. |
+| `placeholder` | `string` | `''` | Empty-state hint. |
+| `disabled` | `boolean` | `false` | Read-only mode. |
+| `gutter` | `boolean` | `false` | Show the line-number gutter. |
+| `dark` | `boolean` | _auto_ | Force dark/light theme. Auto-detected from `color-scheme` if omitted. |
+| `onChange` | `(value) => void` | — | Fires on every doc change. |
+| `onBlur` | `(value) => void` | — | Fires when value changed during focus session. |
+
+## Handle
+
+`createCnEditor(target, options)` returns a `CnEditorHandle`:
+
+| Member | Description |
+|---|---|
+| `view` | Underlying `EditorView` (escape hatch). |
+| `getValue()` | Returns the current document text. |
+| `setValue(next)` | No-op if equal; otherwise replaces the document. |
+| `setPlaceholder(next)` | Reconfigures the placeholder compartment. |
+| `setDisabled(next)` | Reconfigures the read-only compartment. |
+| `setGutter(next)` | Reconfigures the line-number gutter compartment. |
+| `focus()` / `select()` / `insertText(text)` | Editor commands. |
+| `destroy()` | Disposes the view and detaches listeners. Idempotent — safe to call multiple times. |
+
+## Paste behaviour
+
+HTML pastes are sanitised with DOMPurify and converted to markdown via Turndown
+(GFM enabled). Plaintext pastes pass through verbatim. Try copying styled
+content from another page into the interactive demo above.
+
+## SSR contract
+
+The package is import-safe in SSR: no `document`, `window`, or `navigator`
+reads at module load. The factory itself requires a browser context and is
+expected to be called inside `onMount` / `client:only` islands. Anonymous SSR
+surfaces never include the editor bundle.
+
+## Out of scope (for now)
+
+- A `<cn-editor>` custom element wrapping the factory.
+- Live markdown rendering (inline decorations).
+- Toolbars and formatting buttons — compose your own around `handle.insertText()`.

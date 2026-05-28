@@ -1,0 +1,28 @@
+/*
+ * Host styles for cyan-editor mount targets.
+ * Apply class .cn-editor-host to the element passed to createCnEditor().
+ * The factory mirrors the disabled option to aria-disabled on the host so
+ * pure-CSS state hooks (and assistive tech) stay in sync.
+ */
+
+.cn-editor-host {
+  display: block;
+  width: 100%;
+  min-height: calc(8 * var(--cn-line, 1.5rem));
+  position: relative;
+  isolation: isolate;
+}
+
+.cn-editor-host .cm-editor {
+  height: 100%;
+}
+
+.cn-editor-host[aria-disabled="true"] .cm-editor {
+  background: var(--cn-input-disabled);
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.cn-editor-host[aria-disabled="true"] .cm-content {
+  pointer-events: none;
+}
