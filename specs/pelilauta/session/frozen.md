@@ -80,3 +80,13 @@ When the page is rendered
 Then the fab-tray contains a server-rendered <a href="/login?next=/create/thread"> link
 And the FrontpageFabs Svelte island is not present in the SSR output
 ```
+
+#### Scenario: Frozen users are blocked by server-side thread-write endpoints
+```gherkin
+Given a POST to "/api/threads" with a valid Bearer token for a user whose account/{uid}.frozen is true
+When the route handler runs
+Then the response status is 403
+And no thread write is performed
+```
+
+- **Vitest Unit Test:** `app/pelilauta/src/pages/api/threads.test.ts`
