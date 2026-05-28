@@ -1,7 +1,7 @@
 ---
 feature: CyanEditor
-status: draft
-maturity: design
+status: alpha
+maturity: implementation
 last_major_review: 2026-05-26
 parent_spec: specs/cyan-ds/spec.md
 ---
@@ -22,7 +22,8 @@ The cyan design system needs a markdown text editor primitive for authenticated 
   - `src/cnPasteHandler.ts` — paste extension: DOMPurify → Turndown (GFM) on `text/html`, plaintext fallback.
   - `src/cnEditorConfig.ts` — `createEditorState` assembling keymaps, history, markdown lang, gutter compartment, placeholder compartment, readOnly compartment.
   - `src/styles.css` — base CSS layer scoped to a host class (`.cn-editor`), exposing `--cn-editor-*` instance tokens.
-  - `src/index.ts` — barrel exporting `createCnEditor`, `cnEditorTheme`, `cnMarkdownHighlightStyle`, `pasteHtmlAsMarkdown`, `CnEditorOptions`, `CnEditorHandle`.
+  - `src/index.ts` — barrel exporting exactly: `createCnEditor`, `buildEditorTheme`, `cnMarkdownHighlightStyle`, `pasteHtmlAsMarkdown`, and the types `CnEditorOptions`, `CnEditorHandle`. The theme is exported as a `buildEditorTheme(isDark)` factory (not a static `cnEditorTheme` value) so module evaluation stays free of DOM reads — see Constraints. State-assembly internals (`createEditorState`, its arg/callback types) are **not** part of the public surface.
+  - `src/CnEditor.svelte` — Svelte 5 host wrapping `createCnEditor`. Owns mount / `onDestroy` and reactively syncs `value` (via `$bindable`), `placeholder`, `disabled`, and `gutter` to the factory's setters. Exposed via the package's `./svelte` subpath export so non-Svelte consumers don't pull Svelte into their bundle. The wrapper adds no behavior of its own — it exists only to absorb the per-host mount boilerplate.
 
   Reverse-spec source pointer (migration reference only): upstream `villetakanen/cn-editor@v2.0.0-beta.3`.
 
@@ -32,6 +33,7 @@ The cyan design system needs a markdown text editor primitive for authenticated 
     - `placeholder?: string` — empty-state hint.
     - `disabled?: boolean` — read-only mode (default `false`).
     - `gutter?: boolean` — show line-number gutter (default `false`).
+    - `dark?: boolean` — force the dark/light theme variant. When omitted, the factory resolves it once at construction from the target's computed `color-scheme` (falling back to `prefers-color-scheme`). An explicit value takes precedence over the computed style. Resolved once at construction; not reactive to later theme changes.
     - `onChange?: (value: string) => void` — fires on every doc change.
     - `onBlur?: (value: string) => void` — fires only when value changed since focus.
   - `CnEditorHandle`:
@@ -49,7 +51,9 @@ The cyan design system needs a markdown text editor primitive for authenticated 
 - **API Contracts:**
   - `createCnEditor(target: HTMLElement, options?: CnEditorOptions): CnEditorHandle`.
   - The factory **does not** register any custom element and **does not** read from `document` / `window` at module load.
+  - The factory mirrors the `disabled` option to `aria-disabled` on the host element, so disabled visual state can be expressed in pure CSS (`.cn-editor-host[aria-disabled="true"]`) and is correctly surfaced to assistive technology.
   - Theme module is side-effect-free at import time. Dark-mode detection is resolved at editor construction via the `target`'s computed style or an explicit option, not via `document.body.classList`.
+  - Theme rules reference only the canonical cyan token namespace: `--cn-input` / `--cn-on-input` / `--cn-input-hover` / `--cn-input-focus` / `--cn-input-disabled` for the field background, `--cn-border` family for borders, `--cn-text*` family for content colour, `--cn-font-*` family for typography, `--cn-selection` for selection. The editor renders as a cyan input field, not a generic textarea.
 
 - **Dependencies:**
   - Runtime: `codemirror`, `@codemirror/state`, `@codemirror/view`, `@codemirror/commands`, `@codemirror/language`, `@codemirror/language-data`, `@codemirror/lang-markdown`, `@lezer/highlight`, `dompurify`, `turndown`, `turndown-plugin-gfm`.
@@ -87,16 +91,16 @@ The cyan design system needs a markdown text editor primitive for authenticated 
 
 ### Definition of Done
 
-- [ ] `packages/cyan-editor/` exists as a pnpm workspace package with `workspace:*` consumers wired (initial consumer: `app/cyan-ds` book page only).
-- [ ] `createCnEditor(target, options)` returns a working `CnEditorHandle` that mounts a CodeMirror 6 instance with markdown language, history, line wrapping, multi-selection, active line + gutter highlights.
-- [ ] `setValue`, `setPlaceholder`, `setDisabled`, `setGutter` reconfigure the running editor via CodeMirror compartments without rebuilding state.
-- [ ] `destroy()` disposes the `EditorView` and removes all listeners; calling other handle methods after destroy is a no-op (does not throw).
-- [ ] HTML paste is converted to markdown via DOMPurify-sanitized Turndown (GFM enabled); plaintext paste passes through unchanged.
-- [ ] All theme rules use `--cn-*` tokens only. No `--color-*`, no `--chroma-*`, no `--background-editor` references remain.
-- [ ] No module under `packages/cyan-editor/src/` reads `document`, `window`, or `navigator` at top level. Import-time evaluation succeeds in a Node SSR context.
-- [ ] No `lit`, `@customElement`, or `customElements.define` occurs anywhere in the package source.
-- [ ] Book page at `app/cyan-ds/src/content/components/cyan-editor.mdx` renders all demos and option/handle tables.
-- [ ] `pnpm verify` is clean across `packages/cyan-editor/`, `packages/cyan/`, and `app/cyan-ds/`.
+- [x] `packages/cyan-editor/` exists as a pnpm workspace package with `workspace:*` consumers wired (initial consumer: `app/cyan-ds` book page only).
+- [x] `createCnEditor(target, options)` returns a working `CnEditorHandle` that mounts a CodeMirror 6 instance with markdown language, history, line wrapping, multi-selection, active line + gutter highlights.
+- [x] `setValue`, `setPlaceholder`, `setDisabled`, `setGutter` reconfigure the running editor via CodeMirror compartments without rebuilding state.
+- [x] `destroy()` disposes the `EditorView` and removes all listeners; calling other handle methods after destroy is a no-op (does not throw).
+- [x] HTML paste is converted to markdown via DOMPurify-sanitized Turndown (GFM enabled); plaintext paste passes through unchanged.
+- [x] All theme rules use `--cn-*` tokens only. No `--color-*`, no `--chroma-*`, no `--background-editor` references remain.
+- [x] No module under `packages/cyan-editor/src/` reads `document`, `window`, or `navigator` at top level. Import-time evaluation succeeds in a Node SSR context.
+- [x] No `lit`, `@customElement`, or `customElements.define` occurs anywhere in the package source.
+- [x] Book page at `app/cyan-ds/src/content/components/cyan-editor.mdx` renders all demos and option/handle tables.
+- [x] `pnpm verify` is clean across `packages/cyan-editor/`, `packages/cyan/`, and `app/cyan-ds/`.
 
 ### Regression Guardrails
 
@@ -176,6 +180,15 @@ Given a mounted editor with gutter: false
 When handle.setGutter(true) is called
 Then the editor DOM contains a .cm-gutters element
 And handle.setGutter(false) removes it
+```
+
+#### Scenario: Explicit dark option overrides computed colour scheme
+
+```gherkin
+Given a target element whose computed color-scheme is light
+When createCnEditor(target, { dark: true }) is called
+Then the editor renders with its dark theme variant
+And omitting the dark option falls back to the target's computed color-scheme
 ```
 
 #### Scenario: Module import is SSR-safe

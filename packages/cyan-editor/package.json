@@ -1,0 +1,33 @@
+{
+  "name": "@pelilauta/cyan-editor",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./svelte": "./src/CnEditor.svelte",
+    "./styles.css": "./src/styles.css"
+  },
+  "scripts": {
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@codemirror/commands": "^6.8.1",
+    "@codemirror/lang-markdown": "^6.3.2",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/language-data": "^6.5.1",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/view": "^6.36.8",
+    "@lezer/highlight": "^1.2.1",
+    "codemirror": "^6.0.1",
+    "dompurify": "^3.2.5",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/dompurify": "^3.2.0",
+    "@types/turndown": "^5.0.5",
+    "jsdom": "^29.0.1",
+    "svelte": "^5.55.3",
+    "vitest": "^3.2.4"
+  }
+}
