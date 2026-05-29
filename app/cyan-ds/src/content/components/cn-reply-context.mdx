@@ -1,0 +1,70 @@
+---
+title: CnReplyContext
+description: Visual banner overlay shown above a reply input, indicating that the current reply is directed at a specific post or user.
+status: draft
+---
+
+import CnReplyContext from "@cyan/components/CnReplyContext.svelte";
+import CnReplyContextDemo from "../../components/CnReplyContextDemo.svelte";
+
+`CnReplyContext` is a contextual banner that overlays the reply input area, indicating which post or user the current reply is directed at. It displays an avatar, the target username prefixed with `@`, a truncated text snippet, and a dismiss button.
+
+## With Avatar and Text
+
+<div style="padding: var(--cn-gap); background: var(--cn-surface); border-radius: var(--cn-border-radius-medium);">
+  <CnReplyContext
+    user="tapa"
+    text="Let's start the game already, we've been waiting for ages!"
+    avatarUrl="https://picsum.photos/seed/tapa/40/40"
+  />
+</div>
+
+## Without Avatar URL (initials fallback)
+
+When no `avatarUrl` is supplied, `CnAvatar` is still rendered — it derives initials from the `user` prop and displays them as a placeholder.
+
+<div style="padding: var(--cn-gap); background: var(--cn-surface); border-radius: var(--cn-border-radius-medium);">
+  <CnReplyContext
+    user="merlin"
+    text="The dragon appeared at dawn. Nobody expected it to be friendly."
+  />
+</div>
+
+## Long Snippet — Truncation
+
+Long text snippets are clamped to a single line with ellipsis (`text-overflow: ellipsis`). The banner height never grows.
+
+<div style="padding: var(--cn-gap); background: var(--cn-surface); border-radius: var(--cn-border-radius-medium);">
+  <CnReplyContext
+    user="storyteller"
+    text="This is an extremely long passage of text that goes on and on far beyond the width of any reasonable container, demonstrating that the snippet area is clamped to a single line and the overflow is handled gracefully with an ellipsis at the end so the layout remains compact and predictable."
+  />
+</div>
+
+## Interactive — Dismiss
+
+Click the × button to dismiss the reply context. The component dispatches `ondismiss` and the parent is responsible for removing it from the DOM.
+
+<CnReplyContextDemo client:only="svelte" user="tapa" text="Let's start the game already!" avatarUrl="https://picsum.photos/seed/tapa/40/40" />
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `user` | `string` | — | Username of the person being replied to. Rendered as `@user`. |
+| `avatarUrl` | `string` | — | Optional URL for the target user's avatar. |
+| `text` | `string` | — | Text snippet of the message being replied to. Truncated with ellipsis if too long. |
+| `ondismiss` | `() => void` | — | Called when the dismiss button is clicked. Parent is responsible for clearing the context. |
+
+## CSS Tokens
+
+| Token | Description |
+|---|---|
+| `--cn-reply-context-bg` | Banner background |
+| `--cn-reply-context-text` | Banner text and icon colour |
+| `--cn-grid` | Inner padding unit |
+| `--cn-gap` | Spacing between elements |
+| `--cn-border-radius-medium` | Banner corner radius |
+| `--cn-border-radius-small` | Dismiss button corner radius |
+| `--cn-hover` | Dismiss button hover overlay |
+| `--cn-focus-ring` | Dismiss button focus ring colour |
