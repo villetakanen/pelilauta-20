@@ -22,10 +22,10 @@ A visual banner that overlays the reply input, indicating that the current reply
   - `user: string` — username of the person being replied to.
   - `avatarUrl?: string` — optional URL to the target user's avatar.
   - `text: string` — snippet of the text being replied to.
-- **Events:**
-  - `dismiss` — dispatched when the user clicks the close/dismiss button.
+- **Callbacks:**
+  - `ondismiss?: () => void` — called when the user clicks the close/dismiss button.
 - **Dependencies:**
-  - Components: `CnAvatar` (used internally to render the user avatar if `avatarUrl` is provided).
+  - Components: `CnAvatar` (always rendered; falls back to initials derived from `user` when no `avatarUrl` is supplied).
   - Tokens: `--cn-reply-context-bg`, `--cn-reply-context-text`, `--cn-grid`, `--cn-gap`.
 
 ### Book Page
@@ -33,7 +33,7 @@ A visual banner that overlays the reply input, indicating that the current reply
 - **Target path:** `app/cyan-ds/src/content/components/cn-reply-context.mdx`
 - **Structure:**
   - Context banner with avatar and text snippet.
-  - Context banner with no avatar (text only).
+  - Context banner without an `avatarUrl` (CnAvatar falls back to initials derived from `user`).
   - Simulating dismissal action with a toast readout.
 
 ## Contract
@@ -45,12 +45,12 @@ A visual banner that overlays the reply input, indicating that the current reply
 - [x] Renders the username prefixed with `@` (e.g. `@tapa`).
 - [x] Truncates the `text` snippet to a single line with ellipsis when it exceeds the container bounds.
 - [x] Provides a clear interactive dismiss button (close icon) on the right side.
-- [x] Dispatches a custom `dismiss` event upon clicking the close button.
+- [x] Invokes the `ondismiss` callback prop upon clicking the close button.
 
 ### Regression Guardrails
 
 - **Content truncation is required.** Long text snippets must never wrap or expand the height of the banner; they must use `text-overflow: ellipsis; overflow: hidden; white-space: nowrap;`.
-- **Stateless design.** The component must not mutate any parent state or clear itself from the DOM; it dispatches `dismiss` and relies on the parent consumer to reactively unmount or clear the props.
+- **Stateless design.** The component must not mutate any parent state or clear itself from the DOM; it calls `ondismiss` and relies on the parent consumer to reactively unmount or clear the props.
 
 ### Testing Scenarios
 
@@ -74,5 +74,5 @@ Then the internal CnAvatar is instantiated with the avatarUrl prop
 ```gherkin
 Given a rendered CnReplyContext
 When the close button is clicked
-Then a "dismiss" event is dispatched to the parent component
+Then the `ondismiss` callback prop is invoked
 ```

@@ -2,8 +2,8 @@
 feature: CnChatBar
 parent_spec: ../spec.md
 stylebook_url: /components/cn-chat-bar
-status: draft
-maturity: design
+status: alpha
+maturity: implementation
 last_major_review: 2026-05-28
 ---
 
@@ -22,6 +22,8 @@ The primary user entry point for thread replies. Designed to resemble modern cha
   - `value: string` — two-way bound string representing the input content.
   - `placeholder?: string` — prompt hint.
   - `disabled?: boolean` — disables inputs and buttons.
+- **Callbacks:**
+  - `onsend?: (value: string) => void` — called when the user submits via the Enter key (non-empty value).
 - **Slots:**
   - `start` — contains leading actions (e.g., attach button).
   - `end` — contains trailing actions (e.g., send button, format button).
@@ -32,7 +34,7 @@ The primary user entry point for thread replies. Designed to resemble modern cha
     - **Desktop:** Expands up to a maximum of 4 lines (scrolls beyond that).
     - **Mobile:** Expands downward up to a maximum height defined in terms of viewport percentage (e.g., 40% of viewport) to avoid overlapping the top content area.
   - **Keyboard Handling:**
-    - Pressing `Enter` key alone triggers the `send` event and prevents default action (newline insertion).
+    - Pressing `Enter` key alone invokes the `onsend` callback prop and prevents the default action (newline insertion).
     - Pressing `Shift+Enter` inserts a standard newline character.
     - On mobile soft keyboards, the system uses standard text input behaviors (carriage return triggers newline or send depending on configuration, default is newline unless submit action is focused).
 
@@ -53,12 +55,12 @@ The primary user entry point for thread replies. Designed to resemble modern cha
 - [x] Exported from `packages/cyan/src/index.ts`.
 - [x] Input element uses a borderless, backgroundless `<textarea>` that grows dynamically on input.
 - [x] Listens to `keydown` events to catch `Enter` and `Shift + Enter` combinations.
-- [x] Dispatches a custom `send` event when `Enter` is pressed without `Shift` (and is not empty).
+- [x] Invokes the `onsend` callback prop when `Enter` is pressed without `Shift` (and the value is non-empty).
 - [x] Inherits color tokens from the `--cn-input` and `--cn-reply-dock-*` namespace.
 
 ### Regression Guardrails
 
-- **No default form submissions.** Pressing Enter in the textarea must not cause a standard page refresh/submit; the event must be caught and prevented.
+- **No default form submissions.** Pressing Enter in the textarea must not cause a standard page refresh/submit; the keydown event's default action must be prevented.
 - **No manual height calculations in pixels.** Height changes must be driven reactively (e.g., using Svelte's scrollHeight binding or standard CSS auto-expand patterns) and must be capped using relative units (`em` or `rem`) corresponding to font size and grid tokens.
 
 ### Testing Scenarios
@@ -76,7 +78,7 @@ And displays a vertical scrollbar when content exceeds 4 lines
 ```gherkin
 Given a mounted CnChatBar with value "Hello world"
 When the user presses the "Enter" key
-Then a "send" event is dispatched
+Then the `onsend` callback prop is invoked with the current value
 And the default newline insertion is prevented
 ```
 
@@ -85,5 +87,5 @@ And the default newline insertion is prevented
 Given a mounted CnChatBar with value "Hello"
 When the user presses the "Shift + Enter" keys
 Then a newline is inserted in the textarea
-And no "send" event is dispatched
+And the `onsend` callback prop is not invoked
 ```
