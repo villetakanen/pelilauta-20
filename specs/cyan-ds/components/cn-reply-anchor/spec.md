@@ -2,8 +2,8 @@
 feature: CnReplyAnchor
 parent_spec: ../spec.md
 stylebook_url: /components/cn-reply-anchor
-status: draft
-maturity: design
+status: alpha
+maturity: implementation
 last_major_review: 2026-05-28
 ---
 
@@ -47,12 +47,12 @@ A structural layout container that anchors the reply interface. To accommodate m
 
 ### Definition of Done
 
-- [ ] `CnReplyAnchor.svelte` implemented in Svelte 5; lives at `packages/cyan/src/components/CnReplyAnchor.svelte`.
-- [ ] Exported from `packages/cyan/src/index.ts`.
-- [ ] Renders an `<aside>` element as its root.
-- [ ] Swaps layout orientation cleanly between desktop (bottom sticky) and mobile (top fixed) modes using media queries or container queries.
-- [ ] Positions the `overhead` slot adjacent to the input bar based on the orientation (above on desktop, below on mobile if appropriate, or stacked logically).
-- [ ] Standard styling integrated into Cyan's core stylesheets.
+- [x] `CnReplyAnchor.svelte` implemented in Svelte 5; lives at `packages/cyan/src/components/CnReplyAnchor.svelte`.
+- [x] Exported from `packages/cyan/src/index.ts`.
+- [x] Renders an `<aside>` element as its root.
+- [x] Swaps layout orientation cleanly between desktop (bottom sticky) and mobile (top fixed) modes using media queries or container queries.
+- [x] Positions the `overhead` slot adjacent to the input bar based on the orientation (above on desktop, below on mobile if appropriate, or stacked logically).
+- [x] Standard styling integrated into Cyan's core stylesheets.
 
 ### Regression Guardrails
 
