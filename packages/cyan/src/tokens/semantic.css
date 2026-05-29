@@ -122,6 +122,9 @@
   );
   --cn-on-selection: var(--cn-on-surface);
 
+  /* Backdrop — used by <dialog>::backdrop and full-screen overlays */
+  --cn-backdrop: light-dark(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7));
+
   /* Lightbox surfaces — derive directly from chroma scales, NOT from --cn-surface-* aliases */
   --cn-lightbox-background: light-dark(var(--chroma-surface-30), var(--chroma-surface-30));
   --cn-lightbox-color: light-dark(var(--chroma-surface-95), var(--chroma-surface-95));

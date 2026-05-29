@@ -2,8 +2,8 @@
 feature: CnRichComposer
 parent_spec: ./spec.md
 stylebook_url: /components/cyan-editor#cn-rich-composer
-status: draft
-maturity: design
+status: alpha
+maturity: implementation
 last_major_review: 2026-05-28
 ---
 
@@ -23,13 +23,15 @@ The full-featured rich text composer for forum-style replies. It expands from th
   - `placeholder?: string` — prompt hint.
   - `attachments: Array<{ id: string; name: string; size: number; status: 'uploading' | 'success' | 'error'; progress?: number; previewUrl?: string }>` — array of file attachments.
   - `saving?: boolean` — disables controls and shows saving loader state on submit.
+  - `open?: boolean` — two-way bound visibility. When `true`, the composer is presented (modal on desktop, full-screen sheet on mobile); when `false`, the underlying `<dialog>` is closed. Consumers drive open/close in response to triggers (e.g. a thread page's "Reply" button) and react to dismissal events.
 - **Callbacks:**
   - `onsave?: () => void` — called when the user clicks the primary submit button.
   - `oncancel?: () => void` — called when the user cancels or closes the composer.
   - `onupload?: (files: File[]) => void` — called with the dropped or chosen files.
 - **Dependencies:**
-  - Components: `CnEditor` (CodeMirror factory wrapper), `CnLightbox` (for file previewing), `CnLoader` (for upload/saving spinner states).
-  - Tokens: `--cn-surface-1`, `--cn-surface-2`, `--cn-border`, `--cn-text`, `--cn-shadow-elevation-3`.
+  - Components: `CnEditor` (CodeMirror factory wrapper, mounted internally via `createCnEditor` for direct handle access), `CnLoader` (for upload/saving spinner states). `CnLightbox` is optional — when integrated, it renders previews of attachments with `previewUrl`; current implementation renders inline `<img>` thumbnails as a fallback.
+  - Markdown rendering: `markdownToHTML` from `@pelilauta/utils`. This is a DS → platform-utility dependency; the choice acknowledges that markdown parsing is generic enough to live in `@pelilauta/utils` for now. Revisit if the DS later needs to ship to other consumers.
+  - Tokens: `--cn-surface-1`, `--cn-surface-2`, `--cn-border`, `--cn-text`, `--cn-shadow-elevation-3`, `--cn-backdrop` (dialog scrim), `--cn-z-reply-dialog` (stacking slot), `--cn-z-dialog-overlay` (drop-overlay inside the dialog), `--cn-color-error`, `--cn-color-success` (attachment status indicators).
 
 ### Constraints
 
@@ -58,12 +60,12 @@ The full-featured rich text composer for forum-style replies. It expands from th
 
 ### Definition of Done
 
-- [ ] `CnRichComposer.svelte` implemented in Svelte 5; lives under `packages/cyan-editor/src/CnRichComposer.svelte`.
-- [ ] Exported via `packages/cyan-editor/src/index.ts` (or subpath).
-- [ ] Connects formatting toolbar buttons to the underlying CodeMirror instance via `CnEditor` handle functions.
-- [ ] Implements dragover/dragleave/drop file handling and invokes the `onupload` callback prop.
-- [ ] Renders attachment progress pills or list items based on the `attachments` prop.
-- [ ] Implements a markdown parser to render HTML in the "Preview" tab.
+- [x] `CnRichComposer.svelte` implemented in Svelte 5; lives under `packages/cyan-editor/src/CnRichComposer.svelte`.
+- [x] Exported via `packages/cyan-editor/src/index.ts` (or subpath).
+- [x] Connects formatting toolbar buttons to the underlying CodeMirror instance via `CnEditor` handle functions.
+- [x] Implements dragover/dragleave/drop file handling and invokes the `onupload` callback prop.
+- [x] Renders attachment progress pills or list items based on the `attachments` prop.
+- [x] Implements a markdown parser to render HTML in the "Preview" tab.
 
 ### Regression Guardrails
 

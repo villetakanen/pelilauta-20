@@ -19,4 +19,7 @@
 
   /* Consumer-facing alias for --cn-z-modal */
   --z-index-modal: var(--cn-z-modal);
+
+  /* Local-scope overlay inside a dialog — sits above sibling dialog content in paint order */
+  --cn-z-dialog-overlay: 1;
 }
