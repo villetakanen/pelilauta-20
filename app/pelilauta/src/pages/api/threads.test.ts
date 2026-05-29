@@ -39,7 +39,7 @@ describe("POST /api/threads", () => {
   });
 
   it("returns 403 for frozen accounts", async () => {
-    // Verifies: specs/pelilauta/session/frozen.md §Strict Server Enforcement
+    // Verifies: specs/pelilauta/session/frozen.md §Frozen users are blocked by server-side thread-write endpoints
     const { ctx } = makeApiContext({ headers: { authorization: "Bearer good-token" } });
     vi.mocked(firebaseServer.verifyIdToken).mockResolvedValue({ uid: "frozen-uid" } as never);
     vi.mocked(authServer.getAccount).mockResolvedValue({ frozen: true });

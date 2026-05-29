@@ -87,6 +87,11 @@
   --cn-reply-bubble: light-dark(var(--chroma-primary-70), var(--chroma-primary-40));
   --cn-on-reply-bubble: light-dark(var(--chroma-surface-100), var(--chroma-surface-95));
 
+  /* Reply Dock (CnChatBar capsule surface) */
+  --cn-reply-dock-bg: light-dark(var(--chroma-surface-100), var(--chroma-surface-20));
+  --cn-reply-dock-border: light-dark(var(--chroma-surface-80), var(--chroma-surface-30));
+  --cn-reply-dock-shadow: var(--cn-shadow-elevation-2);
+
   /* Inputs / Forms */
   --cn-input: light-dark(var(--chroma-surface-80), var(--chroma-surface-0));
   --cn-on-input: var(--cn-on-surface);

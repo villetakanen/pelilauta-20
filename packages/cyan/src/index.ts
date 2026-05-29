@@ -1,5 +1,6 @@
 export { default as AppBar } from "./components/AppBar.astro";
 export { default as CnBubble } from "./components/CnBubble.svelte";
+export { default as CnChatBar } from "./components/CnChatBar.svelte";
 export { default as CnLightbox } from "./components/CnLightbox.svelte";
 export type { CnLightboxImage } from "./components/CnLightbox.types";
 export { default as Icon } from "./components/Icon.astro";
