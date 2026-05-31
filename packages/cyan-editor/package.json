@@ -5,12 +5,14 @@
   "exports": {
     ".": "./src/index.ts",
     "./svelte": "./src/CnEditor.svelte",
+    "./svelte-rich-composer": "./src/CnRichComposer.svelte",
     "./styles.css": "./src/styles.css"
   },
   "scripts": {
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
+    "@pelilauta/utils": "workspace:*",
     "@codemirror/commands": "^6.8.1",
     "@codemirror/lang-markdown": "^6.3.2",
     "@codemirror/language": "^6.11.0",
@@ -24,6 +26,8 @@
     "turndown-plugin-gfm": "^1.0.2"
   },
   "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^5.1.1",
+    "@testing-library/svelte": "^5.3.1",
     "@types/dompurify": "^3.2.0",
     "@types/turndown": "^5.0.5",
     "jsdom": "^29.0.1",

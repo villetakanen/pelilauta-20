@@ -1,0 +1,72 @@
+---
+title: CnChatBar
+description: Single-line auto-expanding capsule input for thread replies. Enter sends, Shift+Enter inserts a newline.
+status: draft
+---
+
+import CnChatBar from "@cyan/components/CnChatBar.svelte";
+import CnChatBarDemo from "../../components/CnChatBarDemo.svelte";
+
+`CnChatBar` is the primary entry point for writing thread replies. It renders a capsule textarea that auto-expands as the user types (up to 4 lines on desktop, 40vh on mobile), and exposes `start` / `end` snippet slots for leading/trailing actions like attach and send buttons.
+
+## Default
+
+<div style="padding: var(--cn-gap); background: var(--cn-surface); border-radius: var(--cn-border-radius-medium);">
+  <CnChatBar client:only="svelte" placeholder="Write a reply…" />
+</div>
+
+## Interactive — Enter vs Shift+Enter
+
+Type something, then press **Enter** to send. Press **Shift+Enter** to insert a newline.
+
+<CnChatBarDemo client:only="svelte" />
+
+## Disabled
+
+<div style="padding: var(--cn-gap); background: var(--cn-surface); border-radius: var(--cn-border-radius-medium);">
+  <CnChatBar client:only="svelte" placeholder="Compose disabled while we reconnect…" disabled />
+</div>
+
+## Auto-expand
+
+Long content grows the textarea up to four lines on desktop. Beyond that, the textarea scrolls internally without expanding the capsule further.
+
+<CnChatBarDemo
+  client:only="svelte"
+  label="Auto-expand"
+  initial={"Line one\nLine two\nLine three\nLine four — anything past this point scrolls within the capsule rather than pushing the page."}
+/>
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `value` | `string` | `""` | Two-way bound textarea content. |
+| `placeholder` | `string` | `""` | Prompt hint shown when empty. |
+| `disabled` | `boolean` | `false` | Disables input and any slotted actions. |
+| `onsend` | `(value: string) => void` | — | Called when Enter is pressed with a non-empty value. The default newline insertion is prevented. |
+
+## Slots
+
+| Slot | Purpose |
+|---|---|
+| `start` | Leading actions — e.g. attach / format buttons. |
+| `end` | Trailing actions — e.g. the send button or a format toggle. |
+
+## CSS Tokens
+
+| Token | Description |
+|---|---|
+| `--cn-reply-dock-bg` | Capsule background |
+| `--cn-reply-dock-border` | Capsule border colour |
+| `--cn-reply-dock-shadow` | Capsule elevation |
+| `--cn-on-input` | Textarea text colour |
+| `--cn-border-radius-large` | Capsule radius |
+| `--cn-grid` | Inner padding unit |
+
+## Keyboard
+
+| Key | Behaviour |
+|---|---|
+| `Enter` | Calls `onsend(value)` if value is non-empty. The default newline insertion is always prevented. |
+| `Shift + Enter` | Inserts a newline. No `send` is dispatched. |

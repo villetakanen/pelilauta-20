@@ -5,17 +5,21 @@
  * Always reference these tokens — never use raw z-index numbers.
  *
  * Stacking order (back to front):
- *   tray < rail < tray-button < fab < reply-dialog < modal < snackbar
+ *   tray < rail < tray-button < fab < reply-anchor < reply-dialog < modal < snackbar
  */
 :root {
   --cn-z-tray: 20000;
   --cn-z-rail: 30000;
   --cn-z-tray-button: 40000;
   --cn-z-fab: 40500;
+  --cn-z-reply-anchor: 40750;
   --cn-z-reply-dialog: 41000;
   --cn-z-modal: 50000;
   --cn-z-snackbar: 60000;
 
   /* Consumer-facing alias for --cn-z-modal */
   --z-index-modal: var(--cn-z-modal);
+
+  /* Local-scope overlay inside a dialog — sits above sibling dialog content in paint order */
+  --cn-z-dialog-overlay: 1;
 }

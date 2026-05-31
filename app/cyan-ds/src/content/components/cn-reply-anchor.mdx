@@ -1,0 +1,89 @@
+---
+title: CnReplyAnchor
+description: Structural layout container that anchors the reply UI — bottom-sticky on desktop, top-fixed below the app bar on mobile so the virtual keyboard never occludes the input.
+status: alpha
+---
+
+import CnReplyAnchor from "@cyan/components/CnReplyAnchor.svelte";
+import CnChatBar from "@cyan/components/CnChatBar.svelte";
+import CnReplyAnchorOverheadDemo from "../../components/CnReplyAnchorOverheadDemo.svelte";
+
+`CnReplyAnchor` is a structural `<aside>` that positions the reply controls correctly for each viewport:
+
+- **Desktop (≥ 768 px):** `position: sticky; bottom: 0` — the anchor docks at the bottom of its scroll container and grows upward.
+- **Mobile (< 768 px):** `position: fixed; top: var(--cn-app-bar-height)` — the anchor pins just below the app bar and grows downward, leaving the lower half of the screen completely clear for the OS virtual keyboard.
+
+The `overhead` slot renders above the input bar on desktop and below it on mobile (DOM ordering is kept stable; `flex-direction` toggles via media query so no JS viewport detection is needed).
+
+## Desktop — Bottom-sticky
+
+The anchor is placed inside a tall scroll container to demonstrate that it stays docked at the bottom.
+
+<div style="position: relative; height: 320px; overflow-y: auto; background: var(--cn-surface-2); border: 1px solid var(--cn-reply-dock-border); border-radius: var(--cn-border-radius-medium);">
+  <div style="padding: var(--cn-gap); height: 600px;">
+    <p style="color: var(--cn-on-surface); opacity: 0.6;">Scroll down — the input stays anchored at the bottom of this container.</p>
+  </div>
+  <CnReplyAnchorOverheadDemo client:only="svelte" />
+
+</div>
+
+## Fixed={true} Default
+
+The default `fixed={true}` enables the sticky/fixed positioning depending on the current viewport.
+
+<div style="position: relative; background: var(--cn-surface); border: 1px solid var(--cn-reply-dock-border); border-radius: var(--cn-border-radius-medium); overflow: hidden; min-height: 120px;">
+  <CnReplyAnchor client:only="svelte">
+    <CnChatBar client:only="svelte" placeholder="Reply to thread…" />
+  </CnReplyAnchor>
+</div>
+
+## Mock Mobile Viewport (top-pinned)
+
+A constrained `375 × 200px` wrapper simulates a mobile screen context. Inside this wrapper the `CnReplyAnchor` should appear pinned at the top (offset by the app-bar height token). In a real device the `position: fixed` pins to the actual viewport — this demo approximates the visual appearance.
+
+<div style="width: 375px; height: 200px; overflow: hidden; position: relative; border: 2px solid var(--cn-reply-dock-border); border-radius: var(--cn-border-radius-medium); background: var(--cn-surface-2);">
+  <div style="background: var(--cn-app-bar-background); height: var(--cn-app-bar-height, 3.5rem); display: flex; align-items: center; padding: 0 var(--cn-gap); color: var(--cn-app-bar-color); font-weight: 600;">
+    App Bar
+  </div>
+  <div style="padding: var(--cn-gap); color: var(--cn-on-surface); opacity: 0.6; font-size: 0.85em;">
+    Thread content — keyboard appears below this on real mobile
+  </div>
+  <CnReplyAnchor client:only="svelte">
+    <CnChatBar client:only="svelte" placeholder="Mobile reply…" />
+  </CnReplyAnchor>
+</div>
+
+## Inline (fixed={false})
+
+When `fixed={false}` the anchor sits in normal document flow with no sticky or fixed positioning.
+
+<div style="background: var(--cn-surface); border: 1px solid var(--cn-reply-dock-border); border-radius: var(--cn-border-radius-medium); overflow: hidden;">
+  <div style="padding: var(--cn-gap); color: var(--cn-on-surface); opacity: 0.6;">Thread content above…</div>
+  <CnReplyAnchor fixed={false} client:only="svelte">
+    <CnChatBar client:only="svelte" placeholder="Inline reply input…" />
+  </CnReplyAnchor>
+</div>
+
+## Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `fixed` | `boolean` | `true` | When `true`, enables sticky (desktop) / fixed-top (mobile) positioning. When `false`, the anchor renders inline in normal document flow. |
+
+## Slots
+
+| Slot | Purpose |
+|---|---|
+| default | The primary input bar (`CnChatBar` or `CnRichComposer`). |
+| `overhead` | Contextual overlay (e.g. `CnReplyContext` chip). Positioned above the bar on desktop, below it on mobile. |
+
+## CSS Tokens
+
+| Token | Description |
+|---|---|
+| `--cn-reply-dock-bg` | Anchor background |
+| `--cn-reply-dock-border` | Anchor border colour |
+| `--cn-reply-dock-shadow` | Anchor elevation / shadow |
+| `--cn-app-bar-height` | App bar height used as `top` offset on mobile |
+| `--cn-grid` | Inner padding unit |
+| `--cn-gap` | Outer horizontal padding |

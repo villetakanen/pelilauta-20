@@ -38,9 +38,8 @@ test("Scenario: Authenticated SSR uses the create-thread FAB branch", async ({ s
   expect(html).not.toContain('href="/login?next=/create/thread"');
 });
 
-test.skip("Scenario: FAB hidden for a frozen logged-in user", async ({ page }) => {
-  // Track: DS-debt — add frozen fixture support to /api/test/seed-session. // before the status oracle can return frozen:true. // The seed-session route would need to write account/{uid} with frozen:true // TODO: frozen user seeding not yet supported by the E2E seed helper.
-  await loginAs(page, { uid: "frozen-e2e-user", claims: { nick: "FrozenUser" } });
+test("Scenario: FAB hidden for a frozen logged-in user", async ({ page }) => {
+  await loginAs(page, { uid: "frozen-e2e-user", claims: { nick: "FrozenUser" }, frozen: true });
   await page.goto("/");
   await page.waitForLoadState("networkidle");
 

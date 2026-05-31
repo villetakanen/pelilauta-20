@@ -18,7 +18,7 @@ const BASE_URL = "http://localhost:4321";
 
 export async function loginAs(
   page: Page,
-  { uid, claims = {} }: { uid: string; claims?: Record<string, unknown> },
+  { uid, claims = {}, frozen }: { uid: string; claims?: Record<string, unknown>; frozen?: boolean },
 ): Promise<void> {
   const secret = process.env.SECRET_e2e_seed_secret;
   if (!secret) {
@@ -29,7 +29,7 @@ export async function loginAs(
 
   const response = await page.request.post(`${BASE_URL}/api/test/seed-session`, {
     headers: { "x-e2e-seed-secret": secret, "content-type": "application/json" },
-    data: { uid, claims },
+    data: { uid, claims, frozen },
   });
   if (!response.ok()) {
     throw new Error(`seed-session failed: ${response.status()} ${await response.text()}`);

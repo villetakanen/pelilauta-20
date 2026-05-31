@@ -213,6 +213,9 @@ importers:
       '@lezer/highlight':
         specifier: ^1.2.1
         version: 1.2.3
+      '@pelilauta/utils':
+        specifier: workspace:*
+        version: link:../utils
       codemirror:
         specifier: ^6.0.1
         version: 6.0.2
@@ -226,6 +229,12 @@ importers:
         specifier: ^1.0.2
         version: 1.0.2
     devDependencies:
+      '@sveltejs/vite-plugin-svelte':
+        specifier: ^5.1.1
+        version: 5.1.1(svelte@5.55.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.3))
+      '@testing-library/svelte':
+        specifier: ^5.3.1
+        version: 5.3.1(svelte@5.55.3)(vite@7.3.1(@types/node@25.5.0)(jiti@2.6.1)(yaml@2.8.3))(vitest@3.2.4(@types/debug@4.1.13)(@types/node@25.5.0)(jiti@2.6.1)(jsdom@29.0.1)(yaml@2.8.3))
       '@types/dompurify':
         specifier: ^3.2.0
         version: 3.2.0

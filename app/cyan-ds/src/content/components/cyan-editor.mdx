@@ -5,6 +5,7 @@ order: 20
 status: draft
 ---
 import CyanEditorDemo from "../../components/CyanEditorDemo.svelte";
+import CnRichComposerDemo from "../../components/CnRichComposerDemo.svelte";
 
 The `cyan-editor` package provides a markdown text editor primitive built on
 CodeMirror 6. It ships as a **framework-agnostic factory** — no custom element,
@@ -109,3 +110,64 @@ surfaces never include the editor bundle.
 - A `<cn-editor>` custom element wrapping the factory.
 - Live markdown rendering (inline decorations).
 - Toolbars and formatting buttons — compose your own around `handle.insertText()`.
+
+---
+
+## CnRichComposer
+
+`CnRichComposer` is the full-featured rich text composer for forum-style replies. It wraps
+`CnEditor` behind a modal overlay on desktop and a full-screen sheet on mobile, and adds a
+markdown formatting toolbar, Write/Preview tabs, drag-and-drop file attachments with upload
+status indicators, and save/cancel actions.
+
+Import path: `@pelilauta/cyan-editor/svelte-rich-composer`
+
+### Basic composer
+
+Click "Open Composer" to launch the modal. Type, use the formatting toolbar, or drop a file
+onto the dialog. Save and Cancel are wired to dismiss the dialog and log the event.
+
+<CnRichComposerDemo client:only="svelte" label="Basic composer" />
+
+### Composer with dummy attachments
+
+Demonstrates the attachment list with uploading, success, and error states.
+
+<CnRichComposerDemo client:only="svelte" label="With attachments" showDummyAttachments={true} />
+
+### Props
+
+| Prop | Type | Default | Description |
+|---|---|---|---|
+| `value` | `string` | `''` | Two-way bound markdown text. |
+| `placeholder` | `string` | `'Write a reply…'` | Empty-state hint shown in the editor. |
+| `attachments` | `AttachmentItem[]` | `[]` | Array of file attachment objects (see below). |
+| `saving` | `boolean` | `false` | Disables controls and shows saving indicator. |
+| `open` | `boolean` | `false` | Controls modal/sheet visibility. Bindable. |
+
+### Callbacks
+
+| Callback | Signature | Description |
+|---|---|---|
+| `onsave` | `() => void` | Called when the user clicks Save. |
+| `oncancel` | `() => void` | Called when the user cancels or closes. |
+| `onupload` | `(files: File[]) => void` | Called with dropped or chosen files. |
+
+### AttachmentItem
+
+```ts
+interface AttachmentItem {
+  id: string;
+  name: string;
+  size: number;                             // bytes
+  status: 'uploading' | 'success' | 'error';
+  progress?: number;                        // 0–100, shown during uploading
+  previewUrl?: string;                      // thumbnail image src
+}
+```
+
+### Formatting toolbar
+
+The toolbar provides shortcuts for: **Bold** (`**text**`), _Italic_ (`_text_`), Link (`[text](url)`),
+Quote (`> text`), Code (`` `text` ``), and List (`- text`). Each button calls
+`handle.insertText(notation)` to insert the markdown notation at the cursor position.

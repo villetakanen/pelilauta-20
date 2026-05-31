@@ -141,12 +141,13 @@ When the front page is rendered
 Then the floating action button to create a thread is visible inside the fab-tray
 ```
 
-#### Scenario: Front-Page FAB hidden from anonymous users
+#### Scenario: Anonymous viewer sees login CTA in FAB tray
 
 ```gherkin
-Given an anonymous user
-When the front page is rendered
-Then the floating action button to create a thread is NOT visible
+Given an anonymous viewer requests the front page
+When the page is rendered
+Then the fab-tray contains a server-rendered <a href="/login?next=/create/thread"> link
+And the FrontpageFabs Svelte island is not present in the SSR output
 ```
 
 #### Scenario: Front-Page FAB hidden from frozen users
