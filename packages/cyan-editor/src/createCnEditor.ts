@@ -24,6 +24,8 @@ export interface CnEditorHandle {
   focus(): void;
   select(): void;
   insertText(text: string): void;
+  /** Returns the currently selected text in the primary selection, or "" if none. */
+  getSelection(): string;
   destroy(): void;
 }
 
@@ -140,6 +142,12 @@ export function createCnEditor(target: HTMLElement, options: CnEditorOptions = {
       if (destroyed) return;
       view.dispatch(view.state.replaceSelection(text));
       view.focus();
+    },
+    getSelection() {
+      if (destroyed) return "";
+      const range = view.state.selection.main;
+      if (range.empty) return "";
+      return view.state.sliceDoc(range.from, range.to);
     },
     destroy() {
       if (destroyed) return;

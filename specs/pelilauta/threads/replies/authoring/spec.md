@@ -1,7 +1,7 @@
 ---
 feature: Thread Reply Authoring
-status: draft
-maturity: design
+status: alpha
+maturity: implementation
 last_major_review: 2026-05-29
 parent_spec: ../spec.md
 ---
@@ -12,7 +12,7 @@ parent_spec: ../spec.md
 
 ### Context
 
-The write half of thread replies: an authenticated, non-frozen user on a thread page composes a reply, submits it, and sees it appear in the list without a full page reload. Sibling to `../spec.md` (read-side SSR + realtime listener), which explicitly deferred reply authoring as out of scope. This spec picks it up now that the cyan reply-stack primitives — `CnChatBar`, `CnReplyContext`, `CnReplyAnchor`, `CnRichComposer` — have shipped.
+The write half of thread replies: an authenticated, non-frozen user on a thread page composes a reply, submits it, and sees it appear in the list without a full page reload. Sibling to `../spec.md` (read-side SSR + realtime listener), which explicitly deferred reply authoring as out of scope. This spec picks it up now that the cyan reply-stack primitives — `CnChatBar`, `CnReplyContext`, `CnReplyAnchor` — have shipped. `CnRichComposer` exists in the design system but is deliberately NOT integrated here (see §Composer mode toggle deprecation note); the chat bar's built-in auto-expand covers the conversational reply use case, and the rich composer earns its complexity on longer-form authoring (thread bodies, blog posts) in future slices.
 
 ### Architecture
 
@@ -48,13 +48,13 @@ The write half of thread replies: an authenticated, non-frozen user on a thread 
 
 - **Dependencies:**
   - `@pelilauta/cyan` — `CnReplyAnchor`, `CnReplyContext` (when a target reply is being quoted).
-  - `@pelilauta/cyan-editor` — `CnChatBar` for inline compose, `CnRichComposer` for the expanded markdown editor.
+  - `@pelilauta/cyan` — `CnChatBar` for inline compose. (Note: `@pelilauta/cyan-editor`'s `CnRichComposer` was originally listed here for an expanded markdown editor; that integration is deprecated — see §Composer mode toggle.)
   - `@pelilauta/auth/client` — session atoms (`uid`, `sessionState`, `frozen`) for the gate.
   - `@pelilauta/auth/server` — `getAccount(uid)` for the frozen check (same accessor already used by the `/api/threads` scaffold).
   - `@pelilauta/firebase/server` — `verifyIdToken`, admin Firestore writes.
   - `@pelilauta/threads/server` — `ReplySchema` for parsing the freshly written doc before returning it.
   - `@pelilauta/threads/client` — `subscribeReplies` already handles deduplication via Firestore `docChanges()`; the optimistic-append flow relies on this without further coupling.
-  - i18n: keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.expand`, `threads:replies.compose.frozenNotice`.
+  - i18n: keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.frozenNotice`. (`threads:replies.compose.expand` is deprecated alongside the dropped composer mode toggle.)
 
 - **Constraints:**
   - **Server-side authority on identity and timing.** `owners`, `author`, `createdAt`, `updatedAt`, `flowTime`, `threadKey`, and `key` are computed server-side from the verified session uid + server time + route param. The request body's `markdownContent` / `images` / `quoteref` are the only client-trusted fields; everything else is ignored if present.
@@ -62,7 +62,7 @@ The write half of thread replies: an authenticated, non-frozen user on a thread 
   - **Anonymous viewers receive no compose UI.** Per `feedback_anonymous_is_ssr_only`, the form island is not rendered for anonymous SSR. The host renders an `<a href="/login?next=/threads/{threadKey}">` CTA element in place of the form. No disabled-textarea pattern.
   - **Frozen users receive no compose UI.** When the client session has `frozen: true`, `ReplyForm` renders a static notice (`threads:replies.compose.frozenNotice`) in place of the input. The notice is informational — no input element, no submit button. The server-side `403` is the authoritative gate; this is progressive enhancement to avoid futile submits.
   - **Optimistic-append owned by the form, dedup owned by the listener.** `ReplyForm` appends a provisional entry (with a temporary client-side key prefixed `tmp-` and `pending: true` styling) the moment the user submits. On `201` it replaces the provisional with the server-parsed `Reply`. On error it removes the provisional, surfaces the error inline (`threads:replies.compose.error`), and re-enables the form with the user's content intact. When `subscribeReplies` later emits an `added` diff carrying the same server `key`, the listener's reconciliation drops the duplicate — the temporary key never collides because it carries the `tmp-` prefix.
-  - **Composer mode toggle.** Inline mode mounts `<CnChatBar>` inside the `<CnReplyAnchor>`. An "Expand" affordance (button rendered via the anchor's `overhead` slot or a trailing `end` slot on the chat bar — implementer's choice) opens `<CnRichComposer open bind:value>` with the current draft. The expanded composer's `onsave` posts via the same `postReply` client and closes itself on success; `oncancel` keeps the draft and returns to inline mode. The draft value is the single source of truth across modes.
+  - **Composer mode toggle.** `[DEPRECATED 2026-05-31]` Original intent: an inline `<CnChatBar>` plus an Expand affordance that opens `<CnRichComposer>` for power-user markdown editing. Dropped because (a) `CnChatBar` already auto-expands up to ~4 lines on desktop / 40vh on mobile, which covers conversational replies; (b) the rich composer's CodeMirror-backed Bold-button selection contract was brittle to verify end-to-end and didn't earn its complexity for reply traffic; (c) markdown rendering at display time means power users can still type `**bold**` manually. The rich composer remains in the DS for future thread-body / blog-post authoring slices where the depth is justified. Current implementation: `<CnChatBar>` inside `<CnReplyAnchor>`, no expand affordance.
   - **No realtime mount on anonymous viewers.** This spec does not change the read-side rule: `subscribeReplies` only mounts for `sessionState === "active"`. Reply authoring is gated on the same condition.
   - **No edit / no delete.** This spec covers create only. Edit and delete are separate slices (the v17 `confirmDelete.astro` + `edit.astro` ports). Reposting is not a workaround — the spec does not provide one.
   - **Image attachments are not in this slice.** `markdownContent` is the only authoring payload. `images` exists in the request schema for forward compatibility but the v1 client never populates it. Implementations may reject non-empty `images` arrays with a 400 to keep the surface tight.
@@ -75,41 +75,41 @@ The write half of thread replies: an authenticated, non-frozen user on a thread 
 
 #### API Route DoD
 
-- [ ] `app/pelilauta/src/pages/api/threads/[threadKey]/replies.ts` exports a `POST` handler.
-- [ ] The handler returns `401 Unauthorized` when no `Authorization: Bearer` header is present or the token fails `verifyIdToken`.
-- [ ] The handler returns `403 Forbidden` when the resolved uid's `account/{uid}.frozen === true`.
-- [ ] The handler returns `400 Bad Request` with a `{ error }` body when the request body fails the in-route Zod request schema (empty/missing `markdownContent`, malformed `images`, etc.).
-- [ ] The handler returns `404 Not Found` with `{ error: "Thread not found" }` when `stream/{threadKey}` does not exist.
-- [ ] On success the handler writes `stream/{threadKey}/comments/{auto-id}` with `owners=[uid]`, `author=uid`, `createdAt`/`updatedAt = serverTimestamp()`, `flowTime = Date.now()`, plus the validated `markdownContent`, optional `images`, optional `quoteref`.
-- [ ] On success the handler reads the just-written doc back, parses it through `ReplySchema`, and returns it as JSON with status `201`.
-- [ ] The handler does not trust client-provided values for `owners`, `author`, `createdAt`, `updatedAt`, `flowTime`, `key`, or `threadKey`.
+- [x] `app/pelilauta/src/pages/api/threads/[threadKey]/replies.ts` exports a `POST` handler.
+- [x] The handler returns `401 Unauthorized` when no `Authorization: Bearer` header is present or the token fails `verifyIdToken`.
+- [x] The handler returns `403 Forbidden` when the resolved uid's `account/{uid}.frozen === true`.
+- [x] The handler returns `400 Bad Request` with a `{ error }` body when the request body fails the in-route Zod request schema (empty/missing `markdownContent`, malformed `images`, etc.).
+- [x] The handler returns `404 Not Found` with `{ error: "Thread not found" }` when `stream/{threadKey}` does not exist.
+- [x] On success the handler writes `stream/{threadKey}/comments/{auto-id}` with `owners=[uid]`, `author=uid`, `createdAt`/`updatedAt = serverTimestamp()`, `flowTime = Date.now()`, plus the validated `markdownContent`, optional `images`, optional `quoteref`.
+- [x] On success the handler reads the just-written doc back, parses it through `ReplySchema`, and returns it as JSON with status `201`.
+- [x] The handler does not trust client-provided values for `owners`, `author`, `createdAt`, `updatedAt`, `flowTime`, `key`, or `threadKey`.
 
 #### Client Post DoD
 
-- [ ] `packages/threads/src/client/postReply.ts` exports `postReply(threadKey, { markdownContent, images?, quoteref? }, idToken)` returning `Promise<Reply>`.
-- [ ] `postReply` sends `Authorization: Bearer ${idToken}` and `Content-Type: application/json`.
-- [ ] `postReply` parses the response body through `ReplySchema` before returning. Non-2xx responses throw with the parsed error message.
-- [ ] `postReply` is exported from `@pelilauta/threads/client` and is the only entry the form island uses to write.
+- [x] `packages/threads/src/client/postReply.ts` exports `postReply(threadKey, { markdownContent, images?, quoteref? }, idToken)` returning `Promise<Reply>`.
+- [x] `postReply` sends `Authorization: Bearer ${idToken}` and `Content-Type: application/json`.
+- [x] `postReply` parses the response body through `ReplySchema` before returning. Non-2xx responses throw with the parsed error message.
+- [x] `postReply` is exported from `@pelilauta/threads/client` and is the only entry the form island uses to write.
 
 #### Form Island DoD
 
-- [ ] `packages/threads/src/components/ReplyForm.svelte` is a Svelte 5 island.
-- [ ] The form mounts only when `uid != null && sessionState === "active"`. It is gated by an auth-atom subscription and never appears for anonymous viewers.
-- [ ] When the resolved session has `frozen === true`, the form renders only the `threads:replies.compose.frozenNotice` text (no input, no submit).
-- [ ] Inline mode mounts `<CnChatBar>` inside a `<CnReplyAnchor>`. Submit fires `postReply` and on success appends the server reply to a parent-supplied `onReplyAppended(reply)` callback.
-- [ ] Submitting first renders a provisional reply (`key: "tmp-{uuid}", pending: true`) at the bottom of the list. On the `201` response, the provisional is replaced with the server `Reply`. On error the provisional is removed and the inline error label `threads:replies.compose.error` is rendered.
-- [ ] An "Expand" affordance opens `<CnRichComposer open bind:value>` carrying the current draft. The composer's `onsave` posts via the same `postReply`; `oncancel` returns to inline mode keeping the draft.
-- [ ] Submit is disabled when the trimmed draft is empty or when a post is in flight.
+- [x] `packages/threads/src/components/ReplyForm.svelte` is a Svelte 5 island.
+- [x] The form mounts only when `uid != null && sessionState === "active"`. It is gated by an auth-atom subscription and never appears for anonymous viewers.
+- [x] When the resolved session has `frozen === true`, the form renders only the `threads:replies.compose.frozenNotice` text (no input, no submit).
+- [x] Inline mode mounts `<CnChatBar>` inside a `<CnReplyAnchor>`. Submit fires `postReply` and on success appends the server reply to a parent-supplied `onReplyAppended(reply)` callback.
+- [x] Submitting first renders a provisional reply (`key: "tmp-{uuid}", pending: true`) at the bottom of the list. On the `201` response, the provisional is replaced with the server `Reply`. On error the provisional is removed and the inline error label `threads:replies.compose.error` is rendered.
+- [DEPRECATED 2026-05-31] An "Expand" affordance opens `<CnRichComposer open bind:value>` carrying the current draft. — Rich composer integration dropped; see §Composer mode toggle.
+- [x] Submit is disabled when the trimmed draft is empty or when a post is in flight.
 
 #### Host Page DoD
 
-- [ ] `app/pelilauta/src/pages/threads/[threadKey]/index.astro` renders `<ReplyForm>` (client-hydrated) under `<ThreadReplies>` only when the host's auth boundary resolves an authenticated session.
-- [ ] When the host renders for an anonymous viewer, an `<a href="/login?next=/threads/{threadKey}">` element appears in the same slot. No `ReplyForm` script is shipped.
-- [ ] The host wires the form's `onReplyAppended` to the same `entries` list that `ThreadReplies` mutates, so the optimistic append and the listener-driven reconciliation operate on a single source of truth.
+- [x] `app/pelilauta/src/pages/threads/[threadKey]/index.astro` renders `<ReplyForm>` (client-hydrated) under `<ThreadReplies>` only when the host's auth boundary resolves an authenticated session.
+- [x] When the host renders for an anonymous viewer, an `<a href="/login?next=/threads/{threadKey}">` element appears in the same slot. No `ReplyForm` script is shipped.
+- [x] The host wires the form's `onReplyAppended` to the same `entries` list that `ThreadReplies` mutates, so the optimistic append and the listener-driven reconciliation operate on a single source of truth.
 
 #### i18n DoD
 
-- [ ] The keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.expand`, `threads:replies.compose.frozenNotice` exist in the project's locale files.
+- [x] The keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.frozenNotice` exist in the project's locale files. (`compose.expand` was dropped alongside the rich-composer integration.)
 
 ### Regression Guardrails
 
@@ -280,25 +280,11 @@ And the submit-in-flight state is false
 
 #### Scenario: Expanded composer shares the draft with inline mode
 
-```gherkin
-Given ReplyForm is mounted with the chat bar carrying value "Hello"
-When the user activates the Expand affordance
-Then CnRichComposer opens with value="Hello"
-When the user types " world" inside the composer and triggers onsave
-Then postReply is called with markdownContent="Hello world"
-And on success the composer closes
-And the inline chat bar's draft is cleared
-```
+`[DEPRECATED 2026-05-31]` Scenario removed alongside the rich-composer integration — see §Composer mode toggle. The rich composer remains in the DS for future longer-form authoring slices (thread bodies, blog posts) and will get its own scenarios there.
 
 #### Scenario: Cancelling the expanded composer returns to inline mode with the draft intact
 
-```gherkin
-Given the expanded composer is open with value="Hello world"
-When the user triggers oncancel
-Then the composer closes
-And the inline chat bar's value is "Hello world"
-And no postReply call was made
-```
+`[DEPRECATED 2026-05-31]` Scenario removed alongside the rich-composer integration — see §Composer mode toggle.
 
 #### Scenario: Submit is disabled for empty drafts
 

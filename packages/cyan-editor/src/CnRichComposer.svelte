@@ -174,7 +174,14 @@ const FORMAT_ACTIONS: FormatAction[] = [
 
 function applyFormat(notation: string) {
   if (!handle) return;
-  handle.insertText(notation);
+  // Smart-wrap: if there is a non-empty selection, substitute the "text"
+  // placeholder in the notation with the selected text so e.g. selecting
+  // "world" and clicking Bold yields "**world**" rather than the literal
+  // placeholder "**text**". Notations without a "text" placeholder fall
+  // through to a plain insert.
+  const selection = handle.getSelection();
+  const next = selection ? notation.replace("text", selection) : notation;
+  handle.insertText(next);
 }
 
 // --- Drag and drop ---
@@ -267,6 +274,7 @@ function formatBytes(bytes: number): string {
           class="cn-rich-composer__format-btn"
           aria-label={action.aria}
           title={action.aria}
+          onmousedown={(event) => event.preventDefault()}
           onclick={() => applyFormat(action.notation)}
           disabled={saving}
         >

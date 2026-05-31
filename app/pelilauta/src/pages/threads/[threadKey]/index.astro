@@ -6,7 +6,7 @@
 // See specs/pelilauta/threads/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
 // See specs/pelilauta/threads/replies/spec.md §Host page parses ?since= into targetFlowTime
 
-import { ThreadDetail, ThreadReplies } from "@pelilauta/threads/components";
+import { ThreadDetail, ThreadReplies, ThreadReplySection } from "@pelilauta/threads/components";
 import type { Thread } from "@pelilauta/threads/server";
 import { getThread } from "@pelilauta/threads/server";
 import { logError } from "@pelilauta/utils/log";
@@ -69,26 +69,31 @@ const description = thread
   {!error && thread && (
     <>
       {currentUid ? (
-        // Authenticated: hydrate with client:idle so the SSR seed paints first,
-        // then the realtime listener mounts after the browser is idle.
-        // client:idle is friendlier on FCP than client:load — the SSR seed is
-        // already visible; realtime updates can wait until the main thread is free.
-        <ThreadReplies
+        // Authenticated: ThreadReplySection owns ThreadReplies + ReplyForm in one
+        // island so the entries state is shared between the listener and the
+        // optimistic-append flow.
+        // client:idle is friendlier on FCP — the SSR seed paints first.
+        <ThreadReplySection
           client:idle
           threadKey={threadKey!}
           {initialReplies}
           {currentUid}
           {targetFlowTime}
+          t={t}
         />
       ) : (
-        // Anonymous: pure SSR, no JS bundle for the reply list.
-        // No client: directive means Astro does not ship a hydration script.
-        <ThreadReplies
-          threadKey={threadKey!}
-          {initialReplies}
-          currentUid={null}
-          {targetFlowTime}
-        />
+        // Anonymous: pure SSR reply list + static login CTA. No JS bundle shipped.
+        <>
+          <ThreadReplies
+            threadKey={threadKey!}
+            {initialReplies}
+            currentUid={null}
+            {targetFlowTime}
+          />
+          <a href={`/login?next=/threads/${threadKey}`}>
+            {t("threads:replies.compose.loginCta")}
+          </a>
+        </>
       )}
     </>
   )}

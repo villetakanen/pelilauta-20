@@ -20,11 +20,11 @@
 
 import type { SessionState } from "@pelilauta/auth/client";
 import { sessionState, uid } from "@pelilauta/auth/client";
-import type { Profile } from "@pelilauta/profiles/server";
 import { onMount, tick, untrack } from "svelte";
 import { subscribeReplies } from "../client/subscribeReplies";
 import type { Reply } from "../schemas/ReplySchema";
 import ReplyArticle from "./ReplyArticle.svelte";
+import type { ReplyEntry } from "./types";
 
 let {
   threadKey,
@@ -34,7 +34,7 @@ let {
   emptyLabel = "No replies yet.",
 }: {
   threadKey: string;
-  initialReplies: Array<{ reply: Reply; bodyHtml: string; profile: Profile | null }>;
+  initialReplies: Array<ReplyEntry>;
   currentUid?: string | null;
   targetFlowTime?: number;
   emptyLabel?: string;
@@ -48,12 +48,42 @@ let liveSessionState = $state<SessionState>("initial");
 // Live reply list seeded from SSR. The listener merges diffs into this.
 // untrack() captures the initial prop value without creating a reactive dependency —
 // this is intentional: we want a one-time seed, not a live derived.
-let entries = $state<Array<{ reply: Reply; bodyHtml: string; profile: Profile | null }>>(
-  untrack(() => [...initialReplies]),
-);
+let entries = $state<Array<ReplyEntry>>(untrack(() => [...initialReplies]));
 
 // Scroll-to-target guard — fires once per mount.
 let scrollFired = $state(false);
+
+/**
+ * Append a new entry or replace an existing one (identified by _replaceKey).
+ * Called by external consumers such as ReplyForm for optimistic appends.
+ * Export allows the host to obtain a reference via bind:this and call imperative.
+ */
+export function appendReply(entry: ReplyEntry & { _replaceKey?: string }): void {
+  if (entry._replaceKey) {
+    const { _replaceKey, ...clean } = entry;
+    const idx = entries.findIndex((e) => e.reply.key === _replaceKey);
+    if (idx !== -1) {
+      entries = entries.map((e, i) => (i === idx ? clean : e));
+    } else {
+      // Provisional not found (maybe already reconciled by listener) — just append
+      entries = [...entries, clean];
+    }
+  } else {
+    // Dedup: skip if key already present
+    const exists = entries.some((e) => e.reply.key === entry.reply.key);
+    if (!exists) {
+      entries = [...entries, entry];
+    }
+  }
+}
+
+/**
+ * Remove an entry by reply key. Called by ReplyForm to roll back a failed
+ * optimistic provisional.
+ */
+export function removeReply(key: string): void {
+  entries = entries.filter((e) => e.reply.key !== key);
+}
 
 // fromUser resolution: SSR uses currentUid; CSR uses liveUid once hydrated.
 // Uses $derived to recompute reactively when liveUid changes.

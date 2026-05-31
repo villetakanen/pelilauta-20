@@ -36,8 +36,18 @@ The dev agent prompt must include:
 - The complete @Dev persona instructions (from `.claude/commands/dev.md`)
 - The Task Brief from Step 0
 - If this is cycle N>1: the **Critic Findings** from the previous cycle, with explicit instructions to fix each violation
+- **Mandatory full-gate run before reporting done.** The dev MUST execute `pnpm verify` (the canonical gate chain: lint, types, astro:check, build, unit tests, AND e2e on both `app/pelilauta` and `app/cyan-ds`) and paste the final lines proving every gate is green. NEVER instruct the dev to "skip e2e" or "verify separately" — environmental obstacles (port conflicts, dirty state) are dev's problem to clear, not to defer. If e2e cannot be run at all in the current environment, dev must STOP and report back rather than ship behind a partial gate chain.
 
 Wait for the dev agent to complete. Capture its summary of changes made.
+
+### Step 1.5 — E2E Gate (orchestrator-enforced, non-negotiable)
+
+Before spawning the critic, the orchestrator MUST confirm that the dev's report contains evidence of a green `pnpm verify` (or, equivalently, a green `pnpm test:e2e` covering BOTH `app/pelilauta` AND `app/cyan-ds` plus all other gates). Concretely:
+
+- The report includes the tail of `pnpm verify` showing `✅ All gates green` (or the explicit Playwright "N passed" summaries for both apps).
+- If the dev's report is silent on e2e or admits to skipping it (regardless of justification — port conflicts, "covered by unit tests", "would slow the loop", etc.), the orchestrator MUST NOT proceed to Step 2. Instead, send the work back to the dev with a single instruction: run `pnpm verify` to completion and report the output. Do not paraphrase or shorten this gate — repeating the dev cycle is cheaper than letting a runtime SSR regression land.
+
+The reason this gate is non-negotiable: unit tests routinely mock Svelte islands and don't exercise Astro SSR seams. `astro:check` and `pnpm build` validate TypeScript and bundling but never execute SSR-only routes. A runtime regression in a wrapper component (e.g. an `import type` elision that drops a value binding the template needs) sails through every gate except a real browser load — which is exactly what Playwright does.
 
 ### Step 2 — Critic Cycle
 
@@ -47,6 +57,8 @@ The critic agent prompt must include:
 - The complete @Critic persona instructions (from `.claude/commands/critic.md`)
 - The Task Brief (so the critic knows what was intended)
 - The dev agent's summary of what was changed
+- **Explicit instruction to independently re-verify e2e:** the critic MUST run `pnpm verify` (or at minimum `pnpm test:e2e`) themselves before issuing a verdict, not just trust the dev's report. A `Ship it` verdict is invalid without this independent confirmation. The critic's report must include the verify-tail output as evidence.
+- **Tag-existence ≠ coverage.** `pnpm spec:coverage` only validates that `Verifies:` tags resolve to real scenario headings. It does NOT confirm the tagged tests execute, pass, or are even unskipped. The critic must read each `Verifies:`-tagged file and confirm the tagged scenario actually has a passing `it()` / `test()` body — `test.skip` or `describe` blocks with declared tags but missing bodies are coverage theatre and must be flagged.
 
 Wait for the critic agent to complete. Parse the verdict.
 
@@ -81,6 +93,7 @@ Report to the user:
 - **Silent unless stuck** — Do not ask the user for confirmation between cycles. Only interrupt if genuinely blocked (ambiguous requirement, conflicting specs, architectural question).
 - **Deterministic exit** — The loop has a clear termination condition (Ship it) and a circuit breaker (3 cycles).
 - **Package boundaries enforced** — Both dev and critic agents receive CLAUDE.md boundary rules.
+- **Full gate chain or no Ship it.** `pnpm verify` — including e2e on BOTH `app/pelilauta` and `app/cyan-ds` — must pass in BOTH the dev cycle and the critic re-verification before the loop can terminate. Bypassing e2e for any reason (perceived irrelevance, port conflicts, "unit tests cover it") is a failure mode this skill exists to prevent.
 
 ## Boundaries
 
