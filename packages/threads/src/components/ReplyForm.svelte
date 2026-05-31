@@ -37,11 +37,24 @@ interface Props {
   onReplyAppended: (entry: ReplyEntry & { _replaceKey?: string }) => void;
   /** Called to remove a provisional entry on error. */
   onReplyRemoved?: (key: string) => void;
-  /** i18n resolver — host provides `t` from its i18n module. */
-  t?: (key: string) => string;
+  /**
+   * i18n resolver — host provides `t` from its i18n module.
+   *
+   * NOTE: functions cannot cross Astro's SSR→CSR island serialization
+   * boundary. When the host passes `t` as an island prop, it arrives as
+   * `null` after hydration. Treat any non-function value (including `null`)
+   * as "use the identity fallback so missing keys surface as their key
+   * name". A follow-up should refactor this to accept pre-resolved strings
+   * from the host instead of a translator function — see
+   * specs/pelilauta/threads/replies/authoring/spec.md §i18n DoD for the
+   * current contract.
+   */
+  t?: ((key: string) => string) | null;
 }
 
-const { threadKey, onReplyAppended, onReplyRemoved, t = (key: string) => key }: Props = $props();
+const props: Props = $props();
+const { threadKey, onReplyAppended, onReplyRemoved } = props;
+const t = $derived(typeof props.t === "function" ? props.t : (key: string) => key);
 
 // --- Auth state (mirrors nanostores atoms into local $state) ---
 let liveUid = $state<string | null>(null);

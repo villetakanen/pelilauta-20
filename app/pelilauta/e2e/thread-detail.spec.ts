@@ -54,8 +54,10 @@ test.describe("Thread Detail", () => {
     await expect(h1).toBeVisible();
 
     // Body should contain rendered HTML — at least one paragraph or inline
-    // element proving markdown was converted upstream of the component
-    const article = page.locator("article");
+    // element proving markdown was converted upstream of the component.
+    // Scope to the top-level thread article (lang="fi"); the page may now
+    // also contain reply articles which have their own structure.
+    const article = page.locator('article[lang="fi"]').first();
     await expect(article).not.toBeEmpty();
     const hasRenderedContent = await article.locator("p, strong, em").count();
     expect(hasRenderedContent).toBeGreaterThan(0);
