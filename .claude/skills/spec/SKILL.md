@@ -40,9 +40,12 @@ Write to `specs/$ARGUMENTS/spec.md`. Create directories as needed. Apply these p
 - **Let Gherkin absorb failure modes.** Edge cases and error behaviour belong in scenarios, not in prose warnings. `Then the system does NOT store credentials in localStorage` is a verifiable contract.
 - **Be specific about file paths.** `src/schemas/user.schema.ts validated against src/types/User.ts` is actionable; "the user model" is not. Agents work with files, not concepts.
 - **Match depth to complexity.** A config-level feature may need one scenario and three lines of architecture. A complex integration may need many. The template gives structure, not mandatory overhead — omit sections that add no information.
+- **Cap scenarios at 5-7.** More than that almost always means more than one feature; split into sub-specs. Each scenario describes a distinct user-observable behaviour — not a distinct internal seam.
 - **Assume engineering competence.** Document decisions and constraints, not general knowledge. "Use React hooks" is not a spec constraint. "All component state must use `useAppState` from `src/hooks/` to persist across navigation" is.
+- **Spec is intent, not engineering defense** (`AGENTS.md` §Spec discipline). "We chose X because Y" rationale prose belongs in code comments, ADRs, or commit bodies — not in `specs/`. If a spec is approaching 200 lines of prose, it has probably drifted into a decision log; rewrite it around what the feature *is*, not how it's wired.
 - **Reference, don't duplicate.** Point to canonical file paths instead of copying code.
 - **One spec per independently evolvable feature.** Don't create monolithic specs; nest instead.
+- **Don't write defensive scenarios.** Scenarios describe load-bearing observable contracts. "What if the implementation is later changed to be wrong" is not a contract — it's a hypothetical regression that doesn't belong in the spec.
 
 ### 4. UI architecture rules (project-specific)
 

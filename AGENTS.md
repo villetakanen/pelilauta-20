@@ -16,7 +16,7 @@
 | Check (lint/format) | `pnpm check` | `package.json`, `biome.json` |
 | Check (types) | `pnpm check:types` | `package.json`, `tsconfig.json` |
 | Check (Astro) | `pnpm astro:check` | `package.json`, `astro.config.mjs` |
-| Verify (full gate chain) | `pnpm verify` | `scripts/verify.sh` |
+| Verify (full gate chain — pre-ship) | `pnpm verify` | `scripts/verify.sh` |
 | Ship (human convenience) | `pnpm ship "msg"` | `scripts/ship.sh` |
 
 ## Quality gates
@@ -32,13 +32,47 @@ A change is shippable only when every package or app it touches is clean across 
 | Unit tests | `pnpm test` | all green |
 | E2E | `pnpm test:e2e` | all green before `/ship` |
 
-Run all five with `pnpm verify` (`scripts/verify.sh`).
+**Where gates belong.** `pnpm verify` runs the full chain and exists for one purpose: pre-ship confirmation. It is invoked by `/ship`, not by dev cycles. During iteration, agents run **the focused thing they need** — `pnpm --filter <package> test` for the package they touched, or nothing at all if the change is obvious. Senior-engineer discipline: confirm the change works; don't audit deploy-readiness on every edit.
+
+Long-term, pre-commit gates (lint, types, astro:check) and pre-push gates (build, e2e) move to `lefthook` and CI respectively — at which point `verify.sh` becomes the redundant scaffolding it currently is. Until then, `pnpm verify` is the single named gate, used once before push.
 
 **Cleanup radius.** When you modify a file under `packages/X/` or `app/X/`, *that entire package* must be clean — including pre-existing warnings or test failures you didn't introduce. Fix them in the same commit; that is in-scope, not scope creep. Other packages are out of scope unless the user asks.
 
 **When a gate is red.** Stop. Surface it. Options are (a) fix it now, (b) skip/mark the test with a tracking note, (c) explicit user opt-in to ship anyway. Never pick (c) on agent authority.
 
 **Convenience vs authority.** `pnpm verify` runs the gates; `pnpm ship` runs them then commits and pushes. The script `scripts/ship.sh` uses `git add .` and is for **human** use — agents stage files explicitly in the chat loop and never invoke `pnpm ship` directly.
+
+## Change tiers
+
+Match process weight to change scope. The tier is decided at task start; in ambiguous cases the lower tier wins unless the user upgrades it.
+
+| Tier | What it is | Process |
+|---|---|---|
+| **Trivial** | Single file, ≤ ~20 lines, no new public API, no schema change, no new files. Examples: copy edits, component prop swaps, dep bumps, small refactors confined to one function. | Edit → focused test if uncertain → ship. No spec, no critic, no full verify mid-cycle. `/ship` runs `pnpm verify`. |
+| **Standard** | A feature with a clear contract — new component, sidebar widget, API endpoint, page route. Single package or two-package change. | Spec → dev → focused tests during iteration → ship. Critic optional. `/ship` runs `pnpm verify`. |
+| **High-risk** | Cross-package refactor, data-contract change, security-sensitive path (auth, write endpoints), new shared primitive. | Spec → dev → critic → manual browser check → ship. `/ship` runs `pnpm verify`. |
+
+**Spec depth follows tier.** Trivial tasks need no spec. Standard tasks need a spec scoped to user-observable contracts. High-risk tasks may justify deeper architecture notes and more scenarios.
+
+**Critic-cycle invocation.** `/assemble` runs dev → critic by default. For Trivial tasks, `/assemble` short-circuits to dev only (no critic). Standard tasks use the critic only if there's reason to (e.g. a tricky composition, a contract update the dev might miss). High-risk tasks always use the critic.
+
+**Gates during cycles.** Don't run `pnpm verify` per cycle. The full chain is for pre-ship, invoked once by `/ship`. During iteration, run only what you need to confirm the change works — typically `pnpm --filter <package> test` for the package you touched. Senior-engineer discipline: confirm the change; don't audit deploy-readiness on every edit.
+
+## Spec discipline
+
+Specs describe **intent and observable contract** only. Implementation rationale, decision history, and "we chose X because Y" prose belong in code comments, ADRs (`docs/adr/`), or commit messages — not in `specs/`.
+
+**Do**
+- State what the feature is, what the reader sees, and what the contract is.
+- Reference file paths instead of restating implementation.
+- Cap scenarios at 5-7. More than that almost always means more than one feature; split into sub-specs.
+
+**Don't**
+- Defend implementation choices in the spec. ("We use `z.preprocess` because…") If the choice needs defending, that's an ADR or a code comment.
+- Restate Architecture as Constraints in negative form. (If Architecture says "markdown rendered upstream," don't also add "MUST NOT call markdownToHTML inside templates" as a Constraint — same statement, different polarity, doubled maintenance.)
+- Create scenarios that defend against hypothetical regressions of code being written in the same diff. ("What if `.some()` is changed back to `[0]` index check") That belongs in code review, not in the spec.
+
+Verification artifacts (tests, lint rules) hook back to scenarios via `Verifies:` tags — see `specs/VERIFICATION.md`. Tags are a **navigation** tool ("find me the test for this contract"), not a forcing function. Load-bearing contracts should be covered by a tagged test. Aspirational or visually-validated scenarios may stay un-tagged.
 
 ## Where Things Live
 

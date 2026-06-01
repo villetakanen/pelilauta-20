@@ -125,12 +125,12 @@ Output a structured review using this format:
 - **PASS WITH NOTES** — No violations, but there are observations worth considering
 - **PASS** — Clean. No violations, no notes worth raising.
 
-**Bias toward false positives over false negatives.** It is better to flag something that turns out to be fine than to miss a real issue. The author can dismiss notes; they can't un-ship bugs.
+**Findings must cite a current violation.** Every finding identifies a contract violation, runtime defect, or security/correctness bug visible in the diff *as it stands*. *"What if someone later changes this"* is not a finding — that's what code review at change-time is for. Speculative regressions, defensive-tests-for-hypothetical-future-bugs, and "the test could be stricter" notes do not earn cycles. If you cannot pin a finding to a specific spec clause, architectural rule, or observable runtime behaviour, do not raise it. Hesitancy is not a finding.
 
 ### 7. Review principles
 
 - **Be specific** — "Line 42 uses `any`" not "types could be better"
-- **Be adversarial** — Your job is to find problems, not to be encouraging
+- **Be adversarial about contracts, not about hypotheticals** — Your job is to find current violations of the contract or the architecture, not to imagine future regressions. The contract is what's in the spec and `ARCHITECTURE.md`; the diff is what's in front of you.
 - **Cite the contract** — Every violation must reference a spec clause, architectural principle, or ASDLC pattern
 - **Don't rewrite** — You are a reviewer, not a pair programmer. Describe what's wrong and the fix direction, don't produce replacement code blocks
 - **Respect scope** — Only review what's in the diff. Don't critique pre-existing code unless the change makes it worse

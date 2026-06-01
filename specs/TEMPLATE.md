@@ -56,7 +56,11 @@ stylebook_url: [https://...]
 
 ### Testing Scenarios
 
-Specs describe intent. Verification — which test, lint rule, or build check enforces a scenario — lives in code, not in this spec. Each Gherkin scenario below MUST be covered by at least one verification artifact that declares upward via a `Verifies:` tag (see `specs/VERIFICATION.md`). Don't name paths or tools here; the implementer picks them, the artifact declares the link, and `pnpm spec:coverage` builds the inverse map.
+Specs describe intent. Verification — which test, lint rule, or build check enforces a scenario — lives in code, not in this spec.
+
+Load-bearing contracts (security, data integrity, public API, regression-critical behaviour) should be covered by at least one verification artifact that declares upward via a `Verifies:` tag (see `specs/VERIFICATION.md`). Aspirational, decorative, or visually-validated scenarios may stay un-tagged — the tag system is a *navigation* tool ("which test covers this contract"), not a forcing function that compels a test for every Gherkin block. Cap scenarios at 5-7 per spec; if you need more, the feature is probably more than one spec.
+
+Don't name paths or tools here; the implementer picks them, the artifact declares the link, and `pnpm spec:coverage` builds the inverse map. `pnpm spec:coverage` fails on orphan tags (tag → non-existent scenario heading); it does not fail on un-tagged scenarios.
 
 #### Scenario: [Name]
 ```gherkin
