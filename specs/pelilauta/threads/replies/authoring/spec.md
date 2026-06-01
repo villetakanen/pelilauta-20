@@ -54,7 +54,7 @@ The write half of thread replies: an authenticated, non-frozen user on a thread 
   - `@pelilauta/firebase/server` — `verifyIdToken`, admin Firestore writes.
   - `@pelilauta/threads/server` — `ReplySchema` for parsing the freshly written doc before returning it.
   - `@pelilauta/threads/client` — `subscribeReplies` already handles deduplication via Firestore `docChanges()`; the optimistic-append flow relies on this without further coupling.
-  - i18n: keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.frozenNotice`. (`threads:replies.compose.expand` is deprecated alongside the dropped composer mode toggle.)
+  - i18n: keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.frozenNotice`. (`threads:replies.compose.expand` is deprecated alongside the dropped composer mode toggle.) The host resolves these keys at SSR and passes the resulting strings as island props (`placeholderText`, `frozenNoticeText`, `errorText`) — translator functions cannot cross the Astro SSR→CSR island boundary and arrive as `null` after hydration.
 
 - **Constraints:**
   - **Server-side authority on identity and timing.** `owners`, `author`, `createdAt`, `updatedAt`, `flowTime`, `threadKey`, and `key` are computed server-side from the verified session uid + server time + route param. The request body's `markdownContent` / `images` / `quoteref` are the only client-trusted fields; everything else is ignored if present.
@@ -110,6 +110,7 @@ The write half of thread replies: an authenticated, non-frozen user on a thread 
 #### i18n DoD
 
 - [x] The keys `threads:replies.compose.placeholder`, `threads:replies.compose.submit`, `threads:replies.compose.error`, `threads:replies.compose.loginCta`, `threads:replies.compose.frozenNotice` exist in the project's locale files. (`compose.expand` was dropped alongside the rich-composer integration.)
+- [x] `ReplyForm` and `ThreadReplySection` accept pre-resolved `placeholderText`, `frozenNoticeText`, `errorText` as string props. They do NOT accept a translator-function prop, since functions cannot cross the Astro SSR→CSR island boundary.
 
 ### Regression Guardrails
 

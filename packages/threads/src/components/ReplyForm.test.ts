@@ -82,6 +82,9 @@ describe("ReplyForm", () => {
     const { container } = render(ReplyForm, {
       props: {
         threadKey: "t1",
+        placeholderText: "Write a reply…",
+        frozenNoticeText: "Account frozen.",
+        errorText: "Send failed.",
         onReplyAppended: vi.fn(),
       },
     });
@@ -104,6 +107,9 @@ describe("ReplyForm", () => {
     const { container } = render(ReplyForm, {
       props: {
         threadKey: "t1",
+        placeholderText: "Write a reply…",
+        frozenNoticeText: "Account frozen.",
+        errorText: "Send failed.",
         onReplyAppended: vi.fn(),
       },
     });
@@ -119,6 +125,9 @@ describe("ReplyForm", () => {
     const { container } = render(ReplyForm, {
       props: {
         threadKey: "t1",
+        placeholderText: "Write a reply…",
+        frozenNoticeText: "Account frozen.",
+        errorText: "Send failed.",
         onReplyAppended: vi.fn(),
       },
     });
@@ -182,6 +191,9 @@ describe("ReplyForm", () => {
     const { container } = render(ReplyForm, {
       props: {
         threadKey: "t1",
+        placeholderText: "Write a reply…",
+        frozenNoticeText: "Account frozen.",
+        errorText: "Send failed.",
         onReplyAppended,
         onReplyRemoved,
       },

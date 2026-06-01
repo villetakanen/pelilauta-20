@@ -79,7 +79,9 @@ const description = thread
           {initialReplies}
           {currentUid}
           {targetFlowTime}
-          t={t}
+          placeholderText={t("threads:replies.compose.placeholder")}
+          frozenNoticeText={t("threads:replies.compose.frozenNotice")}
+          errorText={t("threads:replies.compose.error")}
         />
       ) : (
         // Anonymous: pure SSR reply list + static login CTA. No JS bundle shipped.

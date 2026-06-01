@@ -34,8 +34,12 @@ interface Props {
   currentUid: string;
   targetFlowTime?: number;
   emptyLabel?: string;
-  /** i18n resolver passed from the host. */
-  t?: (key: string) => string;
+  /** Pre-resolved i18n strings for the embedded ReplyForm. Resolved at SSR
+   * by the host because translator functions cannot serialize across the
+   * Astro island boundary (they arrive as null after hydration). */
+  placeholderText: string;
+  frozenNoticeText: string;
+  errorText: string;
 }
 
 const {
@@ -44,7 +48,9 @@ const {
   currentUid,
   targetFlowTime,
   emptyLabel,
-  t = (key: string) => key,
+  placeholderText,
+  frozenNoticeText,
+  errorText,
 }: Props = $props();
 
 // We expose appendReply/removeReply to bridge the two components via bind:this.
@@ -69,7 +75,9 @@ function handleReplyRemoved(key: string) {
 />
 <ReplyForm
   {threadKey}
-  {t}
+  {placeholderText}
+  {frozenNoticeText}
+  {errorText}
   onReplyAppended={handleReplyAppended}
   onReplyRemoved={handleReplyRemoved}
 />
