@@ -6,6 +6,7 @@ export { default as ReplyArticle } from "./ReplyArticle.svelte";
 export { default as ReplyForm } from "./ReplyForm.svelte";
 export { default as ThreadCard } from "./ThreadCard.svelte";
 export { default as ThreadDetail } from "./ThreadDetail.svelte";
+export { default as ThreadMetadata } from "./ThreadMetadata.astro";
 export { default as ThreadReplies } from "./ThreadReplies.svelte";
 export { default as ThreadReplySection } from "./ThreadReplySection.svelte";
 export type { ReplyEntry } from "./types";

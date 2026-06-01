@@ -1,0 +1,77 @@
+---
+// ThreadMetadata — sidebar metadata block for the thread detail page.
+//
+// Renders three pieces of metadata: creation date, author (via ProfileLink),
+// and channel link. Static SSR; no client:* directives.
+//
+// Date source: thread.createdAt (NOT flowTime — see specs/pelilauta/threads/detail-page/sidebar-metadata.md §Architecture).
+// Author: thread.owners[0] identity, resolved as authorProfile by the host page.
+// Channel: display name resolved by host page; falls back to slug when not found.
+// i18n: connective phrasing driven by @pelilauta/threads/i18n in-package source.
+//
+// See specs/pelilauta/threads/detail-page/sidebar-metadata.md
+
+import { ProfileLink } from "@pelilauta/profiles/components";
+import type { Profile } from "@pelilauta/profiles/server";
+import { en, fi } from "../i18n";
+import type { Thread } from "../schemas/ThreadSchema";
+import { getMetadataDate } from "./getMetadataDate";
+
+interface Props {
+  thread: Thread;
+  authorProfile: Profile | null;
+  channelName: string;
+  locale: string;
+}
+
+const { thread, authorProfile, channelName, locale } = Astro.props;
+
+/**
+ * Formats a timestamp using the same heuristic as formatDateLabel in
+ * app/pelilauta/src/components/front-page/buildTopThreadCards.ts:
+ *   - within 72 h: relative via Intl.RelativeTimeFormat
+ *   - older: ISO YYYY-MM-DD
+ */
+function formatDateLabel(time: number, loc: string): string {
+  const now = Date.now();
+  const diffMs = time - now;
+  const diffH = diffMs / (1000 * 60 * 60);
+  if (Math.abs(diffH) <= 72) {
+    const rtf = new Intl.RelativeTimeFormat(loc, { numeric: "auto" });
+    const diffM = diffMs / (1000 * 60);
+    if (Math.abs(diffM) < 60) return rtf.format(Math.round(diffM), "minute");
+    if (Math.abs(diffH) < 24) return rtf.format(Math.round(diffH), "hour");
+    const diffD = diffH / 24;
+    return rtf.format(Math.round(diffD), "day");
+  }
+  return new Date(time).toISOString().substring(0, 10);
+}
+
+// thread.createdAt may be undefined for legacy documents; fall back to epoch
+// (produces "1970-01-01") rather than crashing with RangeError on new Date(NaN).
+// Matches v17's new Date(0) fallback pattern. Uses getMetadataDate so the
+// "date source = createdAt, not flowTime" contract is enforced by the unit test.
+const createdAtMs = getMetadataDate(thread);
+
+const dateLabel = formatDateLabel(createdAtMs, locale);
+
+// Connective phrasing is owned by the component, sourced from the in-package i18n.
+// Default to Finnish unless locale is explicitly "en", matching the project-wide
+// locale fallback convention (only two locales: fi and en).
+const tree = locale === "en" ? en : fi;
+const inChannelTemplate = (tree.thread as Record<string, string>).inChannel ?? "Aiheessa {topic}";
+
+// Split the template on the {topic} placeholder so the channel name becomes an
+// anchor while the surrounding connective text remains plain.
+// e.g. "Aiheessa {topic}" → prefix="Aiheessa ", suffix=""
+// In valid locales this template has {topic}; defensive fallback for malformed locales.
+const templateParts = inChannelTemplate.split("{topic}");
+const channelPrefix = templateParts.length === 2 ? (templateParts[0] ?? "") : "";
+const channelSuffix = templateParts.length === 2 ? (templateParts[1] ?? "") : "";
+---
+
+<address>
+  <time datetime={new Date(createdAtMs).toISOString().substring(0, 10)}>{dateLabel}</time>
+  <ProfileLink profile={authorProfile} />
+  <span>{channelPrefix}<a href={`/channels/${thread.channel}`}>{channelName}</a>{channelSuffix}</span>
+</address>
