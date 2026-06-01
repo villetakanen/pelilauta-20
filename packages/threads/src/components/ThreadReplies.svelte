@@ -8,15 +8,15 @@
 // fires once per mount after tick().
 //
 // See specs/pelilauta/threads/detail-page/replies/spec.md
-// §ThreadReplies SSR-renders every initialReply with id={reply.key}
-// §ThreadReplies mounts the realtime listener only when authenticated
-// §ThreadReplies merges a docChanges diff into the rendered list
-// §ThreadReplies scrolls to the first reply at-or-after targetFlowTime
-// §ThreadReplies does not scroll when no reply matches targetFlowTime
-// §Anonymous SSR response is uid-independent and listener-free
-// §Authenticated SSR resolves fromUser from currentUid
-// §ThreadReplies recomputes fromUser when the auth atom resolves
-// §Native #reply-{key} fragment scrolls without component logic
+// §Anonymous viewer receives the full reply list in SSR
+// §Authenticated viewer sees new replies appear without reload
+// §Authenticated viewer sees new replies appear without reload
+// §?since={flowTime} scrolls to the first matching reply
+// §?since={flowTime} scrolls to the first matching reply
+// §Anonymous viewer receives the full reply list in SSR
+// §Own replies render with the reply bubble variant
+// §Own replies render with the reply bubble variant
+// §Native #reply-{key} fragment jumps to a reply without JavaScript
 
 import type { SessionState } from "@pelilauta/auth/client";
 import { sessionState, uid } from "@pelilauta/auth/client";

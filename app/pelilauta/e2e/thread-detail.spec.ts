@@ -5,8 +5,8 @@
 // are not fixed; tests that require a real thread discover one via the front
 // page and skip when the dev database is empty.
 //
-// Verifies: specs/pelilauta/threads/detail-page/spec.md §Anonymous thread page renders the reader container with two columns
-// Verifies: specs/pelilauta/threads/detail-page/spec.md §Error and not-found states render outside the reader container
+// Verifies: specs/pelilauta/threads/detail-page/spec.md §Anonymous thread page renders reader and replies as separate content containers
+// Verifies: specs/pelilauta/threads/detail-page/spec.md §Error and not-found states render outside both containers
 // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §Metadata block renders date, author, and channel link
 // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §Host page wires the sidebar slot
 // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §SSR produces no client-side JS for the metadata block
@@ -156,6 +156,11 @@ test.describe("Thread Detail", () => {
 
     // No reply UI inside the reader container — reply region is a sibling.
     await expect(golden.locator("astro-island")).toHaveCount(0);
+
+    // Reply region lives in a cn-content-prose container that is a subsequent sibling of cn-content-golden.
+    // (The page may have other .cn-content-prose elements like the footer credits; the sibling selector
+    // pins the assertion to the reader → replies layout specifically.)
+    await expect(page.locator(".cn-content-golden ~ .cn-content-prose")).toHaveCount(1);
   });
 
   test("404 page renders no cn-content-golden", async ({ page }) => {

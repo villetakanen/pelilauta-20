@@ -12,7 +12,7 @@
 //   - getProfile MUST be called here, not inside any .svelte component.
 //   - Promise.all is used so all profile reads parallelise.
 //
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
 
 import type { Profile } from "@pelilauta/profiles/server";
 import { getProfile } from "@pelilauta/profiles/server";

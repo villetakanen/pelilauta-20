@@ -6,8 +6,8 @@
 // no markdownToHTML, no getProfile calls.
 //
 // See specs/pelilauta/threads/detail-page/replies/spec.md
-// §ReplyArticle composes its DS primitives without async work
-// §ReplyArticle uses the reply variant of CnBubble when fromUser is true
+// §ReplyArticle is a pure render
+// §Own replies render with the reply bubble variant
 
 import CnBubble from "@cyan/components/CnBubble.svelte";
 import CnLightbox from "@cyan/components/CnLightbox.svelte";

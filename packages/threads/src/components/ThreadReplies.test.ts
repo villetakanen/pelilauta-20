@@ -1,13 +1,13 @@
 // ThreadReplies component tests
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies SSR-renders every initialReply with id={reply.key}
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies mounts the realtime listener only when authenticated
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies merges a docChanges diff into the rendered list
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies scrolls to the first reply at-or-after targetFlowTime
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies does not scroll when no reply matches targetFlowTime
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous SSR response is uid-independent and listener-free
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated SSR resolves fromUser from currentUid
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies recomputes fromUser when the auth atom resolves
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Native #reply-{key} fragment scrolls without component logic
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §?since={flowTime} scrolls to the first matching reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §?since={flowTime} scrolls to the first matching reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Native #reply-{key} fragment jumps to a reply without JavaScript
 
 import { sessionState as sessionStateAtom, uid as uidAtom } from "@pelilauta/auth/client";
 import type { Profile } from "@pelilauta/profiles/server";
@@ -65,7 +65,7 @@ function makeEntry(key: string, overrides: Partial<Reply> = {}) {
 describe("ThreadReplies", () => {
   // Scenario: ThreadReplies SSR-renders every initialReply with id={reply.key}
   it("renders an article with id for each initialReply", () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies SSR-renders every initialReply with id={reply.key}
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
     const entries = [makeEntry("r1"), makeEntry("r2"), makeEntry("r3"), makeEntry("r4")];
     const { container } = render(ThreadReplies, {
       props: {
@@ -84,7 +84,7 @@ describe("ThreadReplies", () => {
   });
 
   it("renders each article with its bodyHtml", () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies SSR-renders every initialReply with id={reply.key}
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
     const entries = [makeEntry("r1"), makeEntry("r2")];
     const { container } = render(ThreadReplies, {
       props: { threadKey: "t1", initialReplies: entries },
@@ -95,11 +95,11 @@ describe("ThreadReplies", () => {
 
   // Scenario: Native #reply-{key} fragment scrolls without component logic
   // The id={reply.key} assertion above already covers this — id is set on the article element
-  // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Native #reply-{key} fragment scrolls without component logic
+  // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Native #reply-{key} fragment jumps to a reply without JavaScript
 
   // Scenario: Anonymous SSR response is uid-independent and listener-free
   it("does NOT call subscribeReplies when uid is null (anonymous)", () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous SSR response is uid-independent and listener-free
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
     uidAtom.set(null);
     sessionStateAtom.set("initial");
     render(ThreadReplies, {
@@ -109,7 +109,7 @@ describe("ThreadReplies", () => {
   });
 
   it("does NOT call subscribeReplies when sessionState is loading (not active)", () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies mounts the realtime listener only when authenticated
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
     uidAtom.set("u1");
     sessionStateAtom.set("loading" as Parameters<typeof sessionStateAtom.set>[0]);
     render(ThreadReplies, {
@@ -120,7 +120,7 @@ describe("ThreadReplies", () => {
 
   // Scenario: Authenticated SSR resolves fromUser from currentUid
   it("renders reply with reply bubble class when currentUid matches reply owner", () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated SSR resolves fromUser from currentUid
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
     const entries = [
       makeEntry("r1", { owners: ["u1"], author: "u1" }),
       makeEntry("r2", { owners: ["u2"], author: "u2" }),
@@ -141,7 +141,7 @@ describe("ThreadReplies", () => {
   });
 
   it("renders all fromUser=false when currentUid is null (anonymous)", () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous SSR response is uid-independent and listener-free
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
     const entries = [makeEntry("r1", { owners: ["u1"] }), makeEntry("r2", { owners: ["u2"] })];
     const { container } = render(ThreadReplies, {
       props: { threadKey: "t1", initialReplies: entries, currentUid: null },
@@ -154,7 +154,7 @@ describe("ThreadReplies", () => {
 
   // Scenario: ThreadReplies mounts the realtime listener only when authenticated
   it("calls subscribeReplies when uid is set and sessionState is active", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies mounts the realtime listener only when authenticated
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
     const { flushSync } = await import("svelte");
     uidAtom.set("u1");
     sessionStateAtom.set("active");
@@ -166,7 +166,7 @@ describe("ThreadReplies", () => {
   });
 
   it("invokes the unsubscribe handle when the component is unmounted", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies mounts the realtime listener only when authenticated
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
     const { flushSync } = await import("svelte");
     const unsubMock = vi.fn();
     subscribeRepliesMock.mockReturnValue(unsubMock);
@@ -183,7 +183,7 @@ describe("ThreadReplies", () => {
 
   // Scenario: ThreadReplies merges a docChanges diff into the rendered list
   it("adds new replies from the diff to the rendered list", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies merges a docChanges diff into the rendered list
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
     const { flushSync } = await import("svelte");
     let capturedCallback: ((diff: unknown) => void) | undefined;
     subscribeRepliesMock.mockImplementation((_key: string, cb: (diff: unknown) => void) => {
@@ -215,7 +215,7 @@ describe("ThreadReplies", () => {
   });
 
   it("updates a modified reply in place (by key)", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies merges a docChanges diff into the rendered list
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
     const { flushSync } = await import("svelte");
     let capturedCallback: ((diff: unknown) => void) | undefined;
     subscribeRepliesMock.mockImplementation((_key: string, cb: (diff: unknown) => void) => {
@@ -246,7 +246,7 @@ describe("ThreadReplies", () => {
   });
 
   it("removes replies from the diff", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies merges a docChanges diff into the rendered list
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Authenticated viewer sees new replies appear without reload
     const { flushSync } = await import("svelte");
     let capturedCallback: ((diff: unknown) => void) | undefined;
     subscribeRepliesMock.mockImplementation((_key: string, cb: (diff: unknown) => void) => {
@@ -279,7 +279,7 @@ describe("ThreadReplies", () => {
 
   // Scenario: ThreadReplies scrolls to the first reply at-or-after targetFlowTime
   it("calls scrollIntoView on the first reply at-or-after targetFlowTime", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies scrolls to the first reply at-or-after targetFlowTime
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §?since={flowTime} scrolls to the first matching reply
     const scrolledTargets: Element[] = [];
     const scrollMock = vi.fn(function (this: Element) {
       scrolledTargets.push(this);
@@ -308,7 +308,7 @@ describe("ThreadReplies", () => {
 
   // Scenario: ThreadReplies does not scroll when no reply matches targetFlowTime
   it("does NOT call scrollIntoView when no reply has flowTime >= targetFlowTime", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies does not scroll when no reply matches targetFlowTime
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §?since={flowTime} scrolls to the first matching reply
     const scrolledTargets: Element[] = [];
     const scrollMock = vi.fn(function (this: Element) {
       scrolledTargets.push(this);
@@ -333,7 +333,7 @@ describe("ThreadReplies", () => {
 
   // Scenario: ThreadReplies recomputes fromUser when the auth atom resolves
   it("upgrades bubble variant to reply when uid atom resolves after SSR with null", async () => {
-    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ThreadReplies recomputes fromUser when the auth atom resolves
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
     const { flushSync } = await import("svelte");
 
     const entries = [makeEntry("r1", { owners: ["u1"] })];

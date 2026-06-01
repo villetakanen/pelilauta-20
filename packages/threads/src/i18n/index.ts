@@ -16,11 +16,12 @@ export const fi: Record<string, NestedTranslation> = {
     threadCount: "{count} ketjua",
   },
   replies: {
+    title: "Keskustelu",
     compose: {
       placeholder: "Kirjoita vastaus…",
       submit: "Lähetä",
       error: "Vastauksen lähettäminen epäonnistui. Yritä uudelleen.",
-      loginCta: "Kirjaudu sisään vastataksesi",
+      loginCta: "Osallistu keskusteluun",
       frozenNotice: "Tilisi on jäädytetty eikä voi lähettää vastauksia.",
     },
   },
@@ -36,11 +37,12 @@ export const en: Record<string, NestedTranslation> = {
     threadCount: "{count} threads",
   },
   replies: {
+    title: "Discussion",
     compose: {
       placeholder: "Write a reply…",
       submit: "Send",
       error: "Failed to send reply. Please try again.",
-      loginCta: "Sign in to reply",
+      loginCta: "Join the discussion",
       frozenNotice: "Your account is frozen and cannot post replies.",
     },
   },

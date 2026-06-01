@@ -1,4 +1,4 @@
-// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
 
 import type { Profile } from "@pelilauta/profiles/server";
 import type { Reply } from "@pelilauta/threads/server";
