@@ -65,7 +65,12 @@ const description = thread
 <Page title={title} description={description} layout="view" ogType="article">
   {error && <p>{t("pelilauta:error.fetch")}</p>}
   {!error && !thread && <p>{t("pelilauta:error.notFound")}</p>}
-  {!error && thread && <ThreadDetail thread={thread} bodyHtml={bodyHtml} />}
+  {!error && thread && (
+    <div class="cn-content-golden">
+      <ThreadDetail thread={thread} bodyHtml={bodyHtml} />
+      <aside></aside>
+    </div>
+  )}
   {!error && thread && (
     <>
       {currentUid ? (

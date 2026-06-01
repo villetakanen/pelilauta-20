@@ -4,6 +4,9 @@
 // Thread data comes from the dev Firebase project — the exact threads available
 // are not fixed; tests that require a real thread discover one via the front
 // page and skip when the dev database is empty.
+//
+// Verifies: specs/pelilauta/threads/detail-page/spec.md §Anonymous thread page renders the reader container with two columns
+// Verifies: specs/pelilauta/threads/detail-page/spec.md §Error and not-found states render outside the reader container
 
 import { expect, test } from "@playwright/test";
 
@@ -105,5 +108,57 @@ test.describe("Thread Detail", () => {
     const randomSuffix = Date.now();
     const response = await page.goto(`/threads/this-thread-does-not-exist-${randomSuffix}`);
     expect(response?.status()).toBe(404);
+  });
+
+  test("renders the cn-content-golden reader container with two direct children", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0) test.skip(count === 0, "No threads in dev database");
+
+    let href: string | null = null;
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        href = await link.getAttribute("href");
+        if (href) break;
+      }
+    }
+    if (!href) {
+      test.skip(true, "No /threads/ link found");
+      return;
+    }
+
+    const response = await page.goto(href);
+    expect(response?.status()).toBe(200);
+
+    // Exactly one reader container.
+    const golden = page.locator(".cn-content-golden");
+    await expect(golden).toHaveCount(1);
+
+    // Two direct element children: main (<ThreadDetail> emits <article>) and sidebar slot (<aside>).
+    const directChildren = golden.locator("> *");
+    await expect(directChildren).toHaveCount(2);
+
+    // First child contains the thread article with the h1 title.
+    await expect(directChildren.nth(0).locator("h1")).toBeVisible();
+
+    // Second child is the sidebar slot — an empty <aside> for now.
+    await expect(directChildren.nth(1)).toHaveJSProperty("tagName", "ASIDE");
+
+    // No reply UI inside the reader container — reply region is a sibling.
+    await expect(golden.locator("astro-island")).toHaveCount(0);
+  });
+
+  test("404 page renders no cn-content-golden", async ({ page }) => {
+    const randomSuffix = Date.now();
+    const response = await page.goto(`/threads/this-thread-does-not-exist-${randomSuffix}`);
+    expect(response?.status()).toBe(404);
+    await expect(page.locator(".cn-content-golden")).toHaveCount(0);
   });
 });
