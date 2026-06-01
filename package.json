@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm --filter ./app/pelilauta dev",
     "dev:ds": "pnpm --filter ./app/cyan-ds dev",
-    "build": "pnpm --filter './app/*' build",
+    "build": "pnpm --filter ./app/pelilauta build && pnpm --filter ./app/cyan-ds build",
     "test": "pnpm --filter '*' test",
     "test:e2e": "pnpm --filter './app/*' test:e2e",
     "check": "biome check --write .",
