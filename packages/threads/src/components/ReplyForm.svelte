@@ -11,10 +11,10 @@
 //   3. On 201: onReplyAppended called with server reply + _replaceKey=tmpKey.
 //   4. On error: onReplyRemoved(tmpKey) called, error shown, draft kept.
 //
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit is disabled for empty drafts
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit is disabled for empty drafts
 
 import CnChatBar from "@cyan/components/CnChatBar.svelte";
 import CnReplyAnchor from "@cyan/components/CnReplyAnchor.svelte";

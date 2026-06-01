@@ -227,6 +227,65 @@ test.describe("Thread Detail", () => {
     await expect(aside.locator(".cn-card")).toHaveCount(0);
   });
 
+  // Verifies: specs/pelilauta/threads/detail-page/cover-lightbox.md §SSR cover is visible without JavaScript
+  test("cover image figure is present in SSR HTML for threads with a poster", async ({ page }) => {
+    // Step 1: Navigate to the front page to discover thread URLs.
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0) {
+      test.skip(count === 0, "No threads in dev database — skip SSR cover test");
+      return;
+    }
+
+    // Collect thread hrefs from front-page cards.
+    const hrefs: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        const href = await link.getAttribute("href");
+        if (href) hrefs.push(href);
+      }
+    }
+
+    if (hrefs.length === 0) {
+      test.skip(true, "No /threads/ links found — skip SSR cover test");
+      return;
+    }
+
+    // Step 2: For each discovered thread URL, fetch the RAW HTTP response body
+    // using page.request.get() — this is the server-emitted HTML before any
+    // JavaScript runs, and is the correct way to assert SSR content.
+    // The figure+img markup must be present in the response bytes, not
+    // injected by client-side hydration.
+    let foundPosterThread = false;
+    for (const href of hrefs) {
+      const response = await page.request.get(href);
+      expect(response.status()).toBe(200);
+
+      // Inspect raw response body — JavaScript has NOT executed at this point.
+      const html = await response.text();
+
+      // Look for a <figure> containing an <img> in the raw HTML.
+      // Regex captures the src attribute of the first img inside a figure.
+      const figureImgMatch = html.match(/<figure[^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/);
+      if (figureImgMatch) {
+        const imgSrc = figureImgMatch[1];
+        // src must be an absolute URL (poster URLs are always absolute).
+        expect(imgSrc).toMatch(/^https?:\/\//);
+        foundPosterThread = true;
+        break;
+      }
+    }
+
+    if (!foundPosterThread) {
+      test.skip(true, "No threads with poster images found in dev database — skip SSR cover test");
+    }
+  });
+
   // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §SSR produces no client-side JS for the metadata block
   test("sidebar metadata block contains no astro-island (pure SSR)", async ({ page }) => {
     await page.goto("/");

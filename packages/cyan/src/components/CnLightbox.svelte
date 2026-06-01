@@ -84,7 +84,7 @@ function handleDialogClose() {
 
 <style>
   .single-figure {
-    margin: 0;
+    margin: 0 0 var(--cn-line);
     padding: var(--cn-lightbox-inner-spacing);
     cursor: pointer;
     background: var(--cn-lightbox-background);
@@ -119,6 +119,7 @@ function handleDialogClose() {
     gap: var(--cn-lightbox-inner-spacing);
     overflow-x: scroll;
     position: relative;
+    margin: 0 0 var(--cn-line);
     padding: var(--cn-lightbox-inner-spacing);
     background: var(--cn-lightbox-background);
     border-radius: var(--cn-lightbox-border-radius);

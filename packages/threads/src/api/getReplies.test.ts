@@ -1,9 +1,9 @@
-// Verifies: specs/pelilauta/threads/replies/spec.md §getReplies returns an empty array for an empty threadKey
-// Verifies: specs/pelilauta/threads/replies/spec.md §getReplies returns parsed replies sorted by flowTime ascending
-// Verifies: specs/pelilauta/threads/replies/spec.md §getReplies returns Date-typed timestamps from Firestore Timestamps
-// Verifies: specs/pelilauta/threads/replies/spec.md §getReplies tie-breaks equal flowTimes by createdAt ascending
-// Verifies: specs/pelilauta/threads/replies/spec.md §getReplies propagates Firestore errors
-// Verifies: specs/pelilauta/threads/replies/spec.md §getReplies propagates Zod parse failures on a malformed doc
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies returns an empty array for an empty threadKey
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies returns parsed replies sorted by flowTime ascending
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies returns Date-typed timestamps from Firestore Timestamps
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies tie-breaks equal flowTimes by createdAt ascending
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies propagates Firestore errors
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies propagates Zod parse failures on a malformed doc
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -46,7 +46,7 @@ describe("getReplies", () => {
   });
 
   it("returns [] for an empty threadKey without issuing a Firestore read", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §getReplies returns an empty array for an empty threadKey
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies returns an empty array for an empty threadKey
     const { getReplies } = await import("./getReplies");
     const result = await getReplies("");
 
@@ -55,7 +55,7 @@ describe("getReplies", () => {
   });
 
   it("returns parsed replies sorted by flowTime ascending", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §getReplies returns parsed replies sorted by flowTime ascending
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies returns parsed replies sorted by flowTime ascending
     getMock.mockResolvedValue({
       docs: [
         makeReplyDoc("r3", { flowTime: 300 }),
@@ -80,7 +80,7 @@ describe("getReplies", () => {
   });
 
   it("returns Date-typed timestamps from Firestore Timestamps", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §getReplies returns Date-typed timestamps from Firestore Timestamps
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies returns Date-typed timestamps from Firestore Timestamps
     // Simulate Firestore Timestamp instances (objects with toDate/toMillis methods)
     const firestoreTimestamp = (ms: number) => ({
       toDate: () => new Date(ms),
@@ -109,7 +109,7 @@ describe("getReplies", () => {
   });
 
   it("tie-breaks equal flowTimes by createdAt ascending", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §getReplies tie-breaks equal flowTimes by createdAt ascending
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies tie-breaks equal flowTimes by createdAt ascending
     getMock.mockResolvedValue({
       docs: [
         makeReplyDoc("r2", {
@@ -133,7 +133,7 @@ describe("getReplies", () => {
   });
 
   it("propagates Firestore errors", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §getReplies propagates Firestore errors
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies propagates Firestore errors
     getMock.mockRejectedValue(new Error("permission-denied"));
 
     const { getReplies } = await import("./getReplies");
@@ -142,7 +142,7 @@ describe("getReplies", () => {
   });
 
   it("propagates Zod parse failures on a malformed doc", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §getReplies propagates Zod parse failures on a malformed doc
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §getReplies propagates Zod parse failures on a malformed doc
     getMock.mockResolvedValue({
       docs: [
         makeReplyDoc("bad", {

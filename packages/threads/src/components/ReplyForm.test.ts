@@ -1,7 +1,7 @@
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit is disabled for empty drafts
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit is disabled for empty drafts
 
 import {
   profile as profileAtom,

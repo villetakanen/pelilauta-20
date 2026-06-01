@@ -5,7 +5,7 @@
 // pre-rendered bodyHtml via {@html}. No async work, no Firestore reads,
 // no markdownToHTML, no getProfile calls.
 //
-// See specs/pelilauta/threads/replies/spec.md
+// See specs/pelilauta/threads/detail-page/replies/spec.md
 // §ReplyArticle composes its DS primitives without async work
 // §ReplyArticle uses the reply variant of CnBubble when fromUser is true
 

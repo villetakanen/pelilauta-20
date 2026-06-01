@@ -3,8 +3,8 @@
 // Anonymous viewers: full SSR reply list, no JS for the reply list.
 // Authenticated viewers: same SSR seed, then ThreadReplies hydrates for realtime updates.
 // See specs/pelilauta/threads/spec.md Stage-2 DoD.
-// See specs/pelilauta/threads/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
-// See specs/pelilauta/threads/replies/spec.md §Host page parses ?since= into targetFlowTime
+// See specs/pelilauta/threads/detail-page/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
+// See specs/pelilauta/threads/detail-page/replies/spec.md §Host page parses ?since= into targetFlowTime
 
 import type { Profile } from "@pelilauta/profiles/server";
 import { getProfile } from "@pelilauta/profiles/server";

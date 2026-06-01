@@ -42,6 +42,7 @@ A responsive image gallery used inline in content where one or more images need 
   - Multi-image container is `display: flex; flex-wrap: nowrap; overflow-x: scroll` and relies on native horizontal scroll. No wheel-event interception — trackpad two-finger swipe, shift+scroll, touch swipe, and scrollbar drag all work via the platform.
   - Multi-image container shows a right-edge fade gradient as a discoverability affordance whenever there is content scrolled off-screen to the right. Implementation: a CSS mask or layered linear-gradient fixed to the container's right edge, sized to fade out roughly the last `--cn-grid` of width.
   - Modal uses `position: fixed`, full viewport coverage, `z-index: var(--z-index-modal)`, `rgba(0, 0, 0, 0.8)` backdrop, image at `object-fit: contain` with `max-width: 90%` and `max-height: 90%`.
+  - Block spacing: both the single-figure and the multi-figure container carry `margin-block-end: var(--cn-line)` so content following the lightbox in source flow has standard vertical rhythm without per-instance margins on consumers.
   - Styling uses Svelte's default scoped CSS. Inside cyan/ packages, scoped CSS is the correct boundary; the "apps never override DS" rule applies to app-layer code only.
 
 ### Book Page

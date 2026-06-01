@@ -9,8 +9,8 @@
 // accepted directly. The anonymous branch still renders a plain <ThreadReplies>
 // with no client: directive.
 //
-// See specs/pelilauta/threads/replies/authoring/spec.md §Host Page DoD
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Anonymous viewers see a login CTA in place of the form
+// See specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Host Page DoD
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Anonymous viewers see a login CTA in place of the form
 
 import ReplyForm from "./ReplyForm.svelte";
 import ThreadReplies from "./ThreadReplies.svelte";

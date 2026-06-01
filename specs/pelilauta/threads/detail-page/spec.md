@@ -16,7 +16,7 @@ parent_spec: ../spec.md
 
 This is the page a reader lands on when they open a single discussion thread. On wide viewports it reads as a two-column layout: the thread article on the left, a narrower sidebar on the right carrying metadata about the thread (channel, author, dates) and actions on it (edit, share, moderation). On narrow viewports the sidebar stacks below the article.
 
-The reply discussion renders below the article in its own region; this spec only owns the upper reader area and the sidebar slot. Reply behaviour stays in [`../replies/spec.md`](../replies/spec.md), and the thread body component contract stays in [`../spec.md`](../spec.md). Individual sidebar widgets (metadata, info actions, share button, lightbox cover, etc.) each get their own sub-spec under this folder as they land.
+The reply discussion renders below the article in its own region; this spec only owns the upper reader area and the sidebar slot. Reply behaviour stays in [`./replies/spec.md`](./replies/spec.md), and the thread body component contract stays in [`../spec.md`](../spec.md). Individual sidebar widgets (metadata, info actions, share button, lightbox cover, etc.) each get their own sub-spec under this folder as they land.
 
 ### Architecture
 
@@ -27,7 +27,7 @@ The reply discussion renders below the article in its own region; this spec only
   - *Main column:* `<ThreadDetail>` (thread article).
   - *Sidebar column:* the metadata / actions slot. Future sidebar widgets (#35 metadata block, #39 ThreadInfoActions, #40 share button, etc.) compose here. While no widgets are implemented, the slot still renders so the grid stays balanced; narrow mode stacks main above sidebar.
 - **Anonymous parity.** The reader container renders identically for anonymous and authenticated viewers from SSR. Sidebar widgets that require auth (e.g. `ThreadInfoActions`) self-gate; their absence does not change the layout.
-- **Out of scope for this iteration.** The reply region (list + chat-bar input) is *not* restructured by this spec — it continues to render below the reader as it does today. A follow-up will move the in-flow reply list into its own `cn-content-prose` container so it gets full prose width like v18; that change ships on its own GitHub issue, not under #34. Reply input docking to the app shell stays unchanged and is owned by [`../replies/spec.md`](../replies/spec.md).
+- **Out of scope for this iteration.** The reply region (list + chat-bar input) is *not* restructured by this spec — it continues to render below the reader as it does today. A follow-up will move the in-flow reply list into its own `cn-content-prose` container so it gets full prose width like v18; that change ships on its own GitHub issue, not under #34. Reply input docking to the app shell stays unchanged and is owned by [`./replies/spec.md`](./replies/spec.md).
 
 ### Dependencies
 

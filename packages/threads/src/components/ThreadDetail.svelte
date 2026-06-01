@@ -1,4 +1,5 @@
 <script lang="ts">
+import CnLightbox from "@cyan/components/CnLightbox.svelte";
 import type { Thread } from "../schemas/ThreadSchema";
 
 let {
@@ -9,26 +10,17 @@ let {
   bodyHtml: string;
 } = $props();
 
-const posterUrl = $derived(
-  thread.poster
-    ? thread.poster
-    : thread.images && thread.images.length > 0
-      ? thread.images[0]?.url
-      : undefined,
-);
-
-const channelSlug = $derived(thread.channel.toLowerCase().replace(/\s+/g, "-"));
-
-const authorUid = $derived(thread.owners?.[0]);
-const isAnonymous = $derived(!authorUid || authorUid === "-");
+const coverImages = $derived.by(() => {
+  const mapped = (thread.images ?? []).map(({ url, alt }) => ({ src: url, caption: alt }));
+  if (thread.poster && !mapped.some((img) => img.src === thread.poster)) {
+    return [{ src: thread.poster, caption: thread.title }, ...mapped];
+  }
+  return mapped;
+});
 </script>
 
 <article lang={thread.locale}>
   <h1>{thread.title}</h1>
-  <p><a href={`/channels/${channelSlug}`}>{thread.channel}</a></p>
-  <p>{isAnonymous ? "anonymous" : authorUid}</p>
-  {#if posterUrl}
-    <img src={posterUrl} alt={thread.title} />
-  {/if}
+  <CnLightbox images={coverImages} />
   <section>{@html bodyHtml}</section>
 </article>

@@ -1,6 +1,6 @@
-// E2E: Thread Reply Authoring — specs/pelilauta/threads/replies/authoring/spec.md
+// E2E: Thread Reply Authoring — specs/pelilauta/threads/detail-page/replies/authoring/spec.md
 //
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Anonymous viewers see a login CTA in place of the form
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Anonymous viewers see a login CTA in place of the form
 //
 // Note: The "happy path post flow" scenario (authenticated user submits a reply)
 // requires a running app + a live Firestore dev database. It is structured to
@@ -14,7 +14,7 @@ import { test as authTest } from "./fixtures/auth";
 // ---  Anonymous viewer sees login CTA ---
 
 test.describe("Reply Authoring — anonymous viewer", () => {
-  // Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Anonymous viewers see a login CTA in place of the form
+  // Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Anonymous viewers see a login CTA in place of the form
   test("shows login CTA link instead of reply form on thread page", async ({ page }) => {
     // Find a real thread key from the front page first
     await page.goto("/");
@@ -76,7 +76,7 @@ test.describe("Reply Authoring — anonymous viewer", () => {
 // test exists to catch.
 
 authTest.describe("Reply Authoring — authenticated viewer", () => {
-  // Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Successful write returns the parsed Reply
+  // Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Successful write returns the parsed Reply
   authTest(
     "SSR renders the ThreadReplySection island for authenticated user",
     async ({ signedInPage }) => {

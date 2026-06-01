@@ -5,7 +5,7 @@
 // No error is surfaced to the user on invalid input — callers receive
 // undefined and skip the scroll-to-target behavior.
 //
-// Verifies: specs/pelilauta/threads/replies/spec.md §Host page parses ?since= into targetFlowTime
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Host page parses ?since= into targetFlowTime
 
 export function parseSinceParam(url: URL | string | null | undefined): number | undefined {
   if (!url) return undefined;

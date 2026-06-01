@@ -7,7 +7,7 @@
 // is called and its diffs are merged into the rendered list. Scroll-to-target
 // fires once per mount after tick().
 //
-// See specs/pelilauta/threads/replies/spec.md
+// See specs/pelilauta/threads/detail-page/replies/spec.md
 // §ThreadReplies SSR-renders every initialReply with id={reply.key}
 // §ThreadReplies mounts the realtime listener only when authenticated
 // §ThreadReplies merges a docChanges diff into the rendered list

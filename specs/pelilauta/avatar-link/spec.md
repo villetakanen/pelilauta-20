@@ -13,7 +13,7 @@ last_major_review: 2026-05-06
 
 The profiles package already provides the parts for an avatar-linked profile citation — `CnAvatar` from `@pelilauta/cyan/components`, `ProfileLink` for the text/nick citation, `getProfile` for upstream resolution — but no combined primitive that pairs an avatar with the `/profiles/{uid}` link target. `AvatarLink` fills that gap: a sibling to `ProfileLink` that renders `<a href="/profiles/{uid}"><CnAvatar nick src/></a>` for resolved profiles and a bare `<CnAvatar/>` for the anonymous fallback.
 
-`ReplyArticle.svelte` (`packages/threads/src/components/`, see [`../threads/replies/spec.md`](../threads/replies/spec.md)) is the immediate consumer — it pairs `AvatarLink` and `ProfileLink` inside a `cn-bubble` header to render reply bylines. The primitive is reusable on every surface that wants an avatar-linked profile citation: thread cards, channel directories, search results, member listings.
+`ReplyArticle.svelte` (`packages/threads/src/components/`, see [`../threads/detail-page/replies/spec.md`](../threads/detail-page/replies/spec.md)) is the immediate consumer — it pairs `AvatarLink` and `ProfileLink` inside a `cn-bubble` header to render reply bylines. The primitive is reusable on every surface that wants an avatar-linked profile citation: thread cards, channel directories, search results, member listings.
 
 Reverse-engineered from `pelilauta-17`:
 
