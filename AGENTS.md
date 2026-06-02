@@ -28,6 +28,8 @@ Gates are enforced by `lefthook` at git boundaries. `pnpm install` wires them.
 
 `lefthook.yml` is the only definition of the chain. Bypass is `--no-verify` — explicit, visible, never used on agent authority.
 
+E2e runs against `pnpm dev:e2e` on port 4323 with `reuseExistingServer: false`. Port 4321 is for manual `pnpm dev`; the two coexist and never share a process.
+
 **Cleanup radius.** When you modify a file under `packages/X/` or `app/X/`, that entire package must be clean across the gates that apply to it — including pre-existing failures you didn't introduce. Fix them in the same commit.
 
 **When a gate is red.** Fix it, mark the test with a tracking note, or get explicit user opt-in to bypass. Agents never pick bypass on their own authority.

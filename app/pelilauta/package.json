@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
+    "dev:e2e": "astro dev --port 4323",
     "build": "astro build",
     "preview": "astro preview --port 4321",
     "test": "vitest run --passWithNoTests",

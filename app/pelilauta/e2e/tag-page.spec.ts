@@ -46,11 +46,8 @@ test(// Verifies: specs/pelilauta/tag-page/spec.md §Synonym redirect terminates
   // Final status must be 200 — no redirect loop.
   expect(response?.status()).toBe(200);
   // Final URL resolves to the decoded canonical.
-  const finalUrl = page.url();
-  expect(
-    finalUrl === "http://localhost:4321/tags/d&d" ||
-      finalUrl === "http://localhost:4321/tags/d%26d",
-  ).toBe(true);
+  const finalPath = new URL(page.url()).pathname;
+  expect(finalPath === "/tags/d&d" || finalPath === "/tags/d%26d").toBe(true);
 
   // The supertag rich header (h1 with icon) must be present.
   const h1 = page.locator("h1").first();

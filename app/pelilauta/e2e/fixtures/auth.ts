@@ -14,8 +14,6 @@ import { test as base, type Page } from "@playwright/test";
  * See specs/pelilauta/session/spec.md §Test-only seed route.
  */
 
-const BASE_URL = "http://localhost:4321";
-
 export async function loginAs(
   page: Page,
   { uid, claims = {}, frozen }: { uid: string; claims?: Record<string, unknown>; frozen?: boolean },
@@ -27,7 +25,7 @@ export async function loginAs(
     );
   }
 
-  const response = await page.request.post(`${BASE_URL}/api/test/seed-session`, {
+  const response = await page.request.post(`/api/test/seed-session`, {
     headers: { "x-e2e-seed-secret": secret, "content-type": "application/json" },
     data: { uid, claims, frozen },
   });
@@ -42,12 +40,11 @@ export async function loginAs(
   const match = /session=([^;]+)/.exec(setCookie);
   if (!match) throw new Error("seed-session Set-Cookie missing session=");
 
-  const url = new URL(BASE_URL);
   await page.context().addCookies([
     {
       name: "session",
       value: match[1],
-      domain: url.hostname,
+      domain: "localhost",
       path: "/",
       httpOnly: true,
       secure: true,
