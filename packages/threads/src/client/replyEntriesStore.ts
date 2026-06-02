@@ -8,8 +8,8 @@
 // locations in the host page.
 //
 // See specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Architecture
-// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Optimistic-append owned by the form, dedup owned by the listener, list owned by the store
-// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Stores are per-thread and module-scoped
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
 
 import { atom, type WritableAtom } from "nanostores";
 import type { ReplyEntry } from "../components/types";
