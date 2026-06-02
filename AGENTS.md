@@ -16,31 +16,23 @@
 | Check (lint/format) | `pnpm check` | `package.json`, `biome.json` |
 | Check (types) | `pnpm check:types` | `package.json`, `tsconfig.json` |
 | Check (Astro) | `pnpm astro:check` | `package.json`, `astro.config.mjs` |
-| Verify (full gate chain — pre-ship) | `pnpm verify` | `scripts/verify.sh` |
-| Ship (human convenience) | `pnpm ship "msg"` | `scripts/ship.sh` |
 
 ## Quality gates
 
-A change is shippable only when every package or app it touches is clean across all gates. "Pre-existing" is never a pass.
+Gates are enforced by `lefthook` at git boundaries. `pnpm install` wires them.
 
-| Gate | Command | Acceptance |
-|---|---|---|
-| Lint / format | `pnpm check` | zero warnings on any modified package |
-| Type check | `pnpm check:types` | clean |
-| Astro check | `pnpm astro:check` | clean |
-| Build | `pnpm build` | clean |
-| Unit tests | `pnpm test` | all green |
-| E2E | `pnpm test:e2e` | all green before `/ship` |
+| Boundary | Gates |
+|---|---|
+| pre-commit | `check`, `check:types`, `astro:check` |
+| pre-push | `build`, `test`, `spec:coverage`, `test:e2e` |
 
-**Where gates belong.** `pnpm verify` runs the full chain and exists for one purpose: pre-ship confirmation. It is invoked by `/ship`, not by dev cycles. During iteration, agents run **the focused thing they need** — `pnpm --filter <package> test` for the package they touched, or nothing at all if the change is obvious. Senior-engineer discipline: confirm the change works; don't audit deploy-readiness on every edit.
+`lefthook.yml` is the only definition of the chain. Bypass is `--no-verify` — explicit, visible, never used on agent authority.
 
-Long-term, pre-commit gates (lint, types, astro:check) and pre-push gates (build, e2e) move to `lefthook` and CI respectively — at which point `verify.sh` becomes the redundant scaffolding it currently is. Until then, `pnpm verify` is the single named gate, used once before push.
+**Cleanup radius.** When you modify a file under `packages/X/` or `app/X/`, that entire package must be clean across the gates that apply to it — including pre-existing failures you didn't introduce. Fix them in the same commit.
 
-**Cleanup radius.** When you modify a file under `packages/X/` or `app/X/`, *that entire package* must be clean — including pre-existing warnings or test failures you didn't introduce. Fix them in the same commit; that is in-scope, not scope creep. Other packages are out of scope unless the user asks.
+**When a gate is red.** Fix it, mark the test with a tracking note, or get explicit user opt-in to bypass. Agents never pick bypass on their own authority.
 
-**When a gate is red.** Stop. Surface it. Options are (a) fix it now, (b) skip/mark the test with a tracking note, (c) explicit user opt-in to ship anyway. Never pick (c) on agent authority.
-
-**Convenience vs authority.** `pnpm verify` runs the gates; `pnpm ship` runs them then commits and pushes. The script `scripts/ship.sh` uses `git add .` and is for **human** use — agents stage files explicitly in the chat loop and never invoke `pnpm ship` directly.
+**During iteration.** Hooks run at the boundary. Don't run the full chain mid-cycle; run only the focused command for the package you touched (`pnpm --filter <package> test`).
 
 ## Change tiers
 
@@ -48,15 +40,15 @@ Match process weight to change scope. The tier is decided at task start; in ambi
 
 | Tier | What it is | Process |
 |---|---|---|
-| **Trivial** | Single file, ≤ ~20 lines, no new public API, no schema change, no new files. Examples: copy edits, component prop swaps, dep bumps, small refactors confined to one function. | Edit → focused test if uncertain → ship. No spec, no critic, no full verify mid-cycle. `/ship` runs `pnpm verify`. |
-| **Standard** | A feature with a clear contract — new component, sidebar widget, API endpoint, page route. Single package or two-package change. | Spec → dev → focused tests during iteration → ship. Critic optional. `/ship` runs `pnpm verify`. |
-| **High-risk** | Cross-package refactor, data-contract change, security-sensitive path (auth, write endpoints), new shared primitive. | Spec → dev → critic → manual browser check → ship. `/ship` runs `pnpm verify`. |
+| **Trivial** | Single file, ≤ ~20 lines, no new public API, no schema change, no new files. Examples: copy edits, component prop swaps, dep bumps, small refactors confined to one function. | Edit → focused test if uncertain → ship. No spec, no critic, no mid-cycle full chain. Hooks gate `/ship`. |
+| **Standard** | A feature with a clear contract — new component, sidebar widget, API endpoint, page route. Single package or two-package change. | Spec → dev → focused tests during iteration → ship. Critic optional. Hooks gate `/ship`. |
+| **High-risk** | Cross-package refactor, data-contract change, security-sensitive path (auth, write endpoints), new shared primitive. | Spec → dev → critic → manual browser check → ship. Hooks gate `/ship`. |
 
 **Spec depth follows tier.** Trivial tasks need no spec. Standard tasks need a spec scoped to user-observable contracts. High-risk tasks may justify deeper architecture notes and more scenarios.
 
 **Critic-cycle invocation.** `/assemble` runs dev → critic by default. For Trivial tasks, `/assemble` short-circuits to dev only (no critic). Standard tasks use the critic only if there's reason to (e.g. a tricky composition, a contract update the dev might miss). High-risk tasks always use the critic.
 
-**Gates during cycles.** Don't run `pnpm verify` per cycle. The full chain is for pre-ship, invoked once by `/ship`. During iteration, run only what you need to confirm the change works — typically `pnpm --filter <package> test` for the package you touched. Senior-engineer discipline: confirm the change; don't audit deploy-readiness on every edit.
+**Gates during cycles.** Don't run the full chain per cycle. Hooks run it at commit and push. During iteration, run only what you need to confirm the change works — typically `pnpm --filter <package> test` for the package you touched.
 
 ## Spec discipline
 

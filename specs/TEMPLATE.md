@@ -32,7 +32,7 @@ stylebook_url: [https://...]
 ## Blueprint
 
 ### Context
-[Why does this feature exist? What problem does it solve? 1-3 sentences.]
+[One sentence: what this feature guarantees about the system. Not motivation, not history — the invariant a maintainer needs.]
 
 ### Architecture
 - **Components:** [Key files/modules with paths. Default to Svelte 5 for DS components; Astro for structural layouts. All must be 100% SSR-compatible per ADR-001. During active reverse-spec ports, temporary upstream source pointers (for example under `.tmp/`) are allowed if clearly marked as migration references.]

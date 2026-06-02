@@ -16,8 +16,7 @@
     "check:icons": "node --experimental-strip-types scripts/generate-icon-registry.ts --check",
     "seed:e2e": "node --experimental-strip-types packages/firebase/scripts/seed-e2e.ts",
     "spec:coverage": "node --experimental-strip-types scripts/spec-coverage.ts",
-    "verify": "bash scripts/verify.sh",
-    "ship": "bash scripts/ship.sh"
+    "prepare": "lefthook install"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.8",

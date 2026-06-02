@@ -97,6 +97,7 @@ Before finishing, verify:
 - [ ] Spec depth matches feature complexity — no 500-line spec for a config change.
 - [ ] If updating: stale sections are `[DEPRECATED yyyy-mm-dd]` with rationale, not silently deleted.
 - [ ] Parent/child references are bidirectional where features depend on each other.
+- [ ] **Delete pass.** Walk every line. Delete it unless a senior engineer reading it cold in a year would learn something they can't get from the code or file paths. Soften nothing — delete. Motivation prose, restated git/tool behaviour, and "we used to X, now Y" narratives all go.
 
 ### 9. Finish
 
