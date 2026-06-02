@@ -9,10 +9,10 @@
 import type { Profile } from "@pelilauta/profiles/server";
 import { getProfile } from "@pelilauta/profiles/server";
 import {
+  ReplyForm,
   ThreadDetail,
   ThreadMetadata,
   ThreadReplies,
-  ThreadReplySection,
 } from "@pelilauta/threads/components";
 import type { Thread } from "@pelilauta/threads/server";
 import { getChannels, getThread } from "@pelilauta/threads/server";
@@ -101,22 +101,14 @@ const description = thread
     <section class="cn-content-prose" aria-labelledby="replies-heading">
       <h2 id="replies-heading">{t("threads:replies.title")}</h2>
       {currentUid ? (
-        // Authenticated: ThreadReplySection owns ThreadReplies + ReplyForm in one
-        // island so the entries state is shared between the listener and the
-        // optimistic-append flow.
-        // client:idle is friendlier on FCP — the SSR seed paints first.
-        <ThreadReplySection
+        <ThreadReplies
           client:idle
           threadKey={threadKey!}
           {initialReplies}
           {currentUid}
           {targetFlowTime}
-          placeholderText={t("threads:replies.compose.placeholder")}
-          frozenNoticeText={t("threads:replies.compose.frozenNotice")}
-          errorText={t("threads:replies.compose.error")}
         />
       ) : (
-        // Anonymous: pure SSR reply list + static login CTA. No JS bundle shipped.
         <>
           <ThreadReplies
             threadKey={threadKey!}
@@ -130,5 +122,15 @@ const description = thread
         </>
       )}
     </section>
+  )}
+  {!error && thread && currentUid && (
+    <ReplyForm
+      client:idle
+      threadKey={threadKey!}
+      {initialReplies}
+      placeholderText={t("threads:replies.compose.placeholder")}
+      frozenNoticeText={t("threads:replies.compose.frozenNotice")}
+      errorText={t("threads:replies.compose.error")}
+    />
   )}
 </Page>

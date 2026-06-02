@@ -59,26 +59,17 @@ test.describe("Reply Authoring — anonymous viewer", () => {
   });
 });
 
-// --- Authenticated viewer's SSR mounts the ThreadReplySection island ---
-//
-// Note on assertion model: the auth fixture plants a server-side session cookie
-// but does NOT sign in the Firebase client SDK. As a result, the client-side
-// AuthHandler cannot fully transition `sessionState` to "active" in e2e — that
-// reconciliation path is covered by unit tests instead (see
-// `session-authenticated.spec.ts` for the same constraint).
-//
-// What this e2e can — and must — verify is that the SSR pass renders the
-// ThreadReplySection island markup at all. If the wrapper component throws
-// during SSR (e.g. an `import type` regression eliding the value binding), the
-// astro-island element disappears from the response and the authenticated
-// thread page is silently broken. That's the regression class that landed in
-// production despite green unit + astro:check + build gates, and what this
-// test exists to catch.
+// Authenticated SSR must render both reply islands: ThreadReplies (inside the
+// prose section) and ReplyForm (sibling after it). The auth fixture plants a
+// server-side session cookie but does not sign in the Firebase client SDK, so
+// `sessionState` cannot fully transition to "active" in e2e — that path is
+// covered by unit tests. The SSR markup assertion catches the class of
+// regression where one of the islands silently fails to render server-side.
 
 authTest.describe("Reply Authoring — authenticated viewer", () => {
-  // Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Successful write returns the parsed Reply
+  // Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §The host mounts ThreadReplies inside cn-content-prose and ReplyForm as a sibling after that section
   authTest(
-    "SSR renders the ThreadReplySection island for authenticated user",
+    "SSR renders ThreadReplies and ReplyForm as separate islands for authenticated user",
     async ({ signedInPage }) => {
       await signedInPage.goto("/");
       const threadLink = signedInPage.locator("article.cn-card a[href^='/threads/']").first();
@@ -98,14 +89,23 @@ authTest.describe("Reply Authoring — authenticated viewer", () => {
       expect(response?.status()).toBe(200);
       const html = (await response?.text()) ?? "";
 
-      // The ThreadReplySection island must be present in the SSR output for
-      // authenticated viewers. Pre-fix this string was absent because the
-      // wrapper threw during SSR.
-      const islandMatches =
+      const repliesIsland =
         html.match(
-          /astro-island[^>]*(component-url="[^"]*ThreadReplySection|component-export="ThreadReplySection")/g,
+          /astro-island[^>]*(component-url="[^"]*ThreadReplies|component-export="ThreadReplies")/g,
         ) ?? [];
-      expect(islandMatches.length).toBe(1);
+      expect(repliesIsland.length).toBe(1);
+
+      const formIsland =
+        html.match(
+          /astro-island[^>]*(component-url="[^"]*ReplyForm|component-export="ReplyForm")/g,
+        ) ?? [];
+      expect(formIsland.length).toBe(1);
+
+      // ReplyForm must NOT be nested inside the cn-content-prose section.
+      const formInsideProse = await signedInPage
+        .locator('section.cn-content-prose astro-island[component-export="ReplyForm"]')
+        .count();
+      expect(formInsideProse).toBe(0);
 
       // Anonymous login CTA must NOT appear in authenticated SSR.
       expect(html).not.toMatch(/href="\/login\?next=/);

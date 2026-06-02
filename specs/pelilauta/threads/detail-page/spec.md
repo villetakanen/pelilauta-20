@@ -33,7 +33,7 @@ This spec owns the page-level layout: the two containers and the sidebar slot in
   - *Sidebar column:* the metadata / actions slot. Sidebar widgets compose here (metadata, info actions, share button, etc.). While a sidebar widget contract is not yet implemented, its slot still renders so the grid keeps two children; narrow mode stacks main above sidebar.
 - **Replies container — `cn-content-prose`.** Single-column primitive at 67ch prose width, centered on wide viewports. Holds the reply region:
   - An `<h2>` section heading at the top, sourced from `threads:replies.title` ("Keskustelu" / "Discussion"). The container references it via `aria-labelledby`.
-  - For authenticated viewers, the `ThreadReplySection` island (list + listener).
+  - For authenticated viewers, the `ThreadReplies` island (list + listener) inside the prose section. The `ReplyForm` island lives as a sibling **after** the prose section so its chat-bar dock attaches to the app shell, not the prose column. The two islands share a per-thread `replyEntriesStore`.
   - For anonymous viewers, the SSR reply list followed by a button-styled login link ("Osallistu keskusteluun" / "Join the discussion") whose href is `/login?next=/threads/{threadKey}`. The button uses the DS's `.button.cta` styling (defined in `packages/cyan/src/core/buttons.css`), not a bare anchor.
   - The chat-bar input itself docks to the app shell rather than rendering inside this container, per [`./replies/spec.md`](./replies/spec.md).
 - **Anonymous parity.** Both containers render identically for anonymous and authenticated viewers from SSR. Sidebar widgets and reply UI that require auth self-gate; their absence does not change the container structure.
@@ -41,7 +41,7 @@ This spec owns the page-level layout: the two containers and the sidebar slot in
 ### Dependencies
 
 - `packages/cyan` — provides `cn-content-golden` and `cn-content-prose` via `content-grid.css`, included in the DS index stylesheet imported by every page; provides `AppShell` / `Page`.
-- `@pelilauta/threads/components` — `ThreadDetail`, `ThreadReplies`, `ThreadReplySection`.
+- `@pelilauta/threads/components` — `ThreadDetail`, `ThreadReplies`, `ReplyForm`.
 
 ### Constraints
 
@@ -55,7 +55,8 @@ This spec owns the page-level layout: the two containers and the sidebar slot in
 ### Definition of Done
 
 - [ ] `/threads/[threadKey]` renders the reader region inside a `cn-content-golden` element with two direct children: `<ThreadDetail>` (main) and the sidebar slot.
-- [ ] The replies region renders inside a `cn-content-prose` element that is a sibling **after** the `cn-content-golden` element. Anonymous viewers see the SSR reply list plus the login CTA inside it; authenticated viewers see the `ThreadReplySection` island inside it.
+- [ ] The replies region renders inside a `cn-content-prose` element that is a sibling **after** the `cn-content-golden` element. Anonymous viewers see the SSR reply list plus the login CTA inside it; authenticated viewers see the `ThreadReplies` island inside it.
+- [ ] For authenticated viewers, the `ReplyForm` island renders as a sibling **after** the `cn-content-prose` section, outside both content containers.
 - [ ] The reply chat-bar input is NOT nested inside either content container — it docks to the app shell per [`./replies/spec.md`](./replies/spec.md).
 - [ ] Wide-viewport rendering: reader columns sit side-by-side per the golden primitive's wide mode; the replies container sits below at prose width (67ch), centered.
 - [ ] Narrow-viewport rendering: main → sidebar → replies stack vertically with the primitives' default rhythm.
@@ -92,7 +93,8 @@ Given a Firestore document at stream/{key}
 And a valid session cookie
 When the page is rendered
 Then the response contains exactly one "cn-content-golden" with two direct children
-And the response contains a sibling "cn-content-prose" containing the ThreadReplySection island
+And the response contains a sibling "cn-content-prose" containing the ThreadReplies island
+And the ReplyForm island appears in the page AFTER the cn-content-prose section, not nested inside it
 And no reply UI renders inside the cn-content-golden element
 And the reply chat-bar input is a descendant of the app shell, not nested inside the cn-content-prose container
 ```

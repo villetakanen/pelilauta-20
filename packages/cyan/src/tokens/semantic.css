@@ -91,10 +91,10 @@
   --cn-reply-context-bg: light-dark(var(--chroma-primary-90), var(--chroma-primary-20));
   --cn-reply-context-text: light-dark(var(--chroma-primary-20), var(--chroma-primary-90));
 
-  /* Reply Dock (CnChatBar capsule surface) */
+  /* Reply Dock (CnReplyAnchor surface — sole owner of dock chrome) */
   --cn-reply-dock-bg: light-dark(var(--chroma-surface-100), var(--chroma-surface-20));
   --cn-reply-dock-border: light-dark(var(--chroma-surface-80), var(--chroma-surface-30));
-  --cn-reply-dock-shadow: var(--cn-shadow-elevation-2);
+  --cn-reply-dock-shadow: var(--cn-shadow-elevation-3);
 
   /* Inputs / Forms */
   --cn-input: light-dark(var(--chroma-surface-80), var(--chroma-surface-0));

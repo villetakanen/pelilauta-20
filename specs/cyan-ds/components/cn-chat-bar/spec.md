@@ -4,7 +4,7 @@ parent_spec: ../spec.md
 stylebook_url: /components/cn-chat-bar
 status: alpha
 maturity: implementation
-last_major_review: 2026-05-28
+last_major_review: 2026-06-02
 ---
 
 # Feature: CnChatBar
@@ -28,15 +28,11 @@ The primary user entry point for thread replies. Designed to resemble modern cha
   - `start` — contains leading actions (e.g., attach button).
   - `end` — contains trailing actions (e.g., send button, format button).
 - **Dependencies:**
-  - Tokens: `--cn-reply-dock-bg`, `--cn-reply-dock-border`, `--cn-reply-dock-shadow`, `--cn-input`, `--cn-text`, `--cn-border-radius-large`, `--cn-grid`.
+  - Tokens: `--cn-input`, `--cn-on-input`, `--cn-grid`. The dock surface (background, border, shadow, radius) is painted by `CnReplyAnchor` — see [`../cn-reply-anchor/spec.md`](../cn-reply-anchor/spec.md) §Chrome ownership.
 - **Constraints:**
-  - **Auto-expanding height:** The inner textarea dynamically expands to fit content.
-    - **Desktop:** Expands up to a maximum of 4 lines (scrolls beyond that).
-    - **Mobile:** Expands downward up to a maximum height defined in terms of viewport percentage (e.g., 40% of viewport) to avoid overlapping the top content area.
-  - **Keyboard Handling:**
-    - Pressing `Enter` key alone invokes the `onsend` callback prop and prevents the default action (newline insertion).
-    - Pressing `Shift+Enter` inserts a standard newline character.
-    - On mobile soft keyboards, the system uses standard text input behaviors (carriage return triggers newline or send depending on configuration, default is newline unless submit action is focused).
+  - **Transparent wrapper.** The component's root element renders no background, border, border-radius, or box-shadow. The visible surface is owned by `CnReplyAnchor` when docked, or by the host when used elsewhere. The bar contributes only its layout (flex, padding for spacing the slots) and the textarea's text/caret colors.
+  - **Auto-expanding height.** The textarea uses `field-sizing: content` (with `rows="1"` fallback). Desktop caps at 4 lines (`max-height: calc(4 * 1.5em)`); mobile caps at `40vh`. Overflow scrolls.
+  - **Keyboard.** `Enter` (no modifier) invokes `onsend` with the current value and prevents default newline insertion. `Shift+Enter` falls through to the browser's default newline behavior.
 
 ### Book Page
 
@@ -56,12 +52,13 @@ The primary user entry point for thread replies. Designed to resemble modern cha
 - [x] Input element uses a borderless, backgroundless `<textarea>` that grows dynamically on input.
 - [x] Listens to `keydown` events to catch `Enter` and `Shift + Enter` combinations.
 - [x] Invokes the `onsend` callback prop when `Enter` is pressed without `Shift` (and the value is non-empty).
-- [x] Inherits color tokens from the `--cn-input` and `--cn-reply-dock-*` namespace.
+- [ ] The component's root wrapper has computed `background: transparent`, no `border`, no `border-radius`, and no `box-shadow`. Only the inner `<textarea>` carries text/caret styling.
 
 ### Regression Guardrails
 
 - **No default form submissions.** Pressing Enter in the textarea must not cause a standard page refresh/submit; the keydown event's default action must be prevented.
 - **No manual height calculations in pixels.** Height changes must be driven reactively (e.g., using Svelte's scrollHeight binding or standard CSS auto-expand patterns) and must be capped using relative units (`em` or `rem`) corresponding to font size and grid tokens.
+- **No wrapper chrome.** The bar must not paint background, border, border-radius, or shadow on its root. Adding chrome here doubles up the dock surface owned by `CnReplyAnchor` and is a regression.
 
 ### Testing Scenarios
 

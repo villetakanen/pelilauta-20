@@ -13,6 +13,7 @@ import { sessionState as sessionStateAtom, uid as uidAtom } from "@pelilauta/aut
 import type { Profile } from "@pelilauta/profiles/server";
 import { cleanup, render } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { __resetForTests } from "../client/replyEntriesStore";
 import type { Reply } from "../schemas/ReplySchema";
 
 // Mock subscribeReplies so we control when diffs arrive
@@ -30,7 +31,7 @@ afterEach(cleanup);
 beforeEach(async () => {
   vi.clearAllMocks();
   subscribeRepliesMock.mockReturnValue(() => {});
-  // Reset auth atoms to unauthenticated state before each test
+  __resetForTests();
   uidAtom.set(null);
   sessionStateAtom.set("initial");
   if (!ThreadReplies) {
