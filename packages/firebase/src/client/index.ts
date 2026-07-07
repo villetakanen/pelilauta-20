@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   getRedirectResult,
   onAuthStateChanged,
+  signInWithCustomToken,
   signInWithRedirect,
 } from "firebase/auth";
 import { getFirestore as clientGetFirestore, type Firestore } from "firebase/firestore";
@@ -34,4 +35,10 @@ export function getAuth(): Auth {
   return clientGetAuth(getApp());
 }
 
-export { GoogleAuthProvider, getRedirectResult, onAuthStateChanged, signInWithRedirect };
+export {
+  GoogleAuthProvider,
+  getRedirectResult,
+  onAuthStateChanged,
+  signInWithCustomToken,
+  signInWithRedirect,
+};

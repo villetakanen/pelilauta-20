@@ -17,9 +17,7 @@ test("Scenario: Authenticated SSR mounts AuthHandler and ProfileButton", async (
 }) => {
   // Assert on the SSR response directly. This test covers the server-side
   // contract only (§Regression Guardrails: AuthHandler mounts only when SSR
-  // says active). Client-side AuthHandler reconciliation behavior is covered
-  // by unit tests; it isn't reachable via cookie-plant because the fixture
-  // doesn't sign into the Firebase client SDK.
+  // says active).
   const response = await signedInPage.goto("/");
   expect(response?.status()).toBe(200);
   const html = (await response?.text()) ?? "";
@@ -35,4 +33,27 @@ test("Scenario: Authenticated SSR mounts AuthHandler and ProfileButton", async (
 
   // ProfileButton renders as an <a href="/settings"> in the authenticated shell.
   expect(html).toMatch(/href="\/settings"/);
+});
+
+test("Scenario: Seeded e2e session is fully functional after hydration", async ({
+  signedInPage,
+}) => {
+  // Verifies: specs/pelilauta/session/state-machine.md §Seeded e2e session is fully functional after hydration
+  //
+  // The fixture plants only the server cookie; the client SDK starts signed
+  // out. AuthHandler must recover the client session via /api/auth/custom-token
+  // rather than tearing the session down. Observable contract: the recovery
+  // round-trip happens, no logout-reload occurs, and the authenticated chrome
+  // survives reconciliation.
+  const recovery = signedInPage.waitForResponse(
+    (r) => r.url().includes("/api/auth/custom-token") && r.status() === 200,
+  );
+  await signedInPage.goto("/");
+  await recovery;
+
+  // A teardown would DELETE the session and reload into the anonymous shell.
+  // After recovery has completed, the authenticated chrome must still be there.
+  await expect(signedInPage.locator('a[href="/settings"]').first()).toBeVisible();
+  const status = await signedInPage.request.get("/api/auth/status");
+  expect((await status.json()).loggedIn).toBe(true);
 });
