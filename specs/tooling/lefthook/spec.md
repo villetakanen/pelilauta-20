@@ -1,7 +1,6 @@
 ---
 feature: Lefthook Quality Gates
 status: draft
-maturity: design
 last_major_review: 2026-06-02
 ---
 

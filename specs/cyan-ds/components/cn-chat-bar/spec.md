@@ -2,8 +2,7 @@
 feature: CnChatBar
 parent_spec: ../spec.md
 stylebook_url: /components/cn-chat-bar
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-06-02
 ---
 

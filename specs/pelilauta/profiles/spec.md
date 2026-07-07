@@ -1,7 +1,6 @@
 ---
 feature: Profiles (Public Identity Vertical)
 status: draft
-maturity: design
 last_major_review: 2026-04-29
 parent_spec: ../spec.md
 ---

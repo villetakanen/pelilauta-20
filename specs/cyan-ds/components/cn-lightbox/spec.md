@@ -3,7 +3,6 @@ feature: CnLightbox
 parent_spec: ../spec.md
 stylebook_url: /components/cn-lightbox
 status: draft
-maturity: design
 last_major_review: 2026-05-06
 ---
 

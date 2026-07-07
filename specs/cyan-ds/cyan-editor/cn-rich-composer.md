@@ -2,8 +2,7 @@
 feature: CnRichComposer
 parent_spec: ./spec.md
 stylebook_url: /components/cyan-editor#cn-rich-composer
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-05-28
 ---
 

@@ -1,7 +1,6 @@
 ---
 feature: Shared Data Models
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-05-06
 ---
 

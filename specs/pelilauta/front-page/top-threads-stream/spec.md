@@ -1,7 +1,6 @@
 ---
 feature: Top Threads Stream
-status: stable
-maturity: implementation
+status: approved
 last_major_review: 2026-04-30
 parent_spec: ../spec.md
 ---

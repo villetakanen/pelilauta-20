@@ -1,7 +1,6 @@
 ---
 feature: Thread Reply Authoring
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-06-02
 parent_spec: ../spec.md
 ---

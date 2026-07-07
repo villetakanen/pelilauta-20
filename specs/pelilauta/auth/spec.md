@@ -1,7 +1,6 @@
 ---
 feature: Authentication (Login UX)
-status: stable
-maturity: verified
+status: approved
 last_major_review: 2026-04-25
 parent_spec: ../spec.md
 ---

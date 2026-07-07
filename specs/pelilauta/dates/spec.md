@@ -1,7 +1,6 @@
 ---
 feature: Date Labels
 status: draft
-maturity: design
 last_major_review: 2026-05-04
 parent_spec: ../spec.md
 ---

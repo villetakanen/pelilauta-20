@@ -17,8 +17,7 @@
 
 ---
 feature: [Feature Name]
-status: [draft | alpha | stable | deprecated]
-maturity: [design | implementation | verified]
+status: [draft | approved | deprecated]
 last_major_review: 2026-04-25
 # [Optional] Link to the parent spec for sub-specs and sub-features.
 # Flat sibling: `./spec.md`. Subfolder child: `../spec.md`.

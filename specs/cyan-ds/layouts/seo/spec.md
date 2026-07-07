@@ -1,7 +1,6 @@
 ---
 feature: SEO Head Metadata (AppShell)
 status: draft
-maturity: design
 last_major_review: 2026-04-27
 parent_spec: ../app-shell/spec.md
 ---

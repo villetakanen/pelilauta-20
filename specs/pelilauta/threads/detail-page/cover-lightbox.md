@@ -1,7 +1,6 @@
 ---
 feature: Thread Cover — CnLightbox Integration
 status: draft
-maturity: design
 last_major_review: 2026-06-01
 parent_spec: ./spec.md
 ---

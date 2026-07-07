@@ -1,7 +1,6 @@
 ---
 feature: Tag detail page (/tags/[tag])
 status: draft
-maturity: design
 last_major_review: 2026-05-05
 parent_spec: ../spec.md
 ---

@@ -1,7 +1,6 @@
 ---
 feature: Channels — Per-Channel Page
-status: stub
-maturity: design
+status: draft
 last_major_review: 2026-04-29
 parent_spec: ../spec.md
 ---

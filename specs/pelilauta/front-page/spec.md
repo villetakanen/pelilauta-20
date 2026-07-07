@@ -1,7 +1,6 @@
 ---
 feature: Front Page
 status: draft
-maturity: implementation
 last_major_review: 2026-05-04
 parent_spec: ../spec.md
 ---
