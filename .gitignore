@@ -9,3 +9,4 @@ test-results
 *.tsbuildinfo
 app/*/pnpm-lock.yaml
 .tmp/
+.DS_Store
