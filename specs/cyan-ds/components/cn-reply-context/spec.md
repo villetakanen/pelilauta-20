@@ -2,8 +2,7 @@
 feature: CnReplyContext
 parent_spec: ../spec.md
 stylebook_url: /components/cn-reply-context
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-05-28
 ---
 

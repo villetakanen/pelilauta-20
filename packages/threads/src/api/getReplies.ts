@@ -8,7 +8,7 @@
 // Errors (Firestore network/permission failures and Zod parse errors) propagate
 // to the caller — no fallback array is substituted.
 //
-// See specs/pelilauta/threads/replies/spec.md §API Contracts.
+// See specs/pelilauta/threads/detail-page/replies/spec.md §API Contracts.
 
 import { getDb } from "@pelilauta/firebase/server";
 import { REPLIES_COLLECTION, type Reply, ReplySchema } from "../schemas/ReplySchema";

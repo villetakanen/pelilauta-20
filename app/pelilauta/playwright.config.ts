@@ -8,14 +8,12 @@ loadDotenv({ path: "../../.env.development" });
 export default defineConfig({
   testDir: "./e2e",
   webServer: {
-    command: "pnpm dev",
-    port: 4321,
-    // Reuse a running dev server locally (so devs can keep `pnpm dev` open
-    // alongside `pnpm test:e2e`); CI always starts a fresh one.
-    reuseExistingServer: !process.env.CI,
+    command: "pnpm dev:e2e",
+    port: 4323,
+    reuseExistingServer: false,
     timeout: 120000,
   },
   use: {
-    baseURL: "http://localhost:4321",
+    baseURL: "http://localhost:4323",
   },
 });

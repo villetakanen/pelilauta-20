@@ -1,7 +1,7 @@
 ---
 feature: cn-hero
 parent_spec: ../../spec.md
-status: not-started
+status: draft
 ---
 
 # Component: cn-hero

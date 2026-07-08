@@ -4,6 +4,12 @@
 // Thread data comes from the dev Firebase project — the exact threads available
 // are not fixed; tests that require a real thread discover one via the front
 // page and skip when the dev database is empty.
+//
+// Verifies: specs/pelilauta/threads/detail-page/spec.md §Anonymous thread page renders reader and replies as separate content containers
+// Verifies: specs/pelilauta/threads/detail-page/spec.md §Error and not-found states render outside both containers
+// Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §Metadata block renders date, author, and channel link
+// Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §Host page wires the sidebar slot
+// Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §SSR produces no client-side JS for the metadata block
 
 import { expect, test } from "@playwright/test";
 
@@ -105,5 +111,216 @@ test.describe("Thread Detail", () => {
     const randomSuffix = Date.now();
     const response = await page.goto(`/threads/this-thread-does-not-exist-${randomSuffix}`);
     expect(response?.status()).toBe(404);
+  });
+
+  test("renders the cn-content-golden reader container with two direct children", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0) test.skip(count === 0, "No threads in dev database");
+
+    let href: string | null = null;
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        href = await link.getAttribute("href");
+        if (href) break;
+      }
+    }
+    if (!href) {
+      test.skip(true, "No /threads/ link found");
+      return;
+    }
+
+    const response = await page.goto(href);
+    expect(response?.status()).toBe(200);
+
+    // Exactly one reader container.
+    const golden = page.locator(".cn-content-golden");
+    await expect(golden).toHaveCount(1);
+
+    // Two direct element children: main (<ThreadDetail> emits <article>) and sidebar slot (<aside>).
+    const directChildren = golden.locator("> *");
+    await expect(directChildren).toHaveCount(2);
+
+    // First child contains the thread article with the h1 title.
+    await expect(directChildren.nth(0).locator("h1")).toBeVisible();
+
+    // Second child is the sidebar slot — an empty <aside> for now.
+    await expect(directChildren.nth(1)).toHaveJSProperty("tagName", "ASIDE");
+
+    // No reply UI inside the reader container — reply region is a sibling.
+    await expect(golden.locator("astro-island")).toHaveCount(0);
+
+    // Reply region lives in a cn-content-prose container that is a subsequent sibling of cn-content-golden.
+    // (The page may have other .cn-content-prose elements like the footer credits; the sibling selector
+    // pins the assertion to the reader → replies layout specifically.)
+    await expect(page.locator(".cn-content-golden ~ .cn-content-prose")).toHaveCount(1);
+  });
+
+  test("404 page renders no cn-content-golden", async ({ page }) => {
+    const randomSuffix = Date.now();
+    const response = await page.goto(`/threads/this-thread-does-not-exist-${randomSuffix}`);
+    expect(response?.status()).toBe(404);
+    await expect(page.locator(".cn-content-golden")).toHaveCount(0);
+  });
+
+  // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §Metadata block renders date, author, and channel link
+  // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §Host page wires the sidebar slot
+  test("sidebar aside contains ThreadMetadata with date, author link, and channel link", async ({
+    page,
+  }) => {
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0)
+      test.skip(count === 0, "No threads in dev database — skip sidebar metadata test");
+
+    let href: string | null = null;
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        href = await link.getAttribute("href");
+        if (href) break;
+      }
+    }
+    if (!href) {
+      test.skip(true, "No /threads/ link found");
+      return;
+    }
+
+    await page.goto(href);
+    await expect(page).toHaveURL(/\/threads\/[^/]+/);
+
+    const golden = page.locator(".cn-content-golden");
+    await expect(golden).toHaveCount(1);
+
+    // The sidebar slot is the second direct child, an <aside>.
+    const aside = golden.locator("> aside");
+    await expect(aside).toHaveCount(1);
+
+    // The aside contains an <address> element (ThreadMetadata's root element).
+    const address = aside.locator("address");
+    await expect(address).toHaveCount(1);
+
+    // Date: a <time> element with a datetime attribute.
+    const timeEl = address.locator("time");
+    await expect(timeEl).toHaveCount(1);
+    const datetime = await timeEl.getAttribute("datetime");
+    expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+
+    // Author: either an anchor to /profiles/ or a <span> for anonymous fallback.
+    const profileAnchorCount = await address.locator("a[href^='/profiles/']").count();
+    const anonSpanCount = await address.locator("span").count();
+    expect(profileAnchorCount + anonSpanCount).toBeGreaterThan(0);
+
+    // Channel: an anchor to /channels/.
+    const channelAnchor = address.locator("a[href^='/channels/']");
+    await expect(channelAnchor).toHaveCount(1);
+    const channelText = await channelAnchor.innerText();
+    expect(channelText.trim().length).toBeGreaterThan(0);
+
+    // No cn-card element inside the golden reader container sidebar.
+    await expect(aside.locator(".cn-card")).toHaveCount(0);
+  });
+
+  // Verifies: specs/pelilauta/threads/detail-page/cover-lightbox.md §SSR cover is visible without JavaScript
+  test("cover image figure is present in SSR HTML for threads with a poster", async ({ page }) => {
+    // Step 1: Navigate to the front page to discover thread URLs.
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0) {
+      test.skip(count === 0, "No threads in dev database — skip SSR cover test");
+      return;
+    }
+
+    // Collect thread hrefs from front-page cards.
+    const hrefs: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        const href = await link.getAttribute("href");
+        if (href) hrefs.push(href);
+      }
+    }
+
+    if (hrefs.length === 0) {
+      test.skip(true, "No /threads/ links found — skip SSR cover test");
+      return;
+    }
+
+    // Step 2: For each discovered thread URL, fetch the RAW HTTP response body
+    // using page.request.get() — this is the server-emitted HTML before any
+    // JavaScript runs, and is the correct way to assert SSR content.
+    // The figure+img markup must be present in the response bytes, not
+    // injected by client-side hydration.
+    let foundPosterThread = false;
+    for (const href of hrefs) {
+      const response = await page.request.get(href);
+      expect(response.status()).toBe(200);
+
+      // Inspect raw response body — JavaScript has NOT executed at this point.
+      const html = await response.text();
+
+      // Look for a <figure> containing an <img> in the raw HTML.
+      // Regex captures the src attribute of the first img inside a figure.
+      const figureImgMatch = html.match(/<figure[^>]*>[\s\S]*?<img[^>]+src=["']([^"']+)["']/);
+      if (figureImgMatch) {
+        const imgSrc = figureImgMatch[1];
+        // src must be an absolute URL (poster URLs are always absolute).
+        expect(imgSrc).toMatch(/^https?:\/\//);
+        foundPosterThread = true;
+        break;
+      }
+    }
+
+    if (!foundPosterThread) {
+      test.skip(true, "No threads with poster images found in dev database — skip SSR cover test");
+    }
+  });
+
+  // Verifies: specs/pelilauta/threads/detail-page/sidebar-metadata.md §SSR produces no client-side JS for the metadata block
+  test("sidebar metadata block contains no astro-island (pure SSR)", async ({ page }) => {
+    await page.goto("/");
+    const region = threadsRegion(page);
+    await expect(region).toBeVisible();
+
+    const cards = region.locator("article.cn-card");
+    const count = await cards.count();
+    if (count === 0) test.skip(count === 0, "No threads in dev database — skip SSR purity test");
+
+    let href: string | null = null;
+    for (let i = 0; i < count; i++) {
+      const link = cards.nth(i).locator("a[href^='/threads/']").first();
+      if ((await link.count()) > 0) {
+        href = await link.getAttribute("href");
+        if (href) break;
+      }
+    }
+    if (!href) {
+      test.skip(true, "No /threads/ link found");
+      return;
+    }
+
+    await page.goto(href);
+    await expect(page).toHaveURL(/\/threads\/[^/]+/);
+
+    const aside = page.locator(".cn-content-golden > aside");
+    await expect(aside).toHaveCount(1);
+
+    // No astro-island inside the sidebar — ThreadMetadata is pure SSR.
+    await expect(aside.locator("astro-island")).toHaveCount(0);
   });
 });

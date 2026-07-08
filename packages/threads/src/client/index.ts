@@ -10,5 +10,13 @@ export * from "../schemas/ReplySchema";
 export * from "../schemas/ThreadSchema";
 export type { PostReplyBody } from "./postReply";
 export { postReply } from "./postReply";
+export {
+  appendEntry,
+  getStore,
+  mergeListenerDiff,
+  removeEntry,
+  replaceEntry,
+  seedEntries,
+} from "./replyEntriesStore";
 export type { RepliesChangeCallback, ReplyDiff } from "./subscribeReplies";
 export { subscribeReplies } from "./subscribeReplies";

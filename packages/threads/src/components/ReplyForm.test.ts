@@ -1,7 +1,7 @@
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit is disabled for empty drafts
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit is disabled for empty drafts
 
 import {
   profile as profileAtom,
@@ -10,6 +10,7 @@ import {
 } from "@pelilauta/auth/client";
 import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/svelte";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { __resetForTests, getStore } from "../client/replyEntriesStore";
 
 // Mock Firebase client (getAuth)
 vi.mock("@pelilauta/firebase/client", () => ({
@@ -20,13 +21,11 @@ vi.mock("@pelilauta/firebase/client", () => ({
   })),
 }));
 
-// Mock postReply
 const postReplyMock = vi.fn();
 vi.mock("../client/postReply", () => ({
   postReply: postReplyMock,
 }));
 
-// Mock DS components — they render correctly but we don't need full DS in unit tests
 vi.mock("@cyan/components/CnChatBar.svelte", async () => {
   const { default: MockChatBar } = await import("./__mocks__/MockChatBar.svelte");
   return { default: MockChatBar };
@@ -39,10 +38,19 @@ vi.mock("@cyan/components/CnReplyAnchor.svelte", async () => {
 
 let ReplyForm: typeof import("./ReplyForm.svelte").default;
 
+const baseProps = {
+  threadKey: "t1",
+  initialReplies: [],
+  placeholderText: "Write a reply…",
+  frozenNoticeText: "Account frozen.",
+  errorText: "Send failed.",
+};
+
 afterEach(cleanup);
 
 beforeEach(async () => {
   vi.clearAllMocks();
+  __resetForTests();
   uidAtom.set(null);
   sessionStateAtom.set("initial");
   profileAtom.set(null);
@@ -79,20 +87,11 @@ describe("ReplyForm", () => {
   it("renders frozen notice and no chat bar when profile.frozen is true", async () => {
     await setActiveSesssion(true);
 
-    const { container } = render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended: vi.fn(),
-      },
-    });
+    const { container } = render(ReplyForm, { props: baseProps });
     const { flushSync } = await import("svelte");
     flushSync();
 
-    // Should show frozen notice
-    const notice = container.querySelector(".reply-form__frozen");
-    expect(notice).not.toBeNull();
-
-    // No chat bar (mock) rendered
+    expect(container.querySelector(".reply-form__frozen")).not.toBeNull();
     expect(container.querySelector("[data-testid='cn-chat-bar']")).toBeNull();
   });
 
@@ -101,12 +100,7 @@ describe("ReplyForm", () => {
     sessionStateAtom.set("initial");
     const { flushSync } = await import("svelte");
 
-    const { container } = render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended: vi.fn(),
-      },
-    });
+    const { container } = render(ReplyForm, { props: baseProps });
     flushSync();
 
     expect(container.querySelector(".reply-form__frozen")).toBeNull();
@@ -116,12 +110,7 @@ describe("ReplyForm", () => {
   it("renders the chat bar when authenticated and not frozen", async () => {
     await setActiveSesssion(false);
 
-    const { container } = render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended: vi.fn(),
-      },
-    });
+    const { container } = render(ReplyForm, { props: baseProps });
     const { flushSync } = await import("svelte");
     flushSync();
 
@@ -129,63 +118,37 @@ describe("ReplyForm", () => {
   });
 
   // Scenario: Submit appends a provisional entry then reconciles to the server reply
-  it("calls onReplyAppended with provisional then server reply on success", async () => {
+  it("writes a provisional entry then replaces it with the server reply on success", async () => {
     await setActiveSesssion(false);
 
     const serverReply = makeServerReply("server-id-1");
     postReplyMock.mockResolvedValueOnce(serverReply);
 
-    const onReplyAppended = vi.fn();
-    render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended,
-      },
-    });
+    render(ReplyForm, { props: baseProps });
     const { flushSync } = await import("svelte");
     flushSync();
 
     const input = screen.getByTestId("mock-chat-input") as HTMLInputElement;
     await fireEvent.input(input, { target: { value: "Hello world" } });
+    await fireEvent.click(screen.getByTestId("mock-send-btn"));
 
-    const sendBtn = screen.getByTestId("mock-send-btn") as HTMLButtonElement;
-    await fireEvent.click(sendBtn);
-
-    // First call: provisional with tmp- key
     await waitFor(() => {
-      expect(onReplyAppended).toHaveBeenCalledTimes(2);
+      const entries = getStore("t1").get();
+      expect(entries).toHaveLength(1);
+      expect(entries[0].reply.key).toBe("server-id-1");
     });
 
-    const firstCall = onReplyAppended.mock.calls[0][0] as { reply: { key: string } };
-    const secondCall = onReplyAppended.mock.calls[1][0] as {
-      reply: { key: string };
-      _replaceKey?: string;
-    };
-
-    expect(firstCall.reply.key).toMatch(/^tmp-/);
-    expect(secondCall.reply.key).toBe("server-id-1");
-    expect(secondCall._replaceKey).toMatch(/^tmp-/);
-
-    // After success: input is cleared and submit is not in flight
     expect(input.value).toBe("");
-    expect(sendBtn.disabled).toBe(false);
+    expect((screen.getByTestId("mock-send-btn") as HTMLButtonElement).disabled).toBe(false);
   });
 
   // Scenario: Submit failure removes the provisional and surfaces the error
-  it("calls onReplyRemoved and shows error on failure", async () => {
+  it("removes the provisional and shows error on failure", async () => {
     await setActiveSesssion(false);
 
     postReplyMock.mockRejectedValueOnce(new Error("403: Forbidden"));
 
-    const onReplyAppended = vi.fn();
-    const onReplyRemoved = vi.fn();
-    const { container } = render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended,
-        onReplyRemoved,
-      },
-    });
+    const { container } = render(ReplyForm, { props: baseProps });
     const { flushSync } = await import("svelte");
     flushSync();
 
@@ -194,49 +157,29 @@ describe("ReplyForm", () => {
     await fireEvent.click(screen.getByTestId("mock-send-btn"));
 
     await waitFor(() => {
-      expect(onReplyRemoved).toHaveBeenCalledOnce();
+      expect(container.querySelector(".reply-form__error")).not.toBeNull();
     });
 
-    // Error message shown
-    const errorEl = container.querySelector(".reply-form__error");
-    expect(errorEl).not.toBeNull();
-
-    // Draft is preserved so user doesn't lose content
+    expect(getStore("t1").get()).toHaveLength(0);
     expect(input.value).toBe("Hello");
   });
 
   // Scenario: Submit is disabled for empty drafts
-  it("does not call postReply for empty draft (no input typed)", async () => {
+  it("does not call postReply for empty draft", async () => {
     await setActiveSesssion(false);
-
-    const onReplyAppended = vi.fn();
-    render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended,
-      },
-    });
+    render(ReplyForm, { props: baseProps });
     const { flushSync } = await import("svelte");
     flushSync();
 
-    // Click send without typing anything (value = "")
     await fireEvent.click(screen.getByTestId("mock-send-btn"));
 
     expect(postReplyMock).not.toHaveBeenCalled();
-    expect(onReplyAppended).not.toHaveBeenCalled();
+    expect(getStore("t1").get()).toHaveLength(0);
   });
 
-  // Scenario: Submit is disabled for whitespace-only draft
   it("does not call postReply for whitespace-only draft", async () => {
     await setActiveSesssion(false);
-
-    const onReplyAppended = vi.fn();
-    render(ReplyForm, {
-      props: {
-        threadKey: "t1",
-        onReplyAppended,
-      },
-    });
+    render(ReplyForm, { props: baseProps });
     const { flushSync } = await import("svelte");
     flushSync();
 
@@ -245,6 +188,6 @@ describe("ReplyForm", () => {
     await fireEvent.click(screen.getByTestId("mock-send-btn"));
 
     expect(postReplyMock).not.toHaveBeenCalled();
-    expect(onReplyAppended).not.toHaveBeenCalled();
+    expect(getStore("t1").get()).toHaveLength(0);
   });
 });

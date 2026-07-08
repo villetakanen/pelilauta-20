@@ -16,29 +16,57 @@
 | Check (lint/format) | `pnpm check` | `package.json`, `biome.json` |
 | Check (types) | `pnpm check:types` | `package.json`, `tsconfig.json` |
 | Check (Astro) | `pnpm astro:check` | `package.json`, `astro.config.mjs` |
-| Verify (full gate chain) | `pnpm verify` | `scripts/verify.sh` |
-| Ship (human convenience) | `pnpm ship "msg"` | `scripts/ship.sh` |
 
 ## Quality gates
 
-A change is shippable only when every package or app it touches is clean across all gates. "Pre-existing" is never a pass.
+Gates are enforced by `lefthook` at git boundaries. `pnpm install` wires them.
 
-| Gate | Command | Acceptance |
+| Boundary | Gates |
+|---|---|
+| pre-commit | `check`, `check:types`, `astro:check` |
+| pre-push | `build`, `test`, `spec:coverage`, `test:e2e` |
+
+`lefthook.yml` is the only definition of the chain. Bypass is `--no-verify` — explicit, visible, never used on agent authority.
+
+E2e runs against `pnpm dev:e2e` on port 4323 with `reuseExistingServer: false`. Port 4321 is for manual `pnpm dev`; the two coexist and never share a process.
+
+**Cleanup radius.** When you modify a file under `packages/X/` or `app/X/`, that entire package must be clean across the gates that apply to it — including pre-existing failures you didn't introduce. Fix them in the same commit.
+
+**When a gate is red.** Fix it, mark the test with a tracking note, or get explicit user opt-in to bypass. Agents never pick bypass on their own authority.
+
+**During iteration.** Hooks run at the boundary. Don't run the full chain mid-cycle; run only the focused command for the package you touched (`pnpm --filter <package> test`).
+
+## Change tiers
+
+Match process weight to change scope. The tier is decided at task start; in ambiguous cases the lower tier wins unless the user upgrades it.
+
+| Tier | What it is | Process |
 |---|---|---|
-| Lint / format | `pnpm check` | zero warnings on any modified package |
-| Type check | `pnpm check:types` | clean |
-| Astro check | `pnpm astro:check` | clean |
-| Build | `pnpm build` | clean |
-| Unit tests | `pnpm test` | all green |
-| E2E | `pnpm test:e2e` | all green before `/ship` |
+| **Trivial** | Single file, ≤ ~20 lines, no new public API, no schema change, no new files. Examples: copy edits, component prop swaps, dep bumps, small refactors confined to one function. | Edit → focused test if uncertain → ship. No spec, no critic, no mid-cycle full chain. Hooks gate `/ship`. |
+| **Standard** | A feature with a clear contract — new component, sidebar widget, API endpoint, page route. Single package or two-package change. | Spec → dev → focused tests during iteration → ship. Critic optional. Hooks gate `/ship`. |
+| **High-risk** | Cross-package refactor, data-contract change, security-sensitive path (auth, write endpoints), new shared primitive. | Spec → dev → critic → manual browser check → ship. Hooks gate `/ship`. |
 
-Run all five with `pnpm verify` (`scripts/verify.sh`).
+**Spec depth follows tier.** Trivial tasks need no spec. Standard tasks need a spec scoped to user-observable contracts. High-risk tasks may justify deeper architecture notes and more scenarios.
 
-**Cleanup radius.** When you modify a file under `packages/X/` or `app/X/`, *that entire package* must be clean — including pre-existing warnings or test failures you didn't introduce. Fix them in the same commit; that is in-scope, not scope creep. Other packages are out of scope unless the user asks.
+**Critic-cycle invocation.** `/assemble` runs dev → critic by default. For Trivial tasks, `/assemble` short-circuits to dev only (no critic). Standard tasks use the critic only if there's reason to (e.g. a tricky composition, a contract update the dev might miss). High-risk tasks always use the critic.
 
-**When a gate is red.** Stop. Surface it. Options are (a) fix it now, (b) skip/mark the test with a tracking note, (c) explicit user opt-in to ship anyway. Never pick (c) on agent authority.
+**Gates during cycles.** Don't run the full chain per cycle. Hooks run it at commit and push. During iteration, run only what you need to confirm the change works — typically `pnpm --filter <package> test` for the package you touched.
 
-**Convenience vs authority.** `pnpm verify` runs the gates; `pnpm ship` runs them then commits and pushes. The script `scripts/ship.sh` uses `git add .` and is for **human** use — agents stage files explicitly in the chat loop and never invoke `pnpm ship` directly.
+## Spec discipline
+
+Specs describe **intent and observable contract** only. Implementation rationale, decision history, and "we chose X because Y" prose belong in code comments, ADRs (`docs/adr/`), or commit messages — not in `specs/`.
+
+**Do**
+- State what the feature is, what the reader sees, and what the contract is.
+- Reference file paths instead of restating implementation.
+- Cap scenarios at 5-7. More than that almost always means more than one feature; split into sub-specs.
+
+**Don't**
+- Defend implementation choices in the spec. ("We use `z.preprocess` because…") If the choice needs defending, that's an ADR or a code comment.
+- Restate Architecture as Constraints in negative form. (If Architecture says "markdown rendered upstream," don't also add "MUST NOT call markdownToHTML inside templates" as a Constraint — same statement, different polarity, doubled maintenance.)
+- Create scenarios that defend against hypothetical regressions of code being written in the same diff. ("What if `.some()` is changed back to `[0]` index check") That belongs in code review, not in the spec.
+
+Verification artifacts (tests, lint rules) hook back to scenarios via `Verifies:` tags — see `specs/VERIFICATION.md`. Tags are a **navigation** tool ("find me the test for this contract"), not a forcing function. Load-bearing contracts should be covered by a tagged test. Aspirational or visually-validated scenarios may stay un-tagged.
 
 ## Where Things Live
 

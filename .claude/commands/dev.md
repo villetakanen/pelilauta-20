@@ -87,12 +87,9 @@ After workers return:
 
 1. **Read their actual output** — trust-but-verify. An agent's summary describes intent, not necessarily what it did. Diff the files it claimed to change.
 2. **Resolve interfaces between workers** — if worker A created a type and worker B consumed it, confirm the shape matches. Workers can't see each other's output mid-flight.
-3. **Run the quality gates sequentially** (fail-fast):
-   - `pnpm check`
-   - `pnpm build`
-   - `pnpm test`
-4. If a gate fails, dispatch a focused Sonnet worker with the error output and the file in scope. Do not start a fix loop yourself — you orchestrate.
-5. Re-run the gate that failed, then continue.
+3. **Confirm the change works.** Run the focused unit test for the package you touched (e.g. `pnpm --filter @pelilauta/threads test`). If the change is purely structural (markup-only edit, prop rename) and no test covers it, that's fine — say so in the report. Do NOT run full `pnpm verify` here; that runs once at `/ship`, not per task. Per `AGENTS.md` §Quality gates, mid-cycle gate ceremony is the exact anti-pattern this command avoids.
+4. If a focused test fails, dispatch a focused Sonnet worker with the error output and the file in scope. Do not start a fix loop yourself — you orchestrate.
+5. Re-run the focused test that failed, then continue.
 
 ## Step 6 — Report
 

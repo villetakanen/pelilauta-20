@@ -17,7 +17,20 @@ Run `/dev` and `/critic` in alternating cycles until the critic issues a **Ship 
 
 ## Pipeline
 
-### Step 0 — Context Gathering
+### Step 0 — Triage by change tier (`AGENTS.md` §Change tiers)
+
+Before gathering context, classify the task by anticipated scope:
+
+- **Trivial** — single file, ≤ ~20 lines, no new public API, no schema change, no new files. Examples: copy edits, component prop swaps, dep bumps, small in-function refactors.
+- **Standard / High-risk** — anything else. Default to this if unsure.
+
+**If Trivial:** short-circuit the dev/critic loop. Spawn a single dev sub-agent with the Task Brief and have it confirm the change works (running the focused unit test for the package it touched if uncertain — not a chained gate script). Do NOT spawn a critic. Do NOT mandate `pnpm verify` mid-cycle. The full chain runs once at `/ship`.
+
+**If Standard or High-risk:** proceed to Step 0.5. The full dev → critic loop applies. During iteration, the dev sub-agent runs focused tests for the package it touched; the orchestrator does not require `pnpm verify` evidence per cycle.
+
+If a task is borderline and you want the critic anyway, say so to the user and proceed.
+
+### Step 0.5 — Context Gathering
 
 Before starting the loop, gather the context the sub-agents will need:
 
@@ -36,18 +49,15 @@ The dev agent prompt must include:
 - The complete @Dev persona instructions (from `.claude/commands/dev.md`)
 - The Task Brief from Step 0
 - If this is cycle N>1: the **Critic Findings** from the previous cycle, with explicit instructions to fix each violation
-- **Mandatory full-gate run before reporting done.** The dev MUST execute `pnpm verify` (the canonical gate chain: lint, types, astro:check, build, unit tests, AND e2e on both `app/pelilauta` and `app/cyan-ds`) and paste the final lines proving every gate is green. NEVER instruct the dev to "skip e2e" or "verify separately" — environmental obstacles (port conflicts, dirty state) are dev's problem to clear, not to defer. If e2e cannot be run at all in the current environment, dev must STOP and report back rather than ship behind a partial gate chain.
+- **Focused test discipline before reporting done.** The dev runs the focused unit test(s) for the package(s) it touched (e.g. `pnpm --filter @pelilauta/threads test`) and reports the result. Mid-cycle `pnpm verify` is NOT required — the full chain runs at `/ship`. The orchestrator does NOT block the next step on full-chain gate evidence. If the dev is uncertain about a runtime path that unit tests don't cover (typically SSR-rendered routes via Playwright), it can opt to run that specific scenario, but this is dev judgment, not a mandatory orchestrator gate.
 
 Wait for the dev agent to complete. Capture its summary of changes made.
 
-### Step 1.5 — E2E Gate (orchestrator-enforced, non-negotiable)
+### Step 1.5 — Sanity check before critic
 
-Before spawning the critic, the orchestrator MUST confirm that the dev's report contains evidence of a green `pnpm verify` (or, equivalently, a green `pnpm test:e2e` covering BOTH `app/pelilauta` AND `app/cyan-ds` plus all other gates). Concretely:
+Before spawning the critic, glance at the dev's report. Did the dev actually make the change it was asked to make? Did it run a focused test if one was warranted? Trust the dev on gate evidence — the full `pnpm verify` chain runs at `/ship`, not here. If the dev's report is missing something obviously load-bearing (e.g. ignored a critic finding from a prior cycle), bounce it back. Otherwise proceed.
 
-- The report includes the tail of `pnpm verify` showing `✅ All gates green` (or the explicit Playwright "N passed" summaries for both apps).
-- If the dev's report is silent on e2e or admits to skipping it (regardless of justification — port conflicts, "covered by unit tests", "would slow the loop", etc.), the orchestrator MUST NOT proceed to Step 2. Instead, send the work back to the dev with a single instruction: run `pnpm verify` to completion and report the output. Do not paraphrase or shorten this gate — repeating the dev cycle is cheaper than letting a runtime SSR regression land.
-
-The reason this gate is non-negotiable: unit tests routinely mock Svelte islands and don't exercise Astro SSR seams. `astro:check` and `pnpm build` validate TypeScript and bundling but never execute SSR-only routes. A runtime regression in a wrapper component (e.g. an `import type` elision that drops a value binding the template needs) sails through every gate except a real browser load — which is exactly what Playwright does.
+SSR-runtime regressions that only Playwright catches do exist, but the cure (mandating full verify per cycle) is worse than the disease (we wasted multiple cycles on flake re-runs). Risky SSR changes are by definition not Trivial — they fall under High-risk in the change-tier rubric and get the critic, manual browser check, and full pre-ship `pnpm verify` for free.
 
 ### Step 2 — Critic Cycle
 
@@ -57,7 +67,7 @@ The critic agent prompt must include:
 - The complete @Critic persona instructions (from `.claude/commands/critic.md`)
 - The Task Brief (so the critic knows what was intended)
 - The dev agent's summary of what was changed
-- **Explicit instruction to independently re-verify e2e:** the critic MUST run `pnpm verify` (or at minimum `pnpm test:e2e`) themselves before issuing a verdict, not just trust the dev's report. A `Ship it` verdict is invalid without this independent confirmation. The critic's report must include the verify-tail output as evidence.
+- The critic reviews the diff against the spec and `ARCHITECTURE.md`. It does NOT re-run `pnpm verify` — that's `/ship`'s job. The critic's job is finding violations, not auditing gate evidence.
 - **Tag-existence ≠ coverage.** `pnpm spec:coverage` only validates that `Verifies:` tags resolve to real scenario headings. It does NOT confirm the tagged tests execute, pass, or are even unskipped. The critic must read each `Verifies:`-tagged file and confirm the tagged scenario actually has a passing `it()` / `test()` body — `test.skip` or `describe` blocks with declared tags but missing bodies are coverage theatre and must be flagged.
 
 Wait for the critic agent to complete. Parse the verdict.
@@ -93,7 +103,7 @@ Report to the user:
 - **Silent unless stuck** — Do not ask the user for confirmation between cycles. Only interrupt if genuinely blocked (ambiguous requirement, conflicting specs, architectural question).
 - **Deterministic exit** — The loop has a clear termination condition (Ship it) and a circuit breaker (3 cycles).
 - **Package boundaries enforced** — Both dev and critic agents receive CLAUDE.md boundary rules.
-- **Full gate chain or no Ship it.** `pnpm verify` — including e2e on BOTH `app/pelilauta` and `app/cyan-ds` — must pass in BOTH the dev cycle and the critic re-verification before the loop can terminate. Bypassing e2e for any reason (perceived irrelevance, port conflicts, "unit tests cover it") is a failure mode this skill exists to prevent.
+- **Full gate chain at ship, not in the loop.** `pnpm verify` runs once at `/ship`. Dev and critic cycles do not mandate it. Bypassing the full chain mid-cycle is not "skipping safety" — it's recognising that deploy-readiness is a separate event from change-correctness.
 
 ## Boundaries
 

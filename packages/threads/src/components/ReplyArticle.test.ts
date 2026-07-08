@@ -1,6 +1,6 @@
 // ReplyArticle component tests
-// Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
-// Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle uses the reply variant of CnBubble when fromUser is true
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
 
 import type { Profile } from "@pelilauta/profiles/server";
 import { cleanup, render } from "@testing-library/svelte";
@@ -39,7 +39,7 @@ function makeProfile(overrides: Partial<Profile> = {}): Profile {
 describe("ReplyArticle", () => {
   // Scenario: ReplyArticle composes its DS primitives without async work
   it("renders an article with id=reply.key", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply({ key: "r1" }),
@@ -53,7 +53,7 @@ describe("ReplyArticle", () => {
   });
 
   it("article carries aria-labelledby=reply-author-{key}", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply({ key: "r1" }),
@@ -67,7 +67,7 @@ describe("ReplyArticle", () => {
   });
 
   it("the element referenced by aria-labelledby exists in the DOM", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     // Regression guard: aria-labelledby must point to a real DOM element so screen readers
     // can derive the article's accessible name. Without the wrapping <span>, ProfileLink
     // silently drops the id prop and the reference is broken.
@@ -86,7 +86,7 @@ describe("ReplyArticle", () => {
   });
 
   it("renders a cn-bubble element", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply(),
@@ -100,7 +100,7 @@ describe("ReplyArticle", () => {
   });
 
   it("renders ProfileLink as an anchor to /profiles/{key}", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply(),
@@ -114,7 +114,7 @@ describe("ReplyArticle", () => {
   });
 
   it("renders AvatarLink cn-avatar element", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply(),
@@ -128,7 +128,7 @@ describe("ReplyArticle", () => {
   });
 
   it("renders bodyHtml as inner HTML", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply(),
@@ -142,7 +142,7 @@ describe("ReplyArticle", () => {
   });
 
   it("renders CnLightbox when reply has images", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply({ images: [{ url: "https://x", alt: "y" }] }),
@@ -159,7 +159,7 @@ describe("ReplyArticle", () => {
   });
 
   it("maps images from {url, alt} to {src, caption} for CnLightbox", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply({ images: [{ url: "https://x", alt: "y" }] }),
@@ -175,7 +175,7 @@ describe("ReplyArticle", () => {
   });
 
   it("does NOT render CnLightbox when reply has no images", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle composes its DS primitives without async work
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §ReplyArticle is a pure render
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply({ images: [] }),
@@ -190,7 +190,7 @@ describe("ReplyArticle", () => {
 
   // Scenario: ReplyArticle uses the reply variant of CnBubble when fromUser is true
   it("adds reply class to cn-bubble when fromUser=true", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle uses the reply variant of CnBubble when fromUser is true
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply(),
@@ -204,7 +204,7 @@ describe("ReplyArticle", () => {
   });
 
   it("does NOT add reply class to cn-bubble when fromUser=false", () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §ReplyArticle uses the reply variant of CnBubble when fromUser is true
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §Own replies render with the reply bubble variant
     const { container } = render(ReplyArticle, {
       props: {
         reply: makeReply(),

@@ -1,7 +1,6 @@
 ---
 feature: Visually Hidden (.sr-only)
 status: draft
-maturity: design
 last_major_review: 2026-04-30
 parent_spec: ../spec.md
 stylebook_url: /principles/visually-hidden

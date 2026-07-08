@@ -50,15 +50,12 @@ function handleKeydown(event: KeyboardEvent) {
 </div>
 
 <style>
+  /* Transparent wrapper — dock chrome is owned by CnReplyAnchor (or the host
+     when used outside the anchor). The bar contributes layout only. */
   .cn-chat-bar {
     display: flex;
     align-items: flex-end;
     gap: var(--cn-grid);
-    padding: var(--cn-grid) calc(var(--cn-grid) * 1.5);
-    background: var(--cn-reply-dock-bg);
-    border: 1px solid var(--cn-reply-dock-border);
-    box-shadow: var(--cn-reply-dock-shadow);
-    border-radius: var(--cn-border-radius-large);
   }
 
   .cn-chat-bar__input {

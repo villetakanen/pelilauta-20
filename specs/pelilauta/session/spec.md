@@ -24,10 +24,11 @@ The session boundary exists once; every other feature composes against it.
   - `@pelilauta/auth/server` (`packages/auth/src/server/projectProfile.ts`) — pure helper that narrows untyped `claims` into a `SessionProfile`. Google OIDC `name`/`picture` fields only; non-Google providers are deferred per `../auth/spec.md` §Out of Scope.
   - `@pelilauta/auth/client` (`packages/auth/src/client/session.ts`) — nanostore atoms (`sessionState`, `uid`, `profile`). CSR-only. No `localStorage` persistence. Exports two sanctioned mutators:
     - `logout()` — clears atoms only. Used by `authedFetch` on recoverable drift (null `currentUser`, `getIdToken` failure, repeated 401).
-    - `fullLogout()` — authoritative exit: `DELETE /api/auth/session` → Firebase `signOut()` → clear atoms → `window.location.reload()`. Used by `AuthHandler` on any reconcile failure, and by `LogoutAction.svelte`. `fullLogout()` is the single entry point for any UI affordance that ends a session.
+    - `fullLogout()` — authoritative exit: `DELETE /api/auth/session` → Firebase `signOut()` → clear atoms → `window.location.reload()`. Used by `AuthHandler` on authoritative server rejection or failed recovery (see [`state-machine.md`](./state-machine.md)), and by `LogoutAction.svelte`. `fullLogout()` is the single entry point for any UI affordance that ends a session.
   - `@pelilauta/auth/components` (`packages/auth/src/components/AuthHandler.svelte`) — CSR island rendered only when SSR determined the session is active. Owns `onAuthStateChanged`, token-refresh lifecycle, and logout fan-out.
   - `@pelilauta/auth/client` (`packages/auth/src/client/authedFetch.ts`) — single entry point for API writes. Attaches `Authorization: Bearer <idToken>`, intercepts `401`, performs one-shot token repair.
   - `pages/api/auth/session.ts` — `POST` (login: verify ID token, set cookie), `DELETE` (logout: clear cookie), `GET` (verify cookie, return `{ uid, claims }`).
+  - `pages/api/auth/custom-token.ts` — recovery endpoint. `POST` verifies the session cookie and mints a Firebase custom token for the cookie's uid, letting the client SDK re-sign itself in when its local state is lost. Contract and state transitions live in [`state-machine.md`](./state-machine.md).
   - `pages/api/auth/status.ts` — oracle endpoint. Verifies cookie and returns authoritative `{ loggedIn, uid, claims }`. The logged-in response shape also includes `frozen: boolean` (resolved from Firestore `account/{uid}.frozen`, defaulting to `false`). See [`frozen.md`](./frozen.md) §API Contracts. Anonymous responses (`loggedIn: false`) omit `frozen`. Firestore-backed claim backfill is deferred to `specs/pelilauta/onboarding/spec.md` per §Out of Scope. Used by client to resolve stale-token races.
   - `pages/api/test/seed-session.ts` — **dev-only** seed route for E2E fixtures. Accepts `{ uid, claims? }`, mints a Firebase custom token, exchanges it via the Identity Toolkit REST API for an ID token, and issues a real session cookie. Used by `app/pelilauta/e2e/fixtures/auth.ts` to plant authenticated sessions for Playwright tests.
     - **Triple-layer defense** (fail-closed in this order):
@@ -79,8 +80,7 @@ The session boundary exists once; every other feature composes against it.
 3. **CSR hydration (authenticated surfaces only):**
    - `AuthHandler` mounts client-side, subscribes to `onAuthStateChanged`.
    - If the client-side Firebase session matches the server's `uid`, session store transitions `initial → active` immediately.
-   - If the client-side session is absent or stale, `AuthHandler` invokes `GET /api/auth/status` to reconcile; if the server says "logged in" but the client disagrees, forces a token refresh via `user.getIdToken(true)`.
-   - If reconciliation fails, triggers `logout()`.
+   - If the client-side session is absent, stale, or a different uid, `AuthHandler` reconciles against `GET /api/auth/status` and — when the server confirms the session — restores the client SDK (token refresh, or custom-token recovery via `POST /api/auth/custom-token`). Teardown happens only on authoritative server rejection or failed recovery. The full state machine, including oracle-failure behavior, lives in [`state-machine.md`](./state-machine.md).
 
 4. **Write request (API-mediated):**
    - Feature calls `authedFetch('/api/threads', { method: 'POST', body })`.
@@ -514,6 +514,8 @@ And window.location.reload() is called
 - **Vitest Unit Test:** `packages/auth/src/components/AuthHandler.test.ts`
 
 #### Scenario: AuthHandler logs out when the client has no user and cannot recover
+
+> [DEPRECATED 2026-07-07] A server-valid session with a missing client user is now a *recoverable* state — the client re-signs in via `POST /api/auth/custom-token` instead of being logged out. Superseded by [`state-machine.md`](./state-machine.md) §Reconcile recovers a missing client user. Logout on this path remains only as the fallback after a failed recovery attempt.
 
 ```gherkin
 Given AuthHandler is mounted

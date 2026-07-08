@@ -1,7 +1,6 @@
 ---
 feature: App Shell Footer (DS Primitive)
 status: draft
-maturity: design
 last_major_review: 2026-04-28
 parent_spec: specs/cyan-ds/layouts/app-shell/spec.md
 stylebook_url: TBD

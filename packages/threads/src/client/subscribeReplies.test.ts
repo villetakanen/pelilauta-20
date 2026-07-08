@@ -1,5 +1,5 @@
-// Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies emits a docChanges diff on each snapshot
-// Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies drops and logs a per-doc parse failure
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -72,7 +72,7 @@ describe("subscribeReplies", () => {
   });
 
   it("calls query/collection/orderBy with the correct stream/{threadKey}/comments path and createdAt asc", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies emits a docChanges diff on each snapshot
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
     const { subscribeReplies } = await import("./subscribeReplies");
     subscribeReplies("thread1", vi.fn());
 
@@ -83,7 +83,7 @@ describe("subscribeReplies", () => {
   });
 
   it("emits a diff with added, modified, and removed arrays derived from docChanges()", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies emits a docChanges diff on each snapshot
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
     let capturedCallback: ((snap: unknown) => void) | undefined;
     onSnapshotMock.mockImplementation((_q, cb) => {
       capturedCallback = cb;
@@ -114,7 +114,7 @@ describe("subscribeReplies", () => {
   });
 
   it("emits Reply objects with threadKey set correctly", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies emits a docChanges diff on each snapshot
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
     let capturedCallback: ((snap: unknown) => void) | undefined;
     onSnapshotMock.mockImplementation((_q, cb) => {
       capturedCallback = cb;
@@ -136,7 +136,7 @@ describe("subscribeReplies", () => {
   });
 
   it("drops a malformed doc and calls logError with docId and error", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies drops and logs a per-doc parse failure
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
     let capturedCallback: ((snap: unknown) => void) | undefined;
     onSnapshotMock.mockImplementation((_q, cb) => {
       capturedCallback = cb;
@@ -169,7 +169,7 @@ describe("subscribeReplies", () => {
   });
 
   it("the listener remains active after a parse failure (callback is still called)", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies drops and logs a per-doc parse failure
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
     let capturedCallback: ((snap: unknown) => void) | undefined;
     onSnapshotMock.mockImplementation((_q, cb) => {
       capturedCallback = cb;
@@ -190,7 +190,7 @@ describe("subscribeReplies", () => {
   });
 
   it("returns the unsubscribe handle from onSnapshot", async () => {
-    // Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies emits a docChanges diff on each snapshot
+    // Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
     const unsubMock = vi.fn();
     onSnapshotMock.mockReturnValue(unsubMock);
 

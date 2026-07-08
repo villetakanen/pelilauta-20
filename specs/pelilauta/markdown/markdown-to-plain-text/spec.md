@@ -1,7 +1,6 @@
 ---
 feature: Markdown to Plain Text Strip
 status: draft
-maturity: design
 last_major_review: 2026-04-27
 parent_spec: ../spec.md
 ---

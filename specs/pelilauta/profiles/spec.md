@@ -1,7 +1,6 @@
 ---
 feature: Profiles (Public Identity Vertical)
 status: draft
-maturity: design
 last_major_review: 2026-04-29
 parent_spec: ../spec.md
 ---
@@ -119,7 +118,7 @@ The `"-"` string is a load-bearing sentinel that appears in `Thread.owners[0]` a
 
 ### Out of Scope
 
-- **`/profiles/{uid}` page route.** Separate feature spec. ProfileLink anchors to it during alpha and 404s until that route lands; that's intentional.
+- **`/profiles/{uid}` page route.** Owned by the child spec [`profile-page/spec.md`](./profile-page/spec.md).
 
 ## Contract
 

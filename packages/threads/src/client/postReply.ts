@@ -4,8 +4,8 @@
 // in the Authorization: Bearer header. Parses the response through ReplySchema
 // before returning so consumers always receive a fully-typed Reply with Date instances.
 //
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §postReply parses the response through ReplySchema
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §postReply rejects non-2xx responses
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §postReply parses the response through ReplySchema
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §postReply rejects non-2xx responses
 
 import type { Reply } from "../schemas/ReplySchema";
 import { ReplySchema } from "../schemas/ReplySchema";

@@ -246,7 +246,7 @@ cumulative: stage 2 assumes stage 1 is green, stage 3 assumes stage 2.
 - [ ] `getChannels()` reads `meta/threads`, parses `topics` through `ChannelsSchema`, returns the array
 - [ ] `i18n/index.ts` exports `fi` and `en` trees containing at least the initial owned key set above
 - [ ] `ThreadCard.svelte` exists at `packages/threads/src/components/ThreadCard.svelte` for use by the TopThreadsStream feature; rendering contract is owned by `specs/pelilauta/front-page/top-threads-stream/thread-card.md`.
-- [ ] `ThreadDetail.svelte` renders a read-only thread (title, channel link, anonymous-aware byline, cover image, body) given `{ thread, bodyHtml }`. Markdown rendering happens upstream in the page's Astro frontmatter — the component is synchronous and SSR-pure. `ThreadDetail` deliberately uses bare semantic HTML (`<article>/<h1>/<p>/<img>/<section>`) rather than composing DS primitives: Cyan has no detail-shell primitive yet (`CnArticle`/`CnReadingPane` not yet specced), so the AGENTS.md "compose DS primitives underneath" rule is satisfied vacuously. When/if such a primitive lands in `specs/cyan-ds/`, `ThreadDetail` migrates to it.
+- [ ] `ThreadDetail.svelte` renders a read-only thread (title, cover via `CnLightbox`, body) given `{ thread, bodyHtml }`. Channel link and author byline are NOT rendered inside the article body — they live in the detail-page sidebar (see `specs/pelilauta/threads/detail-page/sidebar-metadata.md`). Markdown rendering happens upstream in the page's Astro frontmatter — the component is synchronous and SSR-pure. The article uses bare semantic HTML (`<article>/<h1>/<section>`) and composes `CnLightbox` for the cover; if a future Cyan detail-shell primitive lands (`CnArticle`/`CnReadingPane`), `ThreadDetail` migrates to it.
 - [ ] `app/pelilauta/src/pages/threads/[threadKey]/index.astro` wires the read-only detail page: SSR-only (no `client:` directives), calls `getThread(threadKey)` and `markdownToHTML(thread.markdownContent)` upstream of `<ThreadDetail>`, handles missing-thread → 404, isolates Firestore failures behind a `pelilauta:error.fetch` block (HTTP 200), and uses the host `<Page>` wrapper. Front-page `ThreadCard` links resolve to a real, non-404 page.
 - [ ] `server/` entry still has zero client SDK imports now that it carries real content
 - [ ] Vitest scenarios below that reference schemas, read accessors, `ThreadCard`, and i18n pass
@@ -378,13 +378,11 @@ And undefined is not returned
 Given a Thread and pre-rendered bodyHtml
 When ThreadDetail is rendered
 Then an h1 holds the title
-And a channel link points to /channels/{slug}
 And the lang attribute on the article reflects thread.locale
+And the cover area is rendered by CnLightbox (cover image contract owned by specs/pelilauta/threads/detail-page/cover-lightbox.md)
 And the bodyHtml is rendered via {@html ...} (HTML tags survive)
-And the byline reads "anonymous" when owners[0] is "-" or owners is empty
-And the byline reads owners[0] (the uid) otherwise
-And the cover image prefers thread.poster over thread.images[0].url
-And no cover image renders when neither is present
+And the article body contains no channel link
+And the article body contains no author byline
 ```
 
 - **Vitest Unit Test:** `packages/threads/src/components/ThreadDetail.test.ts`

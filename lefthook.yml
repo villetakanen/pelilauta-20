@@ -4,6 +4,10 @@ pre-commit:
       glob: "*.{js,ts,jsx,tsx,json,svelte,astro}"
       run: npx @biomejs/biome check --write --staged {staged_files}
       stage_fixed: true
+    types:
+      run: pnpm check:types
+    astro:
+      run: pnpm astro:check
 
 commit-msg:
   commands:
@@ -13,7 +17,11 @@ commit-msg:
 pre-push:
   parallel: true
   commands:
-    type-check:
-      run: pnpm check:types
+    build:
+      run: pnpm build
     test:
       run: pnpm test
+    spec-coverage:
+      run: pnpm spec:coverage
+    e2e:
+      run: pnpm test:e2e

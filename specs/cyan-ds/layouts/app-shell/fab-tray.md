@@ -1,7 +1,6 @@
 ---
 feature: AppShell FAB Tray
 status: draft
-maturity: design
 last_major_review: 2026-05-20
 parent_spec: ./spec.md
 ---

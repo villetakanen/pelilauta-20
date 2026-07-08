@@ -5,16 +5,16 @@
 // Frozen users see a notice. Anonymous users should never see this component —
 // the host renders an <a href="/login?next=..."> CTA instead.
 //
-// Optimistic append flow:
-//   1. User submits → provisional entry (key: "tmp-{uuid}", pending: true) appended via onReplyAppended.
+// Optimistic append flow (writes the shared replyEntriesStore for threadKey):
+//   1. User submits → appendEntry(threadKey, provisional {key: "tmp-{uuid}"}).
 //   2. postReply is called.
-//   3. On 201: onReplyAppended called with server reply + _replaceKey=tmpKey.
-//   4. On error: onReplyRemoved(tmpKey) called, error shown, draft kept.
+//   3. On 201: replaceEntry(threadKey, tmpKey, serverReply).
+//   4. On error: removeEntry(threadKey, tmpKey), error shown, draft kept.
 //
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Submit is disabled for empty drafts
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Frozen viewers see a notice in place of the form
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit appends a provisional entry then reconciles to the server reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit failure removes the provisional and surfaces the error
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Submit is disabled for empty drafts
 
 import CnChatBar from "@cyan/components/CnChatBar.svelte";
 import CnReplyAnchor from "@cyan/components/CnReplyAnchor.svelte";
@@ -28,33 +28,24 @@ import {
 import { getAuth } from "@pelilauta/firebase/client";
 import { onMount } from "svelte";
 import { postReply } from "../client/postReply";
+import { appendEntry, removeEntry, replaceEntry, seedEntries } from "../client/replyEntriesStore";
 import type { Reply } from "../schemas/ReplySchema";
 import type { ReplyEntry } from "./types";
 
 interface Props {
   threadKey: string;
-  /** Called to append an optimistic provisional or replace it with the server reply. */
-  onReplyAppended: (entry: ReplyEntry & { _replaceKey?: string }) => void;
-  /** Called to remove a provisional entry on error. */
-  onReplyRemoved?: (key: string) => void;
-  /**
-   * i18n resolver — host provides `t` from its i18n module.
-   *
-   * NOTE: functions cannot cross Astro's SSR→CSR island serialization
-   * boundary. When the host passes `t` as an island prop, it arrives as
-   * `null` after hydration. Treat any non-function value (including `null`)
-   * as "use the identity fallback so missing keys surface as their key
-   * name". A follow-up should refactor this to accept pre-resolved strings
-   * from the host instead of a translator function — see
-   * specs/pelilauta/threads/replies/authoring/spec.md §i18n DoD for the
-   * current contract.
-   */
-  t?: ((key: string) => string) | null;
+  /** SSR-seeded list, passed so this island can seed the shared store if it
+   * hydrates before ThreadReplies. Idempotent — only the first seed wins. */
+  initialReplies: Array<ReplyEntry>;
+  /** Pre-resolved i18n strings — host resolves these at SSR. Translator
+   * functions cannot cross the Astro island boundary; passing strings
+   * instead avoids the null-after-hydration trap. */
+  placeholderText: string;
+  frozenNoticeText: string;
+  errorText: string;
 }
 
-const props: Props = $props();
-const { threadKey, onReplyAppended, onReplyRemoved } = props;
-const t = $derived(typeof props.t === "function" ? props.t : (key: string) => key);
+const { threadKey, initialReplies, placeholderText, frozenNoticeText, errorText }: Props = $props();
 
 // --- Auth state (mirrors nanostores atoms into local $state) ---
 let liveUid = $state<string | null>(null);
@@ -62,6 +53,9 @@ let liveSessionState = $state<SessionState>("initial");
 let liveProfile = $state<SessionProfile | null>(null);
 
 onMount(() => {
+  // Seed the shared store in case this island hydrates before ThreadReplies.
+  seedEntries(threadKey, initialReplies);
+
   const unsubUid = uid.subscribe((v) => {
     liveUid = v;
   });
@@ -119,7 +113,7 @@ async function handleSubmit(value: string) {
     images: [],
   };
 
-  onReplyAppended({ reply: provisional, bodyHtml: "", profile: null });
+  appendEntry(threadKey, { reply: provisional, bodyHtml: "", profile: null });
 
   try {
     // Get Firebase ID token — postReply requires it as an explicit param.
@@ -132,13 +126,12 @@ async function handleSubmit(value: string) {
 
     const serverReply = await postReply(threadKey, { markdownContent: content }, idToken);
 
-    // Replace provisional with server reply
-    onReplyAppended({ reply: serverReply, bodyHtml: "", profile: null, _replaceKey: tmpKey });
+    replaceEntry(threadKey, tmpKey, { reply: serverReply, bodyHtml: "", profile: null });
     draft = "";
   } catch (_err) {
     // Roll back provisional and surface error
-    onReplyRemoved?.(tmpKey);
-    errorMsg = t("threads:replies.compose.error");
+    removeEntry(threadKey, tmpKey);
+    errorMsg = errorText;
     // Draft is kept so user doesn't lose their content
   } finally {
     submitting = false;
@@ -153,7 +146,7 @@ function handleChatBarSend(value: string) {
 {#if isActive}
   {#if isFrozen}
     <p class="reply-form__frozen" role="status" aria-live="polite">
-      {t("threads:replies.compose.frozenNotice")}
+      {frozenNoticeText}
     </p>
   {:else}
     <CnReplyAnchor>
@@ -164,7 +157,7 @@ function handleChatBarSend(value: string) {
       {/snippet}
       <CnChatBar
         bind:value={draft}
-        placeholder={t("threads:replies.compose.placeholder")}
+        placeholder={placeholderText}
         disabled={submitting}
         onsend={handleChatBarSend}
       />

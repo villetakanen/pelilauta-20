@@ -1,5 +1,5 @@
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §postReply parses the response through ReplySchema
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §postReply rejects non-2xx responses
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §postReply parses the response through ReplySchema
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §postReply rejects non-2xx responses
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { postReply } from "./postReply";

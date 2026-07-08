@@ -1,27 +1,14 @@
 ---
 name: ship
-description: Executes the final verification, commit, and push sequence to finalize a task.
+description: Stage, commit, and push completed work. Hooks enforce the gate chain.
 ---
 
 # Ship Skill
 
-Use this skill strictly to finalize and deploy completed work. You must execute the following sequence in exact order. Do not proceed to the next step if the current step fails.
+1. **Stage:** `git status`, then `git add <file1> <file2>` for the files relevant to this task.
+2. **Commit:** Conventional Commit, all-lowercase subject. `git commit -m "type(scope): description"`.
+3. **Push:** `git push`.
 
-## Execution Sequence
+Pre-commit and pre-push hooks (`lefthook.yml`) run the gate chain. If a hook fails, fix the failure and re-run — do not use `--no-verify` on agent authority.
 
-1. **Verify Quality:** Run `pnpm verify`.
-   - If the command fails, immediately stop the shipping process, analyze the terminal errors, and fix the codebase.
-   - If the command succeeds, proceed to Step 2.
-
-2. **Stage Files:** Run `git status` to identify modified files. Stage only the specific files relevant to your task using:
-   `git add <file1> <file2>`
-
-3. **Commit:** Create a Conventional Commit (all-lowercase subject) and execute:
-   `git commit -m "type(scope): description"`
-
-4. **Push:** Upload the changes to the repository:
-   `git push`
-
-## Rules
-- You are required to fix any pre-existing warnings or test failures in the packages you modify before committing.
-- If a test fails that you cannot fix, stop and ask the user how to proceed.
+If a pre-existing failure surfaces in a package you modified, fix it in the same commit (see `AGENTS.md` §Cleanup radius). If you cannot, stop and ask the user.

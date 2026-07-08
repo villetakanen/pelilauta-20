@@ -1,4 +1,4 @@
-// Verifies: specs/pelilauta/threads/replies/spec.md §Host page parses ?since= into targetFlowTime
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §?since={flowTime} scrolls to the first matching reply
 
 import { describe, expect, it } from "vitest";
 import { parseSinceParam } from "./parseSinceParam";

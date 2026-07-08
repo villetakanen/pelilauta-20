@@ -1,7 +1,6 @@
 ---
 feature: CyanEditor
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-05-26
 parent_spec: specs/cyan-ds/spec.md
 ---

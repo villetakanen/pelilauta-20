@@ -1,11 +1,11 @@
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §POST /api/threads/{threadKey}/replies requires a bearer token
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Invalid bearer token is rejected
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Frozen accounts are blocked at the write endpoint
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Empty markdownContent is rejected
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Whitespace-only markdownContent is rejected
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Missing thread returns 404
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Successful write returns the parsed Reply
-// Verifies: specs/pelilauta/threads/replies/authoring/spec.md §Client-provided owners and timestamps are ignored
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §POST /api/threads/{threadKey}/replies requires a bearer token
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Invalid bearer token is rejected
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Frozen accounts are blocked at the write endpoint
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Empty markdownContent is rejected
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Whitespace-only markdownContent is rejected
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Missing thread returns 404
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Successful write returns the parsed Reply
+// Verifies: specs/pelilauta/threads/detail-page/replies/authoring/spec.md §Client-provided owners and timestamps are ignored
 
 import * as authServer from "@pelilauta/auth/server";
 import * as firebaseServer from "@pelilauta/firebase/server";

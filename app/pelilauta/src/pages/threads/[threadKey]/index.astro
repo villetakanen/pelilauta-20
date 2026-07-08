@@ -3,20 +3,28 @@
 // Anonymous viewers: full SSR reply list, no JS for the reply list.
 // Authenticated viewers: same SSR seed, then ThreadReplies hydrates for realtime updates.
 // See specs/pelilauta/threads/spec.md Stage-2 DoD.
-// See specs/pelilauta/threads/replies/spec.md §Host page resolves profiles and bodyHtml upstream of ThreadReplies
-// See specs/pelilauta/threads/replies/spec.md §Host page parses ?since= into targetFlowTime
+// See specs/pelilauta/threads/detail-page/replies/spec.md §Anonymous viewer receives the full reply list in SSR
+// See specs/pelilauta/threads/detail-page/replies/spec.md §Host page parses ?since= into targetFlowTime
 
-import { ThreadDetail, ThreadReplies, ThreadReplySection } from "@pelilauta/threads/components";
+import type { Profile } from "@pelilauta/profiles/server";
+import { getProfile } from "@pelilauta/profiles/server";
+import {
+  ReplyForm,
+  ThreadDetail,
+  ThreadMetadata,
+  ThreadReplies,
+} from "@pelilauta/threads/components";
 import type { Thread } from "@pelilauta/threads/server";
-import { getThread } from "@pelilauta/threads/server";
+import { getChannels, getThread } from "@pelilauta/threads/server";
 import { logError } from "@pelilauta/utils/log";
 import { markdownToHTML } from "@pelilauta/utils/markdownToHTML";
 import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
-import { t } from "../../../i18n";
+import { DEFAULT_LOCALE, t } from "../../../i18n";
 import Page from "../../../layouts/Page.astro";
 import { parseSinceParam } from "./parseSinceParam";
 import type { InitialReplyEntry } from "./prepareInitialReplies";
 import { prepareInitialReplies } from "./prepareInitialReplies";
+import { resolveChannelName } from "./resolveChannelName";
 
 const { threadKey } = Astro.params;
 
@@ -28,18 +36,29 @@ let thread: Thread | undefined;
 let bodyHtml = "";
 let error = false;
 let initialReplies: InitialReplyEntry[] = [];
+let authorProfile: Profile | null = null;
+let channelName = "";
 
 const currentUid = Astro.locals.uid ?? null;
 const targetFlowTime = parseSinceParam(Astro.request.url);
+const locale = DEFAULT_LOCALE;
 
 if (threadKey) {
   try {
     thread = await getThread(threadKey);
     if (thread) {
-      // Markdown rendering happens upstream in the frontmatter — SSR Data Flow rule.
-      bodyHtml = await markdownToHTML(thread.markdownContent ?? "");
-      // Reply SSR seed: profiles and bodyHtml resolved upstream, never in .svelte templates.
-      initialReplies = await prepareInitialReplies(threadKey);
+      // Markdown rendering and upstream data resolution — SSR Data Flow rule.
+      // getProfile, getChannels, and prepareInitialReplies run in parallel.
+      const ownerUid = thread.owners[0];
+      let channels: Awaited<ReturnType<typeof getChannels>>;
+      [bodyHtml, initialReplies, authorProfile, channels] = await Promise.all([
+        markdownToHTML(thread.markdownContent ?? ""),
+        prepareInitialReplies(threadKey),
+        getProfile(ownerUid),
+        getChannels(),
+      ]);
+      // Channel display name resolved upstream; falls back to slug when not found.
+      channelName = resolveChannelName(thread.channel, channels);
     } else {
       Astro.response.status = 404;
     }
@@ -65,24 +84,31 @@ const description = thread
 <Page title={title} description={description} layout="view" ogType="article">
   {error && <p>{t("pelilauta:error.fetch")}</p>}
   {!error && !thread && <p>{t("pelilauta:error.notFound")}</p>}
-  {!error && thread && <ThreadDetail thread={thread} bodyHtml={bodyHtml} />}
   {!error && thread && (
-    <>
+    <div class="cn-content-golden">
+      <ThreadDetail thread={thread} bodyHtml={bodyHtml} />
+      <aside>
+        <ThreadMetadata
+          thread={thread}
+          authorProfile={authorProfile}
+          channelName={channelName}
+          locale={locale}
+        />
+      </aside>
+    </div>
+  )}
+  {!error && thread && (
+    <section class="cn-content-prose" aria-labelledby="replies-heading">
+      <h2 id="replies-heading">{t("threads:replies.title")}</h2>
       {currentUid ? (
-        // Authenticated: ThreadReplySection owns ThreadReplies + ReplyForm in one
-        // island so the entries state is shared between the listener and the
-        // optimistic-append flow.
-        // client:idle is friendlier on FCP — the SSR seed paints first.
-        <ThreadReplySection
+        <ThreadReplies
           client:idle
           threadKey={threadKey!}
           {initialReplies}
           {currentUid}
           {targetFlowTime}
-          t={t}
         />
       ) : (
-        // Anonymous: pure SSR reply list + static login CTA. No JS bundle shipped.
         <>
           <ThreadReplies
             threadKey={threadKey!}
@@ -90,11 +116,21 @@ const description = thread
             currentUid={null}
             {targetFlowTime}
           />
-          <a href={`/login?next=/threads/${threadKey}`}>
+          <a href={`/login?next=/threads/${threadKey}`} class="button cta">
             {t("threads:replies.compose.loginCta")}
           </a>
         </>
       )}
-    </>
+    </section>
+  )}
+  {!error && thread && currentUid && (
+    <ReplyForm
+      client:idle
+      threadKey={threadKey!}
+      {initialReplies}
+      placeholderText={t("threads:replies.compose.placeholder")}
+      frozenNoticeText={t("threads:replies.compose.frozenNotice")}
+      errorText={t("threads:replies.compose.error")}
+    />
   )}
 </Page>

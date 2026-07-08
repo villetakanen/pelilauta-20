@@ -1,7 +1,6 @@
 ---
 feature: Flex utilities (.flex-grow, .flex-none)
-status: alpha
-maturity: implementation
+status: draft
 last_major_review: 2026-05-02
 parent_spec: ../spec.md
 ---

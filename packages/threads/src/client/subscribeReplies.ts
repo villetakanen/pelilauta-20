@@ -7,12 +7,12 @@
 // @pelilauta/utils/log — the listener never throws.
 // Returns the unsubscribe handle.
 //
-// See specs/pelilauta/threads/replies/spec.md §API Contracts
-// and §subscribeReplies emits a docChanges diff on each snapshot
-// and §subscribeReplies drops and logs a per-doc parse failure.
+// See specs/pelilauta/threads/detail-page/replies/spec.md §API Contracts
+// and §subscribeReplies emits diff updates and survives bad docs
+// and §subscribeReplies emits diff updates and survives bad docs.
 //
-// Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies emits a docChanges diff on each snapshot
-// Verifies: specs/pelilauta/threads/replies/spec.md §subscribeReplies drops and logs a per-doc parse failure
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
+// Verifies: specs/pelilauta/threads/detail-page/replies/spec.md §subscribeReplies emits diff updates and survives bad docs
 
 import { getDb } from "@pelilauta/firebase/client";
 import { logError } from "@pelilauta/utils/log";

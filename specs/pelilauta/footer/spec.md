@@ -1,7 +1,6 @@
 ---
 feature: Pelilauta App Footer
 status: draft
-maturity: design
 last_major_review: 2026-04-28
 parent_spec: specs/pelilauta/spec.md
 ---

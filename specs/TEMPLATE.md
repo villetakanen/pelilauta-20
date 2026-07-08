@@ -17,8 +17,7 @@
 
 ---
 feature: [Feature Name]
-status: [draft | alpha | stable | deprecated]
-maturity: [design | implementation | verified]
+status: [draft | approved | deprecated]
 last_major_review: 2026-04-25
 # [Optional] Link to the parent spec for sub-specs and sub-features.
 # Flat sibling: `./spec.md`. Subfolder child: `../spec.md`.
@@ -32,7 +31,7 @@ stylebook_url: [https://...]
 ## Blueprint
 
 ### Context
-[Why does this feature exist? What problem does it solve? 1-3 sentences.]
+[One sentence: what this feature guarantees about the system. Not motivation, not history — the invariant a maintainer needs.]
 
 ### Architecture
 - **Components:** [Key files/modules with paths. Default to Svelte 5 for DS components; Astro for structural layouts. All must be 100% SSR-compatible per ADR-001. During active reverse-spec ports, temporary upstream source pointers (for example under `.tmp/`) are allowed if clearly marked as migration references.]
@@ -56,7 +55,11 @@ stylebook_url: [https://...]
 
 ### Testing Scenarios
 
-Specs describe intent. Verification — which test, lint rule, or build check enforces a scenario — lives in code, not in this spec. Each Gherkin scenario below MUST be covered by at least one verification artifact that declares upward via a `Verifies:` tag (see `specs/VERIFICATION.md`). Don't name paths or tools here; the implementer picks them, the artifact declares the link, and `pnpm spec:coverage` builds the inverse map.
+Specs describe intent. Verification — which test, lint rule, or build check enforces a scenario — lives in code, not in this spec.
+
+Load-bearing contracts (security, data integrity, public API, regression-critical behaviour) should be covered by at least one verification artifact that declares upward via a `Verifies:` tag (see `specs/VERIFICATION.md`). Aspirational, decorative, or visually-validated scenarios may stay un-tagged — the tag system is a *navigation* tool ("which test covers this contract"), not a forcing function that compels a test for every Gherkin block. Cap scenarios at 5-7 per spec; if you need more, the feature is probably more than one spec.
+
+Don't name paths or tools here; the implementer picks them, the artifact declares the link, and `pnpm spec:coverage` builds the inverse map. `pnpm spec:coverage` fails on orphan tags (tag → non-existent scenario heading); it does not fail on un-tagged scenarios.
 
 #### Scenario: [Name]
 ```gherkin

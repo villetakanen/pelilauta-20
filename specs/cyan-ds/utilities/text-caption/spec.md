@@ -1,7 +1,6 @@
 ---
 feature: Text Caption (.text-caption)
-status: stable
-maturity: implementation
+status: approved
 last_major_review: 2026-05-02
 parent_spec: ../spec.md
 stylebook_url: /principles/typography
