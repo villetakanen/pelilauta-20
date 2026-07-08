@@ -126,6 +126,10 @@ has a regression net:
 - `reuseExistingServer: !process.env.CI`.
 - lefthook pre-push: sequence `test:e2e` after `build` instead of parallel;
   update `specs/tooling/lefthook/spec.md`.
+- Silence dotenv's promotional tip banner in test output: `loadDotenv({ path:
+  "../../.env.development", quiet: true })` in `app/pelilauta/playwright.config.ts`
+  (dotenv@17 prints rotating ads on every load — one masqueraded as a
+  suspicious URL during a gate run).
 
 ## Epic 5 — Data lifecycle on the dev project (secondary)
 
