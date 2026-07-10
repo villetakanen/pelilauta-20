@@ -8,6 +8,12 @@ import CnIcon from "@cyan/components/CnIcon.svelte";
 import { getSupertag, hasTaggedEntries, resolveTagSynonym } from "@pelilauta/tags/server";
 import { t } from "../../i18n";
 import Page from "../../layouts/Page.astro";
+import { isAppEnabled } from "../../utils/appFlags";
+
+// See specs/pelilauta/app-flags/spec.md — disabled sub-app routes resolve to 404.
+if (!isAppEnabled("tags")) {
+  return Astro.rewrite("/404");
+}
 
 const { tag } = Astro.params;
 

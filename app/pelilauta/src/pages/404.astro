@@ -1,0 +1,16 @@
+---
+// Site-wide not-found page. Served by Astro for unmatched routes, and
+// rewritten to by sub-app routes disabled via app flags
+// (specs/pelilauta/app-flags/spec.md).
+import { t } from "../i18n";
+import Page from "../layouts/Page.astro";
+
+Astro.response.status = 404;
+---
+
+<Page title={t("app:error.notFound")} description={t("app:error.notFound")} layout="view" noSharing>
+  <article>
+    <h1>{t("app:error.notFound")}</h1>
+    <p><a href="/">{t("app:footer.product.title")}</a></p>
+  </article>
+</Page>

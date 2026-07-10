@@ -9,13 +9,17 @@ import TopSitesStream from "../components/front-page/TopSitesStream.astro";
 import TopThreadsStream from "../components/front-page/TopThreadsStream.astro";
 import { t } from "../i18n";
 import Page from "../layouts/Page.astro";
+import { isAppEnabled } from "../utils/appFlags";
 
 const { uid } = Astro.locals;
+const threadsEnabled = isAppEnabled("threads");
+const sitesEnabled = isAppEnabled("sites");
+const tagsEnabled = isAppEnabled("tags");
 ---
 
 <Page title="Pelilauta 20" description="Pelilauta on roolipelaajien yhteisö — kanavat, keskustelut ja sivustot." layout="view" noun="fox" asPageHeading>
   <CnBackgroundPoster slot="app-background-poster" src={heroImg.src} />
-  {uid
+  {threadsEnabled && (uid
     ? <FrontpageFabs slot="fab-tray" label={t("app:fab.create-thread")} client:load />
     : (
       <a slot="fab-tray" class="button fab" href="/login?next=/create/thread">
@@ -23,10 +27,10 @@ const { uid } = Astro.locals;
         <span>{t("app:fab.create-thread")}</span>
       </a>
     )
-  }
+  )}
 
   <section class="cn-content-triad">
-    <TopThreadsStream />
+    {threadsEnabled && <TopThreadsStream />}
 
     <SyndicateStream server:defer>
       <div slot="fallback">
@@ -35,10 +39,12 @@ const { uid } = Astro.locals;
       </div>
     </SyndicateStream>
 
-    <div>
-      <TopSitesStream />
-      <hr />
-      <FeaturedTags />
-    </div>
+    {(sitesEnabled || tagsEnabled) && (
+      <div>
+        {sitesEnabled && <TopSitesStream />}
+        {sitesEnabled && tagsEnabled && <hr />}
+        {tagsEnabled && <FeaturedTags />}
+      </div>
+    )}
   </section>
 </Page>

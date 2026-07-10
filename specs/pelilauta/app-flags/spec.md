@@ -1,6 +1,6 @@
 ---
 feature: App flags
-status: draft
+status: approved
 last_major_review: 2026-07-07
 parent_spec: ../spec.md
 ---

@@ -6,6 +6,13 @@
 import { ChannelsApp } from "@pelilauta/threads/components";
 import { t } from "../../i18n";
 import Page from "../../layouts/Page.astro";
+import { isAppEnabled } from "../../utils/appFlags";
+
+// Channels is the threads vertical's directory surface.
+// See specs/pelilauta/app-flags/spec.md §Disabled threads app routes resolve to 404.
+if (!isAppEnabled("threads")) {
+  return Astro.rewrite("/404");
+}
 
 const title = t("seo:channels.title");
 const description = t("seo:channels.description");

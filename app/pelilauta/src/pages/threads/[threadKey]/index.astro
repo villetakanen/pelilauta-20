@@ -21,10 +21,17 @@ import { markdownToHTML } from "@pelilauta/utils/markdownToHTML";
 import { markdownToPlainText } from "@pelilauta/utils/markdownToPlainText";
 import { DEFAULT_LOCALE, t } from "../../../i18n";
 import Page from "../../../layouts/Page.astro";
+import { isAppEnabled } from "../../../utils/appFlags";
 import { parseSinceParam } from "./parseSinceParam";
 import type { InitialReplyEntry } from "./prepareInitialReplies";
 import { prepareInitialReplies } from "./prepareInitialReplies";
 import { resolveChannelName } from "./resolveChannelName";
+
+// Disabled sub-app routes resolve to the site 404.
+// See specs/pelilauta/app-flags/spec.md §Disabled threads app routes resolve to 404.
+if (!isAppEnabled("threads")) {
+  return Astro.rewrite("/404");
+}
 
 const { threadKey } = Astro.params;
 
